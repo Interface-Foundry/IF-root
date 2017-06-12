@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Results } from '../newComponents';
-import { toggleHistory, submitQuery, addItem, selectItem } from '../newActions';
+import { toggleHistory, submitQuery, addItem, selectItem, fetchItem } from '../newActions';
 import { isUrl, addSearchHistory } from '../utils';
 import { push } from 'react-router-redux';
 import ReactGA from 'react-ga';

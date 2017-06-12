@@ -51,7 +51,7 @@ export default class Details extends Component {
               <div className='tags'>
                 {
                   tabs.map((t) => (
-                    <h1 onClick={() => selectTab(t.toLowerCase())} className={`${tab.toUpperCase() === t.toUpperCase() ? 'selected' : ''}`}>{t}</h1>
+                    <h1 key={t} onClick={() => selectTab(t.toLowerCase())} className={`${tab.toUpperCase() === t.toUpperCase() ? 'selected' : ''}`}>{t}</h1>
                   ))
                 }
               </div>

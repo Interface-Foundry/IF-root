@@ -1,9 +1,5 @@
 import { get, post, del} from './async'
 
-export const editItem = () => ({
-	type: 'EDIT_ITEM'
-})
-
 export const fetchCart = cart_id => get(
 	`/api/cart/${cart_id}`, 
 	'CART', 
@@ -48,17 +44,6 @@ export const deleteCart = cart_id => del(
 	(type) => ({
   		type: `${type}_SUCCESS`,
   		response: cart_id,
-  		receivedAt: Date.now()
-	})
-)
-
-export const addItem = (cart_id, item_id) => post(
-	`/api/cart/${cart_id}/item`, 
-	'ADD_ITEM',
-	{ item_id }, 
-	(type, json) => ({
-  		type: `${type}_SUCCESS`,
-  		response: json,
   		receivedAt: Date.now()
 	})
 )

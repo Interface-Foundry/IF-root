@@ -28,14 +28,10 @@ export default class Results extends Component {
     return false
   }
 
-  _handeKeyPress(e) {
-    debugger
-  }
-
   render() {
     // Add
     let arrow, selected;
-    const { cart, query, results, addItem, selectedItemId, selectItem } = this.props,
+    const { cart, query, results, addItem, selectedItemId, selectItem, fetchItem } = this.props,
           numResults = results.length,
           cartAsins = cart.items.map((item) => item.asin),
           partitionResults = results.reduce((acc, result, i) => {
@@ -57,7 +53,7 @@ export default class Results extends Component {
       partitionResults.splice(selected.row, 0, [{...selected.result, selected: true}]);
 
     return (
-      <table className='results' onKeyDown={::this._handeKeyPress}>
+      <table className='results'>
         <tbody>
           <tr>
             <th colSpan='100%'>
@@ -73,14 +69,17 @@ export default class Results extends Component {
                   itemrow.map(item => {
                     return item.selected ? (
                       <Selected 
+                        key={item.id}
                         item={item} 
                         cart={cart} 
                         arrow={arrow}
                         cartAsins={cartAsins}
+                        fetchItem={fetchItem}
                         addItem={addItem} 
                         selectedItemId={selectedItemId}/>
                       ) : ( 
                         <Default 
+                          key={item.id}
                           item={item} 
                           cart={cart} 
                           cartAsins={cartAsins}

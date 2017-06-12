@@ -14,7 +14,7 @@ export default class Cart extends Component {
 
   render() {
 
-    const { cart, user, query } = this.props,
+    const { cart, user, query, editId, editItem, removeItem } = this.props,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my;
 
@@ -31,7 +31,7 @@ export default class Cart extends Component {
                   <ul>
                     {
                       myCart.map((item) => (
-                        <li key={item.id}>
+                        <li key={item.id} className={editId === item.id ? 'edit' : ''}>
                           <div className={`image`} style={{
                             backgroundImage: `url(${item.main_image_url})`,
                           }}/>
@@ -40,10 +40,16 @@ export default class Cart extends Component {
                             <p> Store: {item.store} | {cart.store_locale} </p>
                             <h4> Qty: {item.quantity} </h4>
                             <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
-                          </div> 
-                          <div className='action'>
-                            <button onClick={() => addItem(cart.id, item.id)}><span>Edit Item</span></button>
                           </div>
+                          {
+                            editId !== item.id ? 
+                            <div className='action'>
+                              <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                            </div> :
+                            <div className='action'>
+                              <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
+                            </div> 
+                          }
                         </li>
                       ))
                     }
@@ -65,7 +71,7 @@ export default class Cart extends Component {
                     <ul>
                       {
                         userCart.items.map((item) => (
-                          <li key={item.id}>
+                          <li key={item.id} className={editId === item.id ? 'edit' : ''}>
                             <div className={`image`} style={{
                               backgroundImage: `url(${item.main_image_url})`,
                             }}/>
@@ -75,9 +81,15 @@ export default class Cart extends Component {
                               <h4> Qty: {item.quantity} </h4>
                               <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
                             </div> 
-                            <div className='action'>
-                              <button onClick={() => addItem(cart.id, item.id)}><span>Edit Item</span></button>
-                            </div>
+                            {
+                              editId !== item.id ? 
+                              <div className='action'>
+                                <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                              </div> :
+                              <div className='action'>
+                                <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
+                              </div> 
+                            }
                           </li>
                         ))
                       }

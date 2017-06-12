@@ -26,7 +26,7 @@ export default class App extends Component {
         <SearchContainer />
         <Details {...cart} tab={tab} selectTab={selectTab}/>
         { Component ? <Component /> : null }
-        <ButtonsContainer/>
+        <ButtonsContainer />
       </div>
     );
   }

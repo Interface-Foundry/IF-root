@@ -7,7 +7,7 @@ const initialState = {
 
 export default (state = initialState, action = {}) => {
   switch (action.type) {
-    case 'EDIT_ITEM_SUCCESS':
+    case 'UPDATE_ITEM_SUCCESS':
     case 'EDIT_ITEM': {
       return {
         ...state,

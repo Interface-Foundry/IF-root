@@ -10,12 +10,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	margin: 0 auto;
     border-collapse: collapse;
 
+
+
 	@media only screen and (max-width: 600px) {
 		border-spacing: 0;
-	}
-
-	.price {
-		color: $price-color;
 	}
 
 	.action {
@@ -97,10 +95,20 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 			li {
 				position: relative;
-				padding: $padding/2 $padding*2;
+				padding: $padding $padding*2;
+				background: white;
+				@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
 				@media only screen and (max-width: 600px) {
 					padding: $padding/2 0;
+				}
+
+				&.edit {
+					border-radius: 5px;
+					border: $border-color-light;
+					box-shadow: $card-box-shadow;
+					transform: scale3d(1.02, 1.02, 1.05);
+					z-index: 100;
 				}
 
 				.image {

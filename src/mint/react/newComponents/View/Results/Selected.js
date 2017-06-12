@@ -6,6 +6,7 @@ import { displayCost } from '../../../utils';
 import { Right } from '../../../../react-common/kipsvg';
 
 export default class Selected extends Component {
+
   render() {
     const { cart, item, cartAsins, selectItem, addItem, arrow } = this.props,
           afterClass = !arrow ? 'left' : ( arrow === 1 ? 'middle' : 'right' );

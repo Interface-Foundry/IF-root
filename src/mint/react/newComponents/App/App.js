@@ -15,6 +15,11 @@ import ReactGA from 'react-ga';
 
 export default class App extends Component {
 
+  _handeKeyPress(e) {
+    // debugger
+    console.log('key press: ', e)
+  }
+
   _logPageView(path, userId) {
     ReactGA.set({ userId });
     ReactGA.event({
@@ -44,7 +49,7 @@ export default class App extends Component {
   render() {
     const { sidenav, popup, togglePopup, toggleSidenav } = this.props;
     return (
-      <section className='app'>
+      <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/cart/:cart_id'} component={HeaderContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>

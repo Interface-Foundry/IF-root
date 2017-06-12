@@ -28,10 +28,16 @@ export {
 	fetchCarts,
 	updateCart, 
 	clearCart, 
-	deleteCart,
-	addItem,
-	editItem
+	deleteCart
 } from './cart';
+
+export {
+	addItem,
+	editItem,
+	updateItem,
+	fetchItem,
+	removeItem
+} from './item';
 
 export { 
 	fetchStores,
