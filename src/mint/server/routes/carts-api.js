@@ -810,6 +810,29 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {post} /api/like/:cart_id
+   * @apiGroup Carts
+   * @apiDescription allows the currently logged-in user to "like" the cart
+   * @apiParam {String} :cart_id the cart receiving the like
+   */
+  router.post('/likes/:cart_id', (req, res) => co(function * () {
+    logging.info('like route called')
+    var user_id = _.get(req, 'UserSession.user_account.id')
+    if (!user_id) throw new Error('User not logged in')
+    // user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+    cart.likes.add(user_id)
+    var likes = cart.likes
+    yield cart.save()
+    res.send(likes)
+  }))
+
+  /**
+   * @api {put} /api/like/:cart_id
+   */
+
+  /**
    * @api {get} /api/itempreview?q=:q&page=:page&category=:category Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
@@ -854,8 +877,7 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id/clone', (req, res) => co(function * () {
     var user_id = _.get(req, 'UserSession.user_account.id')
-    //for testing:
-    if (!user_id) user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+    if (!user_id) throw new Error('User not logged in')
 
     var clone = yield cloning_utils.clone(req.params.cart_id, user_id);
     return res.send(clone);
