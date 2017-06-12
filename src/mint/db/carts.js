@@ -99,6 +99,12 @@ var cartsCollection = Waterline.Collection.extend({
 
     // social validation metrics
 
+    /** @type {user_accounts} people who have liked this cart */
+    likes: {
+      collection: 'user_accounts',
+      via: 'likes'
+    },
+
     /** @type {integer} the number of times this cart has been #viewed */
     views: {
       type: 'integer',

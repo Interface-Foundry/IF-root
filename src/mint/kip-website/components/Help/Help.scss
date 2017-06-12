@@ -74,6 +74,9 @@
     @media only screen and (max-width: 870px) {
       height: 560px;
     }
+    &.slack {
+      height: 560px;
+    }
     .services__navigation {
       h2 {
         color: rgba($bgColor, 0.7);
@@ -135,6 +138,11 @@
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
+        &.slack {
+          top: 50px;
+          height: 500px;
+          width: 500px;
+        }
         .bubble {
           position: absolute;
           left: -100%;
@@ -148,6 +156,22 @@
             top: -150px;
             left: 0;
             width: 180px;
+          }
+          &.slack {
+            top: -40px;
+            left: 155px;
+            width: 180px;
+            &:after {
+              content: '';
+              position: absolute;
+              border-top: 20px solid transparent;
+              border-bottom: 20px solid transparent;
+              border-right: 20px solid;
+              transform: rotate(180deg);
+              right: 75px;
+              bottom: -30px;
+              transform: rotate(-90deg);
+            }
           }
           p {
             font-size: 18px;
@@ -167,6 +191,11 @@
             border-bottom: 20px solid transparent;
             border-right: 20px solid;
             transform: rotate(180deg);
+            &.slack {
+              right: 75px;
+              bottom: -30px;
+              transform: rotate(-90deg);
+            }
             @media only screen and (max-width: 870px) {
               right: 75px;
               bottom: -30px;

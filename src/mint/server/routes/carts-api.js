@@ -570,19 +570,20 @@ module.exports = function (router) {
    * @apiParam {string} :cart_id the id of the cart whose data we want to access
    */
   router.get('/cart/:cart_id/metrics', (req, res) => co(function * () {
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('checkouts');
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('checkouts').populate('likes');
     if (!cart) return res.sendStatus(404);
     var clones = yield cloning_utils.getChildren(cart.id, 'clone')
     //count checkouts for all of the clones
-    clones = yield clones.map(function * (clone_id) {
+    clone_checkouts = yield clones.map(function * (clone_id) {
       var clone = yield db.Carts.findOne({id: clone_id}).populate('checkouts')
       return clone.checkouts.length
     })
-    var checkouts = cart.checkouts.length + clones.reduce((a, b) => a + b, 0)
+    var checkouts = cart.checkouts.length + clone_checkouts.reduce((a, b) => a + b, 0)
     return res.send({
       views: cart.views, // views is just for the current cart; not its descendents
       clones: clones.length,
-      checkouts: checkouts
+      checkouts: checkouts,
+      likes: cart.likes.length
     });
   }))
 
@@ -810,6 +811,46 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {post} /api/likes/:cart_id
+   * @apiGroup Carts
+   * @apiDescription allows the currently logged-in user to "like" the cart
+   * @apiParam {String} :cart_id the cart receiving the like
+   */
+  router.post('/likes/:cart_id', (req, res) => co(function * () {
+    var user_id = _.get(req, 'UserSession.user_account.id')
+    if (!user_id) throw new Error('User not logged in')
+    // user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+    // user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
+
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+    cart.likes.add(user_id)
+    yield cart.save()
+    var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+    res.send(modifiedCart.likes)
+  }))
+
+  /**
+   * @api {put} /api/likes/:cart_id
+   * @apiGroup Carts
+   * @apiDescription allows the currently logged-in user to "unlike" the cart
+   * @apiParam {String} :cart_id the cart from which the like is being removed
+   */
+   router.put('/likes/:cart_id', (req, res) => co(function * () {
+     var user_id = _.get(req, 'UserSession.user_account.id')
+     if (!user_id) throw new Error('User not logged in')
+    //  user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+    // user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
+
+     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+     cart.likes.remove(user_id)
+    //  var likes = cart.likes
+     yield cart.save()
+
+     var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+     res.send(modifiedCart.likes)
+   }))
+
+  /**
    * @api {get} /api/itempreview?q=:q&page=:page&category=:category Item Preview
    * @apiDescription Gets an item for a given url, ASIN, or search string, but does not add it to cart. Use 'post /api/cart/:cart_id/item {item_id: item_id}' to add to cart later.
    * @apiGroup Carts
@@ -854,8 +895,7 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id/clone', (req, res) => co(function * () {
     var user_id = _.get(req, 'UserSession.user_account.id')
-    //for testing:
-    if (!user_id) user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
+    if (!user_id) throw new Error('User not logged in')
 
     var clone = yield cloning_utils.clone(req.params.cart_id, user_id);
     return res.send(clone);

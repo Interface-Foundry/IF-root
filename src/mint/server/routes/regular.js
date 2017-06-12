@@ -255,12 +255,12 @@ router.get('/newcart/:store', (req, res) => co(function * () {
  * @apiGroup HTML
  * @apiParam {string} :version key for ab testing, right now its A, B, or C
  */
-router.get('/version/:version', (req, res)=> co(function *() {
+router.get('/v/:version', (req, res)=> co(function *() {
   let version = req.params.version.toUpperCase();
-  version = (version === 'A' || version === 'B' || version === 'C' ) 
+  version = (version === 'A' || version === 'B' || version === 'C' || version === 'PRIME') 
     ? version 
-    : res.session.siteVersion 
-      ? res.session.siteVersion 
+    : res.UserSession && res.UserSession.siteVersion 
+      ? res.UserSession.siteVersion 
       : _.sample(['A','B','C']);
   req.UserSession.siteVersion = version;
   yield req.UserSession.save();

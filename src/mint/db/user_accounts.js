@@ -119,6 +119,13 @@ var userAccountCollection = Waterline.Collection.extend({
     reminded: {
       type: 'boolean',
       defaultsTo: false
+    },
+
+    /** @type {carts} Carts this user has liked*/
+    likes: {
+      collection: 'carts',
+      via: 'likes',
+      dominant: true
     }
   }
 })

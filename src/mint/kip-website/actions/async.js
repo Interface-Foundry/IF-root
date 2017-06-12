@@ -2,7 +2,7 @@ import { SubmissionError } from 'redux-form';
 
 export const logout = () => async dispatch => {
   dispatch({ type: 'LOGOUT' });
-}
+};
 
 export const get = (url, type) => async dispatch => {
   try {
@@ -42,10 +42,19 @@ export function login(cart_id, email) {
   };
 }
 
-export function getSiteState() {
+export function getSiteState(loc = '') {
+  console.log({ loc });
   return async dispatch => {
     try {
-      const site = await fetch('/api/home/json', { credentials: 'same-origin' })
+      const site = await fetch('/api/home/json', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ loc })
+        })
         .then(json => json.json());
       return dispatch({
         type: 'GOT_SITE',
@@ -85,24 +94,25 @@ export const scrollToPosition = (scrollTo, scrollFrom = 0) =>
   async dispatch => {
     let scrollPos = scrollFrom;
     const interval = setInterval(() => {
-      if (scrollTo - scrollPos < 6) {
-        clearInterval(interval);
-        dispatch({
-          type: 'HANDLE_SCROLL',
-          response: {
-            scrollTo,
-            fixed: scrollPos > 2
-          }
-        });
-      } else {
-        scrollPos = scrollPos + 10;
-        dispatch({
-          type: 'HANDLE_SCROLL',
-          response: {
-            scrollTo: scrollPos,
-            fixed: scrollPos > 2
-          }
-        });
-      }
-    }, 1);
-  }
+        if (scrollTo - scrollPos < 6) {
+          clearInterval(interval);
+          dispatch({
+            type: 'HANDLE_SCROLL',
+            response: {
+              scrollTo,
+              fixed: scrollPos > 2
+            }
+          });
+        } else {
+          scrollPos = scrollPos + 40;
+          dispatch({
+            type: 'HANDLE_SCROLL',
+            response: {
+              scrollTo: scrollPos,
+              fixed: scrollPos > 2
+            }
+          });
+        }
+      },
+      1);
+  };

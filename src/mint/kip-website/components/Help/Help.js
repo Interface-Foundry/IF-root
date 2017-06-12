@@ -1,5 +1,3 @@
-/* eslint react/prefer-stateless-function: 0, react/forbid-prop-types: 0 */
-/* eslint global-require: 0 */
 import React, { Component } from 'react';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import ReactDOM from 'react-dom';
@@ -10,11 +8,12 @@ import { HeaderContainer, FooterContainer } from '../../containers';
 
 export default class Help extends Component {
   static propTypes = {
-    helpTemplate: PropTypes.object
+    helpTemplate: PropTypes.object,
+    src: PropTypes.string
   }
   constructor(props) {
-    super(props)
-    this._startLoop = this._startLoop.bind(this)
+    super(props);
+    this._startLoop = this._startLoop.bind(this);
   }
 
   state = {
@@ -36,47 +35,47 @@ export default class Help extends Component {
     this.setState({
       offsetTop: ReactDOM.findDOMNode(this.help)
         .offsetTop + 50
-    })
+    });
   }
 
   _startLoop(stop) {
-    const { selectedIndex } = this.state
+    const { selectedIndex } = this.state;
 
     if (stop) {
       if (self)
-        clearTimeout(self.timeout)
+        clearTimeout(self.timeout);
 
-      clearTimeout(this.timeout)
+      clearTimeout(this.timeout);
     } else {
-      let self = this
+      let self = this;
       self.timeout = setTimeout(() => {
 
         self.setState({
           selectedIndex: selectedIndex === 2 ? 0 : selectedIndex + 1
-        })
+        });
 
-        self._startLoop()
+        self._startLoop();
       }, 7500);
     }
   }
 
   componentWillUnmount() {
-    this._startLoop(true)
+    this._startLoop(true);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      nextProps.helpTemplate.images.length !== this.props.helpTemplate.images.length
-      || nextState.selectedIndex !== this.state.selectedIndex
+      nextProps.helpTemplate.images.length !== this.props.helpTemplate.images.length || nextState.selectedIndex !== this.state.selectedIndex
     );
   }
 
   render() {
-    const { state: { selectedIndex, offsetTop }, props: { helpTemplate, helpTemplate: { images, faq } }, _startLoop } = this;
+    const { state: { selectedIndex, offsetTop }, props: { helpTemplate, src, helpTemplate: { images, slackImages, faq } }, _startLoop } = this;
+    const slides = src === 'slack' ? slackImages : images;
     return (
       <div className="Help">
         <HeaderContainer title={helpTemplate.titleText} subtext={helpTemplate.subtext} color={images.length ? images[selectedIndex].class: ''} offsetTop={offsetTop}/>
-        <section className={`tutorial ${images.length ? images[selectedIndex].class : ''}`} ref={(help) => this.help = help}>
+        <section className={`tutorial ${images.length ? images[selectedIndex].class : ''} ${src==='slack' ? 'slack' : ''}`} ref={(help) => this.help = help}>
           <nav className="services__navigation">
             <ul>
               {
@@ -84,7 +83,7 @@ export default class Help extends Component {
                   <li key={i.id}>
                     <h2 onClick={() => { 
                       _startLoop(true);
-                       this.setState({selectedIndex: index}) 
+                       this.setState({selectedIndex: index}); 
                      }
                      } className={`row-1 col-4 ${index === selectedIndex ? 'selected' : ''}`}>
                       <span className='stepText'>{helpTemplate.stepText}&nbsp;</span>
@@ -101,50 +100,57 @@ export default class Help extends Component {
               transitionEnterTimeout={0}
               transitionLeaveTimeout={0}>
               {
-                images.map((i, index) => {
-                  if(index !== selectedIndex ) return null
+                slides.map((i, index) => {
+                  if(index !== selectedIndex ) return null;
                   return (
-                    <div key={i.id} className={`image ${images[selectedIndex].class}`} style={
-                      {
-                        backgroundImage: `url(${i.src})`
-                      }}>
-                      <div className='bubble'>
+                    <div key={i.id} className={`image ${images[selectedIndex].class} ${src==='slack' ? 'slack' : ''}`} style={{backgroundImage: `url(${i.src})`}}>
+                      <div className={`bubble ${src==='slack' ? 'slack' : ''}`}>
                         <p>{i.bubble}</p>
                       </div>
                     </div>
-                  )
+                  );
                 })
               }
             </CSSTransitionGroup>
-          </div>
+          </div> 
         </section>
-        
-        <section className='FAQ'>
+        <section className = 'FAQ'>
           <div className="action">
-            <a href='/newcart'>
-              <button>
-                <span>{helpTemplate.buttonText} <Right/></span>
-              </button>
-            </a>
+            {
+              src === 'slack' 
+              ? <a href="https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459" target="_blank" rel="noopener noreferrer">
+                      <button>
+                      {helpTemplate.slackText}
+                      </button>
+                </a>
+              : <a href='/newcart'>
+                  <button>
+                    <span>{helpTemplate.buttonText} <Right/></span>
+                  </button>
+                </a>
+            }
           </div>
-          <h1><span>{faq.title}</span></h1>
-
-          <p className='subtext'>
-            {replaceHtml(faq.subtext)}
-          </p>
+          <h1>
+            <span>
+              {faq.title}
+            </span>
+          </h1>
+          <p className = 'subtext'>
+            { replaceHtml(faq.subtext) } 
+          </p> 
           {
             faq.qs.map((q, i) => (
               <div key={i} className='question'>
-                <h2>
-                  {`${i+1}. `}
-                  {q.title}
-                </h2>
-                <p>{replaceHtml(q.answer)} </p>
-              </div>
+                    <h2>
+                      {`${i+1}. `}
+                      {q.title}
+                    </h2>
+                    <p>{replaceHtml(q.answer)} </p>
+                  </div>
             ))
-          }
+          } 
         </section>
-        <FooterContainer />
+        <FooterContainer/>
       </div>
     );
   }
