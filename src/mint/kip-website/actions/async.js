@@ -104,7 +104,7 @@ export const scrollToPosition = (scrollTo, scrollFrom = 0) =>
             }
           });
         } else {
-          scrollPos = scrollPos + 10;
+          scrollPos = scrollPos + 40;
           dispatch({
             type: 'HANDLE_SCROLL',
             response: {

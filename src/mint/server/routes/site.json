@@ -634,5 +634,200 @@
         }]
       }
     }
+  },
+  "PRIME": {
+    "ribbon": {
+      "left": [{
+        "title": "How Kip Works",
+        "link": "/howitworks"
+      }, {
+        "title": "About",
+        "link": "/about"
+      }, {
+        "title": "Blog",
+        "link": "/blog"
+      }],
+      "right": {
+        "loginText": "Log in",
+        "newCartText": "Create Cart",
+        "addToSlackText": "Add To Slack"
+      }
+    },
+    "hero": {
+      "headline": "Save Money on Amazon Prime Fees with Kip",
+      "description": "Save on fees with ${Kip}. Share accounts and split fees without giving away passwords or personal data",
+      "buttonText": "Use Kip Now",
+      "slackText": "Add to Slack",
+      "subtext": ["Free", "Secure", "No Setup"],
+      "learnMore": "Learn More about Kip",
+      "imgUrl": "//storage.googleapis.com/kip-random/website/kip_collect.gif"
+    },
+    "header": {
+      "readMoreText": "Read More"
+    },
+    "services": {
+      "tagline": "SAVE MONEY ON PRIME",
+      "tagDescrip": "${Kip} beats traditional web shopping by bringing all types of products into one place.",
+      "details": {
+        "descrips": [{
+          "text": "Forgot password? Kip lets you shop across multiple stores with 1-login.",
+          "image": "//storage.googleapis.com/kip-random/website/sym_3.svg"
+        }, {
+          "text": "Enjoy free 2-day shipping and without sharing passwords.",
+          "image": "//storage.googleapis.com/kip-random/website/sym_cloud.svg"
+        }, {
+          "text": "Track orders and expenses through Slack, Email, and Facebook Messenger.",
+          "image": "//storage.googleapis.com/kip-random/website/sym_2.svg"
+        }],
+        "actionText": "Use Kip Now",
+        "slackActionText": "Add to Slack Now"
+      }
+    },
+    "footer": {
+      "links": [{
+        "title": "Terms of Use",
+        "link": "/legal"
+      }, {
+        "title": "Blog",
+        "link": "/blog"
+      }, {
+        "title": "Add to Slack",
+        "link": "//slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459"
+      }, {
+        "title": "Become a Partner",
+        "link": "//kip11.typeform.com/to/wYrY5w"
+      }]
+    },
+    "help": {
+      "buttonText": "Use Kip Now",
+      "slackText": "Add To Slack",
+      "stepText": "Step",
+      "titleText": "Kip is 1 - Click Easy",
+      "subtext": ["No Fees", "No Download", "No Hassle"],
+      "images": [{
+        "src": "//storage.googleapis.com/kip-random/mint_1_desktop.gif",
+        "class": "secondary",
+        "bubble": "Browse Items or Paste a URL to Add Things to Your Kip Cart",
+        "step": "1",
+        "id": 1
+      }, {
+        "src": "//storage.googleapis.com/kip-random/mint_2_desktop.gif",
+        "class": "primary",
+        "bubble": "Use Kip to Store the Items you Love in the Cloud",
+        "step": "2",
+        "id": 2
+      }, {
+        "src": "//storage.googleapis.com/kip-random/mint_3_desktop.gif",
+        "class": "third",
+        "bubble": "Invite friends to Add to Your Kip Cart, Share Shipping and Other Fees",
+        "step": "3",
+        "id": 3
+      }],
+      "slackImages": [{
+        "src": "//storage.googleapis.com/kip-random/slack_1_desktop.png",
+        "class": "secondary",
+        "bubble": "Invite your whole team to order items",
+        "step": "1",
+        "id": 1
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_2_desktop.png",
+        "class": "primary",
+        "bubble": "Search for things your team needs",
+        "step": "2",
+        "id": 2
+      }, {
+        "src": "//storage.googleapis.com/kip-random/slack_3_desktop.png",
+        "class": "third",
+        "bubble": "Check out everyone's items at once",
+        "step": "3",
+        "id": 3
+      }],
+      "faq": {
+        "title": "FAQ",
+        "subtext": "Can't find your answer? Contact us at ${mail}",
+        "qs": [{
+          "title": "How do I use kip?",
+          "answer": "Start using Kip by clicking ${[New Cart](/newcart)} and enter your email address to login${br}Select your favorite store and add items to Kip cart using search or copy - paste URL.${br}Check out the tutorial on ${[How Kip Works](/howitworks)} page "
+        }, {
+          "title": "How do I add other people to my Kip Cart?",
+          "answer": "Invite friends to Kip by clicking the +Share button on your Kip cart.${br}Copy the entire link and paste to share with anyone or tap the social media icons"
+        }, {
+          "title": "Is Kip Free?",
+          "answer": "Kip is 100% free for users. We make money through retailer affiliate fees to keep it free for you!"
+        }, {
+          "title": "How do I request a vendor/brand on Kip?",
+          "answer": "Tell us what brands and stores you want on ${[email](mailto:hello@kipthis.com)}, ${[twitter](//twitter.com/kiptalk)}, or chat with us!"
+        }, {
+          "title": "Is Kip available outside USA?",
+          "answer": "Yes! Learn more about Kip Global Direct and our shopping services into UK and Southeast Asia.${br}${br}If you don’t see your country, drop us a message on ${[email](mailto:hello@kipthis.com)}, ${[twitter](//twitter.com/kiptalk)}, or chat with us."
+        }, {
+          "title": "I have an idea! How do I request a feature?",
+          "answer": "Tell us what features you want here or you can ${[email](mailto:hello@kipthis.com)}, ${[twitter](//twitter.com/kiptalk)}, or chat with us directly!"
+        }, {
+          "title": "Kip is broken, please help!",
+          "answer": "I’m sorry you’re having trouble. Contact us on ${[email](mailto:hello@kipthis.com)}, ${[twitter](//twitter.com/kiptalk)}, or chat with us and we will reply you ASAP. ${br}${br}Please describe the error and attach any screenshots if possible."
+        }, {
+          "title": "I’m interested in partnering with Kip. How do I contact you?",
+          "answer": "We love partners! Fill out ${[this partner survey](//kip11.typeform.com/to/wYrY5w)} or email us directly at ${mail}"
+        }, {
+          "title": "Where can I use Kip?",
+          "answer": "Kip is great for groups of all sizes from roommates who want to split Amazon Prime fees to organizations who need to track expenses and manage teams remotely.${br}${br}If you have a unique way of using Kip, ${[let us know](mailto:hello@kipthis.com)}!"
+        }, {
+          "title": "Who is Kip?",
+          "answer": "Kip is a digital penguin that loves to frolic amongst internet deepsea cables. Being only 2 years old, sometimes they have difficulty understanding people. Their favorite food is emoji 🍋 🍉 🍇 if you send Kip emojis, they will get happy!${br}${br}Underneath their round black eyes, they have a personality like an iceberg…${br}${br}Curious? Learn why ${[Kip is the first gender neutral AI](//medium.com/@kipsearch/no-butlers-30b92715f580)} and why ${[we chose penguins as our mascot](//medium.com/@kipsearch/no-butlers-30b92715f580)}."
+        }]
+      }
+    },
+    "blog": {
+      "titleText": "Conversations in Commerce",
+      "subtext": ["Case Studies Findings", "Thoughts on building Kip"]
+    },
+    "about": {
+      "titleText": "Smart Penguin for Social Shopping",
+      "subtext": ["Community Driven", "Social Commerce", "Machine Learning"],
+      "seenIn": "Seen In",
+      "videoTitle": "See Kip in Action",
+      "team": {
+        "title": "Meet the Team",
+        "mission": "Our vision is a universal shopping experience for groups that leverage their social power to get the best deals across the globe.${br}${br}Kip guarantees our customers the best service experience and speedy responses to your questions.",
+        "members": [{
+          "image": "/kip.png",
+          "name": "Graham Annett"
+        }, {
+          "image": "/kip.png",
+          "name": "Alyx Baldwin (CTO)"
+        }, {
+          "image": "/kip.png",
+          "name": "Chris Barry"
+        }, {
+          "image": "/kip.png",
+          "name": "Peter Brandt"
+        }, {
+          "image": "/kip.png",
+          "name": "Hannah Katznelson"
+        }, {
+          "image": "/kip.png",
+          "name": "Rachel Law (CEO)"
+        }, {
+          "image": "/kip.png",
+          "name": "Koh Luce"
+        }]
+      },
+      "why": {
+        "head": "HI, I'M KIP THE PENGUIN",
+        "actionText": "Use Kip Now",
+        "description": "${Kip} brings a penguin's perspective to collective purchasing.",
+        "reasons": [{
+          "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
+          "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+        }, {
+          "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
+          "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
+        }, {
+          "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
+          "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
+        }]
+      }
+    }
   }
 }
