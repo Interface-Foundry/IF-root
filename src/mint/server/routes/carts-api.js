@@ -818,9 +818,9 @@ module.exports = function (router) {
    */
   router.post('/likes/:cart_id', (req, res) => co(function * () {
     var user_id = _.get(req, 'UserSession.user_account.id')
-    // if (!user_id) throw new Error('User not logged in')
+    if (!user_id) throw new Error('User not logged in')
     // user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
-    user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
+    // user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
 
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
     cart.likes.add(user_id)
@@ -837,9 +837,9 @@ module.exports = function (router) {
    */
    router.put('/likes/:cart_id', (req, res) => co(function * () {
      var user_id = _.get(req, 'UserSession.user_account.id')
-    //  if (!user_id) throw new Error('User not logged in')
+     if (!user_id) throw new Error('User not logged in')
     //  user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
-    user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
+    // user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
 
      var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
      cart.likes.remove(user_id)
