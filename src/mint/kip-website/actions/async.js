@@ -42,6 +42,22 @@ export function login(cart_id, email) {
   };
 }
 
+export function getSiteState() {
+  return async dispatch => {
+    try {
+      const site = await fetch('/api/home/json', { credentials: 'same-origin' })
+        .then(json => json.json());
+      return dispatch({
+        type: 'GOT_SITE',
+        response: site,
+        receivedAt: Date.now()
+      });
+    } catch (e) {
+      throw 'Error getting site state';
+    }
+  };
+}
+
 export function validateCode(email, code) {
   return async dispatch => {
     try {
@@ -64,3 +80,29 @@ export function validateCode(email, code) {
     }
   };
 }
+
+export const scrollToPosition = (scrollTo, scrollFrom = 0) =>
+  async dispatch => {
+    let scrollPos = scrollFrom;
+    const interval = setInterval(() => {
+      if (scrollTo - scrollPos < 6) {
+        clearInterval(interval);
+        dispatch({
+          type: 'HANDLE_SCROLL',
+          response: {
+            scrollTo,
+            fixed: scrollPos > 2
+          }
+        });
+      } else {
+        scrollPos = scrollPos + 10;
+        dispatch({
+          type: 'HANDLE_SCROLL',
+          response: {
+            scrollTo: scrollPos,
+            fixed: scrollPos > 2
+          }
+        });
+      }
+    }, 1);
+  }

@@ -134,11 +134,11 @@ export function previewItem(item_id) {
   };
 }
 
-export function search(amazon_id, store, locale) {
+export function previewAmazonItem(amazon_id, store, locale, category) {
   return async function (dispatch) {
     dispatch(request());
     try {
-      const response = await fetch(`/api/itempreview?q=${amazon_id}&store=${store}&store_locale=${locale}`, {
+      const response = await fetch(`/api/itempreview?q=${amazon_id}&store=${store}&store_locale=${locale}${category ? `&category=${category}` : ''}`, {
         credentials: 'same-origin'
       });
       const json = await response.json();

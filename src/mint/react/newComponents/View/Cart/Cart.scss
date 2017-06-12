@@ -10,10 +10,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	margin: 0 auto;
     border-collapse: collapse;
 
-
-
 	@media only screen and (max-width: 600px) {
 		border-spacing: 0;
+	}
+
+	.grey {
+		color: rgba(#111, 0.5);
+	}
+
+	.price {
+		color: $price-color;
 	}
 
 	.action {
@@ -22,30 +28,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 		button {
 			border: 0;
-			background: 0;
+			background: rgba(#333, 0.1);
+			padding: 0 $padding;
+			border-radius: 5px;
 			height: 25px;
 			line-height: 25px;
 			color: #333;
 			font-size: 12px;
-			opacity: 0.4;
-
-			span {
-				border-bottom: 3px solid #333;
-
-				svg {
-					fill: #333;
-				    height: 25px;
-				    display: inline-block;
-				    width: 10px;
-					@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-				}
-			}
-
-			&:hover {
-				svg {
-					transform: translate3d(3px, 0, 0);
-				}
-			}
 		}
 	}
 

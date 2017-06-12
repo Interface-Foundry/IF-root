@@ -14,6 +14,7 @@ import {
   RECEIVE_CLEAR_CART,
   DELETE_CART
 } from '../constants/ActionTypes';
+import { push } from 'react-router-redux';
 import { sleep } from '../utils';
 
 const receive = (currentCart) => ({
@@ -70,6 +71,25 @@ export const addingItem = (addingItem) => ({
   addingItem
 });
 
+export const privacyLevels = {
+  PUBLIC: 1,
+  PRIVATE: 2,
+  DISPLAY: 3
+};
+
+const getPrivacy = (lvl) => {
+  switch (Number(lvl)) {
+  case privacyLevels.PUBLIC:
+    return 'public';
+  case privacyLevels.PRIVATE:
+    return 'private';
+  case privacyLevels.DISPLAY:
+    return 'display';
+  default:
+    throw `${lvl} is not a valid privacy level`;
+  }
+};
+
 export const updateCartItem = newItem => ({});
 
 export function fetchCart(cart_id) {
@@ -109,6 +129,27 @@ export function updateCart(cart) {
   };
 }
 
+export function updatePrivacy(cart_id, privacyLevel) {
+  const privacy = getPrivacy(privacyLevel);
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/cart/${cart_id}/privacy/${privacy}`, {
+        'method': 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+      });
+      const json = await response.json();
+      console.log(json);
+      return dispatch(recieveUpdate(json));
+    } catch (e) {
+      throw e;
+    }
+  };
+}
+
 { /* https://mint.kipthis.com/api/cart/:cart_id/clear */ }
 export function clearCart(cart_id) {
   return async(dispatch, getState) => {
@@ -137,6 +178,7 @@ export function deleteCart(cart_id) {
         credentials: 'same-origin',
       });
       dispatch(recieveDeleteCart(cart_id));
+      dispatch(push('/newcart?toast=Cart Deleted&status=success'));
     } catch (e) {
       throw 'error in cart delete';
     }

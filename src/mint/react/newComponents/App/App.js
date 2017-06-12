@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route, Switch } from 'react-router';
 
-import { HeaderContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../newContainers';
+import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../newContainers';
 import { ErrorPage, Modal } from '..';
 
 //Analytics!
@@ -37,7 +37,7 @@ export default class App extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    if(
+    if (
       nextProps.sidenav !== this.props.sidenav ||
       nextProps.popup !== this.props.popup ||
       nextProps.match.url !== this.props.match.url
@@ -52,6 +52,7 @@ export default class App extends Component {
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/cart/:cart_id'} component={HeaderContainer} />
+        <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
 

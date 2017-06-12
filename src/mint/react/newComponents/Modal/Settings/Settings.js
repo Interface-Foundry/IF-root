@@ -93,7 +93,7 @@ export default class Settings extends Component {
           <li><Link to={`/cart/${cart.id}/m/feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
         </ul>
         <div className='reachKip'/>
-        <h4>Kip Version 1.3 (Mint)</h4>
+        <h4>Kip Version 1.3.2 (Mint)</h4>
       </div>
     );
   }

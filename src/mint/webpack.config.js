@@ -2,8 +2,7 @@ const path = require('path'),
   webpack = require('webpack'),
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
-  HOME_DIR = path.resolve(__dirname, 'kip-website'),
-  BabiliPlugin = require('babili-webpack-plugin');
+  HOME_DIR = path.resolve(__dirname, 'kip-website');
 
 module.exports = {
   entry: {
@@ -20,11 +19,13 @@ module.exports = {
       'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.GA': JSON.stringify(true || process.env.GA)
     }),
-    new BabiliPlugin({
-      removeDebugger: true
-    }, {
-      comments: false
+    new webpack.optimize.OccurrenceOrderPlugin(),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true,
+      debug: false
     }),
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } }),
     new webpack.optimize.CommonsChunkPlugin({ name: 'common' })
   ],
   resolve: {
@@ -34,7 +35,6 @@ module.exports = {
     rules: [{
         test: /\.jsx?$|\.js?$/,
         exclude: /node_modules/,
-
         use: {
           loader: 'babel-loader',
           options: {

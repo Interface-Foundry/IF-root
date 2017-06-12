@@ -35,6 +35,7 @@
       cursor: pointer;
       svg {
         height: 100%;
+        vertical-align: top !important;
       }
     }
     .image {
@@ -100,6 +101,7 @@
       align-items: center;
       cursor: pointer;
       svg {
+        vertical-align: top !important;
         height: 100%;
       }
     }

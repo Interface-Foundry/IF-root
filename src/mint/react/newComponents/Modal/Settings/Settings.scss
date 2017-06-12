@@ -7,6 +7,9 @@
   padding: $padding*2 $padding*2 0;
   display: flex;
   flex-direction: column;
+  border-top: 3px solid $color-blue;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
   ul {
     flex: 1 1 auto;
     text-align: right;

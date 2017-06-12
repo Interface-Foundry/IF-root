@@ -28,7 +28,8 @@ export {
 	fetchCarts,
 	updateCart, 
 	clearCart, 
-	deleteCart
+	deleteCart,
+	fetchMetrics
 } from './cart';
 
 export {

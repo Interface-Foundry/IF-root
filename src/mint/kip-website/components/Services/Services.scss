@@ -1,264 +1,213 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
-
 .services {
-	position: relative;
-	text-align: center;
-	background: transparent;
-	padding: $padding*5 $padding*2 0;
-	z-index: 1;
-
-
-	@media only screen and (max-width: 600px) {
-		padding: $padding*3 $padding*2 $padding*3;
-	}
-
-	.cluster {
-		position: relative;
-		height: 350px;
-		margin-top: -50px;
-		z-index: 0;
-
-		@media only screen and (max-width: 600px) {
-			margin: 0px;
-		}
-
-		svg {
-			height: 300px;
-			
-			@media only screen and (max-width: 600px) {
-				height: 350px;
-			}
-			g {
-				fill: white;
-    			stroke: rgba($primaryColor, 0.8);
-    			stroke-width: 20px;
-			}
-		}
-		.inline {
-			position: relative;
-			height: 100px;
-			width: 100%;
-			margin-top: -75px;
-
-			svg {
-				width: 125px;
-				height: 50px;
-				display: inline-block;
-				transform: rotate(0deg) translate3d(0, 50px,0);
-
-				g {
-					fill: rgba($primaryColor, 0.8);
-	    			stroke: none;
-				}
-
-				&:first-of-type {
-					transform: rotate(60deg) translate3d(-50px, 25px, 0);
-					text-align: right;
-				}
-
-				&:last-of-type {
-					transform: rotate(-60deg) translate3d(50px, 25px,0);
-					text-align: left;
-				}
-			}
-
-			@media only screen and (max-width: 600px) {
-				display: none;
-			}
-		}
-	}
-
-
-	h1 {
-		font-size: 28px;
-		padding: 0;
-		color: #42403f;
-		z-index: 1;
-
-		&:first-of-type {
-			padding-top: 0;
-			@media only screen and (max-width: 600px) {
-				padding-top: $padding*4;
-			}
-		}
-		@media only screen and (max-width: 600px) {
-			font-size: 21px;
-			padding-top: 0;
-		}
-	}
-
-	h4 {
-		font-size: 18px;
-		font-weight: 100;
-		padding: 0 0 $padding*5;
-	    max-width: 500px;
-	    margin: 0 auto;
-		z-index: 1;
-
-		span {
-			font-weight: 600;
-			font-size: 18px;
-			color: $primaryColor;
-			@media only screen and (max-width: 600px) {
-				font-size: 14px;
-			}
-		}
-
-		@media only screen and (max-width: 600px) {
-			font-size: 14px;
-			padding-bottom: 0;
-		}
-	}
-
-	h3 {
-		font-size: 27px;
-		margin: 0 0 $padding*6;
-		color: $primaryColor;
-	    line-height: 35px;
-
-		@media only screen and (max-width: 600px) {
-			margin: $padding*3 0;
-			font-size: 18px;
-			line-height: 25px;
-		}
-
-		span {
-			color: #42403f;
-			font-size: 20px;
-			line-height: 60px;
-			@media only screen and (max-width: 600px) {
-				font-size: 16px;
-			}
-		}
-	}
-
-	.services__details {
-		position: relative;
-		padding: $padding*2 $padding*2 $padding*4;
-		text-align: left;
-
-		@media only screen and (max-width: 600px) {
-			transform: translate3d(0, 0px, 0) !important;
-			padding: $padding*2;
-
-			&:first-of-type {
-				padding-top: 0;
-			}
-		}
-
-		&:first-of-type {
-			transform: translate3d(0, -150px, 0);
-		}
-
-		&:last-of-type {
-			transform: translate3d(0, -150px, 0);
-		}
-
-		svg {
-			width: 100%;
-			height: $ribbonHeight*2;
-			padding: $padding/2;
-			fill: $warningColor;
-		}
-
-		.image {
-			width: 100%;
-			height: $ribbonHeight*2;
-			background-size: contain;
-			display: inline-block;
-		}
-
-		h2 {
-			display: inline-block;
-			white-space: nowrap;
-			color: darken($bgColor, 15);
-			line-height: $ribbonHeight;
-			margin: 0;
-			font-size: 20px;
-			font-weight: 500;
-		}
-
-
-		h4 {
-			position: relative;
-			white-space: normal;
-			font-weight: 100;
-			font-size: 15px;
-			padding: $padding*2 0 0;
-			color: rgba($bgColor, 1);
-			@media only screen and (max-width: 600px) {
-				padding: 0;
-			}
-		}
-
-		&:first-of-type {
-			svg {
-				fill: $thirdColor;
-			}
-		}
-
-		&:nth-of-type(3) {
-			svg {
-				fill: darken(#eaf9ff, 40);
-			}
-		}
-
-	}
-
-	.action {
-		padding: $padding 0 $padding*2;
-		button {
-			border: 0px solid #eccd46;
-			white-space: nowrap;
-			border-radius: $padding/2;
-			background: transparent;
-			color: $primaryColor;
-			padding: 0;
-			font-size: 20px;
-			height: $ribbonHeight;
-			line-height: $ribbonHeight;
-			cursor: pointer;
-			&:focus {
-				@include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
-			}
-			&.slack {
-				margin-right: $padding*2;
-				background: transparent;
-			}
-			span {
-				position: relative;
-				&:after {
-					content: '';
-					position: absolute;
-					height: 3px;
-					width: 100%;
-					left: 0;
-					bottom: -3px;
-					border-radius: 150px;
-					background: transparent;
-					@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-				}
-			}
-			&:hover {
-				span {
-					&:after {
-						background: $primaryColor;
-					}
-				}
-				svg {
-					transform: translate3d(5px,0,0)
-				}
-			}
-			svg {
-				height: $ribbonHeight;
-			    padding: 15px 0px 15px 0px;
-				width: auto;
-				fill: $primaryColor !important;
-				background: transparent;
-			    @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-			}
-		}
-	}
-
+  position: relative;
+  text-align: center;
+  background: transparent;
+  padding: $padding*5 $padding*2 0;
+  z-index: 1;
+  @media only screen and (max-width: 600px) {
+    padding: $padding*3 $padding*2 $padding*3;
+  }
+  .cluster {
+    position: relative;
+    height: 350px;
+    margin-top: -50px;
+    z-index: 0;
+    @media only screen and (max-width: 600px) {
+      margin: 0px;
+    }
+    svg {
+      height: 300px;
+      @media only screen and (max-width: 600px) {
+        height: 350px;
+      }
+      g {
+        fill: white;
+        stroke: rgba($primaryColor, 0.8);
+        stroke-width: 20px;
+      }
+    }
+    .inline {
+      position: relative;
+      height: 100px;
+      width: 100%;
+      margin-top: -75px;
+      svg {
+        width: 125px;
+        height: 50px;
+        display: inline-block;
+        transform: rotate(0deg) translate3d(0, 50px, 0);
+        g {
+          fill: rgba($primaryColor, 0.8);
+          stroke: none;
+        }
+        &:first-of-type {
+          transform: rotate(60deg) translate3d(-50px, 25px, 0);
+          text-align: right;
+        }
+        &:last-of-type {
+          transform: rotate(-60deg) translate3d(50px, 25px, 0);
+          text-align: left;
+        }
+      }
+      @media only screen and (max-width: 600px) {
+        display: none;
+      }
+    }
+  }
+  h1 {
+    font-size: 28px;
+    padding: 0;
+    color: #42403f;
+    z-index: 1;
+    &:first-of-type {
+      padding-top: 0;
+      @media only screen and (max-width: 600px) {
+        padding-top: $padding*4;
+      }
+    }
+    @media only screen and (max-width: 600px) {
+      font-size: 21px;
+      padding-top: 0;
+    }
+  }
+  h4 {
+    font-size: 18px;
+    font-weight: 100;
+    padding: 0 0 $padding*5;
+    max-width: 500px;
+    margin: 0 auto;
+    z-index: 1;
+    span {
+      font-weight: 600;
+      font-size: 18px;
+      color: $primaryColor;
+      @media only screen and (max-width: 600px) {
+        font-size: 14px;
+      }
+    }
+    @media only screen and (max-width: 600px) {
+      font-size: 14px;
+      padding-bottom: 0;
+    }
+  }
+  h3 {
+    font-size: 27px;
+    margin: 0 0 $padding*6;
+    color: $primaryColor;
+    line-height: 35px;
+    @media only screen and (max-width: 600px) {
+      margin: $padding*3 0;
+      font-size: 18px;
+      line-height: 25px;
+    }
+    span {
+      color: #42403f;
+      font-size: 20px;
+      line-height: 60px;
+      @media only screen and (max-width: 600px) {
+        font-size: 16px;
+      }
+    }
+  }
+  .services__details {
+    position: relative;
+    padding: $padding*2 $padding*2 $padding*4;
+    text-align: left;
+    @media only screen and (max-width: 600px) {
+      transform: translate3d(0, 0px, 0) !important;
+      padding: $padding*2;
+      &:first-of-type {
+        padding-top: 0;
+      }
+    }
+    &:first-of-type {
+      transform: translate3d(0, -150px, 0);
+    }
+    &:last-of-type {
+      transform: translate3d(0, -150px, 0);
+    }
+    .image {
+      width: 100%;
+      height: $ribbonHeight*2;
+      background-size: contain;
+      display: inline-block;
+    }
+    h2 {
+      display: inline-block;
+      white-space: nowrap;
+      color: darken($bgColor, 15);
+      line-height: $ribbonHeight;
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+    }
+    h4 {
+      position: relative;
+      white-space: normal;
+      font-weight: 100;
+      font-size: 15px;
+      padding: $padding*2 0 0;
+      color: rgba($bgColor, 1);
+      @media only screen and (max-width: 600px) {
+        padding: 0;
+      }
+    }
+  }
+  .action {
+    padding: $padding 0 $padding*2;
+    button {
+      border: 0px solid #eccd46;
+      white-space: nowrap;
+      border-radius: $padding/2;
+      background: transparent;
+      color: $primaryColor;
+      padding: 0;
+      font-size: 20px;
+      height: $ribbonHeight;
+      line-height: $ribbonHeight;
+      cursor: pointer;
+      &:focus {
+        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+      }
+      &.slack {
+        margin-right: $padding*2;
+        background: transparent;
+      }
+      span {
+        position: relative;
+        &:after {
+          content: '';
+          position: absolute;
+          height: 3px;
+          width: 100%;
+          left: 0;
+          bottom: -3px;
+          border-radius: 150px;
+          background: transparent;
+          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        }
+      }
+      &:hover {
+        span {
+          &:after {
+            background: $primaryColor;
+          }
+        }
+        svg {
+          transform: translate3d(5px, 0, 0)
+        }
+      }
+      svg {
+        height: $ribbonHeight;
+        padding: 15px 0px 15px 0px;
+        width: auto;
+        fill: $primaryColor !important;
+        background: transparent;
+        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      }
+    }
+  }
 }
+

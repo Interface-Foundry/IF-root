@@ -13,19 +13,14 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  sendAddressData: (...args) => {
+  submitForm: (user_id, data) => {
+    const { ypo_account_number: { val: ypo_account_number }, ypo_account_name: { val: ypo_account_name }, ypo_voucher_code: { val: ypo_voucher_code }, full_name: { val: full_name }, line_1: { val: line_1 }, line_2: { val: line_2 }, city: { val: city }, region: { val: region }, code: { val: code }, country: { val: country }, delivery_message: { val: delivery_message } } = data;
     ReactGA.event({
       category: 'Cart',
-      action: 'Added Address',
+      action: 'Added Address'
     });
-    return dispatch(sendAddressData(...args));
-  },
-  sendYPOData: (user_id, ypo_account_number, ypo_account_name, ypo_voucher_code) => {
-    ReactGA.event({
-      category: 'Cart',
-      action: 'Added Address',
-    });
-    return dispatch(updateUser(user_id, { ypo_account_number, ypo_account_name, ypo_voucher_code }));
+    dispatch(updateUser(user_id, { ypo_account_number, ypo_account_name, ypo_voucher_code }));
+    dispatch(sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country, delivery_message))
   }
 });
 

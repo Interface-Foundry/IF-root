@@ -1,14 +1,17 @@
 export {
-	handleScroll,
-	toggleSidenav,
-	toggleModal,
-	registerHeight,
-	scrollToPosition
-} from './app';
+  handleScroll,
+  toggleSidenav,
+  toggleModal,
+  registerHeight
+}
+from './app';
 
 export {
-	login, 
-	validateCode, 
-	get, 
-	logout
-} from './async';
+  login,
+  validateCode,
+  get,
+  logout,
+  getSiteState,
+  scrollToPosition
+}
+from './async';

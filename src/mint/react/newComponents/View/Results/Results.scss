@@ -8,7 +8,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	width: 100%;
 	height: auto;
 	margin: 0 auto;
-	padding: $padding 0;
 	border-collapse: collapse;
 
 	.price {
@@ -49,7 +48,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 	th {
 		nav {
-			padding: 0 $padding*2;
+			padding: $padding $padding*2 0;
 			p {
 				position: relative;
 				display: inline-block;

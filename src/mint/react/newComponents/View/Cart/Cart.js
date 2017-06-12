@@ -25,9 +25,12 @@ export default class Cart extends Component {
             <th colSpan='100%'>
               {
                 myCart.length > 0 ? <div className='card'>
-                  <h1>{user.name} <span> - {myCart.length} items</span> </h1>
+                  <h1>{user.name} </h1>
                   <h1 className='date'> <span> {timeFromDate(myCart[0].updatedAt)} </span> </h1>
-                  <h4> Total: <span className='price'>{displayCost(calculateItemTotal(myCart))}</span></h4>
+                  <h4>
+                    <span className='price'>{displayCost(calculateItemTotal(myCart))}</span> &nbsp;
+                    <span className='grey'>({myCart.length} items)</span>
+                  </h4>
                   <ul>
                     {
                       myCart.map((item) => (
@@ -65,9 +68,12 @@ export default class Cart extends Component {
               <tr key={userCart.id}>
                 <td colSpan='100%'>
                   <div className='card'>
-                    <h1>{userCart.name} <span> - {userCart.items.length} items</span> </h1>
+                    <h1>{userCart.name}</h1>
                     <h1 className='date'> <span> {timeFromDate(userCart.items[0].updatedAt)} </span> </h1>
-                    <h4> Total: <span className='price'>{displayCost(calculateItemTotal(userCart.items))}</span></h4>
+                    <h4>
+                      <span className='price'>{displayCost(calculateItemTotal(userCart.items))}</span> &nbsp;
+                      <span className='grey'>({userCart.items.length} items)</span>
+                    </h4>
                     <ul>
                       {
                         userCart.items.map((item) => (
@@ -84,10 +90,10 @@ export default class Cart extends Component {
                             {
                               editId !== item.id ? 
                               <div className='action'>
-                                <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                                <button onClick={() => editItem(item.id)}>Edit Item</button>
                               </div> :
                               <div className='action'>
-                                <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
+                                <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button>
                               </div> 
                             }
                           </li>

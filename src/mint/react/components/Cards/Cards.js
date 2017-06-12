@@ -83,7 +83,7 @@ export default class Cards extends Component {
     const activeCards = cards.map((card, i) => {
       return <li key={card._id || card.id} onClick={(e) => selectCard(i + 1, card)}>
         {
-          cardType.includes('search')  ? <SearchCard {...card} currentCart={currentCart} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} index={i} search={search}/>
+          cardType.includes('search')  ? <SearchCard {...card} currentCart={currentCart} cart_id={cart_id} index={i}/> : <CategoryCard {...card} cart_id={cart_id} currentCart={currentCart} index={i} previewAmazonItem={previewAmazonItem}/>
         }
       </li>;
     });

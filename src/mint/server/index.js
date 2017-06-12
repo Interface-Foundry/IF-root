@@ -12,8 +12,8 @@ const fs = require('fs'),
   co = require('co');
 
 // start any jobs
-var dailyDealsJob = require('./deals/send-daily-deals-job')
-var reengagementEmailsJob = require('./send-reengagement-emails-job')
+if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
+if (process.env.NODE_ENV !== 'production') var reengagementEmailsJob = require('./send-reengagement-emails-job')
 
 // live reloading
 if (process.env.BUILD_MODE !== 'prebuilt') {
@@ -32,6 +32,8 @@ if (process.env.BUILD_MODE !== 'prebuilt') {
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }));
+} else {
+  app.get('/__webpack_hmr', (req, res) => res.status(200).end())
 }
 
 require('colors');
@@ -110,6 +112,7 @@ if (process.env.LOGGING_MODE === 'database') {
 //
 // Back end routes
 //
+app.use('/prototype', require('./routes/global-direct-prototype.js'));
 app.use('/', require('./routes/regular.js'));
 app.use('/api', require('./routes/api.js'));
 app.use('/sendgrid', require('./routes/incoming-mail.js'));
@@ -147,10 +150,13 @@ app.get('/legal', (_, res) => {
 app.get('/blog', (_, res) => {
   res.render('pages/index');
 });
-app.get('/help', (_, res) => {
+app.get('/howitworks', (_, res) => {
   res.render('pages/index');
 });
-app.get('/whykip', (_, res) => {
+app.get('/compare', (_, res) => {
+  res.render('pages/index');
+});
+app.get('/about', (_, res) => {
   res.render('pages/index');
 });
 app.get('/s/*', (_, res) => {

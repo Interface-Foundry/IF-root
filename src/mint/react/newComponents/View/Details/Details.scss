@@ -8,7 +8,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	width: 100%;
 	height: auto;
 	margin: 0 auto;
-	border-spacing: $padding*2 $padding;
+	border-collapse: collapse;
 
 	@media only screen and (max-width: 600px) {
 		border-spacing: $padding $padding;
@@ -18,42 +18,61 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		text-align: left;
 		padding: 0 0 $padding;
 
-		.image {
-			height: $nav-height;
-			width: $nav-height;
-			display: inline-block;
-			border-radius: 100%;
-		}
-		.text {
-			display: inline-block;
-			padding: 0 $padding;
+		.card {
+			border: 1px solid $secondaryColor;
+			.left {
+				display: inline-block;
+				min-width: 50%;
+				.image {
+					height: $nav-height;
+					width: $nav-height;
+					display: inline-block;
+					border-radius: 5px;
+				}
+				.text {
+					display: inline-block;
+					padding: 0 $padding;
 
-			h1 {
-				font-size: 14px;
-				height: 20px;
-				line-height: 20px;
-			}
-			p {
-				font-size: 10px;
-				height: 10px;
-				line-height: 10px;
-				opacity: 0.5;
-			}
-			h4 {
-				font-size: 10px;
-				height: 20px;
-				line-height: 20px;
-				opacity: 0.8;
+					h1 {
+						font-size: 14px;
+						height: 20px;
+						line-height: 20px;
+					}
+					p {
+						font-size: 10px;
+						height: 10px;
+						line-height: 10px;
+						opacity: 0.5;
+					}
+					h4 {
+						font-size: 10px;
+						height: 20px;
+						line-height: 20px;
+						opacity: 0.8;
 
-				.price {
-					color: $price-color;
+						.price {
+							color: $price-color;
+						}
+					}
 				}
 			}
-		}
-		.buttons {
-			display: inline-block;
-			@media only screen and (max-width: 600px) {
-				display: none;
+			.right {
+				display: inline-block;
+				min-width: 50%;
+				text-align: right;
+				.buttons {
+					display: inline-block;
+					height: auto;
+
+					button {
+						display: block;
+						margin: $padding auto;
+					}
+
+					@media only screen and (max-width: 600px) {
+						display: none;
+					}
+				}
 			}
 		}
 	}
@@ -64,37 +83,22 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		text-align: left;
 		width: 100%;
 
-		span {
-			display: inline-block;
-			border-radius: 5px;
-			padding: $padding/4 $padding*1;
-			margin-right: $padding*2;
-			background: white;
+		nav {
+			padding: $padding $padding 0;
 
-			@media only screen and (max-width: 600px) {
-				margin: $padding/2;
-			}
-
-			&.price {
-				color: $price-color;
-			}
-		}
-
-		.tags {
-			h1 {
+			span {
 				display: inline-block;
-				padding: $padding $padding*2;
-				cursor: pointer;
-				font-size: 14px;
+				border-radius: 5px;
+				margin-right: $padding*2;
 
-				&.selected {
-					background: white;
-					border: 1px solid $border-color-light;
-					border-bottom: 0;
-					border-radius: 5px 5px 0 0;
+				@media only screen and (max-width: 600px) {
+					margin: $padding/2;
+				}
+
+				&.updated {
+					color: rgba(#111, 0.5);
 				}
 			}
-			border-bottom: 3px solid white;
 		}
 	}
 }

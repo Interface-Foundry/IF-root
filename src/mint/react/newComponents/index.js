@@ -5,6 +5,7 @@ export Stores from './Stores';
 export ErrorPage from './ErrorPage';
 export Search from './Search';
 export Buttons from './Buttons';
+export Tabs from './Tabs';
 
 export Modal from './Modal';
 export { Feedback, Settings, Share, EditCart } from './Modal';

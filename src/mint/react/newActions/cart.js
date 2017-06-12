@@ -27,6 +27,16 @@ export const fetchCarts = () => get(
 	}
 )
 
+export const fetchMetrics = cart_id => get(
+	`/api/cart/${cart_id}/metrics`, 
+	'METRICS', 
+	(type, json) => ({
+		type: `${type}_SUCCESS`,
+		response: json,
+		receivedAt: Date.now()
+	})
+)
+
 export const updateCart = cart => post(
 	`/api/cart/${cart.id}`, 
 	'UPDATE_CART',

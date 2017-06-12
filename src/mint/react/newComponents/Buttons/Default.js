@@ -21,8 +21,8 @@ export default class Default extends Component {
 
     return (
       <span className='default'>
-        <button className='blue'> Share <Share/> </button>
         <button className='yellow sub'> <div> Checkout <br/> <span> {displayCost(total)} </span> </div>  <Cart/> </button>
+        <button className='blue'> Share <Share/> </button>
       </span>
     );
   }

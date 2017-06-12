@@ -9,54 +9,41 @@ import { ButtonsContainer } from '../../../newContainers';
 //Analytics!
 import ReactGA from 'react-ga';
 
-const tabs = [
-  'Cart',
-  'Results',
-  'Payment',
-  'Archive'
-]
-
 export default class Details extends Component {
 
   render() {
-    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, views, tab, selectTab } = this.props,
+    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt,  views, tab, selectTab } = this.props,
           total = calculateItemTotal(items);
-
+    console.log(thumbnail_url)
     return (
       <table className='details'>
         <tbody>
           <tr>
   			    <th colSpan='100%'>
-              <div className={`image`} style={{
-                backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
-              }}/>
-              <div className='text'> 
-                <h1>{name}</h1>
-                <p>Created By: {leader.name} | {store} {store_locale}</p>
-                <h4>Kip Cart – <span className='price'>{displayCost(total)} Total</span></h4>
-              </div> 
-              <ButtonsContainer/>
+              <div className='card'>
+                <div className='left'>
+                  <div className={`image`} style={{
+                    backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
+                  }}/>
+                  <div className='text'> 
+                    <h1>{name}</h1>
+                    <h4>{store} {store_locale}</h4>
+                    <p>Created {timeFromDate(updatedAt)} by {leader.name}</p>
+                  </div> 
+                </div>
+                <div className='right'>
+                  <ButtonsContainer/>
+                </div>
+              </div>
             </th>
           </tr>
           <tr>
             <td>
-              <span>{views} Views</span>
-              <span>{items.length} Items</span>
-              <span>{members.length} Members</span>
-              <span>Updated {timeFromDate(updatedAt)}</span>
+              <nav>
+                <p> {items.length} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
+              </nav>
             </td>
         	</tr>
-          <tr>
-            <td>
-              <div className='tags'>
-                {
-                  tabs.map((t) => (
-                    <h1 key={t} onClick={() => selectTab(t.toLowerCase())} className={`${tab.toUpperCase() === t.toUpperCase() ? 'selected' : ''}`}>{t}</h1>
-                  ))
-                }
-              </div>
-            </td>
-          </tr>
         </tbody>
       </table>
     );

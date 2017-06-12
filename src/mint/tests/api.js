@@ -2,6 +2,7 @@ const request = require('request-promise')
 const co = require('co')
 const assert = require('assert')
 require('should')
+require('../server/index')
 
 /**
  * We will use the db to circumvent the whole email checking process
@@ -62,6 +63,19 @@ const post = function * (url, data, extended) {
   return body
 }
 
+const put = function * (url, data, extended) {
+  url = 'http://localhost:3000' + url
+  var body = yield request({
+    uri: url,
+    method: 'put',
+    jar: true,
+    json: true,
+    body: data,
+    resolveWithFullResponse: extended
+  })
+  return body
+}
+
 const del = function * (url, data) {
   url = 'http://localhost:3000' + url
   var body = yield request({
@@ -75,7 +89,7 @@ const del = function * (url, data) {
 }
 
 describe('api', function () {
-  this.timeout(4000)
+  this.timeout(8000)
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -173,6 +187,9 @@ describe('api', function () {
     assert.equal(cart.leader.email_address, mcTesty.email)
     // assert.equal(cart.name, mcTesty.name + " Kip Cart")
 
+    // the default privacy status should be public
+    assert.equal(cart.privacy, 'public')
+
     // lets save this cart id for later
     mcTesty.cart_id = cart.id
 
@@ -260,9 +277,11 @@ describe('api', function () {
 
   it('GET /api/itempreview should return a preview of an item, but not add it to cart', () => co(function * () {
     var url = 'https://www.amazon.com/HiLetgo-Version-NodeMCU-Internet-Development/dp/B010O1G1ES/ref=sr_1_3?ie=UTF8&qid=1490217410&sr=8-3&keywords=nodemcu'
-    var item = yield get('/api/itempreview?q=' + encodeURIComponent(url))
+    var items = yield get('/api/itempreview?q=' + encodeURIComponent(url))
+    assert(items)
+    var item = items[0]
     assert(item)
-    assert.equal(item.original_link, url)
+    assert(item.original_link.includes('HiLetgo-Version-NodeMCU-Internet-Development'))
     assert.equal(item.name, 'HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
     assert(item.thumbnail_url)
     assert(item.main_image_url)

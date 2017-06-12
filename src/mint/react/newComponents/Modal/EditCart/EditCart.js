@@ -13,9 +13,12 @@ class EditCart extends Component {
     cart: PropTypes.object,
     clearCart: PropTypes.func,
     updateCart: PropTypes.func,
+    updatePrivacy: PropTypes.func,
     deleteCart: PropTypes.func,
     cart_id: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    privacyLevel: PropTypes.object,
+    prevCartId: PropTypes.string,
   }
 
   state = {
@@ -30,8 +33,8 @@ class EditCart extends Component {
   _saveName = () => {
     const { state: { cartName }, props: { updateCart, cart } } = this;
     ReactGA.event({
-      category: 'User',
-      action: 'Changed Cart Name'
+      category: 'Cart',
+      action: 'Name'
     });
     updateCart({ ...cart, name: cartName });
   }
@@ -40,7 +43,20 @@ class EditCart extends Component {
     const { updateCart, cart } = this.props;
     const thumbnail_url = (await cloudinary(e))
       .secure_url;
+    ReactGA.event({
+      category: 'Cart',
+      action: 'Image'
+    });
     updateCart({ ...cart, thumbnail_url });
+  }
+
+  _updatePrivacy = (e) => {
+    const { updatePrivacy, cart } = this.props;
+    ReactGA.event({
+      category: 'Cart',
+      action: 'Privacy'
+    });
+    updatePrivacy(cart.id, e.target.value);
   }
 
   render() {
@@ -49,19 +65,20 @@ class EditCart extends Component {
       state: { editingName },
       _changeName,
       _saveName,
-      _updateImage
+      _updateImage,
+      _updatePrivacy
     } = this;
 
     return (
       <div className='editCart'>
         <div className="input custom src">
-            <Image input={{ 
-              onChange: _updateImage, 
-              value: (cart ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png') 
+            <Image input={{
+              onChange: _updateImage,
+              value: (cart ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png')
             }} />
         </div>
-         { 
-          editingName 
+         {
+          editingName
           ? <div className="input name">
               <input name="name" type="text" placeholder="Add Cart Name" onChange={_changeName} value={this.state.cartName}/>
               <button onClick={()=>{this.setState({editingName: false}); _saveName();}}>Save</button>
@@ -70,15 +87,23 @@ class EditCart extends Component {
               <Icon icon='Edit'/> <span className='editText'>Edit</span>
             </div>
         }
+        <div className='privacy'>
+          <label> Privacy: </label>
+          <select onChange={_updatePrivacy}>
+            <option value='1' selected={cart && cart.privacy === 'public'}>Public</option>
+            <option value='2' selected={cart && cart.privacy === 'private'}>Private</option>
+            <option value='3' selected={cart && cart.privacy === 'display'}>Display</option>
+          </select>
+        </div>
         <div className='pad'/>
         <table className='dangerzone'>
           <caption>
-            <h1 className='danger'> Danger Will Robinson!</h1>
+            <h1 className='danger'>Danger Zone</h1>
             <h3>Buttons in this area can ruin your perfect cart permanently!</h3>
           </caption>
           <tbody>
             <tr>
-              <td> 
+              <td>
                 <h2>Empty Cart</h2>
                 <p>This will permanently remove everything from your cart!</p>
               </td>

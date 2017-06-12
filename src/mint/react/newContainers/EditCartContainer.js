@@ -5,6 +5,7 @@ import { EditCart } from '../newComponents';
 import { getCartById } from '../newReducers';
 import { updateCart, clearCart, deleteCart } from '../newActions';
 
+// Ask hannah and add back in, look in Containers.
 const mapStateToProps = (state, ownProps) => {
   return {
     cart_id: state.cart.id,

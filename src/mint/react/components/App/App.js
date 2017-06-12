@@ -42,7 +42,7 @@ export default class App extends Component {
   state = {
     sidenav: false,
     popup: false,
-    isMobile: false
+    isMobile: false,
   }
 
   _logPageView(path, userId) {
@@ -58,14 +58,43 @@ export default class App extends Component {
     this.setState({ sidenav: !sidenav });
   }
 
-  _togglePopup = () => {
+  _togglePopup = (stop) => {
     const { popup } = this.state;
-    this.setState({ popup: !popup });
+    const { cart_id, user_account } = this.props;
+
+    if (cart_id || user_account.id) {
+      this.setState({ popup: !popup });
+    } else {
+      this.setState({ popup: true });
+    }
+  }
+
+  componentWillMount() {
+    const {
+      props: {
+        fetchCart,
+        fetchAllCarts,
+        cart_id,
+        history: { replace },
+        location: { pathname }
+      }
+    } = this;
+    if (cart_id
+      && !pathname.includes('/newcart')
+      && !pathname.includes('/feedback')
+      && !pathname.includes('/archive')
+      && !pathname.includes('/settings')
+      && !pathname.includes('/404')) {
+      fetchCart(cart_id)
+        .then(cart => !cart ? replace('/404') : null);
+    }
+    fetchAllCarts();
+    if (window.innerWidth > 900) this.setState({ sidenav: true });
   }
 
   componentDidMount() {
-    if (window.innerWidth < 900)
-      this.setState({ isMobile: true });
+    if (window.innerWidth < 900) this.setState({ isMobile: true });
+    else this.setState({ sidenav: true });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -98,6 +127,9 @@ export default class App extends Component {
       && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
+
+      fetchAllCarts();
+      if (window.innerWidth > 900) this.setState({ sidenav: true });
     }
   }
 
@@ -130,38 +162,54 @@ export default class App extends Component {
       state: { sidenav, isMobile, popup }
     } = this;
     const showFooter = !location.pathname.includes('/m/edit') || location.pathname.includes('/404') || location.pathname.includes('newcart');
+
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
-        <Toast toast={toast} status={status} loc={location} replace={replace}/>
-        <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
-        {popup ? <LoginScreenContainer _toggleLoginScreen={_togglePopup}/> : null}
-        <div className={`app__view ${showFooter ? '' : 'large'}`}>
+          <Toast toast={toast} status={status} loc={location} replace={replace}/>
+          <Header {...props}  _toggleSidenav={ _toggleSidenav} _togglePopup={_togglePopup} isMobile={isMobile}/>
           <div>
-            {/* Render Error Page */}
-            <Route path={'/404'} exact component={ErrorPage} />
-
-            { /* Renders modal when route permits */ }
-            <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
-
-            { /* Renders cart when route permits */ }
-            <Route path={'/cart/:cart_id'} exact component={CartContainer} />
-            <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
-
-            { /* Renders cart choice if theres no store set */}
-            <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
+            {
+              popup ?
+              <LoginScreenContainer
+                loginText={
+                  location.pathname.includes('newcart')
+                  ? 'Join Kip today'
+                  : 'Enter Your email to Log In'}
+                loginSubtext={
+                  location.pathname.includes('newcart')
+                  ? 'One simple step and we\'ll be on our way'
+                  : 'Enter your email to log in'}
+                _toggleLoginScreen={_togglePopup}/>
+              : null
+            }
           </div>
-        </div>
-        { 
-          sidenav || !isMobile 
-          ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={_toggleSidenav} user_account={user_account} itemsLen={items.length} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} /> 
-          : null
-        }
-        {
-          showFooter 
-          ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/> 
-          : null
-        }
-      </section>
+          <div className={`app__view ${showFooter ? '' : 'large'}`}>
+            <div>
+              {/* Render Error Page */}
+              <Route path={'/404'} exact component={ErrorPage} />
+
+              { /* Renders modal when route permits */ }
+              <Route path={'/cart/:cart_id/m/*'} exact component={Modal} />
+
+              { /* Renders cart when route permits */ }
+              <Route path={'/cart/:cart_id'} exact component={CartContainer} />
+              <Route path={'/cart/:cart_id/address'} exact component={CartContainer} />
+
+              { /* Renders cart choice if theres no store set */}
+              <Route path={'/newcart'} exact component={(props) => <CartStoresContainer {...props} _toggleLoginScreen={_togglePopup}/>} />
+            </div>
+          </div>
+          {
+            sidenav
+            ? <Sidenav cart_id={cart_id} replace={replace} logout={logout} leader={leader} carts={carts} _toggleSidenav={()=>window.innerWidth < 900 ? _toggleSidenav() : null} user_account={user_account} itemsLen={items.length} fetchAllCarts={fetchAllCarts} currentCart={currentCart} updateCart={updateCart} archivedCarts={archivedCarts} />
+            : null
+          }
+          {
+            showFooter
+            ? <Footer {...props} clearItem={clearItem} cart_id={cart_id} _togglePopup={_togglePopup} isMobile={isMobile}/>
+            : null
+          }
+        </section>
     );
   }
 }

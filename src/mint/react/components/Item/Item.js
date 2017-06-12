@@ -237,7 +237,7 @@ export default class Item extends Component {
               <ProductDescription description={description} />
               {
                 iframe_review_url 
-                  ? <iframe className='review__iframe' src={iframe_review_url}/>
+                  ? <div className='review__wrapper'><iframe className='review__iframe' src={iframe_review_url}/><div className='review__overlay'/></div>
                   : null
               }
               {

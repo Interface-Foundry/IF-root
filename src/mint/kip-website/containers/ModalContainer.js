@@ -1,11 +1,11 @@
 import { connect } from 'react-redux';
 import { LoginScreen } from '../../react-common/components';
 
-import { 
-	get,
-	toggleModal,
-  login, 
-  validateCode 
+import {
+  get,
+  toggleModal,
+  login,
+  validateCode
 } from '../actions';
 
 const mapStateToProps = (state, props) => ({
@@ -15,7 +15,9 @@ const mapStateToProps = (state, props) => ({
   errors: state.auth.errors,
   message: state.auth.message,
   ok: state.auth.ok,
-  loggedIn: state.auth.loggedIn
+  loggedIn: state.auth.loggedIn,
+  loginText: state.app.loginText,
+  loginSubtext: state.app.loginSubtext
 });
 
 const mapDispatchToProps = dispatch => ({

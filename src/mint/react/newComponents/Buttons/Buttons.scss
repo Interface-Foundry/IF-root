@@ -45,12 +45,12 @@
 		}
 
 		&.blue {
-			background: $color-blue;
-			color: white;
+			background: white;
+			color: $color-blue;
 			svg {
 				path {
-					fill: white;
-				    stroke: white;
+					fill: $color-blue;
+				    stroke: $color-blue;
 				    stroke-width: $padding;
 				}
 			}

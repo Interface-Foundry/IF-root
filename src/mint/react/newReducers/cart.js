@@ -8,11 +8,15 @@ const initialState = {
   store: '',
   store_locale: '',
   members: [],
-  items: []
+  items: [],
+  checkouts:0,
+  clones:0,
+  views:0
 } 
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
+    case 'METRICS_SUCCESS':
     case 'CART_SUCCESS':
     case 'UPDATE_CART_SUCCESS':
       return {

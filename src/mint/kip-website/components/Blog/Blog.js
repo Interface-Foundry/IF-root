@@ -2,17 +2,17 @@
 /* eslint global-require: 0 */
 import React, { Component } from 'react';
 import moment from 'moment';
-import ReactDOM from 'react-dom'
-
-import { Footer } from '..';
-import { HeaderContainer } from '../../containers';
-
-import { Icon } from '../../themes';
-import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn } from '../../themes/newSvg';
+import ReactDOM from 'react-dom';
+import { PropTypes } from 'prop-types';
+import { HeaderContainer, FooterContainer } from '../../containers';
 
 export default class Blog extends Component {
   constructor(props) {
-      super(props)
+    super(props)
+  }
+  static propTypes = {
+    posts: PropTypes.array,
+    blogTemplate: PropTypes.object
   }
 
   state = {
@@ -21,16 +21,17 @@ export default class Blog extends Component {
 
   componentDidMount() {
     this.setState({
-      offsetTop: ReactDOM.findDOMNode(this.blogs).offsetTop
-    })
+      offsetTop: ReactDOM.findDOMNode(this.blogs)
+        .offsetTop
+    });
   }
 
   render() {
-    const { props: { posts }, state: { offsetTop } } = this;
+    const { props: { posts, blogTemplate }, state: { offsetTop } } = this;
 
     return (
-      <div className="blog"> 
-        <HeaderContainer title={'Conversations in Commerce'} subtext={['Case Studies Findings', 'Thoughts on Building Kip']} color="third" offsetTop={offsetTop}/>
+      <div className="blog">
+        <HeaderContainer title={blogTemplate.titleText} subtext={blogTemplate.subtext} color="third" offsetTop={offsetTop}/>
         <section className="blogs" ref={(blogs) => this.blogs = blogs}>
           {
             posts.map((post) => {
@@ -38,11 +39,11 @@ export default class Blog extends Component {
                 <div className='image' style={{backgroundImage: `url(${post.imageSrc || 'https://storage.googleapis.com/kip-random/head%40x2.png'})`}}/>
                 <h1>{post.title}</h1>
                 <p>{moment(post.firstPublishedAt).format('LLL')}</p>
-              </a>
+              </a>;
             })
           }
         </section>
-        <Footer/>
+        <FooterContainer />
       </div>
     );
   }

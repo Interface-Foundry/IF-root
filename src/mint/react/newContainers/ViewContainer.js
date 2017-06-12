@@ -5,8 +5,7 @@ import { View } from '../newComponents';
 
 import { 
   toggleSidenav,
-  togglePopup,
-  selectTab
+  togglePopup
 } from '../newActions';
 
 import ReactGA from 'react-ga';
@@ -23,8 +22,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   togglePopup: () => dispatch(togglePopup()),
-  toggleSidenav: () => dispatch(toggleSidenav()),
-  selectTab: (tab) => dispatch(selectTab(tab))
+  toggleSidenav: () => dispatch(toggleSidenav())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(View);

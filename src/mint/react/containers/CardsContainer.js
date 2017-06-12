@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { Cards } from '../components';
 import { selectCard } from '../actions/cards';
-import { search, clearItem } from '../actions/item';
+import { previewAmazonItem, clearItem } from '../actions/item';
 import { addSearchHistory } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -25,9 +25,9 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(selectCard(cardIndex, card));
   },
-  search: (url, category) => {
+  previewAmazonItem: (url, store, store_locale, machineName) => {
     addSearchHistory(url);
-    return dispatch(search(url, category));
+    return dispatch(previewAmazonItem(url, store, store_locale, machineName));
   },
   clearItem: () => dispatch(clearItem())
 });

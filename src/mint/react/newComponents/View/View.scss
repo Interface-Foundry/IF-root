@@ -6,7 +6,7 @@
 	position: relative;
 	max-width: 1200px;
 	margin: 0 auto;
-	padding: $padding 0 $padding*2;
+	padding: 0 0 $padding*2;
 
 	@media only screen and (max-width: 600px) {
 		padding: $padding*5 0;
@@ -21,7 +21,7 @@
     	padding: 0;
 	    margin: 0;
 	    position: fixed;
-    	top: 50px;
+    	top: $nav-height*2;
     	height: 40px;
     	z-index: 10;
     	border-bottom: 1px solid $border-color-light;
@@ -42,7 +42,7 @@
 	}
 
 	.card {
-		background-color: $kip-primary-color;
+		background-color: white;
 	    border-radius: $padding/2;
 	    box-shadow: $card-box-shadow;
 	    padding: $padding $padding*2;

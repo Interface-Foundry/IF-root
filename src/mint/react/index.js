@@ -10,13 +10,13 @@ import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './newReducers';
-import { checkSession, fetchCart, fetchCarts, fetchStores } from './newActions';
+import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics } from './newActions';
 import { AppContainer } from './newContainers';
 
 //Analytics!
 import ReactGA from 'react-ga';
 
-import 'whatwg-fetch';
+// import 'whatwg-fetch';
 
 if (module.hot
   && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt'))
@@ -50,10 +50,13 @@ const store = createStore(
 // Basically our initialization sequence
 // Check session
 // Fetch everything required for the app to not break
+// Fetch Metrics
+const cart_id = location.pathname.split('/')[2];
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchCarts())
   store.dispatch(fetchStores())
-  store.dispatch(fetchCart(location.pathname.split('/')[2]))
+  store.dispatch(fetchCart(cart_id))
+  store.dispatch(fetchMetrics(cart_id))
 });
 
 ReactDOM.render(
