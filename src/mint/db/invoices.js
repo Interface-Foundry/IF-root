@@ -8,7 +8,7 @@ const constants = require('../server/constants.js')
  * http://schema.org/Invoice
  */
 const invoiceCollection = Waterline.Collection.extend({
-  identity: 'invoice',
+  identity: 'invoices',
   connection: 'default',
   migrate: 'safe',
   attributes: {

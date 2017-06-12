@@ -29,15 +29,14 @@ waterline.loadCollection(require('./delivery_details'))
 waterline.loadCollection(require('./email_events'))
 waterline.loadCollection(require('./emails'))
 waterline.loadCollection(require('./feedback'))
+waterline.loadCollection(require('./invoices'))
 waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
+waterline.loadCollection(require('./payment_sources'))
 waterline.loadCollection(require('./reactions'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
-
-waterline.loadCollection(require('./invoice'))
-waterline.loadCollection(require('./payment_source'))
 
 var config = {
   adapters: {
@@ -71,10 +70,10 @@ var initialize = new Promise((resolve, reject) => {
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
       Feedback: ontology.collections.feedback,
-      Invoice: ontology.collections.invoice,
+      Invoices: ontology.collections.invoices,
       ItemOptions: ontology.collections.item_options,
       Items: ontology.collections.items,
-      PaymentSource: ontology.collections.payment_source,
+      PaymentSources: ontology.collections.payment_sources,
       Reactions: ontology.collections.reactions,
       Sessions: ontology.collections.sessions,
       UserAccounts: ontology.collections.user_accounts,
