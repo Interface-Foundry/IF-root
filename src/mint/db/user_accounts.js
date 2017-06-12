@@ -124,7 +124,8 @@ var userAccountCollection = Waterline.Collection.extend({
     /** @type {carts} Carts this user has liked*/
     likes: {
       collection: 'carts',
-      via: 'likes'
+      via: 'likes',
+      dominant: true
     }
   }
 })

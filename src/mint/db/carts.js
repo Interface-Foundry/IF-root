@@ -102,8 +102,7 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {user_accounts} people who have liked this cart */
     likes: {
       collection: 'user_accounts',
-      via: 'likes',
-      dominant: true
+      via: 'likes'
     },
 
     /** @type {integer} the number of times this cart has been #viewed */
