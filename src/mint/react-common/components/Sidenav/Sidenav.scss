@@ -227,7 +227,7 @@
   .sidenav__list {
     @media (min-width: 900px) {
       background: white;
-      height: calc(100% - #{$nav-height});
+      height: calc(100% - #{$nav-height*2});
     }
     li {
       &.sidenav__list__header {
