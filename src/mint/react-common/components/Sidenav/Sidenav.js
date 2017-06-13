@@ -9,17 +9,14 @@ import { Icon } from '..';
 
 export default class Sidenav extends Component {
   static propTypes = {
-    itemsLen: PropTypes.number,
     cart_id: PropTypes.string,
     user_account: PropTypes.object.isRequired,
     leader: PropTypes.object,
     currentCart: PropTypes.object,
     carts: PropTypes.arrayOf(PropTypes.object),
     archivedCarts: PropTypes.arrayOf(PropTypes.object),
-    fetchAllCarts: PropTypes.func,
     _toggleSidenav: PropTypes.func.isRequired,
-    replace: PropTypes.func,
-    updateCart: PropTypes.func,
+    push: PropTypes.func
   }
 
   state = {
@@ -27,7 +24,7 @@ export default class Sidenav extends Component {
   }
 
   _handleShare = () => {
-    const { replace, cart_id } = this.props;
+    const { push, cart_id } = this.props;
     // TRY THIS FIRST FOR ANY BROWSER
     if (navigator.share !== undefined) {
       navigator.share({
@@ -38,11 +35,12 @@ export default class Sidenav extends Component {
         .then(() => console.log('Successful share'))
         .catch(error => console.log('Error sharing:', error));
     } else {
-      replace(`/cart/${cart_id}/m/share`);
+      push(`/cart/${cart_id}/m/share`);
     }
   }
 
   // moves cart with id to front of list
+  // Cool function, try to put stuff like this in the utilities folder so we can use it in other places.
   _moveToFront(carts, id) {
     return carts.reduce((acc, cart) => {
       if (cart.id === id) return [cart, ...acc];
@@ -88,7 +86,7 @@ export default class Sidenav extends Component {
                     { c.locked 
                       ? <div className='icon'/> 
                       : !i 
-                        ? <SideNavLink className='editIcon' to={`/cart/${cart_id}/m/edit/${c.id}`}>
+                        ? <SideNavLink className='editIcon' to={`/cart/${cart_id}/m/edit`}>
                             <div className='icon'>
                               <Icon icon='Edit'/>
                             </div>

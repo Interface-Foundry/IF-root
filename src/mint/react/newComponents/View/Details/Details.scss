@@ -1,0 +1,204 @@
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+
+$colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
+
+.details {
+	position: relative;
+	width: 100%;
+	height: auto;
+	margin: 0 auto;
+	border-collapse: collapse;
+
+	@media only screen and (max-width: 600px) {
+	    overflow-x: auto;
+	    display: block;
+	}
+
+	th {
+		text-align: left;
+		padding: $padding/3 $padding/2 $padding;
+
+		@media only screen and (max-width: 600px) {
+			padding: 0 3px;
+			display: block;
+		}
+
+		.card {
+			border-top: 3px solid $secondaryColor;
+
+			.left {
+				display: inline-block;
+				min-width: 50%;
+
+				@media only screen and (max-width: 600px) {
+					display: block;
+					width: 100%;
+				}
+				.image {
+					height: $nav-height;
+					width: $nav-height;
+					display: inline-block;
+					border-radius: 5px;
+				}
+				.text {
+					display: inline-block;
+					padding: 0 $padding;
+
+					h1 {
+						font-size: 18px;
+						height: 20px;
+						line-height: 20px;
+						cursor: pointer;
+						white-space: nowrap;
+
+						svg {
+							margin-left: $padding;
+							vertical-align: top !important;
+							padding: 0 $padding/5;
+							color: rgba(#333, 0.5);
+						}
+
+						span {
+							font-weight: 100;
+							font-size: 12px;
+							color: rgba(#333, 0.5); 
+						}
+
+						&:hover {
+							span {
+								color: $warningColor;
+							}
+
+							svg {
+								color: $warningColor;
+							}
+						}
+					}
+					p {
+						font-size: 10px;
+						height: 10px;
+						line-height: 10px;
+						opacity: 0.5;
+					}
+					h4 {
+						font-size: 14px;
+						height: 20px;
+						font-weight: 100;
+						line-height: 20px;
+						opacity: 0.8;
+
+						.price {
+							color: $price-color;
+						}
+					}
+				}
+			}
+			.right {
+				display: inline-block;
+				min-width: 50%;
+				text-align: right;
+				.buttons {
+					display: inline-block;
+					height: auto;
+
+					button {
+						display: block;
+						margin: $padding auto;
+					}
+
+					@media only screen and (max-width: 600px) {
+						display: none;
+					}
+				}
+			}
+			.metrics {
+				display: block;
+				width: 100%;
+
+				.metric {
+					display: inline-block;
+					margin-right: $padding*2;
+
+					&.red {
+						.top {
+							svg {
+								fill: $warningColor !important;
+							}
+						}
+					}
+
+					&:last-of-type {
+						cursor: pointer;
+						&:hover {
+							.top {
+								svg {
+									fill: $secondaryColor;
+								}
+								* {
+									color: $secondaryColor;
+								}
+							}
+							.sub {
+								* {
+									color: $secondaryColor;
+								}
+							}
+						}
+					}
+
+
+					.top {
+						height: 25px;
+						line-height: 25px;
+						text-align: center;
+						svg {
+							vertical-align: top !important;
+							fill: rgba(#333, 0.6);
+						}
+						p {
+							padding: 0 0 0 $padding/2;
+							font-weight: 100;
+							color: rgba(#333, 0.6);
+						}
+						* {
+							height: 25px;
+							line-height: 25px;
+							display: inline-block;
+						}
+					}
+					.sub {
+						text-align: center;					
+						* {
+							font-weight: 100;
+							font-size: 12px;
+							color: rgba(#333, 0.6);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	td {
+		font-size: 14px;
+		font-weight: 500;
+		text-align: left;
+		width: 100%;
+
+		nav {
+			padding: $padding $padding 0;
+
+			span {
+				display: inline-block;
+				border-radius: 5px;
+				margin-right: $padding*2;
+
+				&.updated {
+					color: rgba(#111, 0.5);
+				}
+			}
+		}
+	}
+}
+

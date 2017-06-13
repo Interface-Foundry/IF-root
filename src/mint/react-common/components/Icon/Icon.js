@@ -16,6 +16,8 @@ import {
   IoAndroidCart,
   IoPlus,
   IoAndroidPersonAdd,
+  IoAndroidPerson,
+  IoAndroidFavorite,
   IoGearA,
   IoChevronDown,
   IoArrowLeftC,
@@ -28,7 +30,8 @@ import {
   IoChevronRight,
   IoChevronLeft,
   IoLogIn,
-  IoIosBox
+  IoIosBox,
+  IoLoop
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -41,6 +44,9 @@ import {
   Sms,
   Whatsapp,
 } from '../../styles';
+import {
+  Share
+} from '../../kipsvg';
 
 export default class Icon extends Component {
   static propTypes = {
@@ -48,6 +54,10 @@ export default class Icon extends Component {
   }
   render() {
     switch (this.props.icon) {
+    case 'Like':
+      return <IoAndroidFavorite/>
+    case 'Loop':
+      return <IoLoop/>
     case 'PriceTag':
       return <IoPricetag/>;
     case 'Hamburger':
@@ -88,6 +98,8 @@ export default class Icon extends Component {
       return <IoIosBox/>;
     case 'Person':
       return <IoAndroidPersonAdd/>;
+    case 'Member':
+      return <IoAndroidPerson/>;
     case 'Plus':
       return <IoPlus/>;
     case 'Settings':
@@ -114,6 +126,8 @@ export default class Icon extends Component {
       return <IoChevronLeft />;
     case 'Login':
       return <IoLogIn/>;
+    case 'Share':
+      return <Share/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

@@ -1,0 +1,30 @@
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.tabs {
+	border-bottom: 1px solid $border-color-light;
+	width: 100%;
+	height: $nav-height;
+	background: white;
+	padding: 0 $padding;
+	h1 {
+		display: inline-block;
+		padding: 0 $padding*2;
+		cursor: pointer;
+		line-height: $nav-height;
+		height: $nav-height;
+		font-size: 14px;
+
+		span {
+		    display: block;
+			border-bottom: 3px solid white;
+		    height: $nav-height - 1.5px;
+		}
+
+		&.selected {
+			span {
+				border-bottom: 3px solid $secondaryColor;
+			}
+		}
+	}
+}

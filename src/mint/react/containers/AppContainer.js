@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { App } from '../components';
-import { fetchCart, fetchAllCarts, updateCart, checkoutCart } from '../actions/cart';
+import { fetchCart, updateCart, checkoutCart } from '../actions/cart';
 import { addItem, removeItem, clearItem } from '../actions/item';
 import { logout, login, validateCode } from '../actions/session';
 import ReactGA from 'react-ga';
@@ -49,7 +49,6 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(fetchCart(cart_id));
   },
-  fetchAllCarts: () => dispatch(fetchAllCarts()),
   updateCart: (cart) => dispatch(updateCart(cart)),
   clearItem: () => dispatch(clearItem()),
   removeItem: (cart_id, item_id) => {
@@ -60,7 +59,10 @@ const mapDispatchToProps = dispatch => ({
   login: (cart_id, email) => dispatch(login(cart_id, email)),
   validateCode: (email, code) => dispatch(validateCode(email, code)),
   logout: () => {
-    dispatch(logout());
+    dispatch(logout()).then(() => {
+      // Navigate away on callback
+      console.log('NB-Appcontainer: ', 'navigate away on callback')
+    })
     // This needs a way to navigate to the home page
     // window.location.href doesn't work tho
   }

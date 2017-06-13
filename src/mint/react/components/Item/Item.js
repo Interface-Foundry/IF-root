@@ -28,7 +28,7 @@ export default class Item extends Component {
     type: PropTypes.string,
     items: PropTypes.array,
     fetchCards: PropTypes.func,
-    previewAmazonItem: PropTypes.func,
+    search: PropTypes.func,
     index: PropTypes.number,
     amazon_id: PropTypes.string,
     nextSearch: PropTypes.func,
@@ -99,11 +99,11 @@ export default class Item extends Component {
   }
 
   componentWillMount() {
-    const { props: { item_id, amazon_id, previewAmazonItem, cart_id, previewItem, type, item, items, index, setSearchIndex, currentCart, fetchCards } } = this;
+    const { props: { item_id, amazon_id, search, cart_id, previewItem, type, item, items, index, setSearchIndex, currentCart, fetchCards } } = this;
 
     if (!item && !items || (type === 'cartVariant' || type === 'cartItem' || type === 'cartVariant' || type === 'cartView')) {
       if (type === 'search' && index) setSearchIndex(index);
-      else if (amazon_id && currentCart.store) previewAmazonItem(amazon_id, currentCart.store, currentCart.store_locale);
+      else if (amazon_id && currentCart.store) search(amazon_id, currentCart.store, currentCart.store_locale);
       else if (currentCart.store) previewItem(item_id);
       else if (type === 'card' && currentCart.store === 'ypo') fetchCards(cart_id);
     }
@@ -116,7 +116,7 @@ export default class Item extends Component {
         cart_id,
         item_id,
         previewItem,
-        previewAmazonItem,
+        search,
         saveOldId,
         amazon_id,
         history: { push },
@@ -143,7 +143,7 @@ export default class Item extends Component {
       previewItem(nextId);
     } else if (nextStore && amazon_id !== nextAmazonId) {
       saveOldId(item_id);
-      previewAmazonItem(nextAmazonId, nextStore, nextLocale);
+      search(nextAmazonId, nextStore, nextLocale);
     }
   }
   componentWillUnmount() {

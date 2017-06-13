@@ -1,0 +1,167 @@
+// react/components/App/Header.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+.navbar {
+  position: relative;
+  display: block;
+  height: $nav-height;
+  line-height: $nav-height;
+  font-family: 'Raleway';
+  text-align: left;
+  background: $secondaryColor;
+  color: white;
+  width: 100%;
+  @media (min-width: 900px) {
+    padding: 0;
+  }
+  .search {
+    @media only screen and (max-width: 600px) {
+      // display: none;
+      margin: 10px 0;
+    }
+  }
+  .header__left {
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    white-space: nowrap;
+    padding: 0 $padding*3;
+    width: 75%;
+    @media only screen and (max-width: 600px) {
+      padding: 0 0 0 $padding;
+    }
+    a {
+      display: inline-block;
+      @media only screen and (max-width: 600px) {
+        display: none;
+      }
+    }
+    .navbar__icon {
+      display: inline-block;
+      width: auto;
+      min-width: 50px;
+      text-align: center;
+      cursor: pointer;
+      svg {
+        height: 100%;
+        vertical-align: top !important;
+      }
+    }
+    .image {
+      display: inline-block;
+      margin: $padding $padding/2 $padding $padding*2;
+      height: $nav-height - $padding*2;
+      width: $nav-height - $padding*2;
+      border-radius: 100%;
+      background-size: cover !important;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+    .members {
+      position: absolute;
+      height: 25px;
+      line-height: 25px;
+      bottom: 0;
+      left: 50px;
+      font-size: 10px;
+    }
+    h3 {
+      display: inline-block;
+      white-space: nowrap;
+      height: 50px;
+      line-height: 50px;
+      font-size: 27px;
+      @media (min-width: 900px) {
+        width: auto;
+      }
+    }
+    .bounce {
+      @include animation(bounceDownSmall 1.5s);
+      animation-iteration-count: 2; // too much twitching
+    }
+  }
+  .header__right {
+    display: inline-block;
+    position: relative;
+    height: $nav-height;
+    text-align: right;
+    padding: 0 $padding*3;
+    width: 25%;
+    p {
+      display: inline-block;
+      padding: 0;
+      line-height: 50px;
+      font-weight: bold;
+      margin-right: $padding;
+      cursor: pointer;
+      span {
+        border-bottom: 3px solid $mainColor;
+      }
+      &.name {
+        @media only screen and (max-width: 600px) {
+          display: none;
+        }
+      }
+    }
+    a {
+      border-bottom: 3px solid $mainColor;
+    }
+    .navbar__icon {
+      display: inline-block;
+      height: $nav-height;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      svg {
+        vertical-align: top !important;
+        height: 100%;
+      }
+    }
+  }
+  .navbar__modal {
+    display: flex;
+    height: 100%;
+    &.settings {
+      background: white;
+      color: $header-color;
+      padding: 0;
+    }
+    .navbar__modal_head {
+      flex-grow: 1;
+      text-align: center;
+      &.settings {
+        padding: 0 $padding*2 0 0;
+        svg {
+          font-size: 20px;
+          vertical-align: top !important;
+          line-height: $nav-height;
+          height: $nav-height;
+          margin-right: $padding/2;
+        }
+      }
+      span {
+        border-bottom: 3px solid $secondaryColor;
+        max-width: 150px;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+  .navbar__icon__close {
+    position: absolute;
+    z-index: 10;
+    text-align: center;
+    cursor: pointer;
+    height: $nav-height;
+    width: $nav-height;
+    svg {
+      height: 100%;
+    }
+  }
+  .no-pointer {
+    cursor: default;
+  }
+}

@@ -1,0 +1,68 @@
+// react/components/CartStore/CartStore.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.stores {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	max-width: 900px;
+	margin: 0 auto;
+	overflow: hidden;
+	padding: $padding*5 0;
+
+	li {
+		position: relative;
+		display: inline-block;
+		width: 50%;
+		height: 50%;
+		padding: $padding;
+		.store {
+			display: block;
+			width: 50%;
+			margin: 0 auto;
+			border-radius: 5px;
+			background: white;
+			overflow: hidden;
+			.image {
+				height: 100px;
+			}
+
+			.store__details {
+				padding: $padding;
+
+				h4 {
+					font-size: 18px;
+				}
+
+				p {
+					font-size: 14px;
+				}
+			}
+
+			.store__select {
+				position: relative;
+				height: $nav-height/2;
+				line-height: $nav-height/2;
+				background: $border-color-light;
+				text-align: center;
+				padding: 0;
+			}
+		}
+
+		&:first-of-type {
+			.store {
+				.store__select {
+			        background: $thirdColor;
+			        color: white;
+			        &:before {
+			          content: '✔';
+			          font-size: 15px;
+			          position: absolute;
+			          left: 30px;
+			        }
+				}
+			}
+		}
+	}
+}

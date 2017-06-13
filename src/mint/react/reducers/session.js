@@ -1,5 +1,3 @@
-// react/reducers/session.js
-
 import {
   RECEIVE_SESSION,
   RECEIVE_UPDATE_SESSION,
@@ -19,10 +17,10 @@ export default function session(state = initialState, action) {
   switch (action.type) {
   case LOGOUT:
     return initialState;
-  case RECEIVE_SESSION:
+  case 'SESSION_SUCCESS':
     return {
       ...state,
-      ...action.newSession
+      ...action.response
     };
   case RECEIVE_UPDATE_SESSION:
     return {

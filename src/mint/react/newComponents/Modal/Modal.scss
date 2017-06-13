@@ -1,0 +1,122 @@
+// react/components/Modal/Modal.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+.modal {
+  position: absolute;
+  background: white;
+  height: 100%;
+  z-index: 100;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 900px;
+  overflow: hidden;
+  @media (min-width: 900px) {
+    border-radius: 0px 0px 5px 5px;
+    box-shadow: $card-box-shadow;
+    height: 99%;
+  }
+  .modal__form {
+    padding: $padding $padding*2 $padding*2 $padding*2;
+    &>div {
+      position: relative;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin-bottom: 0;
+      font-size: 18px;
+    }
+    span {
+      display: none;
+    }
+    .form__modal__input {
+      display: flex;
+      flex-direction: row;
+      height: $nav-height;
+      width: 100%;
+      background: white;
+      border-radius: 3px;
+      border: 2px solid $color-blue;
+      text-align: left;
+      &.email {
+        border: 2px dashed $color-blue;
+      }
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      button, input {
+        border-radius: 4px;
+        background: transparent;
+        border: 0;
+      }
+      input {
+        background: white;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        padding: $padding;
+      }
+      .form__modal__input__submit {
+        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        cursor: pointer;
+        color: white;
+        margin: 5px;
+        height: 75%;
+        .form__modal__input__submit__description {
+          font-weight: 600;
+          font-size: 20px;
+          background: $color-blue;
+          width: 100%;
+          height: 100%;
+          align-items: center;
+          padding: 0 10px 0 10px;
+          display: flex;
+          justify-content: center;
+          border-radius: 3px;
+        }
+        &:disabled {
+          opacity: 0;
+        }
+      }
+    }
+  }
+  .modal__drag {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    cursor: move;
+    height: $nav-height/1.5;
+  }
+}
+
+.example-enter {
+  opacity: 0.01;
+  &.example-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+  }
+}
+
+.example-leave {
+  opacity: 1;
+  &.example-leave-active {
+    opacity: 0.01;
+    transition: opacity 300ms ease-in;
+  }
+}
+
+.example-appear {
+  opacity: 0.01;
+}
+
+.example-appear.example-appear-active {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+

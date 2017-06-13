@@ -23,7 +23,8 @@ export {
   getNameFromEmail,
   addLinkToDeepLink,
   calculateItemTotal,
-  displayCost
+  displayCost,
+  removeDangerousCharactersFromString
 }
 from './formating';
 

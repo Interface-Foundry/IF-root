@@ -9,9 +9,9 @@ import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
-import Reducers from './reducers';
-import { session } from './actions';
-import { AppContainer } from './containers';
+import Reducers from './newReducers';
+import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics } from './newActions';
+import { AppContainer } from './newContainers';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -47,14 +47,23 @@ const store = createStore(
   applyMiddleware(...middleware)
 );
 
-// update login status
-store.dispatch(session.update());
+// Basically our initialization sequence
+// Check session
+// Fetch everything required for the app to not break
+// Fetch Metrics
+const cart_id = location.pathname.split('/')[2];
+store.dispatch(checkSession()).then(() => {
+  store.dispatch(fetchCarts())
+  store.dispatch(fetchStores())
+  store.dispatch(fetchCart(cart_id))
+  store.dispatch(fetchMetrics(cart_id))
+});
 
 ReactDOM.render(
   <Provider store={store}>
-   <ConnectedRouter history={history}>
-       <Route path="*" component={AppContainer} />
-   </ConnectedRouter>
- </Provider>,
+    <ConnectedRouter history={history}>
+      <Route path="*" component={AppContainer} />
+    </ConnectedRouter>
+  </Provider>,
   document.getElementById('root')
 );

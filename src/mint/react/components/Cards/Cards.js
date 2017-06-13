@@ -23,7 +23,7 @@ export default class Cards extends Component {
     selectDeal: PropTypes.func,
     cardType: PropTypes.string,
     selectCard: PropTypes.func,
-    previewAmazonItem: PropTypes.func,
+    search: PropTypes.func,
     position: PropTypes.number,
     clearItem: PropTypes.func,
     storeName: PropTypes.string,
@@ -78,7 +78,7 @@ export default class Cards extends Component {
   }
 
   renderCards() {
-    const { props: { currentCart, cards = [], cart_id, selectCard, cardType, previewAmazonItem } } = this;
+    const { props: { currentCart, cards = [], cart_id, selectCard, cardType, search } } = this;
 
     const activeCards = cards.map((card, i) => {
       return <li key={card._id || card.id} onClick={(e) => selectCard(i + 1, card)}>

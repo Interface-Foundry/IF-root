@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-export default class AddAmazonItem extends Component {
+export default class NotificationBubble extends Component {
 
   static propTypes = {
     top: PropTypes.number,

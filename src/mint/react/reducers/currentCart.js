@@ -51,13 +51,13 @@ export default function cart(state = initialState, action) {
       ...action.updatedCart,
       thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/head%40x2.png',
     };
-  case RECEIVE_CART:
+  case 'CART_SUCCESS':
     return {
       ...state,
-      ...action.currentCart,
-      thumbnail_url: action.currentCart.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
-      locked: action.currentCart.locked || false,
-      cart_id: action.currentCart.id
+      ...action.response,
+      thumbnail_url: action.response.thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png',
+      locked: action.response.locked || false,
+      cart_id: action.response.id
     };
   case RECEIVE_ITEMS:
     return {

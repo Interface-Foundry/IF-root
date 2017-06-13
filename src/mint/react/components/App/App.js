@@ -26,7 +26,6 @@ export default class App extends Component {
     user_account: PropTypes.object,
     match: PropTypes.object.isRequired,
     fetchCart: PropTypes.func.isRequired,
-    fetchAllCarts: PropTypes.func.isRequired,
     updateCart: PropTypes.func.isRequired,
     location: PropTypes.object.isRequired,
     session_id: PropTypes.string,
@@ -103,7 +102,6 @@ export default class App extends Component {
       _logPageView,
       props: {
         fetchCart,
-        fetchAllCarts,
         cart_id,
         session_id,
         user_account: { id },
@@ -129,6 +127,7 @@ export default class App extends Component {
       && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
+
       fetchAllCarts();
       if (window.innerWidth > 900) this.setState({ sidenav: true });
     }
@@ -158,7 +157,6 @@ export default class App extends Component {
         clearItem,
         items,
         archivedCarts,
-        fetchAllCarts,
         history: { replace }
       },
       state: { sidenav, isMobile, popup }

@@ -10,7 +10,7 @@ export default class CategoryCard extends Component {
     machineName: PropTypes.string.isRequired,
     itemCount: PropTypes.number.isRequired,
     image: PropTypes.string.isRequired,
-    previewAmazonItem: PropTypes.func
+    search: PropTypes.func
   }
 
   render() {

@@ -41,6 +41,24 @@
         font-size: 30px;
         color: darken($bgColor, 15);
         line-height: 40px;
+        b {
+          font-weight: 800;
+          color: $primaryColor;
+          &:nth-child(3n) {
+            color: $thirdColor;
+          }
+          &:nth-child(2n) {
+            color: $warningColor;
+          }
+          &:nth-child(5n) {
+            color: #1EBFFF;
+          }
+        }
+        a {
+          a {
+            color: $primaryColor;
+          }
+        }
         &.hightlight {
           background: $primaryColor;
         }

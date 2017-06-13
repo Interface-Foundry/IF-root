@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { Item } from '../components';
 import { fetchCards, selectCard } from '../actions/cards';
-import { previewItem, clearItem, previewAmazonItem, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex, saveOldId } from '../actions/item';
+import { previewItem, clearItem, search, removeItem, incrementItem, decrementItem, nextSearch, prevSearch, setSearchIndex, saveOldId } from '../actions/item';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -29,12 +29,12 @@ const mapDispatchToProps = dispatch => ({
     });
     return dispatch(previewItem(itemId));
   },
-  previewAmazonItem: (amazonId, store, locale) => {
+  search: (amazonId, store, locale) => {
     ReactGA.event({
       category: 'Item',
       action: 'Item Added',
     });
-    return dispatch(previewAmazonItem(amazonId, store, locale));
+    return dispatch(search(amazonId, store, locale));
   },
   clearItem: () => dispatch(clearItem()),
   removeItem: (cart_id, item_id) => {
