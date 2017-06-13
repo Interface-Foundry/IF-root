@@ -8,7 +8,8 @@ import moment from 'moment';
 export default class Invoice extends Component {
 
   render() {
-
+  	const { cart } = this.props;
+  	
     return (
       <table className='invoice'>
         <h1>inside invoice</h1>
