@@ -35,20 +35,20 @@ class PaymentSource {
     return new paymentSourceHandlers[source](sourceData)
   }
 
-  //this is #fakenews -- for testing
-  async pay (invoice, amount) {
-    logging.info('pay called')
-    //create payments
-    // logging.info('this', this)
-    var payment = await db.Payments.create({
-      invoice: invoice.id,
-      user: this.user,
-      payment_source: this.id,
-      amount: amount
-    })
-    logging.info('got the payment')
-    return payment;
-  }
+  // //this is #fakenews -- for testing
+  // async pay (invoice, amount) {
+  //   logging.info('pay called')
+  //   //create payments
+  //   // logging.info('this', this)
+  //   var payment = await db.Payments.create({
+  //     invoice: invoice.id,
+  //     user: this.user,
+  //     payment_source: this.id,
+  //     amount: amount
+  //   })
+  //   logging.info('got the payment')
+  //   return payment;
+  // }
 }
 
 
@@ -78,24 +78,24 @@ class StripePaymentSource extends PaymentSource {
     return paymentSource
   }
 
-  // async pay (invoice, amount) {
-  //   const stripeResponse = await stripe.charges.create({
-  //     amount: amount,
-  //     currency: _.get(invoice, 'currency', 'usd'),
-  //     source: this.data.id
-  //   })
-  //
-  //
-  //   const payment = await db.Payments.create({
-  //     invoice: invoice.id,
-  //     user: this.user,
-  //     payment_source: this.id,
-  //     amount: amount,
-  //     data: stripeResponse
-  //   })
-  //
-  //   return payment
-  // }
+  async pay (invoice, amount) {
+    const stripeResponse = await stripe.charges.create({
+      amount: amount,
+      currency: _.get(invoice, 'currency', 'usd'),
+      source: this.data.id
+    })
+
+
+    const payment = await db.Payments.create({
+      invoice: invoice.id,
+      user: this.user,
+      payment_source: this.id,
+      amount: amount,
+      data: stripeResponse
+    })
+
+    return payment
+  }
 }
 
 

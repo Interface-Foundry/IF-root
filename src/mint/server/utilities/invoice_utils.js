@@ -288,7 +288,7 @@ async function sendBackToStoreOnSlackbot (pay, charge) {
 async function sendInternalCheckoutEmail (invoice, baseUrl) {
   logging.info('all payments complete')
   var paidEmail = await db.Emails.create({
-    recipients: 'hannah.katznelson@gmail.com',
+    recipients: 'hello@kipthis.com',
     sender: 'hello@kipthis.com',
     subject: 'Payment Collected!',
     template_name: 'kip_order_process',
