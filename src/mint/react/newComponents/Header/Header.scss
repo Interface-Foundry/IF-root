@@ -24,6 +24,8 @@
     position: relative;
     height: 100%;
     white-space: nowrap;
+    padding: 0 $padding*3;
+    width: 75%;
     a {
       display: inline-block;
     }
@@ -73,13 +75,12 @@
     }
   }
   .header__right {
-    position: absolute;
-    top: 0;
-    right: 0;
+    display: inline-block;
+    position: relative;
     height: $nav-height;
-    justify-content: center;
-    align-items: center;
-    padding: 0 $padding;
+    text-align: right;
+    padding: 0 $padding*3;
+    width: 25%;
     p {
       display: inline-block;
       padding: 0;

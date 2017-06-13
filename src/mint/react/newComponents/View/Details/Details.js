@@ -27,7 +27,7 @@ export default class Details extends Component {
                   <div className='text'> 
                     <h1>{name}</h1>
                     <h4>{store} {store_locale}</h4>
-                    <p>Created {timeFromDate(updatedAt)} by {leader.name}</p>
+                    <p>Created {timeFromDate(createdAt)} by {leader.name}</p>
                   </div> 
                 </div>
                 <div className='right'>

@@ -98,6 +98,15 @@ body {
     height: calc(100% - #{$nav-height * 3});
   }
 
+  @media only screen and (min-width: 600px) {
+    display: inline-block;
+    overflow-y: auto;
+    height: calc(100% - #{$nav-height * 2});
+    &.squeeze {
+      width: calc(100% - 250px);
+    }
+  }
+
 }
 
 .image {
