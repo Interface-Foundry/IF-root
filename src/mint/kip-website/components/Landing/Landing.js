@@ -13,7 +13,8 @@ export default class Landing extends Component {
     animationState: PropTypes.number,
     fixed: PropTypes.bool,
     registerHeight: PropTypes.func,
-    match: PropTypes.object
+    match: PropTypes.object,
+    setSource: PropTypes.func
   }
 
   state = {
@@ -21,11 +22,12 @@ export default class Landing extends Component {
   }
 
   componentDidMount() {
-    const { registerHeight, match: { params: { src } } } = this.props;
+    const { registerHeight, setSource, match: { params: { src } } } = this.props;
     registerHeight(ReactDOM.findDOMNode(this)
       .offsetTop, ReactDOM.findDOMNode(this)
       .clientHeight);
     sessionStorage.src = src ? src : sessionStorage.src ? sessionStorage.src : '';
+    setSource(sessionStorage.src);
     this.setState({
       offsetTop: ReactDOM.findDOMNode(this.landing)
         .offsetTop - 50

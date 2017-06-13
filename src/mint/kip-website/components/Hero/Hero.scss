@@ -44,14 +44,14 @@
         b {
           font-weight: 800;
           color: $primaryColor;
-          &:nth-child(3n) {
-            color: $thirdColor;
-          }
           &:nth-child(2n) {
             color: $warningColor;
           }
+          &:nth-child(3n) {
+            color: $primaryColor;
+          }
           &:nth-child(5n) {
-            color: #1EBFFF;
+            color: $thirdColor;
           }
         }
         a {

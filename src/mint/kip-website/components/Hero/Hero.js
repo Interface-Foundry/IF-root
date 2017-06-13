@@ -22,13 +22,12 @@ export default class Hero extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    return nextProps.animate !== this.props.animate
-      || nextProps.heroTemplate.headline !== this.props.heroTemplate.headline
-      || nextProps.offsetTop !== this.props.offsetTop;
+    return nextProps.animate !== this.props.animate || nextProps.heroTemplate.headline !== this.props.heroTemplate.headline || nextProps.offsetTop !== this.props.offsetTop;
   }
 
   render() {
     const { animate, src, scrollToPosition, offsetTop, heroTemplate } = this.props;
+    console.log(src);
     return (
       <div className={`hero image ${animate ? 'start' : ''}`} style={{height: window.innerHeight}}>
           <div className='hero__main'>

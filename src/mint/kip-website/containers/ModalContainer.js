@@ -18,7 +18,7 @@ const mapStateToProps = (state, props) => ({
   loggedIn: state.auth.loggedIn,
   loginText: state.app.loginText,
   loginSubtext: state.app.loginSubtext,
-  src: sessionStorage.src
+  src: sessionStorage.src || state.siteState.src
 });
 
 const mapDispatchToProps = dispatch => ({
