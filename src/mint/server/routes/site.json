@@ -1,5 +1,5 @@
 {
-  "A": {
+  "a": {
     "ribbon": {
       "left": [{
         "title": "How Kip Works",
@@ -211,7 +211,7 @@
       }
     }
   },
-  "B": {
+  "b": {
     "ribbon": {
       "left": [{
         "title": "How Kip Works",
@@ -423,7 +423,7 @@
       }
     }
   },
-  "C": {
+  "c": {
     "ribbon": {
       "left": [{
         "title": "How Kip Works",
@@ -635,7 +635,7 @@
       }
     }
   },
-  "PRIME": {
+  "prime": {
     "ribbon": {
       "left": [{
         "title": "How Kip Works",

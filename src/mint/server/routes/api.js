@@ -92,8 +92,12 @@ router.get('/blog/posts', (req, res) => co(function * () {
 const cachedJson = require('./site.json');
 router.post('/home/json', (req, res) => co(function* () {
   // need to check if we've already given them a version, and give the same version
-  let siteVersion = req.UserSession.siteVersion ? req.UserSession.siteVersion : _.sample(['A', 'B', 'C']);
-  siteVersion = req.body.loc === '/s/slack' ? 'C' : siteVersion;
+  const siteVersion = 
+      (req.body.loc === '/s/slack' 
+            ? 'c'
+            : req.UserSession.siteVersion 
+              ? req.UserSession.siteVersion 
+              : _.sample(['a', 'b', 'c'])).toLowerCase();
   req.UserSession.siteVersion = siteVersion;
   yield req.UserSession.save();
   // TODO: if anyone has a more efficient way to do this...
