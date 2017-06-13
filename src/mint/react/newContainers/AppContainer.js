@@ -6,7 +6,8 @@ import { App } from '../newComponents';
 import { 
   toggleSidenav,
   togglePopup,
-  fetchCart
+  fetchCart,
+  fetchMetrics
 } from '../newActions';
 
 import ReactGA from 'react-ga';
@@ -22,7 +23,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   togglePopup: () => dispatch(togglePopup()),
   toggleSidenav: () => dispatch(toggleSidenav()),
-  fetchCart: (id) => dispatch(fetchCart(id))
+  fetchCart: (id) => dispatch(fetchCart(id)),
+  fetchMetrics: (id) => dispatch(fetchMetrics(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
