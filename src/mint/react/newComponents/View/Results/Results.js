@@ -74,9 +74,9 @@ export default class Results extends Component {
                         cart={cart} 
                         arrow={arrow}
                         cartAsins={cartAsins}
-                        fetchItem={fetchItem}
                         addItem={addItem} 
-                        selectedItemId={selectedItemId}/>
+                        selectedItemId={selectedItemId}
+                        selectItem={selectItem}/>
                       ) : ( 
                         <Default 
                           key={item.id}

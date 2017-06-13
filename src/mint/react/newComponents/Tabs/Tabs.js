@@ -4,23 +4,31 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 
-const tabs = [
-  'Cart',
-  'Search',
-  'Invoice'
-]
-
 export default class Tabs extends Component {
 
   render() {
-    const { tab, selectTab } = this.props;
+    const { tab, selectTab, cart } = this.props,
+          tabs = [
+            { 
+              tab: 'cart',
+              display: `Cart (${cart.items.length})`
+            },
+            {
+              tab: 'search',
+              display: 'Search'
+            },
+            {
+              tab: 'invoice',
+              display: 'Invoice'
+            }
+          ];
 
     return (
       <div className='tabs'>
         {
           tabs.map((t) => (
-            <h1 key={t} onClick={() => selectTab(t.toLowerCase())} className={`${tab.toUpperCase() === t.toUpperCase() ? 'selected' : ''}`}>
-              <span>{t}</span>
+            <h1 key={t.tab} onClick={() => selectTab(t.tab)} className={`${tab === t.tab ? 'selected' : ''}`}>
+              <span>{t.display}</span>
             </h1>
           ))
         }

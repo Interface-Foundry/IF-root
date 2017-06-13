@@ -82,11 +82,41 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 		&.selected {
 			padding: $padding $padding/2 $padding/3;
+
+			@media only screen and (max-width: 600px) {
+				position: fixed;
+				height: 100%;
+				top: 0;
+				left: 0;
+				padding: 0;
+				margin: 0 !important;
+				z-index: 50;
+				overflow-y: auto;
+			}
 			.card {
 				opacity: 1 !important;
 				padding: $padding $padding*2;
 				border-top: 3px solid $secondaryColor;
 				box-shadow: $card-box-shadow !important;
+				@media only screen and (max-width: 600px) {
+					margin: 0;
+					overflow-y: auto;
+				}
+
+				.close {
+					position: absolute;
+					top: 10px;
+					left: 10px;
+					height: $nav-height/3;
+					width: $nav-height/3;
+					padding: 0;
+					border: 0;
+					background: white;
+
+					svg {
+						fill: $warningColor;
+					}
+				}
 
 				.text {
 					width: calc(100% - #{$nav-height*5});
@@ -105,6 +135,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 						font-size: 14px;
 						line-height: 18px;	
 					}
+
+					@media only screen and (max-width: 600px) {
+						width: 100%;
+						display: block;
+						padding: $padding;
+					}
 				}
 
 				.iframe {
@@ -116,7 +152,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					iframe {
 						width: 100%;
 						border: 0;
-						overflow: hidden;						
+						overflow: hidden;		
+						@media only screen and (max-width: 600px) {
+							height: 230px;
+						}			
 					}
 				}
 
@@ -124,12 +163,25 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					width: $nav-height*5;
 					height: $nav-height*5;
 					display: inline-block;
+
+					@media only screen and (max-width: 600px) {
+						width: 100%;
+						display: block;
+					}
 				}
 
 				.action {
 					position: absolute;
 					bottom: $padding*2;
 					right: $padding*2;
+
+					@media only screen and (max-width: 600px) {
+						position: relative;
+						display: block;
+						width: 100%;
+						bottom: auto;
+						right: auto;
+					}
 				}
 
 				.padding {

@@ -73,12 +73,38 @@
       line-height: 50px;
       font-size: 27px;
       @media (min-width: 900px) {
-        width: auto;
+        width: calc(100% - 50px);
       }
     }
     .bounce {
       @include animation(bounceDownSmall 1.5s);
       animation-iteration-count: 2; // too much twitching
+    }
+    .navbar__modal__head {
+      &.settings {
+        padding: 0 $padding*2 0 0;
+        .header__left {
+          a {
+            @media only screen and (max-width: 600px) {
+              display: inline-block;
+            }
+          }
+        }
+        svg {
+          font-size: 20px;
+          vertical-align: top !important;
+          line-height: $nav-height;
+          height: $nav-height;
+          margin-right: $padding/2;
+        }
+      }
+      span {
+        font-size: 14px;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
   .header__right {
@@ -119,39 +145,24 @@
       }
     }
   }
-  .navbar__modal {
-    display: flex;
-    height: 100%;
-    &.settings {
-      background: white;
-      color: $header-color;
-      padding: 0;
-    }
-    .navbar__modal_head {
-      flex-grow: 1;
-      text-align: center;
-      &.settings {
-        padding: 0 $padding*2 0 0;
-        svg {
-          font-size: 20px;
-          vertical-align: top !important;
-          line-height: $nav-height;
-          height: $nav-height;
-          margin-right: $padding/2;
-        }
-      }
-      span {
-        border-bottom: 3px solid $secondaryColor;
-        max-width: 150px;
+  .settings {
+    display: block;
+    background: white;
+
+    .header__left {
+      color: #333;
+      a {
         display: inline-block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+      }
+    }
+    .header__right {
+      svg {
+        fill: #333;
       }
     }
   }
   .navbar__icon__close {
-    position: absolute;
+    position: relative;
     z-index: 10;
     text-align: center;
     cursor: pointer;

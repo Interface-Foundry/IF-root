@@ -22,12 +22,6 @@
 			display: inline-block;
 			width: $nav-height - $padding;
 			height: $nav-height - $padding;
-
-			path {
-				fill: black;
-			    stroke: black;
-			    stroke-width: $padding;
-			}
 		}
 
 		div {
@@ -48,16 +42,20 @@
 			background: white;
 			color: $color-blue;
 			svg {
-				path {
-					fill: $color-blue;
-				    stroke: $color-blue;
-				    stroke-width: $padding;
-				}
+				fill: $color-blue;
+				padding: $padding/2;
+				vertical-align: top !important;
 			}
 		}
 
 		&.yellow {
 			background: $mainColor;
+
+			path {
+				fill: black;
+			    stroke: black;
+			    stroke-width: $padding;
+			}
 		}
 	}
 }

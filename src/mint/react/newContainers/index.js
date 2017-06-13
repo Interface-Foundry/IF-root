@@ -13,4 +13,5 @@ export ButtonsContainer from './ButtonsContainer';
 export LoginScreenContainer from './LoginScreenContainer';
 export CartContainer from './CartContainer';
 export TabsContainer from './TabsContainer';
+export InvoiceContainer from './InvoiceContainer';
 

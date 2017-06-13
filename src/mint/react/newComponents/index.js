@@ -11,5 +11,5 @@ export Modal from './Modal';
 export { Feedback, Settings, Share, EditCart } from './Modal';
 
 export View from './View';
-export { Results, Cart } from './View';
+export { Results, Cart, Invoice } from './View';
 

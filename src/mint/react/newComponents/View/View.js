@@ -5,8 +5,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import Details from './Details'
-import Invoice from './Invoice'
-import { ResultsContainer, ButtonsContainer, CartContainer } from '../../newContainers';
+import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer } from '../../newContainers';
 
 export default class App extends Component {
   render() {
@@ -14,7 +13,7 @@ export default class App extends Component {
           containers = {
             'search': ResultsContainer,
             'cart': CartContainer,
-            'invoice': Invoice
+            'invoice': InvoiceContainer
           },
           Component = containers[tab];
 
