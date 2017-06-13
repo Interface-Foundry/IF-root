@@ -46,11 +46,11 @@ export default class App extends Component {
   }
 
   render() {
-    const { sidenav, popup, togglePopup, toggleSidenav } = this.props;
+    const { sidenav, popup, togglePopup, toggleSidenav, match } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
-        <Route path={'/cart/:cart_id'} component={HeaderContainer} />
+        <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
@@ -59,7 +59,7 @@ export default class App extends Component {
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
           <Route path={'/404'} exact component={ErrorPage} />
         </div>
-        { sidenav ? <SidenavContainer /> : null }  
+        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
       </section>
     );
   }

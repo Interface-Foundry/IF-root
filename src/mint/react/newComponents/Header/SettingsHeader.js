@@ -24,6 +24,7 @@ export default class SettingsHeader extends Component {
       history: { push }
     } = this.props;
 
+    console.log(user)
     return (
       <span className='settings'>
         <div className='header__left'>

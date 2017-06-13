@@ -20,7 +20,6 @@ export default class Default extends Component {
           }}/>
           <div className='text'> 
             <h1>{item.name}</h1>
-            <p> Store: {item.store} | {cart.store_locale} </p>
             <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
           </div> 
           <div className='action'>

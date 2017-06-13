@@ -37,6 +37,10 @@ export default class Header extends Component {
             <SettingsHeader text='Share Cart' icon="Share" {...this.props}/>
           }
         />
+        <Route path={'/newcart'} exact component={() => 
+            <SettingsHeader text='Select Store' icon="Settings" {...this.props}/>
+          }
+        />
       </nav>
     );
   }

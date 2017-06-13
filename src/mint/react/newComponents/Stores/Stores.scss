@@ -1,68 +1,87 @@
 // react/components/CartStore/CartStore.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
-
-.stores {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	max-width: 900px;
-	margin: 0 auto;
-	overflow: hidden;
-	padding: $padding*5 0;
-
-	li {
-		position: relative;
-		display: inline-block;
-		width: 50%;
-		height: 50%;
-		padding: $padding;
-		.store {
-			display: block;
-			width: 50%;
-			margin: 0 auto;
-			border-radius: 5px;
-			background: white;
-			overflow: hidden;
-			.image {
-				height: 100px;
-			}
-
-			.store__details {
-				padding: $padding;
-
-				h4 {
-					font-size: 18px;
-				}
-
-				p {
-					font-size: 14px;
-				}
-			}
-
-			.store__select {
-				position: relative;
-				height: $nav-height/2;
-				line-height: $nav-height/2;
-				background: $border-color-light;
-				text-align: center;
-				padding: 0;
-			}
-		}
-
-		&:first-of-type {
-			.store {
-				.store__select {
-			        background: $thirdColor;
-			        color: white;
-			        &:before {
-			          content: '✔';
-			          font-size: 15px;
-			          position: absolute;
-			          left: 30px;
-			        }
-				}
-			}
-		}
-	}
+.cart_store {
+  h3 {
+    margin-top: -15px;
+  }
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: $card-box-shadow;
+  margin: $padding / 2;
+  padding: $padding * 2 $padding;
+  .cart_store__list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    margin: 0 auto;
+    a {
+      cursor: pointer;
+      display: inline-block;
+      font-size: 18px;
+      height: 150px;
+      margin: $padding / 2;
+      min-width: 150px;
+      padding: 1px;
+      width: 100px;
+      .cart__choice {
+        background: white;
+        border: 1px $border-color-light solid;
+        border-radius: $padding;
+        position: relative;
+        text-align: center;
+        .choice__details {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: $padding / 2.5 $padding / 2.5 0 $padding / 2.5;
+          .choice__image {
+            align-self: center;
+            height: $nav-height + 25px;
+            width: $nav-height + 75px;
+          }
+          .choice__domain {
+            color: #58595b;
+            font-size: 0.7em;
+            hyphens: auto;
+            margin-bottom: $padding;
+            overflow: hidden;
+            padding: 0;
+            position: relative;
+            white-space: normal;
+          }
+        }
+        .choice__select {
+          position: relative;
+          width: 100%;
+          height: $nav-height/2;
+          line-height: $nav-height/2;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          background: $border-color-light;
+          border-radius: 0 0 $padding - 1 $padding - 1;
+        }
+      }
+      &:hover {
+        .cart__choice {
+          border-color: $thirdColor;
+        }
+        .choice__select {
+          background: $thirdColor;
+          color: white;
+          &:before {
+            content: '✔';
+            font-size: 15px;
+            position: absolute;
+            left: 35px;
+            top: -1px;
+          }
+        }
+      }
+    }
+  }
 }
+

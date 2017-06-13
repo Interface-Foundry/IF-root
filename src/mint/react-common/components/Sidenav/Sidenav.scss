@@ -225,6 +225,12 @@
     }
   }
   .sidenav__list {
+    &.large {
+      @media (min-width: 900px) {
+        background: white;
+        height: calc(100% - #{$nav-height});
+      }
+    }
     @media (min-width: 900px) {
       background: white;
       height: calc(100% - #{$nav-height*2});

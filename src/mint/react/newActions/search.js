@@ -32,3 +32,13 @@ export const submitQuery = (query, store, locale) => get(
     receivedAt: Date.now()
   })
 )
+
+export const fetchCategories = (cart_id) => get(
+  `/api/categories/${cart_id}`, 
+  'SEARCH',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+)
