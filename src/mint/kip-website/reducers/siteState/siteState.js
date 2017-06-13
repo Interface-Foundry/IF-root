@@ -75,6 +75,7 @@ export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
   case 'GOT_SITE':
     return {
+      ...state,
       ...action.response
     };
   case 'SET_SOURCE':
