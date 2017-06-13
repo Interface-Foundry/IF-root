@@ -14,7 +14,8 @@ export {
 export { 
 	get,
 	post,
-	del
+	del,
+	put
 } from './async';
 
 export { 
@@ -30,7 +31,8 @@ export {
 	clearCart, 
 	deleteCart,
 	fetchMetrics,
-	likeCart
+	likeCart,
+	unlikeCart
 } from './cart';
 
 export {

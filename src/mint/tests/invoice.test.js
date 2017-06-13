@@ -1,17 +1,30 @@
-const rp = require('request-promise')
-const request = rp.defaults({json: true})
+const bodyParser = require('body-parser')
+const express = require('express')
+const request = require('request-promise').defaults({json: true})
+const router = express()
 
-const assert = require('assert')
 require('should')
+const assert = require('assert')
 
 const PORT = process.env.PORT || 3000
 const localhost = 'http://127.0.0.1:' + PORT
 
-const server = require('../server/payments/invoice-api.js')
+
 const dbReady = require('../db')
 var db
 
 
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({
+  extended: true
+}))
+
+require('../server/routes/invoice-api.js')(router)
+
+// test route
+router.get('/test', async (req, res) => {
+  res.sendStatus(200)
+})
 
 
 const mockInvoice = {
@@ -55,7 +68,7 @@ const mockUser = {
 describe('invoice tests', () => {
   before(async () => {
     db = await dbReady
-    await server.listen(PORT)
+    await router.listen(PORT)
   })
 
   it('make sure server is running', async () => {

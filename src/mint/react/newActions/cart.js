@@ -1,4 +1,4 @@
-import { get, post, del} from './async'
+import { get, post, del, put} from './async'
 
 export const fetchCart = cart_id => get(
 	`/api/cart/${cart_id}`, 
@@ -60,6 +60,19 @@ export const deleteCart = cart_id => del(
 )
 
 export const likeCart = cart_id => post(
+	`/api/likes/${cart_id}`, 
+	'LIKE_CART',
+	{}, 
+	(type, json) => ({
+  		type: `${type}_SUCCESS`,
+  		response: {
+  			likes: json
+  		},
+  		receivedAt: Date.now()
+	})
+)
+
+export const unlikeCart = cart_id => put(
 	`/api/likes/${cart_id}`, 
 	'LIKE_CART',
 	{}, 

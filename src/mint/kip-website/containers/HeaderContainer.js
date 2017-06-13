@@ -13,7 +13,7 @@ const mapStateToProps = (state, props) => ({
   fixed: state.app.fixed,
   scrollTo: state.app.scrollTo,
   headerTemplate: state.siteState.header,
-  src: sessionStorage.src
+  src: sessionStorage.src || state.siteState.src
 })
 
 const mapDispatchToProps = dispatch => ({

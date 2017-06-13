@@ -67,7 +67,8 @@ const initialState = {
       actionText: '',
       reasons: []
     }
-  }
+  },
+  src: ''
 };
 
 export default function reducer(state = initialState, action = {}) {
@@ -75,6 +76,11 @@ export default function reducer(state = initialState, action = {}) {
   case 'GOT_SITE':
     return {
       ...action.response
+    };
+  case 'SET_SOURCE':
+    return {
+      ...state,
+      src: action.src
     };
   default:
     return state;

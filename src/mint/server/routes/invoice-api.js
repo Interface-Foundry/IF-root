@@ -8,23 +8,6 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-// for mocha tests - check if server up
-// if (process.env.NODE_ENV !== 'production') {
-//   const bodyParser = require('body-parser')
-//   const express = require('express')
-//   const router = express()
-
-//   router.use(bodyParser.json());
-//   router.use(bodyParser.urlencoded({
-//     extended: true
-//   }))
-
-//   // test route
-//   router.get('/test', async (req, res) => {
-//     res.sendStatus(200)
-//   })
-// }
-
 module.exports = function (router) {
 
   // ------------------------------------

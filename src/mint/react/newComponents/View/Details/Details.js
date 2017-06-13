@@ -14,7 +14,7 @@ import ReactGA from 'react-ga';
 export default class Details extends Component {
 
   render() {
-    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, user } = this.props,
+    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user } = this.props,
           total = calculateItemTotal(items),
           metrics = [{
               name: 'Members',
@@ -56,7 +56,7 @@ export default class Details extends Component {
                       <div className={
                           `metric 
                           ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}` 
-                        } onClick={() => m.name === 'Likes' ? likeCart(id) : null}>
+                        } onClick={() => m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : null}>
                         <div className='top'>
                           <Icon icon={m.icon}/>
                           <p>{m.value}</p>

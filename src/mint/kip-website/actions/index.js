@@ -2,7 +2,8 @@ export {
   handleScroll,
   toggleSidenav,
   toggleModal,
-  registerHeight
+  registerHeight,
+  setSource
 }
 from './app';
 

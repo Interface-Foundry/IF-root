@@ -3,7 +3,7 @@ import About from '../components/About';
 
 const mapStateToProps = (state, props) => ({
   aboutTemplate: state.siteState.about,
-  src: sessionStorage.src
+  src: sessionStorage.src || state.siteState.src
 });
 
 export default connect(mapStateToProps)(About);

@@ -13,7 +13,7 @@ const mapStateToProps = (state, props) => ({
   archivedCarts: state.auth.archivedCarts,
   user_account: state.auth.user_account,
   currentCart: state.auth.carts.length ? state.auth.carts[0] : {},
-  src: sessionStorage.src
+  src: sessionStorage.src || state.siteState.src
 });
 
 const mapDispatchToProps = dispatch => ({

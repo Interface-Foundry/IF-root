@@ -442,7 +442,7 @@
       }
     },
     "hero": {
-      "headline": "${__ __}Manage ${__Orders__} with ${Kip} AI",
+      "headline": "${__ __}Manage ${__Orders__} with ${__Kip AI__}",
       "description": "Use ${Kip} to manage your team purchases and track expenses. Organize orders with ${Kip} now!",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
@@ -654,7 +654,7 @@
       }
     },
     "hero": {
-      "headline": "${__ __} ${__Save__} Money on Amazon Prime Fees with ${Kip}",
+      "headline": "${__ __} ${__Save__} Money on Amazon Prime Fees with ${__Kip__}",
       "description": "Save on fees with ${Kip}. Share accounts and split fees without giving away passwords or personal data",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
