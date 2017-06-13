@@ -95,12 +95,10 @@ var cartsCollection = Waterline.Collection.extend({
 
     dirty: 'boolean',
 
-    archive: archive,
-
     /** cart subtotal from store */
     subtotal: 'float',
 
-    shipping_address: Waterline.isA('addresses'),
+    address: Waterline.isA('addresses'),
 
     // social validation metrics
 

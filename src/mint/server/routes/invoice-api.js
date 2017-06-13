@@ -122,7 +122,6 @@ module.exports = function (router) {
       if (done) {
         //send off w/e emails
         logging.info('all payments complete')
-        logging.info('req.get(host)', req.get('host'))
         var paidEmail = await db.Emails.create({
           recipients: (req.get('host') === 'localhost:3000' ? 'hannah.katznelson@gmail.com' : 'hello@kipthis.com'),
           sender: 'hello@kipthis.com',
@@ -131,7 +130,7 @@ module.exports = function (router) {
           cart: invoice.cart
         })
 
-        const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader')
+        const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader').populate('address')
 
         var itemsByUser = {}
         cart.items.map(function (item) {
@@ -154,11 +153,13 @@ module.exports = function (router) {
           items: nestedItems,
           total: '$' + invoice.total.toFixed(2),
           cart: cart,
-          totalItems: totalItems, 
+          totalItems: totalItems,
           date: paidEmail.sent_at,
           users: cart.members,
-          checkoutUrl: cart.affiliate_checkout_url || www.kipthis.com
+          checkoutUrl: cart.affiliate_checkout_url || www.kipthis.com,
+          address: cart.address
         })
+        logging.info('sending checkout email to hello@kipthis.com')
         await paidEmail.send()
       }
 
