@@ -34,7 +34,7 @@ export default class Hero extends Component {
           <div className='hero__main'>
             <div className="col-6 headline">
               <h1>
-                {heroTemplate.headline}
+                <a href='/howitworks'>{replaceHtml(heroTemplate.headline)}</a>
               </h1>
               <p>
                 {replaceHtml(heroTemplate.description)}

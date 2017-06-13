@@ -17,7 +17,7 @@
   margin-top: $padding*2;
   @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.7s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-  @media only screen and (max-width: 600px) {
+  @media only screen and (max-width: 690px) {
     border-bottom: 0px solid transparent;
     margin-top: 0;
     .second {
@@ -33,7 +33,7 @@
     background: white;
     border-bottom: 2px solid mix(white, $primaryColor, 85%);
     margin-top: 0;
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 640px) {
       border-bottom: 0px solid transparent;
       .second {
         background: white;
@@ -80,7 +80,7 @@
         width: 30px;
         fill: $primaryColor;
       }
-      @media only screen and (max-width: 600px) {
+      @media only screen and (max-width: 640px) {
         margin-right: 10px;
       }
     }
@@ -93,11 +93,11 @@
     }
     &.right {
       padding: 0 10px;
-      @media only screen and (max-width: 600px) {
+      @media only screen and (max-width: 640px) {
         padding: 0;
       }
     }
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 640px) {
       &.desktop {
         display: none;
       }
@@ -127,7 +127,7 @@
         height: 100%;
         background: transparent;
       }
-      @media only screen and (max-width: 700px) {
+      @media only screen and (max-width: 730px) {
         padding: 0px $padding/2;
         font-size: 12px;
       }
@@ -172,11 +172,11 @@
     .right, .row, .ribbon, .action {
       height: unset;
       a {
-        height: unset;
-        display: block;
+        display: flex;
+        flex-direction: column;
       }
     }
-    @media only screen and (max-width: 700px) {
+    @media only screen and (max-width: 690px) {
       order: 3;
       margin: 0 auto;
       padding-left: 5px;
@@ -186,7 +186,7 @@
   .cart {
     display: flex;
     justify-content: flex-end;
-    @media only screen and (max-width: 700px) {
+    @media only screen and (max-width: 690px) {
       flex: 1 1 auto;
       min-width: 280px;
     }
