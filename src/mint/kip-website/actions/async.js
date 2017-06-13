@@ -43,7 +43,6 @@ export function login(cart_id, email) {
 }
 
 export function getSiteState(loc = '') {
-  console.log({ loc });
   return async dispatch => {
     try {
       const site = await fetch('/api/home/json', {

@@ -33,7 +33,7 @@ export default class Compare extends Component {
 
   render() {
     const { compareTemplate, src } = this.props;
-    if (!compareTemplate) return <div/>;
+    if (!compareTemplate) return <div/>; // don't show anything if the we don't have the json
     const { categories, competitors } = compareTemplate,
     actionText = src === 'slack' ? compareTemplate.slackButtonText : compareTemplate.buttonText,
       buttonLink = src === 'slack' ? 'https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459' : '/newcart';

@@ -240,6 +240,16 @@
       }
     }
   }
+  .video {
+    height: 500px;
+    border-radius: $padding;
+    overflow: hidden;
+    padding: 0;
+    width: 900px;
+    z-index: 10;
+    margin: 0 auto $padding*5;
+    border: 3px solid mix(white, $primaryColor, 85%);
+  }
   .FAQ {
     position: relative;
     text-align: left;
