@@ -122,28 +122,43 @@ module.exports = function (router) {
       if (done) {
         //send off w/e emails
         logging.info('all payments complete')
+        logging.info('req.get(host)', req.get('host'))
         var paidEmail = await db.Emails.create({
-          recipients: invoice.leader.email_address, //TODO all members also??
+          recipients: (req.get('host') === 'localhost:3000' ? 'hannah.katznelson@gmail.com' : 'hello@kipthis.com'),
           sender: 'hello@kipthis.com',
           subject: 'Payment Collected!',
-          sent_at: moment().format('dddd, MMMM Do, h:mm a'),
-          template_name: 'summary_email', //TODO
+          template_name: 'kip_order_process',
           cart: invoice.cart
         })
 
-        const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items')
+        logging.info('created email')
 
-        logging.info('invoice', invoice)
+        const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader')
+
+        // logging.info('invoice', invoice)
         // logging.info('cart:', cart)
+        var itemsByUser = {}
+        cart.items.map(function (item) {
+          if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
+          else itemsByUser[item.added_by].push(item)
+        })
+        var nestedItems = []
+        Object.keys(itemsByUser).map(function (k) {
+          nestedItems.push(itemsByUser[k])
+        })
 
-        await paidEmail.template('summary_email', {
-          username: invoice.leader.name || invoice.leader.email_address,
+        // logging.info("cart.leader", cart.leader)
+        await paidEmail.template('kip_order_process', {
+          username: cart.leader.name || cart.leader.email_address,
           baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
           id: cart.id,
-          items: cart.items,
+          items: nestedItems,
           total: '$' + invoice.total.toFixed(2),
           cart: cart,
-          totalItems: 'what is this'
+          totalItems: cart.items.length, // not quite right, bc qty
+          date: paidEmail.sent_at,
+          users: cart.members,
+          checkoutUrl: cart.affiliate_checkout_url || www.kipthis.com
         })
         await paidEmail.send()
       }
