@@ -51,7 +51,7 @@ export default class Sidenav extends Component {
   render() {
     const {
       _moveToFront,
-      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id },
+      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, large },
       state: { show }
     } = this;
 
@@ -69,7 +69,7 @@ export default class Sidenav extends Component {
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>
         </div>
-        <ul className='sidenav__list'>
+        <ul className={`sidenav__list ${large ? 'large' : ''}`}>
           <li className='sidenav__list__header'>
             <p>{user_account.name ? user_account.name : ''}</p>
             <div className='icon' onClick={_toggleSidenav}>

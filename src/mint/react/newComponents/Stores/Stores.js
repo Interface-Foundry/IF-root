@@ -1,7 +1,9 @@
-// react/components/CartStore/CartStore.js
+// react/components/Stores/Stores.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
+import Store from './Store'
 
 export default class Stores extends Component {
 
@@ -15,25 +17,32 @@ export default class Stores extends Component {
 
   render() {
     const { stores, history: { push } } = this.props;
+    const otherStores = stores.slice() || [];
+    const suggested = otherStores.shift() || [];
+
     return (
-      <ul className="stores">
-        {
-        	stores.map(store => 
-        		<li>
-				      <a href={`/newcart/${store.store_type}`}  key={store.store_type} className='store'>
-			          <div className='store__details'>
-			            <div className='store__image image' style={{backgroundImage:`url(${store.store_img})`}}/>
-			            <h4 className='store__name'> { store.store_name } </h4>
-			            <p className='store__domain'> { store.store_domain } </p>
-			          </div>
-			          <div className='store__select'>
-			            Choose
-			          </div>
-				      </a>
-			      </li>
-          )
-        }
-      </ul>
+      <section>
+        <div className='cart_store'> 
+          <h3>Suggested For You</h3>
+          <ul className='cart_store__list suggested'>
+            <Store key={suggested.store_type} {...suggested} />
+          </ul>
+        </div>
+        <div className='cart_store'> 
+          <h3>Other Stores</h3>
+          <ul className='cart_store__list'>
+            {otherStores.map(store => 
+                <Store 
+                  key={store.store_type} 
+                  {...store} 
+                />
+              )
+            }
+          </ul>
+        </div>
+      </section>
     );
   }
 }
+
+

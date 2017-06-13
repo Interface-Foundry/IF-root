@@ -1,7 +1,7 @@
 // react/containers/AppContainer.js
 
 import { connect } from 'react-redux';
-import { Tabs } from '../newComponents';
+import { Invoice } from '../newComponents';
 
 import { 
   selectTab
@@ -11,16 +11,17 @@ import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    tab: state.app.viewTab,
     cart: state.cart
   }
 };
 
+// Just an example for mapping functions to the component. 
+// What this does it connect the functions to redux, so that the results of those functions get passed to our redux store. 
 const mapDispatchToProps = dispatch => ({
   selectTab: (tab) => dispatch(selectTab(tab))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Tabs);
+export default connect(mapStateToProps, mapDispatchToProps)(Invoice);
 
 
 

@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 
 import { displayCost, removeDangerousCharactersFromString } from '../../../utils';
 import { Right } from '../../../../react-common/kipsvg';
+import { Delete } from '../../../../react-common/kipsvg';
 
 export default class Selected extends Component {
 
@@ -12,8 +13,11 @@ export default class Selected extends Component {
           afterClass = !arrow ? 'left' : ( arrow === 1 ? 'middle' : 'right' );
 
     return (
-      <td key={item.id} colSpan='100%' onClick={() => selectItem(item.id)} className='selected'>
+      <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''} ${afterClass}`}>
+          <button className='close' onClick={() => selectItem(null)}>
+            <Delete/>
+          </button>
           {
             cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
           }
