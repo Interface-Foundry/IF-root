@@ -5,22 +5,24 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import Details from './Details'
+import Invoice from './Invoice'
 import { ResultsContainer, ButtonsContainer, CartContainer } from '../../newContainers';
 
 export default class App extends Component {
   render() {
-    const { tab, cart } = this.props,
+    const { tab, cart, user, likeCart } = this.props,
           containers = {
             'search': ResultsContainer,
-            'cart': CartContainer
+            'cart': CartContainer,
+            'invoice': Invoice
           },
           Component = containers[tab];
 
     return (
       <div className='view'>
-        { tab === 'cart' ? <Details {...cart}/> : null }
+        { tab === 'cart' ? <Details {...cart} user={user} likeCart={likeCart}/> : null }
         { Component ? <Component /> : null }
-        <ButtonsContainer />
+        { tab === 'cart' ? <ButtonsContainer /> : null }
       </div>
     );
   }

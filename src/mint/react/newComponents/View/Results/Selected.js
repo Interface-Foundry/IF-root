@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { displayCost } from '../../../utils';
+import { displayCost, removeDangerousCharactersFromString } from '../../../utils';
 import { Right } from '../../../../react-common/kipsvg';
 
 export default class Selected extends Component {
@@ -25,7 +25,7 @@ export default class Selected extends Component {
             <p> Store: {item.store} | {cart.store_locale} </p>
             <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
             <div className='text__expanded'>
-              <p> {item.description} </p>
+              <div dangerouslySetInnerHTML={{__html: removeDangerousCharactersFromString(item.description)}} />
             </div>
           </div> 
 

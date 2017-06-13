@@ -16,7 +16,8 @@
   }
   .search {
     @media only screen and (max-width: 600px) {
-      display: none;
+      // display: none;
+      margin: 10px 0;
     }
   }
   .header__left {
@@ -26,8 +27,14 @@
     white-space: nowrap;
     padding: 0 $padding*3;
     width: 75%;
+    @media only screen and (max-width: 600px) {
+      padding: 0 0 0 $padding;
+    }
     a {
       display: inline-block;
+      @media only screen and (max-width: 600px) {
+        display: none;
+      }
     }
     .navbar__icon {
       display: inline-block;

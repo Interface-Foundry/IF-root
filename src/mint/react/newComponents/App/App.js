@@ -17,7 +17,6 @@ export default class App extends Component {
 
   _handeKeyPress(e) {
     // debugger
-    console.log('key press: ', e)
   }
 
   _logPageView(path, userId) {
@@ -52,7 +51,6 @@ export default class App extends Component {
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/cart/:cart_id'} component={HeaderContainer} />
-        <Route path={'/cart/:cart_id'} exact component={SearchContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />

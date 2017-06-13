@@ -27,6 +27,7 @@ export const fetchCarts = () => get(
 	}
 )
 
+
 export const fetchMetrics = cart_id => get(
 	`/api/cart/${cart_id}/metrics`, 
 	'METRICS', 
@@ -54,6 +55,19 @@ export const deleteCart = cart_id => del(
 	(type) => ({
   		type: `${type}_SUCCESS`,
   		response: cart_id,
+  		receivedAt: Date.now()
+	})
+)
+
+export const likeCart = cart_id => post(
+	`/api/likes/${cart_id}`, 
+	'LIKE_CART',
+	{}, 
+	(type, json) => ({
+  		type: `${type}_SUCCESS`,
+  		response: {
+  			likes: json
+  		},
   		receivedAt: Date.now()
 	})
 )

@@ -102,12 +102,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					.text__expanded {
 						display: inline-block;
 						padding: $padding 0 0;
-
-						p {
-							font-size: 14px;
-							line-height: 18px;	
-							padding: 0;						
-						}
+						font-size: 14px;
+						line-height: 18px;	
 					}
 				}
 

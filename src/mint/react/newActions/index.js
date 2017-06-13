@@ -29,7 +29,8 @@ export {
 	updateCart, 
 	clearCart, 
 	deleteCart,
-	fetchMetrics
+	fetchMetrics,
+	likeCart
 } from './cart';
 
 export {

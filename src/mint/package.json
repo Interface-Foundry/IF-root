@@ -65,6 +65,7 @@
     "sails-mongo": "^0.12.2",
     "sockjs-client": "^1.1.2",
     "spliddit": "^2.1.1",
+    "striptags": "^3.0.1",
     "tapable": "^0.2.6",
     "thunkify": "^2.1.2",
     "tsv": "^0.2.0",

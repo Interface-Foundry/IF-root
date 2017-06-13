@@ -55,34 +55,6 @@ body {
   background: $kip-secondary-color;
   background-image: url(https://storage.googleapis.com/kip-random/website/kip_scribble_pattern.png);
   background-size: 400px;
-
-  & > .search {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    height: $nav-height;
-    z-index: 10;
-    border-bottom: 1px solid $border-color-light;
-
-    @media only screen and (min-width: 600px) {
-      display: none;
-    }
-    input {
-      border-radius: 0;
-    }
-    button {
-      border-radius: 0;
-
-      svg {
-        padding: $padding/2;
-      }
-    }
-    .history {
-      padding: 0;
-      margin: 0;
-      top: 39px;
-    }
-  }
 }
 
 .app__view {
@@ -95,7 +67,7 @@ body {
   height: calc(100% - #{$nav-height * 2});
 
   @media only screen and (max-width: 600px) {
-    height: calc(100% - #{$nav-height * 3});
+    height: calc(100% - #{$nav-height * 2});
   }
 
   @media only screen and (min-width: 600px) {
