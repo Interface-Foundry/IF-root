@@ -63,7 +63,7 @@ export default class App extends Component {
       <div className='app'>
           { sidenav ? <SidenavContainer /> : null }
           { modal ? <ModalContainer /> : null }
-          <RibbonContainer src={match.params.src} />
+          <RibbonContainer />
           <div className='app__view' ref={(scroll) => this.scroll = scroll}>
             <Route path={`${match.url}`} exact component={LandingContainer}/>
             <Route path={`${match.url}s/:src`} exact component={LandingContainer}/>

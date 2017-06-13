@@ -9,7 +9,8 @@ import {
 const mapStateToProps = (state, props) => ({
   user_account: state.auth.user_account,
   fixed: state.app.fixed,
-  ribbonTemplate: state.siteState.ribbon
+  ribbonTemplate: state.siteState.ribbon,
+  src: sessionStorage.src
 });
 
 const mapDispatchToProps = dispatch => ({

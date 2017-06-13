@@ -22,21 +22,23 @@ export default class Compare extends Component {
       case 'Apple':
         return <Apple key={i}/>;
       case 'Facebook':
-        return useLink ? <a key={i} href='//m.me/talkto.kip'><Facebook/></a> : <Facebook key={i}/>
+        return useLink ? <a key={i} href='//m.me/talkto.kip'><Facebook/></a> : <Facebook key={i}/>;
       case 'Chrome':
-        return useLink ? <a key={i} href='/newcart'><Chrome/></a> : <Chrome key={i}/>
+        return useLink ? <a key={i} href='/newcart'><Chrome/></a> : <Chrome key={i}/>;
       case 'Gmail':
-        return useLink ? <a key={i} href='/newcart'><Gmail/></a> : <Gmail key={i}/>
+        return useLink ? <a key={i} href='/newcart'><Gmail/></a> : <Gmail key={i}/>;
       }
     });
   }
 
   render() {
-
-    const { compareTemplate, compareTemplate: { categories, competitors }, src } = this.props,
-      actionText = src === 'slack' ? compareTemplate.slackButtonText : compareTemplate.buttonText,
+    const { compareTemplate, src } = this.props;
+    if (!compareTemplate) return <div/>;
+    const { categories, competitors } = compareTemplate,
+    actionText = src === 'slack' ? compareTemplate.slackButtonText : compareTemplate.buttonText,
       buttonLink = src === 'slack' ? 'https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459' : '/newcart';
     let counter = 0;
+
     return (
       <div className="compare col-12">
             <h1 className='tagline'><span>{ compareTemplate.tagline }</span></h1>

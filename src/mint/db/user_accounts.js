@@ -57,6 +57,11 @@ var userAccountCollection = Waterline.Collection.extend({
     addresses: Waterline.isMany('addresses'),
 
     /**
+     * @type {checkout_events} occasions on which this user has checked out
+     */
+    checkouts: Waterline.isMany('checkout_events'),
+
+    /**
      * Whether the user accepts a cash or not
      * @type {Boolean}
      */
@@ -114,6 +119,13 @@ var userAccountCollection = Waterline.Collection.extend({
     reminded: {
       type: 'boolean',
       defaultsTo: false
+    },
+
+    /** @type {carts} Carts this user has liked*/
+    likes: {
+      collection: 'carts',
+      via: 'likes',
+      dominant: true
     }
   }
 })

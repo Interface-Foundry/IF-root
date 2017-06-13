@@ -93,6 +93,20 @@ export function login(cart_id, email) {
   };
 }
 
+export function getAddresses() {
+  return async dispatch => {
+    try {
+      const response = await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
+        credentials: 'same-origin'
+      });
+
+      return dispatch(receiveUpdate(await response.json()));
+    } catch (e) {
+      return new SubmissionError({ email: 'Something went wrong with login' });
+    }
+  };
+}
+
 export function validateCode(email, code) {
   return async dispatch => {
     try {
