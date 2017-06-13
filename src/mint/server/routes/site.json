@@ -18,7 +18,7 @@
       }
     },
     "hero": {
-      "headline": "Shop Online with Friends",
+      "headline": "Shop ${__Online__} with ${__Friends__}",
       "description": "${Kip} saves you money on 3rd party fees with wholesale prices.${br}Use Kip Now today! ",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
@@ -200,13 +200,13 @@
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
           "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
-          "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+          "text": "Penguins protect each other. ${__Kip keeps your data safe__}, and doesn’t resell to 3rd parties."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
-          "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
+          "text": "Penguins help each other out, Kip helps you ${__split and share account fees like Amazon Prime__} with your team."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
-          "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
+          "text": "Penguins are social, Kip makes ${__coordinating team purchasing easy__}."
         }]
       }
     }
@@ -230,7 +230,7 @@
       }
     },
     "hero": {
-      "headline": "Shop Social for Best Prices",
+      "headline": "Shop ${__Social__} for Best ${__Prices__}",
       "description": "Shop and save online with friends, ${Kip} gets you the lowest prices when you shop together.${br}Use Kip today!",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
@@ -412,13 +412,13 @@
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
           "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
-          "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+          "text": "Penguins protect each other. ${__Kip keeps your data safe__}, and doesn’t resell to 3rd parties."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
-          "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
+          "text": "Penguins help each other out, Kip helps you ${__split and share account fees like Amazon Prime__} with your team."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
-          "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
+          "text": "Penguins are social, Kip makes ${__coordinating team purchasing easy__}."
         }]
       }
     }
@@ -442,7 +442,7 @@
       }
     },
     "hero": {
-      "headline": "Manage Orders with Kip AI",
+      "headline": "${__ __}Manage ${__Orders__} with ${Kip} AI",
       "description": "Use ${Kip} to manage your team purchases and track expenses. Organize orders with ${Kip} now!",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
@@ -624,13 +624,13 @@
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
           "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
-          "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+          "text": "Penguins protect each other. ${__Kip keeps your data safe__}, and doesn’t resell to 3rd parties."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
-          "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
+          "text": "Penguins help each other out, Kip helps you ${__split and share account fees like Amazon Prime__} with your team."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
-          "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
+          "text": "Penguins are social, Kip makes ${__coordinating team purchasing easy__}."
         }]
       }
     }
@@ -654,7 +654,7 @@
       }
     },
     "hero": {
-      "headline": "Save Money on Amazon Prime Fees with Kip",
+      "headline": "${__ __} ${__Save__} Money on Amazon Prime Fees with ${Kip}",
       "description": "Save on fees with ${Kip}. Share accounts and split fees without giving away passwords or personal data",
       "buttonText": "Use Kip Now",
       "slackText": "Add to Slack",
@@ -819,13 +819,13 @@
         "description": "${Kip} brings a penguin's perspective to collective purchasing.",
         "reasons": [{
           "image": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
-          "text": "Penguins protect each other. Kip keeps your data safe, and doesn’t resell to 3rd parties."
+          "text": "Penguins protect each other. ${__Kip keeps your data safe__}, and doesn’t resell to 3rd parties."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/present_both_kips_sk.svg",
-          "text": "Penguins help each other out, Kip helps you split and share account fees like Amazon Prime with your team."
+          "text": "Penguins help each other out, Kip helps you ${__split and share account fees like Amazon Prime__} with your team."
         }, {
           "image": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
-          "text": "Penguins are social, Kip takes away the stress of coordinating team purchasing."
+          "text": "Penguins are social, Kip makes ${__coordinating team purchasing easy__}."
         }]
       }
     }

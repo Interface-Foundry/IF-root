@@ -14,8 +14,11 @@ export const replaceHtml = str =>
 const swapForHtml = (str, i) => {
   // this is becoming markdown
   const text = str.match(/\[(.+?)\]/),
-    link = str.match(/\((.+?)\)/);
+    link = str.match(/\((.+?)\)/),
+    bold = str.match(/__(.+?)__/);
+  if (bold) return <b key={i}>{swapForHtml(bold[1], i - 0.5)}</b>;
   if (link && text) return <span key={i}><a href={link[1]}>{text[1]}</a></span>;
+
   switch (str) {
   case '${Kip}':
     return <span key={i}><Link to='/howitworks'>Kip</Link></span>;
@@ -26,4 +29,4 @@ const swapForHtml = (str, i) => {
   default:
     return str;
   }
-}
+};

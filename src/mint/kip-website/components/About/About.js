@@ -52,10 +52,10 @@ export default class About extends Component {
                 <div key={i} className="col-4 row-1 services__details">
                   <div className='image' style={{ backgroundImage: `url(${r.image})` }} />
                   <h4>
-                    {r.text}
+                    {replaceHtml(r.text)}
                   </h4>
                   <div className="col-12 row-1 action">
-                    <a href='/newcart' target="_blank"><button><span>{aboutTemplate.why.actionText} <Right /></span></button></a>
+                    <a href='/newcart' rel='noopener noreferrer' target="_blank"><button><span>{replaceHtml(aboutTemplate.why.actionText)} <Right /></span></button></a>
                   </div>
                 </div>
               ))
