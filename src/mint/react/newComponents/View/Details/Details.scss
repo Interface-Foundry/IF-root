@@ -31,7 +31,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		}
 
 		.card {
-			border: 1px solid $secondaryColor;
+			border-top: 3px solid $secondaryColor;
 
 			.left {
 				display: inline-block;
@@ -108,10 +108,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 				display: inline-block;
 				border-radius: 5px;
 				margin-right: $padding*2;
-
-				@media only screen and (max-width: 600px) {
-					margin: $padding/2;
-				}
 
 				&.updated {
 					color: rgba(#111, 0.5);

@@ -23,7 +23,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	}
 
 	.action {
-		padding: $padding/2 0 0;
+		padding: $padding/2 0;
 		text-align: right;
 
 		button {
@@ -35,6 +35,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			line-height: 25px;
 			color: #333;
 			font-size: 12px;
+			margin-right: $padding;
 		}
 	}
 
@@ -97,7 +98,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					border: $border-color-light;
 					box-shadow: $card-box-shadow;
 					transform: scale3d(1.02, 1.02, 1.05);
-					z-index: 100;
+					z-index: 5;
 				}
 
 				.image {

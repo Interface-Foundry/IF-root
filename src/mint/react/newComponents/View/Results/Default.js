@@ -10,7 +10,7 @@ export default class Default extends Component {
     const { cart, item, cartAsins, selectItem, addItem } = this.props;
 
     return (
-        <td onClick={() => selectItem(item.id)}>
+        <td>
           <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''}`}>
             {
               cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
@@ -24,7 +24,8 @@ export default class Default extends Component {
               <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
             </div> 
             <div className='action'>
-              <button onClick={() => addItem(cart.id, item.id)}><span>Add to Cart <Right/></span></button>
+              <button className='more' onClick={() => selectItem(item.id)}>See More</button>
+              <button onClick={() => addItem(cart.id, item.id)}>Add to Cart <Right/></button>
             </div>
           </div>
         </td>

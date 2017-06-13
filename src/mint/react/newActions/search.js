@@ -27,7 +27,7 @@ export const submitQuery = (query, store, locale) => get(
     response: {
       results: json.asin ? [json] : [...json],
       history: false,
-      tab: 'results'
+      tab: 'search'
     },
     receivedAt: Date.now()
   })

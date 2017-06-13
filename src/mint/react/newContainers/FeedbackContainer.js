@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
 import { Feedback } from '../newComponents';
 import ReactGA from 'react-ga';
-import { postFeedback } from '../actions';
+import { postFeedback } from '../newActions';
 
 const mapStateToProps = (state, ownProps) => {
   return {
