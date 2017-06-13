@@ -10,7 +10,7 @@ import { ResultsContainer, ButtonsContainer, CartContainer } from '../../newCont
 
 export default class App extends Component {
   render() {
-    const { tab, cart, user, likeCart } = this.props,
+    const { tab, cart, user, likeCart, unlikeCart } = this.props,
           containers = {
             'search': ResultsContainer,
             'cart': CartContainer,
@@ -20,7 +20,7 @@ export default class App extends Component {
 
     return (
       <div className='view'>
-        { tab === 'cart' ? <Details {...cart} user={user} likeCart={likeCart}/> : null }
+        { tab === 'cart' ? <Details {...cart} user={user} likeCart={likeCart} unlikeCart={unlikeCart}/> : null }
         { Component ? <Component /> : null }
         { tab === 'cart' ? <ButtonsContainer /> : null }
       </div>

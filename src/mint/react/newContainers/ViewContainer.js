@@ -6,7 +6,8 @@ import { View } from '../newComponents';
 import { 
   toggleSidenav,
   togglePopup,
-  likeCart
+  likeCart,
+  unlikeCart
 } from '../newActions';
 
 import ReactGA from 'react-ga';
@@ -24,7 +25,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   togglePopup: () => dispatch(togglePopup()),
   toggleSidenav: () => dispatch(toggleSidenav()),
-  likeCart: (id) => dispatch(likeCart(id))
+  likeCart: (id) => dispatch(likeCart(id)),
+  unlikeCart: (id) => dispatch(unlikeCart(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(View);
