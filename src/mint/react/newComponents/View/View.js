@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import Details from './Details'
-import { ResultsContainer, SearchContainer, ButtonsContainer, CartContainer } from '../../newContainers';
+import { ResultsContainer, ButtonsContainer, CartContainer } from '../../newContainers';
 
 export default class App extends Component {
   render() {
@@ -18,7 +18,6 @@ export default class App extends Component {
 
     return (
       <div className='view'>
-        <SearchContainer />
         { tab === 'cart' ? <Details {...cart}/> : null }
         { Component ? <Component /> : null }
         <ButtonsContainer />

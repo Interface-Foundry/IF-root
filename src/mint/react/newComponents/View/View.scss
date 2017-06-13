@@ -9,36 +9,11 @@
 	padding: 0 0 $padding*2;
 
 	@media only screen and (max-width: 600px) {
-		padding: $padding*5 0;
+		padding: 0 0 $padding*5;
 	}
 
 	* {
 	    max-width: 1066px;
-	}
-
-	.search {
-		width: 100%;
-    	padding: 0;
-	    margin: 0;
-	    position: fixed;
-    	top: $nav-height*2;
-    	height: 40px;
-    	z-index: 10;
-    	border-bottom: 1px solid $border-color-light;
-		@media only screen and (min-width: 600px) {
-			display: none;
-		}
-		input {
-			border-radius: 0;
-		}
-		button {
-			border-radius: 0;
-		}
-		.history {
-			padding: 0;
-			margin: 0;
-			top: 39px;
-		}
 	}
 
 	.card {

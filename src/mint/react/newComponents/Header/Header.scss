@@ -90,6 +90,11 @@
       span {
         border-bottom: 3px solid $mainColor;
       }
+      &.name {
+        @media only screen and (max-width: 600px) {
+          display: none;
+        }
+      }
     }
     a {
       border-bottom: 3px solid $mainColor;

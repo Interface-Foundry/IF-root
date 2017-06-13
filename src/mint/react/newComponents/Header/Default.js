@@ -41,7 +41,7 @@ export default class Default extends Component {
           <SearchContainer />
         </div>
         <div className='header__right'>
-          {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : <p><Link to={`/cart/${cart.id}/m/settings`}><span>{user.name}</span></Link></p>}
+          {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : <p className='name'><Link to={`/cart/${cart.id}/m/settings`}><span>{user.name}</span></Link></p>}
           <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div>
         </div>
       </span>
