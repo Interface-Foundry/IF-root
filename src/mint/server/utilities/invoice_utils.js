@@ -1,6 +1,9 @@
-const constants = require('./payment_constants.js')
-
+const constants = require('../payments/payment_constants.js')
 const logging = require('../../../logging.js')
+
+var db
+const dbReady = require('../../db')
+dbReady.then((models) => { db = models; })
 
 /**
  * create a charge for Stripe
@@ -224,7 +227,7 @@ async function payCafeOrder (pay) {
     pay.delivery_post = guestCheckout
     pay.save()
     profOak.say(`paying for delivery.com for team:${pay.order.team_id} total amount: ${pay.order.order.total} with tip ${pay.delivery_post.tip}`)
-    var response = yield payForItemFromKip(guestCheckout, pay.order.guest_token)
+    var response = await payForItemFromKip(guestCheckout, pay.order.guest_token)
     logging.info('Delivery.com Guest Checkout Res: ', response)
     pay.delivery_raw_response = response
     pay.save()
@@ -248,7 +251,7 @@ async function sendBackToStoreOnSlackbot (pay, charge) {
   // save stripe card token and info to slack team
 
   try {
-    var slackbot = yield db.Slackbot.findOne({team_id: pay.order.team_id})
+    var slackbot = await db.Slackbot.findOne({team_id: pay.order.team_id})
   } catch (err) {
     logging.error('error: cant find team to save stripe info')
     return
@@ -259,7 +262,7 @@ async function sendBackToStoreOnSlackbot (pay, charge) {
   // update stripe / push cards into array
   if (!slackbot.meta.payments) {
     slackbot.meta.payments = []
-    yield slackbot.save()
+    await slackbot.save()
   }
 
   // save card / stripe acct to slack team
@@ -279,5 +282,52 @@ async function sendBackToStoreOnSlackbot (pay, charge) {
     company_card: companyCard,
     date_added: Date.now()
   })
-  yield slackbot.save()
+  await slackbot.save()
+}
+
+async function sendInternalCheckoutEmail (invoice, baseUrl) {
+  logging.info('all payments complete')
+  var paidEmail = await db.Emails.create({
+    recipients: 'hannah.katznelson@gmail.com',
+    sender: 'hello@kipthis.com',
+    subject: 'Payment Collected!',
+    template_name: 'kip_order_process',
+    cart: invoice.cart
+  })
+
+  const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader').populate('address')
+
+  var itemsByUser = {}
+  cart.items.map(function (item) {
+    if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
+    else itemsByUser[item.added_by].push(item)
+  })
+  var nestedItems = []
+  Object.keys(itemsByUser).map(function (k) {
+    nestedItems.push(itemsByUser[k])
+  })
+
+  var totalItems = cart.items.reduce(function (a, b) {
+    return a + b.quantity
+  }, 0)
+
+  await paidEmail.template('kip_order_process', {
+    username: cart.leader.name || cart.leader.email_address,
+    baseUrl: baseUrl,
+    id: cart.id,
+    items: nestedItems,
+    total: '$' + invoice.total.toFixed(2),
+    cart: cart,
+    totalItems: totalItems,
+    date: paidEmail.sent_at,
+    users: cart.members,
+    checkoutUrl: cart.affiliate_checkout_url || www.kipthis.com,
+    address: cart.address
+  })
+  logging.info('sending checkout email to hello@kipthis.com')
+  await paidEmail.send()
+}
+
+module.exports = {
+  sendInternalCheckoutEmail: sendInternalCheckoutEmail
 }

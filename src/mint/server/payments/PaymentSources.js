@@ -25,9 +25,9 @@ class PaymentSource {
   }
 
   static async GetById (paymentSourceId) {
-    logging.info('paymentSourceId', paymentSourceId)
+    // logging.info('paymentSourceId', paymentSourceId)
     const paymentSource = await db.PaymentSources.findOne({id: paymentSourceId})
-    logging.info('paymentSource', paymentSource)
+    // logging.info('paymentSource', paymentSource)
     return new paymentSourceHandlers[paymentSource.payment_vendor](paymentSource)
   }
 
@@ -37,6 +37,7 @@ class PaymentSource {
 
   //this is #fakenews -- for testing
   async pay (invoice, amount) {
+    logging.info('pay called')
     //create payments
     // logging.info('this', this)
     var payment = await db.Payments.create({
@@ -45,7 +46,7 @@ class PaymentSource {
       payment_source: this.id,
       amount: amount
     })
-
+    logging.info('got the payment')
     return payment;
   }
 }
@@ -66,7 +67,7 @@ class StripePaymentSource extends PaymentSource {
 
     const stripeResponse = await stripe.customers.create({
       email: user.email_address,
-      // source: paymentInfo.token
+      source: paymentInfo.token //was commented out? intentionally? who knows
     })
 
     const paymentSource = await db.PaymentSources.create({
@@ -77,24 +78,24 @@ class StripePaymentSource extends PaymentSource {
     return paymentSource
   }
 
-  async pay (invoice, amount) {
-    const stripeResponse = await stripe.charges.create({
-      amount: amount,
-      currency: _.get(invoice, 'currency', 'usd'),
-      source: this.data.id
-    })
-
-
-    const payment = await db.Payments.create({
-      invoice: invoice.id,
-      user: this.user,
-      payment_source: this.id,
-      amount: amount,
-      data: stripeResponse
-    })
-
-    return payment
-  }
+  // async pay (invoice, amount) {
+  //   const stripeResponse = await stripe.charges.create({
+  //     amount: amount,
+  //     currency: _.get(invoice, 'currency', 'usd'),
+  //     source: this.data.id
+  //   })
+  //
+  //
+  //   const payment = await db.Payments.create({
+  //     invoice: invoice.id,
+  //     user: this.user,
+  //     payment_source: this.id,
+  //     amount: amount,
+  //     data: stripeResponse
+  //   })
+  //
+  //   return payment
+  // }
 }
 
 

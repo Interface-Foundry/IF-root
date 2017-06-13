@@ -3,6 +3,7 @@ const moment = require('moment');
 
 const Invoice = require('../payments/Invoice.js')
 const PaymentSource = require('../payments/PaymentSources.js')
+const utils = require('../utilities/invoice_utils.js')
 
 var db
 const dbReady = require('../../db')
@@ -93,60 +94,18 @@ module.exports = function (router) {
         throw new Error('Need amount we are paying')
       }
       const invoice = await Invoice.GetById(req.params.invoice_id)
-      logging.info('got our invoice')
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
-      logging.info('got our payment source')
+      logging.info('got the payment source')
       const paymentAmount = req.body.payment_amount
+      logging.info('ditto amount')
       const payment = await paymentSource.pay(invoice, paymentAmount)
       logging.info('paid')
 
-      //~~~~~if this invoice has been fully paid, fire off whatever emails~~~~~//
+      // If this invoice has been fully paid, fire off whatever emails
       var done = await invoice.paidInFull()
       if (done) {
-        //send off w/e emails
-        logging.info('all payments complete')
-        var paidEmail = await db.Emails.create({
-          recipients: (req.get('host') === 'localhost:3000' ? 'hannah.katznelson@gmail.com' : 'hello@kipthis.com'),
-          sender: 'hello@kipthis.com',
-          subject: 'Payment Collected!',
-          template_name: 'kip_order_process',
-          cart: invoice.cart
-        })
-
-        const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader').populate('address')
-
-        var itemsByUser = {}
-        cart.items.map(function (item) {
-          if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
-          else itemsByUser[item.added_by].push(item)
-        })
-        var nestedItems = []
-        Object.keys(itemsByUser).map(function (k) {
-          nestedItems.push(itemsByUser[k])
-        })
-
-        var totalItems = cart.items.reduce(function (a, b) {
-          return a + b.quantity
-        }, 0)
-
-        await paidEmail.template('kip_order_process', {
-          username: cart.leader.name || cart.leader.email_address,
-          baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
-          id: cart.id,
-          items: nestedItems,
-          total: '$' + invoice.total.toFixed(2),
-          cart: cart,
-          totalItems: totalItems,
-          date: paidEmail.sent_at,
-          users: cart.members,
-          checkoutUrl: cart.affiliate_checkout_url || www.kipthis.com,
-          address: cart.address
-        })
-        logging.info('sending checkout email to hello@kipthis.com')
-        await paidEmail.send()
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
       }
-
-      //~~~~~~~~~~//
 
       return res.send(payment)
     })
