@@ -16,7 +16,7 @@ export default class Ribbon extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
-    return nextProps.fixed !== this.props.fixed || nextProps.ribbonTemplate.right.loginText !== this.props.ribbonTemplate.right.loginText || (nextProps.user_account && this.props.user_account && nextProps.user_account !== this.props.user_account && nextProps.user_account.name !== this.props.user_account.name) || nextProps.src !== this.props.src;
+    return nextProps.fixed !== this.props.fixed || nextProps.ribbonTemplate.right.loginText !== this.props.ribbonTemplate.right.loginText || nextProps.user_account !== this.props.user_account || nextProps.user_account.name !== this.props.user_account.name || nextProps.src !== this.props.src;
   }
 
   render() {
