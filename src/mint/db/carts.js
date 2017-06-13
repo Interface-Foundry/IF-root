@@ -97,6 +97,11 @@ var cartsCollection = Waterline.Collection.extend({
 
     archive: archive,
 
+    /** cart subtotal from store */
+    subtotal: 'float',
+
+    shipping_address: Waterline.isA('addresses'),
+
     // social validation metrics
 
     /** @type {user_accounts} people who have liked this cart */
@@ -118,12 +123,7 @@ var cartsCollection = Waterline.Collection.extend({
     parent_reorder: 'string',
 
     /** @type {[user_accounts]} times this cart has been checked out */
-    checkouts: Waterline.isMany('checkout_events'),
-
-    /** cart subtotal from store */
-    subtotal: 'float',
-
-    archive: archive
+    checkouts: Waterline.isMany('checkout_events')
   }
 });
 

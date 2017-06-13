@@ -403,11 +403,11 @@ module.exports = function (router) {
    */
   router.post('/user/:user_id/address', (req, res) => co(function* () {
     // check permissions
-    var currentUser = req.UserSession.user_account
-    if (!currentUser || currentUser.id !== req.params.user_id) {
+    if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
-
+    var currentUser = req.UserSession.user_account
+  
     // Find the user in the database
     var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
 
@@ -430,7 +430,7 @@ module.exports = function (router) {
    * @apiGroup Users
    *
    * @apiParamExample Request
-   * get /api/user/address 
+   * get /api/user/address
    *
    *  @apiSuccessExample Response
    * [{
