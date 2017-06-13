@@ -29,8 +29,7 @@ export default class Details extends Component {
               icon: 'Like',
               value: likes.length
             }],
-          likedList = likes.map((user) => user.id),
-          membersList = members.map((user) => user.id);
+          likedList = likes.map((user) => user.id);
 
     return (
       <table className='details'>
@@ -56,8 +55,7 @@ export default class Details extends Component {
                     metrics.map((m) => (
                       <div className={
                           `metric 
-                          ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''} 
-                          ${membersList.includes(user.id) && m.name === 'Members' ? 'red' : ''}`
+                          ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}` 
                         } onClick={() => m.name === 'Likes' ? likeCart(id) : null}>
                         <div className='top'>
                           <Icon icon={m.icon}/>

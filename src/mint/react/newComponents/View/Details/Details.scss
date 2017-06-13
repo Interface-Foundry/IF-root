@@ -121,9 +121,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					margin-right: $padding*2;
 
 					&.red {
-						* {
-							color: $warningColor !important;
-						}
 						.top {
 							svg {
 								fill: $warningColor !important;
