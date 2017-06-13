@@ -131,12 +131,8 @@ module.exports = function (router) {
           cart: invoice.cart
         })
 
-        logging.info('created email')
-
         const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader')
 
-        // logging.info('invoice', invoice)
-        // logging.info('cart:', cart)
         var itemsByUser = {}
         cart.items.map(function (item) {
           if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
@@ -147,7 +143,10 @@ module.exports = function (router) {
           nestedItems.push(itemsByUser[k])
         })
 
-        // logging.info("cart.leader", cart.leader)
+        var totalItems = cart.items.reduce(function (a, b) {
+          return a + b.quantity
+        }, 0)
+
         await paidEmail.template('kip_order_process', {
           username: cart.leader.name || cart.leader.email_address,
           baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
@@ -155,13 +154,14 @@ module.exports = function (router) {
           items: nestedItems,
           total: '$' + invoice.total.toFixed(2),
           cart: cart,
-          totalItems: cart.items.length, // not quite right, bc qty
+          totalItems: totalItems, 
           date: paidEmail.sent_at,
           users: cart.members,
           checkoutUrl: cart.affiliate_checkout_url || www.kipthis.com
         })
         await paidEmail.send()
       }
+
       //~~~~~~~~~~//
 
       return res.send(payment)
