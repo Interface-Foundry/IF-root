@@ -111,7 +111,6 @@ class Invoice {
     const payments = await db.Payments.find({invoice: this.id})
     logging.info('payments', payments)
     const amountPaid = payments.reduce((prev, curr) => {
-      logging.info('prev', prev)
       return prev += curr.amount
     }, 0)
 

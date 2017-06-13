@@ -17,6 +17,7 @@ var clone = function * (cart_id, user_id, reorder) {
   delete originalJson.views
   delete originalJson.parent_clone
   delete originalJson.parent_reorder
+  delete originalJson.address
 
   // create new cart
   var clone = yield db.Carts.create(originalJson)
@@ -66,6 +67,9 @@ var reorder = function * (cart_id, user_id) {
   var original = yield db.Carts.findOne({id: cart_id}).populate('members')
   var copy = yield clone(cart_id, user_id, true)
 
+  // use same shipping address as the original
+  copy.address = original.address;
+
   // add the members of the old cart to the new cart
   original.members.map(m => {
     copy.members.add(m.id)
@@ -87,10 +91,10 @@ var reorder = function * (cart_id, user_id) {
   })
   yield copy.save()
 
-  var original_test = yield db.Carts.findOne({id: cart_id}).populate('members').populate('items')
-  var copy_test = yield db.Carts.findOne({id: copy.id}).populate('members').populate('items')
-  logging.info('original:', original_test)
-  logging.info('copy:', copy_test)
+  // var original_test = yield db.Carts.findOne({id: cart_id}).populate('members').populate('items')
+  // var copy_test = yield db.Carts.findOne({id: copy.id}).populate('members').populate('items')
+  // logging.info('original:', original_test)
+  // logging.info('copy:', copy_test)
 }
 
 // type is either the string 'clone' or 'reorder'

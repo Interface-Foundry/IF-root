@@ -171,7 +171,8 @@ module.exports.checkout = function * (cart, req, res) {
       'address_1': address.line_1 || '',
       'address_2': address.line_1 || '',
       'town': address.city,
-      'postcode': address.code,
+      'region': address.state,
+      'postcode': address.zip,
       'delivery_message': address.delivery_message,
       'voucher_code': leader.ypo_voucher_code
     }
