@@ -47,23 +47,6 @@
         "slackActionText": "Add to Slack Now"
       }
     },
-    "compare": {
-      "tagline": "Kip Benefits",
-      "subHead": "Just check out how we compare.",
-      "buttonText": "Use Kip Now",
-      "slackText": "Add to Slack Now",
-      "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
-      "competitors": [{
-        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
-        "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
-      }, {
-        "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
-        "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
-      }, {
-        "image": "//storage.googleapis.com/kip-random/website/chart_q.svg",
-        "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
-      }]
-    },
     "footer": {
       "links": [{
         "title": "Terms of Use",
@@ -259,23 +242,6 @@
         "slackActionText": "Add to Slack Now"
       }
     },
-    "compare": {
-      "tagline": "Kip Benefits",
-      "subHead": "Just check out how we compare.",
-      "buttonText": "Use Kip Now",
-      "slackText": "Add to Slack Now",
-      "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
-      "competitors": [{
-        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
-        "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
-      }, {
-        "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
-        "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
-      }, {
-        "image": "//storage.googleapis.com/kip-random/website/chart_q.svg",
-        "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
-      }]
-    },
     "footer": {
       "links": [{
         "title": "Terms of Use",
@@ -470,23 +436,6 @@
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
       }
-    },
-    "compare": {
-      "tagline": "Kip Benefits",
-      "subHead": "Just check out how we compare.",
-      "buttonText": "Use Kip Now",
-      "slackText": "Add to Slack Now",
-      "categories": ["Order Management", "Budget Setting", "Track Orders", "Multiple Vendors", "No Signup/Download", "Accessibility", "Pricing"],
-      "competitors": [{
-        "image": "//storage.googleapis.com/kip-random/kip_logo_horizontal.svg",
-        "data": [true, true, true, true, true, ["Facebook", "Gmail", "Slack", "Chrome"], "FREE"]
-      }, {
-        "image": "//storage.googleapis.com/kip-random/website/chart_hivy.svg",
-        "data": [true, true, false, false, false, ["Apple", "Slack"], "Credit Card Required"]
-      }, {
-        "image": "//storage.googleapis.com/kip-random/website/chart_q.svg",
-        "data": [true, false, false, true, false, ["Apple", "Play"], "Credit Card Required"]
-      }]
     },
     "footer": {
       "links": [{

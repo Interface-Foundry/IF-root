@@ -23,7 +23,6 @@
     box-shadow: 0 1px 5px -2px grey;
     text-align: center;
     &.codemode {
-
       @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 1s);
       @include transition(all 1s cubic-bezier(0.4, 0, 0.2, 1));
     }
