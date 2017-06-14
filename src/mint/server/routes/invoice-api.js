@@ -178,7 +178,6 @@ module.exports = function (router) {
     return "send emails DUNGEON FAMILY"
   })
 
-
   /**
   * @api {post} /invoice/:invoice_type/:cart_id create invoice
   * @apiDescription create an invoice for the specified cart

@@ -2,6 +2,28 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+var cloneItem = function * (item_id, user_id, cart_id) {
+  item = yield db.Items.findOne({id: item_id}).populate('details')
+
+  //create new item
+  var itemJson = item.toJSON();
+  delete itemJson.id
+  delete itemJson.options
+  delete itemJson.reactions
+  delete itemJson.added_by
+  delete itemJson.cart
+  delete itemJson.details
+
+  //create new item
+  var clonedItem = yield db.Items.create(itemJson)
+  clonedItem.cart = cart_id
+  clonedItem.added_by = user_id
+  clonedItem.details = item.details.id
+  yield clonedItem.save()
+
+  return clonedItem
+}
+
 //creates a clone of a cart with the same name and items but without the users, comments, or reactions
 var clone = function * (cart_id, user_id, reorder) {
   var original = yield db.Carts.findOne({id: cart_id}).populate('items')
@@ -27,7 +49,7 @@ var clone = function * (cart_id, user_id, reorder) {
   clone.dirty = false;
 
   // clone items in the cart
-  yield original.items.map(function * (item) { //this line is throwing a weird exception for some reason?
+  yield original.items.map(function * (item) {
     item = yield db.Items.findOne({id: item.id}).populate('details')
 
     //create new item
@@ -139,5 +161,6 @@ module.exports = {
   clone: clone,
   reorder: reorder,
   getParents: getParents,
-  getChildren: getChildren
+  getChildren: getChildren,
+  cloneItem: cloneItem
 }

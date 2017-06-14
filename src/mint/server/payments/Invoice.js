@@ -13,10 +13,13 @@ const userPaymentAmountHandler = {
     return debts
   },
   'single': function (invoice) {
-    return {}
+    var debts = {}
+    debts[invoice.leader] = invoice.total
+    return debts
   },
   'split_by_item': function (invoice) {
-    return {}
+    var debts = {}
+    return debts
   }
 }
 
@@ -96,10 +99,11 @@ class Invoice {
    *
    * @param      {array}   users   The users
    */
-  async sendCollectionEmail (users) {
-    logging.info('THIS', this)
-    users.map(async (user) => {
-      var amount = await this.determineUserPaymentAmount()
+  async sendCollectionEmail () {
+    // logging.info('THIS', this)
+    this.users.map(async (user) => {
+      var amounts = await this.determineUserPaymentAmount()
+      logging.info('amounts', amounts)
       var email = await db.Emails.create({
         recipients:'user.email',
         subject: 'Payment Subject',

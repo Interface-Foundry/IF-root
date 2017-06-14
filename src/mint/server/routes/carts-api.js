@@ -984,6 +984,19 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {post} /api/item/:item_id/clone
+   * @apiParam :item_id the item we are cloning
+   * @apiParam :cart_id the cart we are adding it to
+   */
+  router.post('/item/:item_id/clone/:cart_id', (req, res) => co(function* () {
+    var user_id = _.get(req, 'UserSession.user_account.id')
+    if (!user_id) throw new Error('User not logged in')
+
+    var clone = yield cloning_utils.cloneItem(item_id, user_id, cart_id)
+    res.send(clone)
+  }))
+
+  /**
    * @api {get} /api/cart_type Get Types
    * @apiDescription Retrieves a list of cart types sorted by the user's IP location and country
    * @apiGroup Carts
