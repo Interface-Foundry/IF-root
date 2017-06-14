@@ -43,6 +43,7 @@ For static.
 * `GA` - if set to true, logs to google analytics. MUST EXPLICITLY SET FALSE WHEN RUNNING `yarn build` OR `yarn start` TO DISABLE
 * `BUILD_MODE` - if set to `prebuilt` then webpack stuff will not be done. Otherwise builds and hot reloads front end assets.
 * `YPO_ENABLED` - shows ypo option in store if set to `true`
+* `MOCK_LOCALE` - if set to `GB`, `CA`, `SG`, or `US`, will make it so that your computer thinks you are in one of those countries. (see server/utilities/geolocation.js)
 
 For newbies, if you want to set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run, for all the env vars above you can add a line like this:
 
