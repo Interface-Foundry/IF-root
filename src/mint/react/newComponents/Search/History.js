@@ -7,8 +7,8 @@ import { getSearchHistory } from '../../utils';
 
 export default class History extends Component {
   static propTypes = {
-    query: PropTypes.array,
-    selectedQuery: PropTypes.string,
+    query: PropTypes.string,
+    selectedQuery: PropTypes.number,
     submitQuery: PropTypes.func,
     updateQuery: PropTypes.func,
     cart: PropTypes.object

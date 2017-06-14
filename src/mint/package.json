@@ -159,7 +159,7 @@
     "dev": "npm run backend",
     "cleanup": "rm -r public/build",
     "test": "env BUILD_MODE=prebuilt mocha --bail tests/all.js",
-    "email": "SEND_EMAILS=1 nodemon ./server/index.js",
+    "email": "SEND_EMAILS=1 nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common ",
     "react-test": "node_modules/.bin/karma start karma.conf.js",
     "apidoc": "npm run apidocs",
     "apidocs": "apidoc -i server/routes/ -o ../../docs/api/ && http-server ../../docs/api -o",

@@ -9,7 +9,7 @@ export default class SettingsHeader extends Component {
 
   static propTypes = {
     match: PropTypes.object.isRequired,
-    icon: PropTypes.object,
+    icon: PropTypes.string,
     text: PropTypes.string,
     user: PropTypes.object,
     cart: PropTypes.object,

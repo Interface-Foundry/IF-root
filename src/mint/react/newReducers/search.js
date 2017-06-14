@@ -1,7 +1,7 @@
 // react/reducers/cards.js
 
 const initialState = { 
-  selectedItemId: 0,
+  selectedItemId: '',
   history: false,
   results: [], 
   query: '' 
