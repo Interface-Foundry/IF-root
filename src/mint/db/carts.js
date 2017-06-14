@@ -123,6 +123,13 @@ var cartsCollection = Waterline.Collection.extend({
     /** cart subtotal from store */
     subtotal: 'float',
 
+    /** shoud show the Pay with Stripe button */
+    kip_pay_allowed: {
+      type: 'boolean',
+      default: false
+    },
+
+    /** function to archive this object */
     archive: archive
   }
 });

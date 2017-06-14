@@ -12,7 +12,6 @@ const path = require('path')
 const haversine = require('haversine')
 const stable = require('stable')
 const thunkify = require('thunkify')
-const ipinfo = thunkify(require('ipinfo'))
 const spliddit = require('spliddit')
 const StoreFactory = require('../cart/StoreFactory')
 
