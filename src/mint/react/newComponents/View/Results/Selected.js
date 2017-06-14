@@ -6,11 +6,16 @@ import { displayCost, removeDangerousCharactersFromString } from '../../../utils
 import { Right } from '../../../../react-common/kipsvg';
 import { Delete } from '../../../../react-common/kipsvg';
 
+import { Icon } from '../../../../react-common/components';
+
 export default class Selected extends Component {
 
   render() {
     const { cart, item, cartAsins, selectItem, addItem, arrow } = this.props,
           afterClass = !arrow ? 'left' : ( arrow === 1 ? 'middle' : 'right' );
+
+    // temp value 
+    const locked = !!cart.amazon_cartid
 
     return (
       <td key={item.id} colSpan='100%' className='selected'>
@@ -39,7 +44,7 @@ export default class Selected extends Component {
             </div> : <div className='padding'/>
           }
           <div className='action'>
-            <button onClick={() => addItem(cart.id, item.id)}><span>Add to Cart <Right/></span></button>
+            { locked ? <button disabled={true}><Icon icon='Locked'/></button> : <button onClick={() => addItem(cart.id, item.id)}><span>Add to Cart <Right/></span></button> }
           </div>
         </div>
       </td>

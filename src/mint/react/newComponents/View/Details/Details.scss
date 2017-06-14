@@ -32,6 +32,17 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 		.card {
 			border-top: 3px solid $secondaryColor;
+			padding: 0;
+			&.locked {
+				border-top: 3px solid #555;
+				.cover {
+					background: #555;
+					color: white!important;
+				}
+			}
+			.cover {
+				padding: $padding;
+			}
 
 			.left {
 				display: inline-block;
@@ -57,6 +68,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 						line-height: 20px;
 						cursor: pointer;
 						white-space: nowrap;
+
+						.locked {
+							svg {
+								margin: 0 $padding 0 0;
+								fill: white;
+							}
+						}
 
 						svg {
 							margin-left: $padding;
@@ -127,6 +145,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			.metrics {
 				display: block;
 				width: 100%;
+				padding: $padding;
 
 				.metric {
 					display: inline-block;

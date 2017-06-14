@@ -5,6 +5,8 @@ import React, { Component } from 'react';
 
 import { calculateItemTotal, displayCost, timeFromDate } from '../../../utils';
 import { splitCartById } from '../../../newReducers';
+
+import { Icon } from '../../../../react-common/components';
 import Empty from '../Empty';
 
 //Analytics!
@@ -17,6 +19,9 @@ export default class Cart extends Component {
     const { cart, user, query, editId, editItem, removeItem } = this.props,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my;
+
+    // temp value 
+    const locked = !!cart.amazon_cartid
 
     return (
       <table className='cart'>
@@ -45,10 +50,13 @@ export default class Cart extends Component {
                           </div>
                           {
                             editId !== item.id ? 
-                            <div className='action'>
-                              <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
-                            </div> :
-                            <div className='action'>
+                              (
+                                !!locked ? <div className='action locked'>
+                                  <button disabled='true'><Icon icon='Locked'/></button>
+                                </div> : <div className='action'>
+                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                                </div>
+                              ) : <div className='action'>
                               <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
                             </div> 
                           }
@@ -86,11 +94,13 @@ export default class Cart extends Component {
                               <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
                             </div> 
                             {
-                              editId !== item.id ? 
-                              <div className='action'>
-                                <button onClick={() => editItem(item.id)}>Edit Item</button>
-                              </div> :
-                              <div className='action'>
+                              editId !== item.id ? (
+                                !!locked ? <div className='action locked'>
+                                  <button disabled='true'><Icon icon='Locked'/></button>
+                                </div> : <div className='action'>
+                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                                </div>
+                              ) : <div className='action'>
                                 <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button>
                               </div> 
                             }

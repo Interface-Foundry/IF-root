@@ -14,7 +14,7 @@ import ReactGA from 'react-ga';
 export default class Details extends Component {
 
   render() {
-    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user } = this.props,
+    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, amazon_cartid } = this.props,
           total = calculateItemTotal(items),
           metrics = [{
               name: 'Members',
@@ -31,29 +31,45 @@ export default class Details extends Component {
             }],
           likedList = likes.map((user) => user.id);
 
+    // temp value 
+    const locked = !!amazon_cartid
+
     return (
       <table className='details'>
         <tbody>
           <tr>
   			    <th colSpan='100%'>
-              <div className='card'>
-                <div className='left'>
-                  <div className={`image`} style={{
-                    backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
-                  }}/>
-                  <div className='text'> 
-                    <h1><Link to={`/cart/${id}/m/edit`}>{name} <Icon icon='Edit'/><span>Edit</span></Link></h1>
-                    <h4>{store} {store_locale}</h4>
-                    <h4>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h4>
-                  </div> 
-                </div>
-                <div className='right'>
-                  <ButtonsContainer/>
+              <div className={`card ${locked ? 'locked' : ''}`}>
+                <div className='cover'>
+                  <div className='left'>
+                    <div className={`image`} style={{
+                      backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
+                    }}/>
+                    <div className='text'> 
+                      <h1>
+                        { 
+                          locked ? <div className='locked'>
+                            <Icon icon='Locked'/>
+                            {name} 
+                          </div> : <Link to={`/cart/${id}/m/edit`}>
+                            {name} 
+                            <Icon icon='Edit'/>
+                            <span>Edit</span>
+                          </Link>
+                        }
+                      </h1>
+                      <h4>{store} {store_locale}</h4>
+                      <h4>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h4>
+                    </div> 
+                  </div>
+                  <div className='right'>
+                    <ButtonsContainer/>
+                  </div>
                 </div>
                 <div className='metrics'>
                   {
                     metrics.map((m) => (
-                      <div className={
+                      <div key={m.name} className={
                           `metric 
                           ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}` 
                         } onClick={() => m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : null}>

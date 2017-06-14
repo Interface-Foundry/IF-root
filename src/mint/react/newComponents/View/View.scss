@@ -43,6 +43,15 @@
 			width: 50%;
 			border-radius: 0;
 			padding: 0 $padding;
+
+			&.blue {
+				background: $secondaryColor;
+				color: white;
+
+				svg {
+					fill: white;
+				}
+			}
 		}
 	}
 }
