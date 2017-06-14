@@ -134,7 +134,6 @@ var cartsCollection = Waterline.Collection.extend({
 
     /** function to archive this object */
     archive: archive
->>>>>>> 5ab73ea11e7a7af14cb4ca378cdceb3b2ebed704
   }
 });
 

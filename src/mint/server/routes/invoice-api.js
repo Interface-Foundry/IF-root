@@ -157,8 +157,10 @@ module.exports = function (router) {
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
-      split: _.get(req, 'params.split_type', 'equal')
+      split: _.get(req, 'body.split_type', 'equal')
     }, _.isUndefined)
+
+    logging.info('invoice data', invoiceData)
 
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
     const newInvoice = await invoice.createInvoice()

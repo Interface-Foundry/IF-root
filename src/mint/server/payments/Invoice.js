@@ -67,13 +67,16 @@ class Invoice {
       throw new Error('Invoice needs to be attached to invoice')
     }
 
+    logging.info('THIS', this)
+
     const newInvoice = await db.Invoices.create({
       leader: cart.leader,
       members: cart.members.map(member => member.id),
       invoice_type: this.invoice,
       cart: cart.id,
       paid: false,
-      total: cart.subtotal
+      total: cart.subtotal,
+      split_type: this.split
     })
 
     return newInvoice
@@ -84,10 +87,11 @@ class Invoice {
    *
    * @param      {array}   users   The users
    */
-  async emailUsers (users) {
+  async sendCollectionEmail (users) {
     logging.info('THIS', this)
     users.map(async (user) => {
-      const email = await db.Emails.create({
+      var amount = await this.determineUserPaymentAmount()
+      var email = await db.Emails.create({
         recipients:'user.email',
         subject: 'Payment Subject',
         cart: this.cart
@@ -107,15 +111,11 @@ class Invoice {
    * @return     {Promise}  { description_of_the_return_value }
    */
   async paidInFull() {
-    logging.info('THIS', this)
     const payments = await db.Payments.find({invoice: this.id})
-    logging.info('payments', payments)
     const amountPaid = payments.reduce((prev, curr) => {
       return prev += curr.amount
     }, 0)
 
-    logging.info('AMOUNT PAID:', JSON.stringify(amountPaid))
-    logging.info('TOTAL:', this.total)
     if (amountPaid >= this.total) {
       return true
     }
