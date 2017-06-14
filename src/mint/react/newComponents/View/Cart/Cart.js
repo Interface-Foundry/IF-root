@@ -20,9 +20,6 @@ export default class Cart extends Component {
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my;
 
-    // temp value 
-    const locked = !!cart.amazon_cartid
-
     return (
       <table className='cart'>
         <thead>
@@ -51,7 +48,7 @@ export default class Cart extends Component {
                           {
                             editId !== item.id ? 
                               (
-                                !!locked ? <div className='action locked'>
+                                !!cart.locked ? <div className='action locked'>
                                   <button disabled='true'><Icon icon='Locked'/></button>
                                 </div> : <div className='action'>
                                   <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
@@ -95,7 +92,7 @@ export default class Cart extends Component {
                             </div> 
                             {
                               editId !== item.id ? (
-                                !!locked ? <div className='action locked'>
+                                !!cart.locked ? <div className='action locked'>
                                   <button disabled='true'><Icon icon='Locked'/></button>
                                 </div> : <div className='action'>
                                   <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>

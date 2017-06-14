@@ -11,9 +11,6 @@ export default class Default extends Component {
   render() {
     const { cart, item, cartAsins, selectItem, addItem } = this.props;
 
-    // temp value 
-    const locked = !!cart.amazon_cartid
-
     return (
       <td>
         <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''}`} onClick={() => selectItem(item.id)}>
@@ -29,7 +26,7 @@ export default class Default extends Component {
           </div> 
           <div className='action'>
             <button className='more' onClick={() => selectItem(item.id)}>See More</button>
-            { locked ? <button disabled={true}><Icon icon='Locked'/></button> : <button onClick={() => addItem(cart.id, item.id)}>Add to Cart <Right/></button> }
+            { cart.locked ? <button disabled={true}><Icon icon='Locked'/></button> : <button onClick={() => addItem(cart.id, item.id)}>Add to Cart <Right/></button> }
           </div>
         </div>
       </td>

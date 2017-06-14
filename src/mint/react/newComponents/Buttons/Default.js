@@ -35,10 +35,17 @@ export default class Default extends Component {
     total = calculateItemTotal(cart.items);
 
     return (
-      <span className='default'>
-        <button className='yellow sub'> <a href={`/api/cart/${cart.id}/checkout`}><div> Checkout <br/> <span> {displayCost(total)} </span> </div>  <Cart/></a> </button>
-        <button className='blue' onClick={::this._handleShare}> Share <Icon icon='Person'/> </button>
-      </span>
+      <div className='default'>
+        {
+          cart.locked ? <span>
+            <button className='yellow sub'> Re-Order <br/> <span> {displayCost(total)} </span> </button>
+            <button className='locked'> <Icon icon='Locked'/> Unlock </button>
+          </span> : <span>
+            <button className='yellow sub'> <a href={`/api/cart/${cart.id}/checkout`}><div> Checkout <br/> <span> {displayCost(total)} </span> </div>  <Cart/></a> </button>
+            <button className='blue' onClick={::this._handleShare}> Share <Icon icon='Person'/> </button>
+          </span>
+        }
+      </div>
     );
   }
 }

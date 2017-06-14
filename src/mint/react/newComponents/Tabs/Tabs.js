@@ -8,7 +8,7 @@ export default class Tabs extends Component {
 
   render() {
     const { tab, selectTab, cart } = this.props,
-          tabs = [
+          tabs = !!cart.kip_pay_allowed ? [
             { 
               tab: 'cart',
               display: `Cart (${cart.items.length})`
@@ -20,6 +20,15 @@ export default class Tabs extends Component {
             {
               tab: 'invoice',
               display: 'Invoice'
+            }
+          ] : [
+            { 
+              tab: 'cart',
+              display: `Cart (${cart.items.length})`
+            },
+            {
+              tab: 'search',
+              display: 'Search'
             }
           ];
 

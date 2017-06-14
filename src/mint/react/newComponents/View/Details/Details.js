@@ -14,7 +14,7 @@ import ReactGA from 'react-ga';
 export default class Details extends Component {
 
   render() {
-    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, amazon_cartid } = this.props,
+    const { name, leader, store,  store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, locked } = this.props,
           total = calculateItemTotal(items),
           metrics = [{
               name: 'Members',
@@ -30,9 +30,6 @@ export default class Details extends Component {
               value: likes.length
             }],
           likedList = likes.map((user) => user.id);
-
-    // temp value 
-    const locked = !!amazon_cartid
 
     return (
       <table className='details'>

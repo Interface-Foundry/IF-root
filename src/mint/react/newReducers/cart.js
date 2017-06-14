@@ -12,14 +12,20 @@ const initialState = {
   checkouts:0,
   clones:0,
   views:0,
-  likes: []
+  likes: [],
+  kip_pay_allowed: false,
+  locked: false
 } 
 
 export default function cart(state = initialState, action) {
   switch (action.type) {
+    case 'CART_SUCCESS':
+      return {
+        ...initialState,
+        ...action.response
+      };
     case 'LIKE_CART_SUCCESS': 
     case 'METRICS_SUCCESS':
-    case 'CART_SUCCESS':
     case 'UPDATE_CART_SUCCESS':
       return {
         ...state,
