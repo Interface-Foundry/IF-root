@@ -22,6 +22,7 @@ const countryCoordinates = require('../cart/cart_types')
   .countryCoordinates
 const category_utils = require('../utilities/category_utils');
 const cloning_utils = require('../utilities/cloning_utils');
+const geolocation = require('../utilities/geolocation')
 
 if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyByHPo9Ew_GekqBBEs6FL40fm3_52dS-g8')
@@ -990,25 +991,12 @@ module.exports = function (router) {
    */
   router.get('/cart_type', (req, res) => co(function* () {
 
-    // get customer IP
-    var ip = (req.headers['x-forwarded-for'] || '')
-      .split(',')[0] || req.connection.remoteAddress;
-    console.log('IP', ip)
-
-    var ipresponse = yield ipinfo(ip);
-
-    // if we can't tell where they are, assume the US
-    if (!ipresponse.country) {
-      ipresponse.country = 'US',
-        ipresponse.loc = '40.7449,-73.9782'
-    }
-
-    var country = ipresponse.country;
+    var geo = geolocation(req.ip) || geolocation.default
+    var country = geo.country;
     var userCoords = {
-      latitude: ipresponse.loc.split(',')[0],
-      longitude: ipresponse.loc.split(',')[1]
+      latitude: geo.ll[0],
+      longitude: geo.ll[1]
     }
-    console.log('ipresponse', ipresponse)
 
     // assemble list of stores
     var stores = [];

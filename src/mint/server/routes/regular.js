@@ -204,6 +204,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   } else {
     throw new Error('Cannot create new cart for store ' + req.params.store)
   }
+  debugger
 
   console.log('cart parte 1', cart)
 
@@ -212,7 +213,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   if (user_id) {
     cart.leader = user_id
   }
-  
+
   var date = new Date()
   if (cart.store_locale === 'US') {
     var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
@@ -257,10 +258,10 @@ router.get('/newcart/:store', (req, res) => co(function * () {
  */
 router.get('/v/:version', (req, res)=> co(function *() {
   let version = req.params.version.toUpperCase();
-  version = (version === 'A' || version === 'B' || version === 'C' || version === 'PRIME') 
-    ? version 
-    : res.UserSession && res.UserSession.siteVersion 
-      ? res.UserSession.siteVersion 
+  version = (version === 'A' || version === 'B' || version === 'C' || version === 'PRIME')
+    ? version
+    : res.UserSession && res.UserSession.siteVersion
+      ? res.UserSession.siteVersion
       : _.sample(['A','B','C']);
   req.UserSession.siteVersion = version;
   yield req.UserSession.save();
