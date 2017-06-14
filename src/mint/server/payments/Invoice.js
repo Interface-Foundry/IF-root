@@ -22,7 +22,7 @@ class Invoice {
    * @return     {Promise}  The invoice db object into class object
    */
   static async GetById (invoiceId) {
-    const invoice = await db.Invoice.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
     if (!invoice) {
       throw new Error('no invoice found')
     }
@@ -67,7 +67,7 @@ class Invoice {
       throw new Error('Invoice needs to be attached to invoice')
     }
 
-    const newInvoice = await db.Invoice.create({
+    const newInvoice = await db.Invoices.create({
       leader: cart.leader,
       members: cart.members.map(member => member.id),
       invoice_type: this.invoice,
@@ -85,6 +85,7 @@ class Invoice {
    * @param      {array}   users   The users
    */
   async emailUsers (users) {
+    logging.info('THIS', this)
     users.map(async (user) => {
       const email = await db.Emails.create({
         recipients:'user.email',
@@ -106,11 +107,16 @@ class Invoice {
    * @return     {Promise}  { description_of_the_return_value }
    */
   async paidInFull() {
-    const payments = await db.Payment.find({id: this.invoice_id})
-    const amountPaid = payments.reduce((curr, prev) => {
+    logging.info('THIS', this)
+    const payments = await db.Payments.find({invoice: this.id})
+    logging.info('payments', payments)
+    const amountPaid = payments.reduce((prev, curr) => {
       return prev += curr.amount
     }, 0)
-    if (amountPaid > this.total) {
+
+    logging.info('AMOUNT PAID:', JSON.stringify(amountPaid))
+    logging.info('TOTAL:', this.total)
+    if (amountPaid >= this.total) {
       return true
     }
     return false
@@ -134,7 +140,7 @@ class MintInvoice extends Invoice {
   }
 
   async checkPrevInvoice () {
-    const invoice = await db.Invoice.findOne({cart: this.cart})
+    const invoice = await db.Invoices.findOne({cart: this.cart})
     if (invoice) {
       return invoice
     }

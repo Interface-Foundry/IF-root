@@ -16,8 +16,8 @@ const paymentsCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
-    /** payment can have one invoice associated with the payment */
-    invoice: Waterline.isA('invoice'),
+    /** cart can have one invoice associated with the payment */
+    invoice: Waterline.isA('invoices'),
 
     /** user can have many payments, payment would be one user */
     user: Waterline.isA('user_accounts'),
@@ -25,7 +25,7 @@ const paymentsCollection = Waterline.Collection.extend({
     /**
      * the source id
      */
-    payment_source: Waterline.isA('payment_source'),
+    payment_source: Waterline.isA('payment_sources'),
 
     /** amount user paid */
     amount: 'float',

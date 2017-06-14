@@ -1,10 +1,16 @@
 const _ = require('lodash')
+const moment = require('moment');
 
 const Invoice = require('../payments/Invoice.js')
 const PaymentSource = require('../payments/PaymentSources.js')
+const utils = require('../utilities/invoice_utils.js')
 
+var db
+const dbReady = require('../../db')
+dbReady.then((models) => { db = models; })
 
 module.exports = function (router) {
+
   // ------------------------------------
   // --------- GENERAL ROUTES  ----------
   // ------------------------------------
@@ -56,6 +62,7 @@ module.exports = function (router) {
      * @apiParam {string} collection_metho (optional) - preference for how to bother users
      */
     .get(async (req, res) => {
+      logging.info('get payment called')
       const collectionType = _.get(req, 'query.collection_method', 'email')
       const invoice = await Invoice.GetById(req.params.invoice_id)
       const paymentComplete = await invoice.paidInFull()
@@ -70,7 +77,7 @@ module.exports = function (router) {
 
 
     /**
-     * @api {post} /invoice/:invoice_id/payment post payment source to invoice
+     * @api {post} /invoice/payment/:invoice_idpost payment source to invoice
      * @apiDescription post a payment to an invoice
      * @apiGroup Payments
      *
@@ -79,6 +86,7 @@ module.exports = function (router) {
      * @apiParam {number} payment_amount - amount of invoice to pay
      */
     .post(async (req, res) => {
+      logging.info('posted to payment route')
       if (!_.get(req, 'body.payment_source')) {
         throw new Error('Need invoice id to post payment to')
       }
@@ -87,8 +95,18 @@ module.exports = function (router) {
       }
       const invoice = await Invoice.GetById(req.params.invoice_id)
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
+      logging.info('got the payment source')
       const paymentAmount = req.body.payment_amount
+      logging.info('ditto amount')
       const payment = await paymentSource.pay(invoice, paymentAmount)
+      logging.info('paid')
+
+      // If this invoice has been fully paid, fire off whatever emails
+      var done = await invoice.paidInFull()
+      if (done) {
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+      }
+
       return res.send(payment)
     })
 
@@ -124,6 +142,7 @@ module.exports = function (router) {
       const paymentType = req.body.payment_source
       const paymentSource = await PaymentSource.Create(paymentType, {user: req.params.user_id})
       const createdSource = await paymentSource.createPaymentSource(req.body)
+      logging.info('new payment source:', createdSource)
       return res.send(createdSource)
     })
 

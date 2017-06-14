@@ -9,8 +9,8 @@ var addressesCollection = Waterline.Collection.extend({
     line_1: 'string',
     line_2: 'string',
     city: 'string',
-    region: 'string',
-    code: 'string',
+    state: 'string', //region
+    zip: 'string', //code
     country: 'string',
     delivery_message: 'string',
 

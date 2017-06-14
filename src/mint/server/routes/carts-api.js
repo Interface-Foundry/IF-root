@@ -996,7 +996,7 @@ module.exports = function (router) {
       latitude: geo.ll[0],
       longitude: geo.ll[1]
     }
-
+    
     // assemble list of stores
     var stores = [];
 
@@ -1008,8 +1008,6 @@ module.exports = function (router) {
       var coordsB = countryCoordinates[b.store_countries[0]]
       var havA = haversine(userCoords, { latitude: coordsA[0], longitude: coordsA[1] });
       var havB = haversine(userCoords, { latitude: coordsB[0], longitude: coordsB[1] })
-      logging.info(a.store_name, 'havA', havA)
-      logging.info(b.store_name, 'havB', havB)
       return Math.abs(havA) - Math.abs(havB)
     })
     // but since the geocoordinates of countries are pretty random,
