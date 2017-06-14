@@ -42,6 +42,17 @@ export const fetchItem = item_id => get(
   })
 );
 
+export const copyItem = (cart_id, item_id) => post(
+  `/api/item/${item_id}/clone/${cart_id}`,
+  'COPY_ITEM',
+  {},
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
 export const removeItem = (cart_id, item_id) => del(
   `/api/cart/${cart_id}/item/${item_id}`,
   'REMOVE_ITEM',

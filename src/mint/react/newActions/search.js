@@ -33,12 +33,14 @@ export const submitQuery = (query, store, locale) => get(
   })
 );
 
-export const fetchCategories = (cart_id) => get(
+export const fetchCategories = cart_id => get(
   `/api/categories/${cart_id}`,
-  'SEARCH',
+  'CATEGORIES',
   (type, json) => ({
     type: `${type}_SUCCESS`,
-    response: json,
+    response: {
+      categories: json
+    },
     receivedAt: Date.now()
   })
 );

@@ -41,7 +41,8 @@ export {
 	editItem,
 	updateItem,
 	fetchItem,
-	removeItem
+	removeItem,
+  copyItem
 } from './item';
 
 export { 
@@ -57,5 +58,6 @@ export {
 	selectItem,
 	submitQuery,
 	updateQuery,
-	toggleHistory
+	toggleHistory,
+  fetchCategories
 } from './search';

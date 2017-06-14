@@ -9,7 +9,8 @@ const mapStateToProps = (state, ownProps) => ({
   cart: state.cart,
   query: state.search.query,
   results: state.search.results,
-  history: state.search.history
+  history: state.search.history,
+  categories: state.search.categories
 });
 
 const mapDispatchToProps = dispatch => ({

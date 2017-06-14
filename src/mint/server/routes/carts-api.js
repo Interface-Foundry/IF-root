@@ -794,6 +794,21 @@ module.exports = function (router) {
   }))
 
   /**
+   * @api {post} /api/item/:item_id/clone
+   * @apiParam :item_id the item we are cloning
+   * @apiParam :cart_id the cart we are adding it to
+   */
+  router.post('/item/:item_id/clone/:cart_id', (req, res) => co(function* () {
+    var user_id = _.get(req, 'UserSession.user_account.id')
+    if (!user_id) throw new Error('User not logged in')
+    var clone = yield cloning_utils.cloneItem(req.params.item_id, user_id, req.params.cart_id)
+    var cart = yield db.Carts.findOne({id: req.params.cart_id})
+    cart.items.add(clone.id)
+    yield cart.save()
+    res.send(clone)
+  }))
+
+  /**
    * @api {delete} /api/item/:item_id/reaction/:user_id Delete Reaction
    * @apiGroup Carts
    * @apiDescription remove a specific reaction off an item on behalf of a user

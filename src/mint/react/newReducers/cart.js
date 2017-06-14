@@ -37,6 +37,7 @@ export default function cart(state = initialState, action) {
       ...state,
       items: state.items.filter((item, i) => item.id !== action.response)
     };
+  case 'COPY_ITEM_SUCCESS':
   case 'ADD_ITEM_SUCCESS':
     {
       return {

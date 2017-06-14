@@ -8,21 +8,24 @@ import { splitCartById } from '../../../newReducers';
 
 import { Icon } from '../../../../react-common/components';
 import Empty from '../Empty';
+import CartButtons from './CartButtons';
 
 export default class Cart extends Component {
   
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,
+    editId: PropTypes.string,
+    removeItem: PropTypes.func,
     editItem: PropTypes.func,
-    editId: PropTypes.func,
-    removeItem: PropTypes.func
+    copyItem: PropTypes.func
   }
 
   render() {
-    const { cart, user, editId, editItem, removeItem } = this.props,
+    const { cart, user, editId } = this.props,
       userCarts = splitCartById(this.props, user),
-      myCart = userCarts.my;
+      myCart = userCarts.my,
+      isLeader = user.id === cart.leader.id;
 
     return (
       <table className='cart'>
@@ -49,18 +52,7 @@ export default class Cart extends Component {
                             <h4> Qty: {item.quantity} </h4>
                             <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
                           </div>
-                          {
-                            editId !== item.id ? 
-                              (
-                                cart.locked ? <div className='action locked'>
-                                  <button disabled='true'><Icon icon='Locked'/></button>
-                                </div> : <div className='action'>
-                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
-                                </div>
-                              ) : <div className='action'>
-                              <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
-                            </div> 
-                          }
+                          <CartButtons {...this.props} item={item}/>
                         </li>
                       ))
                     }
@@ -94,17 +86,7 @@ export default class Cart extends Component {
                               <h4> Qty: {item.quantity} </h4>
                               <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
                             </div> 
-                            {
-                              editId !== item.id ? (
-                                cart.locked ? <div className='action locked'>
-                                  <button disabled='true'><Icon icon='Locked'/></button>
-                                </div> : <div className='action'>
-                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
-                                </div>
-                              ) : <div className='action'>
-                                <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button>
-                              </div> 
-                            }
+                            <CartButtons {...this.props} item={item}/>
                           </li>
                         ))
                       }

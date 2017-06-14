@@ -4,18 +4,16 @@ const initialState = {
   selectedItemId: '',
   history: false,
   results: [], 
+  categories: [],
   query: '' 
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
+    case 'CATEGORIES_SUCCESS':
+    case 'SEARCH_SUCCESS':
     case 'SELECT_ITEM':
     case 'UPDATE_QUERY':
-      return {
-        ...state,
-        ...action.response
-      };
-    case 'SEARCH_SUCCESS':
       return {
         ...state,
         ...action.response

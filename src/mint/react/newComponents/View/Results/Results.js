@@ -16,6 +16,7 @@ export default class Results extends Component {
     addItem: PropTypes.func,
     selectItem: PropTypes.func
   }
+
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if (
@@ -58,7 +59,7 @@ export default class Results extends Component {
           <tr>
             <th colSpan='100%'>
               <nav>
-                <p> Showing {numResults} results for: <span className='price'>"{query}"</span>  </p>
+                <p> About {numResults} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
               </nav>
             </th>
           </tr>

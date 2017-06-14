@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
 import Reducers from './newReducers';
-import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics } from './newActions';
+import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories } from './newActions';
 import { AppContainer } from './newContainers';
 
 //Analytics!
@@ -56,6 +56,7 @@ store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
   store.dispatch(fetchCart(cart_id));
   store.dispatch(fetchMetrics(cart_id));
+  store.dispatch(fetchCategories(cart_id))
 });
 
 ReactDOM.render(
