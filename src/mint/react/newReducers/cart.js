@@ -14,6 +14,7 @@ const initialState = {
   views:0,
   likes: [],
   kip_pay_allowed: false,
+  privacy: "public",
   locked: false
 } 
 

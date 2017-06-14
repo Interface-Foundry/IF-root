@@ -26,14 +26,9 @@ export default class Default extends Component {
       <span className='default'>
         <div className='header__left'>
           <Link to={`/cart/${cart.id}`}>
-            {cart.locked 
-              ? <div className={`navbar__icon`}>
-                  <Icon icon='Locked'/>
-                </div> 
-              : <div className={`image`} style={{
-                  backgroundImage: `url(${cart.thumbnail_url ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
-                }}/>
-            }
+            <div className={`image`} style={{
+              backgroundImage: `url(${cart.thumbnail_url ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
+            }}/>
             <h3>
               Kip
             </h3>
