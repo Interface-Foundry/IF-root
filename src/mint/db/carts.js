@@ -121,7 +121,20 @@ var cartsCollection = Waterline.Collection.extend({
     parent_reorder: 'string',
 
     /** @type {[user_accounts]} times this cart has been checked out */
-    checkouts: Waterline.isMany('checkout_events')
+    checkouts: Waterline.isMany('checkout_events'),
+
+    /** cart subtotal from store */
+    subtotal: 'float',
+
+    /** shoud show the Pay with Stripe button */
+    kip_pay_allowed: {
+      type: 'boolean',
+      default: false
+    },
+
+    /** function to archive this object */
+    archive: archive
+>>>>>>> 5ab73ea11e7a7af14cb4ca378cdceb3b2ebed704
   }
 });
 

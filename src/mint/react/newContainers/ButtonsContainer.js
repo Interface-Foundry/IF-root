@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { Buttons } from '../newComponents';
+import { push } from 'react-router-redux'
 
 import { 
   logout,	
@@ -20,7 +21,8 @@ const mapDispatchToProps = dispatch => ({
   logout: () => {
     dispatch(get('/api/logout', 'SESSION'));
     dispatch(logout());
-  }
+  },
+  push: (url) => dispatch(push(url))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);

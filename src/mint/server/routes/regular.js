@@ -5,7 +5,7 @@ var _ = require('lodash');
 
 const cartUtils = require('../cart/cart_utils')
 const dealsDb = require('../deals/deals')
-
+const geolocation = require('../utilities/geolocation')
 
 /**
  * Models loaded from the waterline ORM
@@ -205,14 +205,23 @@ router.get('/newcart/:store', (req, res) => co(function * () {
     throw new Error('Cannot create new cart for store ' + req.params.store)
   }
 
-  console.log('cart parte 1', cart)
+  // figure out what country the user is in
+  var geo = geolocation(req) || geolocation.default
+
+  // determine if we should show the Pay with Stripe button
+  // if any of these conditions are met, then kip pay is allowed
+  cart.kip_pay_allowed = [
+    cart.store === 'ypo',
+    cart.store_locale !== geo.country && geo.country !== 'GB', // TODO switch everything that is UK over to the official country code GB
+    cart.store_locale !== 'UK' && geo.country === 'GB'
+  ].filter(Boolean).length > 0
 
   // Add the cart leader if they are logged in
   const user_id = _.get(req, 'UserSession.user_account.id')
   if (user_id) {
     cart.leader = user_id
   }
-  
+
   var date = new Date()
   if (cart.store_locale === 'US') {
     var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
@@ -221,10 +230,8 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   }
   cart.name = dateString + ' Kip Cart'
 
-  // This is all the investors care about right here. This is the money line.
-  console.log('creating cart', cart)
+  // This is all we care about, creating new carts. 25 thousand carts per month is the goal
   cart = yield db.Carts.create(cart)
-  console.log(cart)
 
   // yay direct the user to their new cart
   res.redirect(`/cart/${cart.id}/`);
@@ -257,10 +264,10 @@ router.get('/newcart/:store', (req, res) => co(function * () {
  */
 router.get('/v/:version', (req, res)=> co(function *() {
   let version = req.params.version.toUpperCase();
-  version = (version === 'A' || version === 'B' || version === 'C' || version === 'PRIME') 
-    ? version 
-    : res.UserSession && res.UserSession.siteVersion 
-      ? res.UserSession.siteVersion 
+  version = (version === 'A' || version === 'B' || version === 'C' || version === 'PRIME')
+    ? version
+    : res.UserSession && res.UserSession.siteVersion
+      ? res.UserSession.siteVersion
       : _.sample(['A','B','C']);
   req.UserSession.siteVersion = version;
   yield req.UserSession.save();

@@ -49,6 +49,7 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
+app.enable('trust proxy'); // req.ip gets set from x-forwarded-for headers
 app.use(compress());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -57,6 +58,7 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
+
 
 /**
  * Creates a cookie-based session for the client
