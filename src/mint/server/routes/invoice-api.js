@@ -146,6 +146,28 @@ module.exports = function (router) {
       return res.send(createdSource)
     })
 
+
+  /**
+   * @api {get} /invoice/cart/:cart_id
+   * @apiDescription get all invoices related to a cart, if no invoices create one.
+   * @apiGroup Invoice
+   *
+   * @apiParam {type} :cart_id - cart_id to look for
+   */
+  router.get('/invoice/cart/:cart_id', async (req, res) => {
+    const invoices = await db.Invoices.GetByCartId(req.params.cart_id)
+    if (invoices.length === 0) {
+      const invoiceData = {
+        cart: req.params.cart_id,
+        split: 'equal'
+      }
+      const invoice = Invoice.Create('mint', invoiceData)
+      const newInvoice = await invoice.createInvoice()
+      return res.send(newInvoice)
+    }
+
+    res.send(invoices)
+  })
   /**
   * @api {post} /invoice/:invoice_type/:cart_id create invoice
   * @apiDescription create an invoice for the specified cart
@@ -157,7 +179,7 @@ module.exports = function (router) {
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
-      split: _.get(req, 'params.split_type', 'equal')
+      split: _.get(req, 'body.split_type', 'equal')
     }, _.isUndefined)
 
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
