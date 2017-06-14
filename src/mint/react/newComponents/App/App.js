@@ -28,10 +28,12 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fetchCart, match } = this.props;
+    const { fetchCart, fetchMetrics, match } = this.props;
 
-    if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2])
+    if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
       fetchCart(nextProps.match.url.split('/')[2])
+      fetchMetrics(nextProps.match.url.split('/')[2])
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
