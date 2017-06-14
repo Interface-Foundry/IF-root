@@ -32,7 +32,8 @@ export {
 	deleteCart,
 	fetchMetrics,
 	likeCart,
-	unlikeCart
+	unlikeCart,
+	reorderCart
 } from './cart';
 
 export {

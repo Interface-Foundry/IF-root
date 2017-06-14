@@ -27,10 +27,19 @@ export const fetchCarts = () => get(
 	}
 )
 
-
 export const fetchMetrics = cart_id => get(
 	`/api/cart/${cart_id}/metrics`, 
 	'METRICS', 
+	(type, json) => ({
+		type: `${type}_SUCCESS`,
+		response: json,
+		receivedAt: Date.now()
+	})
+)
+
+export const reorderCart = cart_id => get(
+	`/api/cart/${cart_id}/reorder`, 
+	'CART', 
 	(type, json) => ({
 		type: `${type}_SUCCESS`,
 		response: json,

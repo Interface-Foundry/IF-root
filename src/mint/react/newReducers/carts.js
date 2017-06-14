@@ -1,7 +1,5 @@
 // react/reducers/otherCarts.js
 
-import { RECEIVE_CARTS, RECEIVE_UPDATE_CART, LOGOUT, DELETE_CART } from '../constants/ActionTypes';
-
 const initialState = {
   carts: [],
   archivedCarts: []

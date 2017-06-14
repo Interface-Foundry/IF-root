@@ -3,9 +3,9 @@ import { Buttons } from '../newComponents';
 import { push } from 'react-router-redux'
 
 import { 
-  logout,	
 	toggleModal,
-	toggleSidenav
+	updateCart,
+  reorderCart
 } from '../newActions';
 
 const mapStateToProps = (state, props) => {
@@ -17,12 +17,9 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = dispatch => ({
   _toggleLoginScreen: () => dispatch(toggleModal()),
-  _toggleSidenav: () => dispatch(toggleSidenav()),
-  logout: () => {
-    dispatch(get('/api/logout', 'SESSION'));
-    dispatch(logout());
-  },
-  push: (url) => dispatch(push(url))
+  reorderCart: (id) => dispatch(reorderCart(id)),
+  push: (url) => dispatch(push(url)),
+  updateCart: (cart) => dispatch(updateCart(cart))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);
