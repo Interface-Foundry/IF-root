@@ -115,7 +115,7 @@ class Dropdown extends Component {
 class AmazonValue extends Component {
   static propTypes = {
     value: PropTypes.object,
-    children: PropTypes.string,
+    children: PropTypes.string
   }
   render() {
     const { value, children } = this.props;
@@ -144,7 +144,7 @@ class AmazonOption extends Component {
     children: PropTypes.string.isRequired,
     onSelect: PropTypes.func.isRequired,
     onFocus: PropTypes.func.isRequired,
-    isFocused: PropTypes.bool.isRequired,
+    isFocused: PropTypes.bool.isRequired
   }
 
   handleMouseDown(event) {

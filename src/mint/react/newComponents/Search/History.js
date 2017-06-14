@@ -6,8 +6,16 @@ import { Icon } from '../../../react-common/components';
 import { getSearchHistory } from '../../utils';
 
 export default class History extends Component {
+  static propTypes = {
+    query: PropTypes.array,
+    selectedQuery: PropTypes.string,
+    submitQuery: PropTypes.func,
+    updateQuery: PropTypes.func,
+    cart: PropTypes.object
+  }
+
   render() {
-    const { props: { query, selectedQuery, submitQuery, updateQuery, cart : { store = '', store_locale = '' } } } = this,
+    const { props: { query, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
     history = query.length > 0 ? getSearchHistory(query) : [];
 
     return (

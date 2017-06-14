@@ -2,7 +2,6 @@
 
 import { connect } from 'react-redux';
 import { EditCart } from '../newComponents';
-import { getCartById } from '../newReducers';
 import { updateCart, clearCart, deleteCart } from '../newActions';
 
 // Ask hannah and add back in, look in Containers.

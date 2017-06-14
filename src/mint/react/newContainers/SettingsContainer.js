@@ -14,7 +14,7 @@ const mapDispatchToProps = dispatch => ({
   updateUser: (id, user) => {
     ReactGA.event({
       category: 'Person',
-      action: 'Edited Info',
+      action: 'Edited Info'
     });
     return dispatch(updateUser(id, user));
   }

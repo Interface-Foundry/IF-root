@@ -3,14 +3,12 @@
 import { connect } from 'react-redux';
 import { App } from '../newComponents';
 
-import { 
+import {
   toggleSidenav,
   togglePopup,
   fetchCart,
   fetchMetrics
 } from '../newActions';
-
-import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -28,7 +26,3 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
-
-
-
-

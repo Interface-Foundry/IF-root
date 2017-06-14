@@ -69,7 +69,7 @@ class StoreChoice extends Component {
       store_img: img,
       store_type: type,
       store_name: name,
-      store_domain: domain,
+      store_domain: domain
     } = this.props;
 
     return (

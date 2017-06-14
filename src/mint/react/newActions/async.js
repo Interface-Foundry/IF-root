@@ -1,25 +1,25 @@
-import { loading, notify } from './'
+import { loading } from './';
 
 export const get = (url, type, cb) => {
-  loading(type)
+  loading(type);
   return async dispatch => {
     try {
       const response = await fetch(url, {
         credentials: 'same-origin'
       });
 
-      return dispatch(cb(type, await response.json()))
+      return dispatch(cb(type, await response.json()));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
         error: error.err
-      })
+      });
     }
   };
-}
+};
 
 export const post = (url, type, item, cb) => {
-  loading(type)
+  loading(type);
   return async dispatch => {
     try {
       const response = await fetch(url, {
@@ -31,18 +31,18 @@ export const post = (url, type, item, cb) => {
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
-      return dispatch(cb(type, await response.json()))
+      return dispatch(cb(type, await response.json()));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
         error: error.err
-      })
+      });
     }
   };
-}
+};
 
 export const put = (url, type, item, cb) => {
-  loading(type)
+  loading(type);
   return async dispatch => {
     try {
       const response = await fetch(url, {
@@ -54,31 +54,31 @@ export const put = (url, type, item, cb) => {
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
-      return dispatch(cb(type, await response.json()))
+      return dispatch(cb(type, await response.json()));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
         error: error.err
-      })
+      });
     }
   };
-}
+};
 
 export const del = (url, type, cb) => {
-  loading(type)
+  loading(type);
   return async dispatch => {
     try {
-      const response = await fetch(url, {
+      await fetch(url, {
         method: 'DELETE',
-        credentials: 'same-origin',
+        credentials: 'same-origin'
       });
 
-      return dispatch(cb(type))
+      return dispatch(cb(type));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
         error: error.err
-      })
+      });
     }
   };
-}
+};

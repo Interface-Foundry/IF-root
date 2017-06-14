@@ -13,7 +13,7 @@ export default class Footer extends Component {
     cart_id: PropTypes.string,
     item: PropTypes.object,
     addItem: PropTypes.func,
-    match: PropTypes.object,
+    match: PropTypes.object
   }
 
   render() {
@@ -43,7 +43,8 @@ class CartFooter extends Component {
     updateCart: PropTypes.func,
     currentCart: PropTypes.object,
     user_account: PropTypes.object,
-    leader: PropTypes.object
+    leader: PropTypes.object,
+    items: PropTypes.array
   }
 
   _handleShare = () => {
@@ -59,12 +60,12 @@ class CartFooter extends Component {
         .then(() => console.log('Successful share'))
         .catch(error => console.log('Error sharing:', error));
     } else {
-      replace(`/cart/${cart_id}/m/share`)
+      replace(`/cart/${cart_id}/m/share`);
     }
   }
 
   render() {
-    const { _handleShare } = this, { updateCart, checkoutCart, cart_id, currentCart, currentCart: { locked }, user_account, leader, items, isMobile, history: { replace, push } } = this.props;
+    const { _handleShare } = this, { updateCart, cart_id, currentCart, currentCart: { locked }, user_account, leader, items, history: { replace, push } } = this.props;
     const isLeader = !!user_account.id && !!leader && (leader.id === user_account.id);
     const total = calculateItemTotal(items);
     const locale = currentCart.store ? currentCart.store.includes('amazon') ? (currentCart.store_locale === 'UK' ? 'GBP' : 'USD') : 'GBP' : null;
@@ -83,7 +84,7 @@ class CartFooter extends Component {
                 e.preventDefault();
                 if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
-                    push(`/cart/${currentCart.id}/address`)
+                    push(`/cart/${currentCart.id}/address`);
                   }
                   else {
                     if(isLeader) updateCart({...currentCart, locked: !currentCart.locked});
@@ -115,7 +116,7 @@ class CartFooter extends Component {
               e.preventDefault();
               if (items.length > 0) {
                   if(currentCart.store === 'ypo'){
-                    push(`/cart/${currentCart.id}/address`)
+                    push(`/cart/${currentCart.id}/address`);
                   }
                   else {
                     if(isLeader) updateCart({...currentCart, locked: !currentCart.locked});
@@ -138,13 +139,14 @@ class CartFooter extends Component {
 class ItemFooter extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
-    item: PropTypes.object,
     addItem: PropTypes.func.isRequired,
     history: PropTypes.object,
     position: PropTypes.number,
     removeDeal: PropTypes.func,
     item_id: PropTypes.string,
-    user_account: PropTypes.object
+    user_account: PropTypes.object,
+    _togglePopup: PropTypes.func,
+    clearItem: PropTypes.func
   }
 
   render() {
@@ -154,7 +156,7 @@ class ItemFooter extends Component {
     return (
       <footer className='footer__item'>
         <button className='cancel dimmed' onClick={()=> {replace(`/cart/${cart_id}/`);}}>Cancel</button>
-        { !!user_account.id ? 
+        { user_account.id ? 
           <button className='add triple' onClick={() => {addItem(cart_id, item_id, replace); clearItem(); replace(`/cart/${cart_id}/`); removeItem ? removeDeal(position) : null;}}>✓ Save to Cart</button> 
           : <button className='add triple' onClick={() => _togglePopup()}>✓ Save to Cart</button> 
         }

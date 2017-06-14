@@ -7,6 +7,7 @@ const initialState = {
 };
 export default function otherCarts(state = initialState, action) {
   let carts;
+  let archivedCarts;
   switch (action.type) {
   case LOGOUT:
     return initialState;
@@ -17,24 +18,20 @@ export default function otherCarts(state = initialState, action) {
       archivedCarts: carts.filter(cart => cart.locked)
         .reverse(),
       carts: carts.filter(cart => !cart.locked)
-        .reverse(),
+        .reverse()
     };
   case RECEIVE_UPDATE_CART:
     carts = state.carts.map(c => ({ ...c, locked: c.locked || false }));
-    const archivedCarts = state.archivedCarts.map(c => ({ ...c, locked: c.locked || false }));
+    archivedCarts = state.archivedCarts.map(c => ({ ...c, locked: c.locked || false }));
     return {
       ...state,
       carts: carts
         .map(c => (
-          c.id === action.updatedCart.id
-          ? { ...c, ...action.updatedCart }
-          : c))
+          c.id === action.updatedCart.id ? { ...c, ...action.updatedCart } : c))
         .reverse(),
       archivedCarts: archivedCarts
         .map(c => (
-          c.id === action.updatedCart.id
-          ? { ...c, ...action.updatedCart }
-          : c))
+          c.id === action.updatedCart.id ? { ...c, ...action.updatedCart } : c))
         .reverse()
     };
   case DELETE_CART:

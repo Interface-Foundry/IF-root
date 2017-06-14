@@ -25,7 +25,7 @@ export default class CartSwitcher extends Component {
 
 class CartItem extends Component {
   static propTypes = {
-    cart: PropTypes.object.isRequired,
+    cart: PropTypes.object.isRequired
   }
 
   render() {

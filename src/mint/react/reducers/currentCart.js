@@ -3,7 +3,6 @@
 import {
   ADDING_ITEM,
   ADD_MEMBER_TO_CART,
-  RECEIVE_CART,
   RECEIVE_UPDATE_CART,
   RECEIVE_ITEMS,
   RECEIVE_ADD_ITEM,
@@ -36,7 +35,7 @@ export default function cart(state = initialState, action) {
   case ADDING_ITEM:
     return {
       ...state,
-      addingItem: action.addingItem,
+      addingItem: action.addingItem
 
     };
   case ADD_MEMBER_TO_CART:
@@ -49,7 +48,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       ...action.updatedCart,
-      thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/head%40x2.png',
+      thumbnail_url: action.updatedCart.thumbnail_url || '//storage.googleapis.com/kip-random/head%40x2.png'
     };
   case 'CART_SUCCESS':
     return {
@@ -79,7 +78,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       items: [state.itemDeleted, ...state.items],
-      itemDeleted: null, // clear saved item if canceled
+      itemDeleted: null // clear saved item if canceled
     };
   case RECEIVE_REMOVE_ITEM:
     return {
@@ -95,7 +94,7 @@ export default function cart(state = initialState, action) {
   case RECEIVE_UPDATE_ITEM:
     return {
       ...state,
-      items: state.items.map(item => item.id === action.old_item_id ? {...item, ...action.item} : item)
+      items: state.items.map(item => item.id === action.old_item_id ? { ...item, ...action.item } : item)
     };
   case REQUEST_SET_STORE:
     return {

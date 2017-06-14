@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { Stores } from '../newComponents';
 
-import { 
+import {
   toggleSidenav,
   togglePopup,
   setStore
@@ -25,13 +25,10 @@ const mapDispatchToProps = dispatch => ({
   setStore: (cart_id, type) => {
     ReactGA.event({
       category: 'Cart',
-      action: `Set type to ${type}`,
+      action: `Set type to ${type}`
     });
     return dispatch(setStore(cart_id, type));
-  },
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Stores);
-
-
-

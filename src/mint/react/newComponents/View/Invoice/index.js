@@ -1,4 +1,4 @@
-// react/components/Invoice/index.js
+// react/components/View/Invoice/index.js
 
 import Invoice from './Invoice';
 import './Invoice.scss';

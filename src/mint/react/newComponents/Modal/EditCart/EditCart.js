@@ -1,4 +1,4 @@
-// react/components/EditCart/EditCart.js
+// react/components/modal/EditCart/EditCart.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -18,7 +18,7 @@ class EditCart extends Component {
     cart_id: PropTypes.string,
     history: PropTypes.object,
     privacyLevel: PropTypes.object,
-    prevCartId: PropTypes.string,
+    prevCartId: PropTypes.string
   }
 
   state = {

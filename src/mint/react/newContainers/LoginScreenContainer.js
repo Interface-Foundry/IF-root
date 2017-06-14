@@ -1,11 +1,11 @@
 import { connect } from 'react-redux';
 import { LoginScreen } from '../../react-common/components';
 
-import { 
-	get,
-	togglePopup,
-  login, 
-  validateCode 
+import {
+  get,
+  togglePopup,
+  login,
+  validateCode
 } from '../newActions';
 
 const mapStateToProps = (state, props) => ({

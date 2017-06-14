@@ -4,8 +4,6 @@ import { connect } from 'react-redux';
 import { Search } from '../newComponents';
 import { updateQuery, toggleHistory, submitQuery } from '../newActions';
 import { isUrl, addSearchHistory } from '../utils';
-import { push } from 'react-router-redux';
-import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   cart: state.cart,
@@ -15,12 +13,12 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	toggleHistory: () => dispatch(toggleHistory()), 
-  	updateQuery: (query) => dispatch(updateQuery(query)),
-  	submitQuery: (query, store, locale) => {
-  		if (!isUrl(query)) addSearchHistory(query);
-  		return dispatch(submitQuery(encodeURIComponent(query), store, locale))
-  	}
+  toggleHistory: () => dispatch(toggleHistory()),
+  updateQuery: (query) => dispatch(updateQuery(query)),
+  submitQuery: (query, store, locale) => {
+    if (!isUrl(query)) addSearchHistory(query);
+    return dispatch(submitQuery(encodeURIComponent(query), store, locale));
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Search);

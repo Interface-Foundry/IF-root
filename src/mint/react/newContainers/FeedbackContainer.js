@@ -19,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
       .then(() => {
         ReactGA.event({
           category: 'Feedback',
-          action: 'Feedback Sent',
+          action: 'Feedback Sent'
         });
         const { history: { replace }, cart_id } = state;
         dispatch(reset('Feedback'));

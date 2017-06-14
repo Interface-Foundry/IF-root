@@ -1,4 +1,4 @@
-import { get, post } from './async'
+import { get, post } from './async';
 
 export const fetchStores = () => (
   get(
@@ -10,7 +10,7 @@ export const fetchStores = () => (
       receivedAt: Date.now()
     })
   )
-)
+);
 
 export const setStore = (cart_id, store) => (
   post(
@@ -23,4 +23,4 @@ export const setStore = (cart_id, store) => (
       receivedAt: Date.now()
     })
   )
-)
+);

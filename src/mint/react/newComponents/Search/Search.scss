@@ -1,6 +1,5 @@
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
-
 .search {
   position: relative;
   display: inline-block;
@@ -8,43 +7,36 @@
   max-width: 600px;
   margin: 10px 0 10px 30px;
   height: 30px;
-
   * {
     height: 100%;
   }
-
   input {
     width: calc(100% - #{$nav-height});
     border: 0;
     padding: 0 $padding;
     font-size: 14px;
   }
-
   button {
     background: white;
     width: $nav-height/2;
     border: 0;
     border-radius: 5px 0 0 5px;
     padding: 0 0 0 $padding/2;
-
     svg {
       width: 100%;
       fill: $secondaryColor;
     }
-
     &.cancel {
       color: $secondaryColor;
       border-radius: 0 5px 5px 0;
       padding: 0 $padding 0 0;
     }
-
     &:disabled {
       svg {
         fill: white !important;
       }
     }
   }
-
   .history {
     position: absolute;
     max-height: 200px;
@@ -57,33 +49,27 @@
     top: 27px;
     z-index: 100;
     box-shadow: $card-box-shadow;
-
     .history__term {
       border-top: 0;
       background: white;
       line-height: 30px;
       color: black;
       cursor: pointer;
-
-      &.selected,
-      &:hover {
+      &.selected, &:hover {
         background: darken(white, 10%);
       }
-
       .history__term-icon {
         display: inline-block;
         width: $nav-height;
         line-height: 30px;
         padding: 0 $padding;
       }
-
       .history__term-query {
         display: inline-block;
         width: calc(100% - #{$nav-height});
         text-align: left;
         padding: 0;
         line-height: 30px;
-
         p {
           font-size: 13px;
           line-height: 30px;
@@ -92,3 +78,4 @@
     }
   }
 }
+

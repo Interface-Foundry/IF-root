@@ -12,7 +12,7 @@ export default class Header extends Component {
     items: PropTypes.arrayOf(PropTypes.object),
     cards: PropTypes.arrayOf(PropTypes.object),
     user_account: PropTypes.object,
-    currentCart: PropTypes.object,
+    currentCart: PropTypes.object
   }
 
   render() {
@@ -120,7 +120,7 @@ class CartHead extends Component {
   render() {
     const {
       state: { bounce },
-      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, isMobile, currentCart: { locked, cart_id, thumbnail_url, members, leader, store, store_locale } }
+      props: { user_account: { name }, _toggleSidenav, _togglePopup, cartName, currentCart: { locked, cart_id, thumbnail_url, leader, store, store_locale } }
     } = this;
 
     const displayStore = store === 'ypo' ? 'YPO' : _.capitalize(`${store} ${store_locale}`);
@@ -134,7 +134,7 @@ class CartHead extends Component {
               </div> 
             : <div className={`image ${bounce ? 'bounce': ''}`} style={
                 {
-                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
+                  backgroundImage: `url(${thumbnail_url ? thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
                 }
               }/>}
           <h3>

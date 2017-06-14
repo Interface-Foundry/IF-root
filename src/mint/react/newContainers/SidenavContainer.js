@@ -2,11 +2,11 @@ import { connect } from 'react-redux';
 import { Sidenav } from '../../react-common/components';
 import { push } from 'react-router-redux';
 
-import { 
-	get,
-  logout,	
-	toggleModal,
-	toggleSidenav
+import {
+  get,
+  logout,
+  toggleModal,
+  toggleSidenav
 } from '../newActions';
 
 const mapStateToProps = (state, props) => {
@@ -16,7 +16,7 @@ const mapStateToProps = (state, props) => {
     archivedCarts: state.carts.archivedCarts || [],
     user_account: state.user,
     currentCart: state.cart
-  }
+  };
 };
 
 const mapDispatchToProps = dispatch => ({

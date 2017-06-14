@@ -1,4 +1,4 @@
-// mint/react/components/Results/Default.js
+// mint/react/components/View/Results/Default.js
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -8,6 +8,14 @@ import { Right } from '../../../../react-common/kipsvg';
 import { Icon } from '../../../../react-common/components';
 
 export default class Default extends Component {
+  static propTypes = {
+    cart: PropTypes.object,
+    item: PropTypes.object,
+    cartAsins: PropTypes.array,
+    selectItem: PropTypes.func,
+    addItem: PropTypes.func
+  }
+  
   render() {
     const { cart, item, cartAsins, selectItem, addItem } = this.props;
 
@@ -17,8 +25,8 @@ export default class Default extends Component {
           {
             cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
           }
-          <div className={`image`} style={{
-            backgroundImage: `url(${item.main_image_url})`,
+          <div className={'image'} style={{
+            backgroundImage: `url(${item.main_image_url})`
           }}/>
           <div className='text'> 
             <h1>{item.name}</h1>

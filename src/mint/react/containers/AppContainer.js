@@ -35,7 +35,7 @@ const mapDispatchToProps = dispatch => ({
   addItem: (cart_id, item_id, replace) => {
     ReactGA.event({
       category: 'Cart',
-      action: 'Item Added',
+      action: 'Item Added'
     });
     return dispatch(addItem(cart_id, item_id))
       .then(e => {
@@ -45,7 +45,7 @@ const mapDispatchToProps = dispatch => ({
   fetchCart: (cart_id) => {
     ReactGA.event({
       category: 'Cart',
-      action: 'Getting Cart ' + cart_id,
+      action: 'Getting Cart ' + cart_id
     });
     return dispatch(fetchCart(cart_id));
   },
@@ -61,8 +61,7 @@ const mapDispatchToProps = dispatch => ({
   logout: () => {
     dispatch(logout()).then(() => {
       // Navigate away on callback
-      console.log('NB-Appcontainer: ', 'navigate away on callback')
-    })
+    });
     // This needs a way to navigate to the home page
     // window.location.href doesn't work tho
   }

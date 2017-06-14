@@ -1,4 +1,4 @@
-// react/components/App/Header.scss
+// react/components/Header/Header.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
 .navbar {
@@ -148,7 +148,6 @@
   .settings {
     display: block;
     background: white;
-
     .header__left {
       color: #333;
       a {
@@ -176,3 +175,4 @@
     cursor: default;
   }
 }
+

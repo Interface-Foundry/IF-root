@@ -1,14 +1,14 @@
-import { get, post } from './async'
+import { post } from './async';
 
 export const updateUser = (id, user) => post(
-  `/api/user/${id}`, 
+  `/api/user/${id}`,
   'UPDATE_USER',
-  user, 
+  user,
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: {
-    	user_account: json
+      user_account: json
     },
     receivedAt: Date.now()
   })
-)
+);

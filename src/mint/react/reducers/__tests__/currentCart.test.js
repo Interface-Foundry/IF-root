@@ -80,7 +80,7 @@ describe('cart reducer', () => {
     const id = 'abc123';
     const newCart = {
       ...firstState,
-      items: [...items, { item: 'whatevs', id }],
+      items: [...items, { item: 'whatevs', id }]
     };
     expect(reducer({
         ...newCart

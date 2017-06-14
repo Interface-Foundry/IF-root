@@ -13,7 +13,7 @@ export default class ProductDescription extends Component {
   state = {
     descripHeight: '100%',
     descripTall: false,
-    showViewMore: false,
+    showViewMore: false
   }
 
   static propTypes = {
@@ -29,7 +29,7 @@ export default class ProductDescription extends Component {
   }
 
   _handleWindowResize() {
-    const height = this.refs.descrip.clientHeight;
+    const height = this.descrip.clientHeight;
 
     this.setState({
       showViewMore: height > 80,
@@ -53,7 +53,7 @@ export default class ProductDescription extends Component {
     const { toggleDescrip, state: { descripHeight, descripTall, showViewMore }, props: { description } } = this;
 
     return (
-      <div ref='descrip' className='item__view__description'>
+      <div ref={(c) => { this.descrip = c; }} className='item__view__description'>
         <p className='ellipsis' style={{maxHeight: descripHeight}}> { description }</p>
         {
           (showViewMore)

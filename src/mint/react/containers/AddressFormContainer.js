@@ -20,7 +20,7 @@ const mapDispatchToProps = dispatch => ({
       action: 'Added Address'
     });
     dispatch(updateUser(user_id, { ypo_account_number, ypo_account_name, ypo_voucher_code }));
-    dispatch(sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country, delivery_message))
+    dispatch(sendAddressData(user_id, full_name, line_1, line_2, city, region, code, country, delivery_message));
   }
 });
 

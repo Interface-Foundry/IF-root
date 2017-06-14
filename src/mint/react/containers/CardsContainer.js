@@ -21,7 +21,7 @@ const mapDispatchToProps = dispatch => ({
   selectCard: (cardIndex, card) => {
     ReactGA.event({
       category: 'Card',
-      action: `Selected a card (number ${cardIndex}`,
+      action: `Selected a card (number ${cardIndex}`
     });
     return dispatch(selectCard(cardIndex, card));
   },

@@ -1,20 +1,12 @@
-// react/components/App/Header.js
+// react/components/Header/Header.js
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
-
-import Default from './Default'
-import SettingsHeader from './SettingsHeader'
+import Default from './Default';
+import SettingsHeader from './SettingsHeader';
 
 export default class Header extends Component {
   render() {
-    const { 
-      user, 
-      cart,
-      _toggleLoginScreen,
-      _toggleSidenav
-    } = this.props;
     return (
       <nav className='navbar'>
         <Route path={'/cart/:cart_id'} exact component={() => 

@@ -16,11 +16,11 @@ const mapDispatchToProps = dispatch => ({
   setStore: (cart_id, type) => {
     ReactGA.event({
       category: 'Cart',
-      action: `Set type to ${type}`,
+      action: `Set type to ${type}`
     });
     return dispatch(setStore(cart_id, type));
   },
-  fetchStores: () => dispatch(fetchStores()),
+  fetchStores: () => dispatch(fetchStores())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(CartStore);

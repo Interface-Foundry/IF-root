@@ -1,4 +1,4 @@
-// react/components/Settings/Settings.js
+// react/components/modal/Settings/Settings.js
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
@@ -53,7 +53,7 @@ export default class Settings extends Component {
     updateUser(id, { email_address: mail });
   }
 
-  render() {    
+  render() {
     const { props: { cart, user: { name, email_address } }, state: { editName, editMail } } = this;
     return (
       <div className='settings-page'>

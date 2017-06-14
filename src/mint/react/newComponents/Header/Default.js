@@ -2,21 +2,23 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../react-common/components';
-import { splitCartById } from '../../newReducers';
 import { SearchContainer } from '../../newContainers';
 
 export default class Default extends Component {
 
   static propTypes = {
     match: PropTypes.object.isRequired,
+    user: PropTypes.object,
+    cart: PropTypes.object,
+    _toggleLoginScreen: PropTypes.func,
+    _toggleSidenav: PropTypes.func
   }
 
   render() {
-    const { 
-      user, 
+    const {
+      user,
       cart,
       _toggleLoginScreen,
       _toggleSidenav
@@ -26,8 +28,8 @@ export default class Default extends Component {
       <span className='default'>
         <div className='header__left'>
           <Link to={`/cart/${cart.id}`}>
-            <div className={`image`} style={{
-              backgroundImage: `url(${cart.thumbnail_url ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`,
+            <div className={'image'} style={{
+              backgroundImage: `url(${cart.thumbnail_url ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
             }}/>
             <h3>
               Kip

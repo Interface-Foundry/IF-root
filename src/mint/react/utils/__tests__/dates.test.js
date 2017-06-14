@@ -1,7 +1,7 @@
 // react/utils/__tests__/dates.test.js
 
-import { timeFromDate } from '..'
-import moment from 'moment'
+import { timeFromDate } from '..';
+import moment from 'moment';
 
 describe('dates util', () => {
 
@@ -16,23 +16,23 @@ describe('dates util', () => {
 
     it('should return "Just now" if diff is less then 1 minute', () => {
       expect(timeFromDate(firstDate))
-        .toEqual('Just now')
-    })
+        .toEqual('Just now');
+    });
 
     it('should return difference in minutes if date is > 1 minute && < 1 hour', () => {
       expect(timeFromDate(secondDate))
-        .toEqual(`${moment().diff(secondDate, 'minutes')} minutes ago`)
-    })
+        .toEqual(`${moment().diff(secondDate, 'minutes')} minutes ago`);
+    });
 
     it('should return difference in hour if date is > 1 hour && < 1 day', () => {
       expect(timeFromDate(thirdDate))
-        .toEqual(`${moment().diff(thirdDate, 'hours')} hours ago`)
-    })
+        .toEqual(`${moment().diff(thirdDate, 'hours')} hours ago`);
+    });
 
     it('should return difference in hour if date is > 1 day', () => {
       expect(timeFromDate(fourthDate))
-        .toEqual(`${moment().diff(fourthDate, 'days')} days ago`)
-    })
-  })
+        .toEqual(`${moment().diff(fourthDate, 'days')} days ago`);
+    });
+  });
 
-})
+});

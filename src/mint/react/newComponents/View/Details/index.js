@@ -1,4 +1,4 @@
-// react/components/Details/index.js
+// react/components/View/Details/index.js
 
 import Details from './Details';
 import './Details.scss';

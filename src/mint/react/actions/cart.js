@@ -142,7 +142,6 @@ export function updatePrivacy(cart_id, privacyLevel) {
         credentials: 'same-origin'
       });
       const json = await response.json();
-      console.log(json);
       return dispatch(recieveUpdate(json));
     } catch (e) {
       throw e;
@@ -160,7 +159,7 @@ export function clearCart(cart_id) {
         .currentCart.oldItems.length) {
         await fetch(`/api/cart/${cart_id}/clear`, {
           method: 'DELETE',
-          credentials: 'same-origin',
+          credentials: 'same-origin'
         });
         dispatch(receiveClearCart(cart_id));
       }
@@ -175,7 +174,7 @@ export function deleteCart(cart_id) {
     try {
       await fetch(`/api/cart/${cart_id}`, {
         method: 'DELETE',
-        credentials: 'same-origin',
+        credentials: 'same-origin'
       });
       dispatch(recieveDeleteCart(cart_id));
       dispatch(push('/newcart?toast=Cart Deleted&status=success'));

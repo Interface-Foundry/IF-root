@@ -7,7 +7,7 @@ export default class AddRemove extends Component {
   static propTypes = {
     item: PropTypes.object,
     incrementItem: PropTypes.func,
-    decrementItem: PropTypes.func,
+    decrementItem: PropTypes.func
   }
   render() {
     const { item: { id, quantity, added_by }, incrementItem, decrementItem } = this.props;

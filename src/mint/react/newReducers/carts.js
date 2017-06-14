@@ -7,19 +7,19 @@ const initialState = {
 
 export default function otherCarts(state = initialState, action) {
   switch (action.type) {
-    case 'CARTS_SUCCESS':
-      return {
-        ...state,
-        ...action.response
-      };
-    case 'DELETE_CART_SUCCESS':
-      return {
-        ...state,
-        carts: state.carts.filter(c => c.id !== action.response),
-        archivedCarts: [...state.carts.filter(c => c.id === action.response), ...state.archivedCarts]
-      };
-    default:
-      return state;
+  case 'CARTS_SUCCESS':
+    return {
+      ...state,
+      ...action.response
+    };
+  case 'DELETE_CART_SUCCESS':
+    return {
+      ...state,
+      carts: state.carts.filter(c => c.id !== action.response),
+      archivedCarts: [...state.carts.filter(c => c.id === action.response), ...state.archivedCarts]
+    };
+  default:
+    return state;
   }
 }
 

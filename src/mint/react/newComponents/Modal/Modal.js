@@ -1,6 +1,5 @@
 // react/components/Modal/Modal.js
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
 

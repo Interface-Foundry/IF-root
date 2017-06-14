@@ -1,9 +1,6 @@
-// mint/react/components/empty/empty.js
+// mint/react/components/View/Empty/Empty.js
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import moment from 'moment';
-
 
 export default class empty extends Component {
 
@@ -25,5 +22,3 @@ export default class empty extends Component {
     );
   }
 }
-
-

@@ -1,10 +1,10 @@
 import { connect } from 'react-redux';
 import { Buttons } from '../newComponents';
-import { push } from 'react-router-redux'
+import { push } from 'react-router-redux';
 
-import { 
-	toggleModal,
-	updateCart,
+import {
+  toggleModal,
+  updateCart,
   reorderCart
 } from '../newActions';
 
@@ -12,7 +12,7 @@ const mapStateToProps = (state, props) => {
   return {
     cart: state.cart,
     user: state.user
-  }
+  };
 };
 
 const mapDispatchToProps = dispatch => ({

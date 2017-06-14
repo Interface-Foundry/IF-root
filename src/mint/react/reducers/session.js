@@ -1,5 +1,4 @@
 import {
-  RECEIVE_SESSION,
   RECEIVE_UPDATE_SESSION,
   UPDATE_USER,
   LOGOUT
@@ -25,7 +24,7 @@ export default function session(state = initialState, action) {
   case RECEIVE_UPDATE_SESSION:
     return {
       ...state,
-      ...action.newSession,
+      ...action.newSession
       // user_account: action.newSession.user || action.newSession.user_account
     };
   case UPDATE_USER:

@@ -14,18 +14,18 @@ export default (state = initialState, action) => {
       return {
         ...state,
         ...action.response
-      }
+      };
     case 'SEARCH_SUCCESS':
       return {
         ...state,
         ...action.response
-      }
+      };
     case 'TOGGLE_HISTORY':
       return {
         ...state,
         history: !state.history
-      }
+      };
     default:
       return state;
   }
-}
+};
