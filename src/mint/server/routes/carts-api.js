@@ -946,6 +946,7 @@ module.exports = function (router) {
     yield user.save()
 
     cart.items = items;
+    cart.locked = true;
     yield cart.save()
     yield cartUtils.sendReceipt(cart, req)
   }))
