@@ -4,8 +4,19 @@ dbReady.then((models) => { db = models; })
 
 
 const userPaymentAmountHandler = {
-  'split_equal': function(invoice) {
-    return
+  'split_equal': function (invoice) {
+    var debts = {}
+    var perUser = invoice.total / (1.0 * invoice.users.length)
+    invoice.users.map(function (user) {
+      debts[user.id] = perUser
+    })
+    return debts
+  },
+  'single': function (invoice) {
+    return {}
+  },
+  'split_by_item': function (invoice) {
+    return {}
   }
 }
 
@@ -66,8 +77,6 @@ class Invoice {
     if (!cart) {
       throw new Error('Invoice needs to be attached to invoice')
     }
-
-    logging.info('THIS', this)
 
     const newInvoice = await db.Invoices.create({
       leader: cart.leader,

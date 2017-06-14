@@ -56,7 +56,7 @@ const invoiceCollection = Waterline.Collection.extend({
      */
     split_type: {
       type: 'string',
-      enum: ['single', 'split_equal', 'split_per_item']
+      enum: ['single', 'split_equal', 'split_by_item']
     },
 
     /** everything that would be a order in old db.payments*/
