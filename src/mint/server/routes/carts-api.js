@@ -913,6 +913,7 @@ module.exports = function (router) {
     if (!user_id) user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
 
     var clone = yield cloning_utils.reorder(req.params.cart_id, user_id);
+    logging.info('got clone', clone)
     return res.send(clone);
   }))
 
@@ -997,7 +998,7 @@ module.exports = function (router) {
       latitude: geo.ll[0],
       longitude: geo.ll[1]
     }
-    
+
     // assemble list of stores
     var stores = [];
 

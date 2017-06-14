@@ -92,9 +92,10 @@ var reorder = function * (cart_id, user_id) {
   yield copy.save()
 
   // var original_test = yield db.Carts.findOne({id: cart_id}).populate('members').populate('items')
-  // var copy_test = yield db.Carts.findOne({id: copy.id}).populate('members').populate('items')
+  var copy_test = yield db.Carts.findOne({id: copy.id}).populate('members').populate('items')
   // logging.info('original:', original_test)
   // logging.info('copy:', copy_test)
+  return copy_test
 }
 
 // type is either the string 'clone' or 'reorder'
