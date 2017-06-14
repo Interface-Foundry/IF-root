@@ -146,6 +146,28 @@ module.exports = function (router) {
       return res.send(createdSource)
     })
 
+
+  /**
+   * @api {get} /invoice/cart/:cart_id
+   * @apiDescription get all invoices related to a cart, if no invoices create one.
+   * @apiGroup Invoice
+   *
+   * @apiParam {type} :cart_id - cart_id to look for
+   */
+  router.get('/invoice/cart/:cart_id', async (req, res) => {
+    const invoices = await db.Invoices.GetByCartId(req.params.cart_id)
+    if (invoices.length === 0) {
+      const invoiceData = {
+        cart: req.params.cart_id,
+        split: 'equal'
+      }
+      const invoice = Invoice.Create('mint', invoiceData)
+      const newInvoice = await invoice.createInvoice()
+      return res.send(newInvoice)
+    }
+
+    res.send(invoices)
+  })
   /**
    * @api {get} /invoice/cart/:cart_id
    * @apiDescription get all invoices related to a cart, if no invoices create one.

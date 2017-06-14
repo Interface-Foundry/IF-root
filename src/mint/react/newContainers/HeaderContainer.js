@@ -1,17 +1,18 @@
 import { connect } from 'react-redux';
 import { Header } from '../newComponents';
 
-import { 
-  logout,	
-	togglePopup,
-	toggleSidenav
+import {
+  logout,
+  togglePopup,
+  toggleSidenav,
+  get
 } from '../newActions';
 
 const mapStateToProps = (state, props) => {
   return {
     cart: state.cart,
     user: state.user
-  }
+  };
 };
 
 const mapDispatchToProps = dispatch => ({

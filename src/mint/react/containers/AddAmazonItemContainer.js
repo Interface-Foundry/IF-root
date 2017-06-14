@@ -18,7 +18,7 @@ const mapDispatchToProps = dispatch => ({
   addingItem: (bool) => {
     ReactGA.event({
       category: 'Cart',
-      action: 'Item Added',
+      action: 'Item Added'
     });
     return dispatch(addingItem(bool));
   }

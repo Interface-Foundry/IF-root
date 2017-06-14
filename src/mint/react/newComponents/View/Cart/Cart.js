@@ -1,20 +1,26 @@
-// mint/react/components/View/View.js
+// mint/react/components/View/Cart/Cart.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { calculateItemTotal, displayCost, timeFromDate } from '../../../utils';
 import { splitCartById } from '../../../newReducers';
+
+import { Icon } from '../../../../react-common/components';
 import Empty from '../Empty';
 
-//Analytics!
-import ReactGA from 'react-ga';
-
 export default class Cart extends Component {
+  
+  static propTypes = {
+    cart: PropTypes.object,
+    user: PropTypes.object,
+    editItem: PropTypes.func,
+    editId: PropTypes.func,
+    removeItem: PropTypes.func
+  }
 
   render() {
-
-    const { cart, user, query, editId, editItem, removeItem } = this.props,
+    const { cart, user, editId, editItem, removeItem } = this.props,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my;
 
@@ -35,8 +41,8 @@ export default class Cart extends Component {
                     {
                       myCart.map((item) => (
                         <li key={item.id} className={editId === item.id ? 'edit' : ''}>
-                          <div className={`image`} style={{
-                            backgroundImage: `url(${item.main_image_url})`,
+                          <div className={'image'} style={{
+                            backgroundImage: `url(${item.main_image_url})`
                           }}/>
                           <div className='text'> 
                             <h1>{item.name}</h1>
@@ -45,10 +51,13 @@ export default class Cart extends Component {
                           </div>
                           {
                             editId !== item.id ? 
-                            <div className='action'>
-                              <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
-                            </div> :
-                            <div className='action'>
+                              (
+                                cart.locked ? <div className='action locked'>
+                                  <button disabled='true'><Icon icon='Locked'/></button>
+                                </div> : <div className='action'>
+                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                                </div>
+                              ) : <div className='action'>
                               <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
                             </div> 
                           }
@@ -59,7 +68,7 @@ export default class Cart extends Component {
                 </div> : <Empty/>
               }
             </th>
-        	</tr>
+          </tr>
         </thead>
         <tbody>
           {
@@ -77,8 +86,8 @@ export default class Cart extends Component {
                       {
                         userCart.items.map((item) => (
                           <li key={item.id} className={editId === item.id ? 'edit' : ''}>
-                            <div className={`image`} style={{
-                              backgroundImage: `url(${item.main_image_url})`,
+                            <div className={'image'} style={{
+                              backgroundImage: `url(${item.main_image_url})`
                             }}/>
                             <div className='text'> 
                               <h1>{item.name}</h1>
@@ -86,11 +95,13 @@ export default class Cart extends Component {
                               <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
                             </div> 
                             {
-                              editId !== item.id ? 
-                              <div className='action'>
-                                <button onClick={() => editItem(item.id)}>Edit Item</button>
-                              </div> :
-                              <div className='action'>
+                              editId !== item.id ? (
+                                cart.locked ? <div className='action locked'>
+                                  <button disabled='true'><Icon icon='Locked'/></button>
+                                </div> : <div className='action'>
+                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
+                                </div>
+                              ) : <div className='action'>
                                 <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button>
                               </div> 
                             }
@@ -108,5 +119,3 @@ export default class Cart extends Component {
     );
   }
 }
-
-

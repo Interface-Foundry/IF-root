@@ -9,7 +9,7 @@ export default class NotificationBubble extends Component {
     top: PropTypes.number,
     bottom: PropTypes.number,
     left: PropTypes.number,
-    right: PropTypes.number,
+    right: PropTypes.number
   }
 
   render() {

@@ -36,13 +36,14 @@ export default class App extends Component {
     status: PropTypes.string,
     history: PropTypes.object,
     clearItem: PropTypes.func,
-    archivedCarts: PropTypes.arrayOf(PropTypes.object)
+    archivedCarts: PropTypes.arrayOf(PropTypes.object),
+    fetchAllCarts: PropTypes.func
   }
 
   state = {
     sidenav: false,
     popup: false,
-    isMobile: false,
+    isMobile: false
   }
 
   _logPageView(path, userId) {
@@ -79,12 +80,7 @@ export default class App extends Component {
         location: { pathname }
       }
     } = this;
-    if (cart_id
-      && !pathname.includes('/newcart')
-      && !pathname.includes('/feedback')
-      && !pathname.includes('/archive')
-      && !pathname.includes('/settings')
-      && !pathname.includes('/404')) {
+    if (cart_id && !pathname.includes('/newcart') && !pathname.includes('/feedback') && !pathname.includes('/archive') && !pathname.includes('/settings') && !pathname.includes('/404')) {
       fetchCart(cart_id)
         .then(cart => !cart ? replace('/404') : null);
     }
@@ -119,12 +115,7 @@ export default class App extends Component {
 
       _logPageView(pathname, nextSessionId); //log initial load
     }
-    if (!pathname.includes('/newcart')
-      && !pathname.includes('/feedback')
-      && !pathname.includes('/archive')
-      && !pathname.includes('/settings')
-      && !pathname.includes('/404')
-      && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
+    if (!pathname.includes('/newcart') && !pathname.includes('/feedback') && !pathname.includes('/archive') && !pathname.includes('/settings') && !pathname.includes('/404') && ((nextCart_id && cart_id !== nextCart_id) || (nextId && nextId !== id))) {
       fetchCart(nextCart_id)
         .then(cart => !cart ? replace('/404') : null);
 
@@ -157,6 +148,7 @@ export default class App extends Component {
         clearItem,
         items,
         archivedCarts,
+        fetchAllCarts,
         history: { replace }
       },
       state: { sidenav, isMobile, popup }

@@ -26,6 +26,6 @@ export default class Smartphone extends Component {
 	</g>
 </svg>
 
-		)
+		);
 	}
 }

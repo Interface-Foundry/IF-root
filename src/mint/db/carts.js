@@ -86,17 +86,13 @@ var cartsCollection = Waterline.Collection.extend({
       defaultsTo: 'public'
     },
 
-    archive: archive,
-
     store_locale: {
       type: 'string',
       required: true
     },
 
+    /** indicates that the cart has been modified since the last time a checkout url was generated */
     dirty: 'boolean',
-
-    /** cart subtotal from store */
-    subtotal: 'float',
 
     address: Waterline.isA('addresses'),
 

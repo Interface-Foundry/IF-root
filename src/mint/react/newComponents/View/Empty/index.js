@@ -1,4 +1,4 @@
-// react/components/Empty/index.js
+// react/components/View/Empty/index.js
 
 import Empty from './Empty';
 import './Empty.scss';

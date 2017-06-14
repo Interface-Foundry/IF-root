@@ -334,9 +334,9 @@ module.exports = function (router) {
    * @apiDescription resets session coookie
    */
   router.get('/logout', (req, res) => {
-    req.session.reset();
-    res.send(200);
-  });
+    req.session.reset()
+    res.redirect('/')
+  })
 
   /**
    * @api {post} /api/user/:user_id Update

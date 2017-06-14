@@ -2,26 +2,33 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import moment from 'moment';
 
 export default class Tabs extends Component {
 
+  static propTypes = {
+    selectTab: PropTypes.func,
+    cart: PropTypes.object,
+    tab: PropTypes.string
+  }
+
   render() {
     const { tab, selectTab, cart } = this.props,
-          tabs = [
-            { 
-              tab: 'cart',
-              display: `Cart (${cart.items.length})`
-            },
-            {
-              tab: 'search',
-              display: 'Search'
-            },
-            {
-              tab: 'invoice',
-              display: 'Invoice'
-            }
-          ];
+      tabs = cart.kip_pay_allowed ? [{
+        tab: 'cart',
+        display: `Cart (${cart.items.length})`
+      }, {
+        tab: 'search',
+        display: 'Search'
+      }, {
+        tab: 'invoice',
+        display: 'Invoice'
+      }] : [{
+        tab: 'cart',
+        display: `Cart (${cart.items.length})`
+      }, {
+        tab: 'search',
+        display: 'Search'
+      }];
 
     return (
       <div className='tabs'>
@@ -36,5 +43,3 @@ export default class Tabs extends Component {
     );
   }
 }
-
-

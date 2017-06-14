@@ -1,5 +1,6 @@
 var db
 const dbReady = require('../../db')
+
 dbReady.then((models) => { db = models; })
 
 
@@ -43,6 +44,19 @@ class Invoice {
     return new invoiceHandlers[invoice.invoice_type](invoice)
   }
 
+
+
+  /**
+   * gets the invoice by Cart
+   *
+   * @class      GetByCartId (name)
+   * @param      {string}   cartId  The cart id
+   * @return     {Promise}  the invoices
+   */
+  static async GetByCartId (cartId) {
+    const invoice = await db.Invoices.find({cart: cartId}).populate('leader').populate('cart').populate('members')
+    return invoice
+  }
 
   /**
    * create a new invoice of type with data

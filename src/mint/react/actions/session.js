@@ -96,7 +96,7 @@ export function login(cart_id, email) {
 export function getAddresses() {
   return async dispatch => {
     try {
-      const response = await fetch(`/api/login?email=${encodeURIComponent(email)}&redirect=/cart/${cart_id}`, {
+      const response = await fetch('/api/user/address', {
         credentials: 'same-origin'
       });
 

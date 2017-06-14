@@ -3,17 +3,15 @@
 import { connect } from 'react-redux';
 import { Tabs } from '../newComponents';
 
-import { 
+import {
   selectTab
 } from '../newActions';
-
-import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   return {
     tab: state.app.viewTab,
     cart: state.cart
-  }
+  };
 };
 
 const mapDispatchToProps = dispatch => ({
@@ -21,7 +19,3 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tabs);
-
-
-
-

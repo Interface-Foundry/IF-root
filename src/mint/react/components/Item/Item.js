@@ -39,7 +39,6 @@ export default class Item extends Component {
     user_account: PropTypes.object,
     currentCart: PropTypes.object,
     store: PropTypes.object,
-    search: PropTypes.string,
     saveOldId: PropTypes.func
   }
 
@@ -58,8 +57,7 @@ export default class Item extends Component {
     if (navOk) {
       if (type === 'search') return ::this.navSearch();
       const newIndex = (originalx > x) // we don't need this if its a search
-        ? (pageIndex === items.length - 1) ? 0 : pageIndex + 1
-        : (pageIndex === 0) ? items.length - 1 : pageIndex - 1;
+        ? (pageIndex === items.length - 1) ? 0 : pageIndex + 1 : (pageIndex === 0) ? items.length - 1 : pageIndex - 1;
       if (type === 'deal')::this.navDeal(newIndex); //look ma, no constructor!
       else if (type === 'cartItem' || type === 'cartVariant')::this.navCart(newIndex);
     }
@@ -87,14 +85,8 @@ export default class Item extends Component {
       history: { replace }
     } = this.props;
     const splitItems = splitCartById(this.props, { id });
-    const myItems = id !== leaderId
-      ? splitItems.my
-      : items;
-    let ind = newIndex > myItems.length - 1
-      ? 0
-      : newIndex < 0
-      ? myItems.length - 1
-      : newIndex;
+    const myItems = id !== leaderId ? splitItems.my : items;
+    let ind = newIndex > myItems.length - 1 ? 0 : newIndex < 0 ? myItems.length - 1 : newIndex;
     replace(`/cart/${cart_id}/m/${type}/${ind}/${myItems[ind].id}/edit`);
   }
 
@@ -120,7 +112,7 @@ export default class Item extends Component {
         saveOldId,
         amazon_id,
         history: { push },
-        item: { asin, options }
+        item: { options }
       }
     } = this;
     const {
@@ -130,7 +122,7 @@ export default class Item extends Component {
       search: nextSearch,
       amazon_id: nextAmazonId,
       item: { position: nextPos, asin: nextAsin, id: nextId },
-      currentCart: { store: nextStore, store_locale: nextLocale },
+      currentCart: { store: nextStore, store_locale: nextLocale }
     } = nextProps;
 
     if (cart_id && nextType === 'item' && Array.isArray(nextSearch)) { //never replace cart_id if its undefined
@@ -171,13 +163,9 @@ export default class Item extends Component {
       }
     } = this;
     const splitItems = splitCartById(this.props, { id });
-    const myItems = leader && id !== leader.id
-      ? splitItems.my
-      : items;
+    const myItems = leader && id !== leader.id ? splitItems.my : items;
     let imageUrl =
-      (items[parseInt(index)] && items[parseInt(index)].large)
-      ? items[parseInt(index)].large
-      : main_image_url,
+      (items[parseInt(index)] && items[parseInt(index)].large) ? items[parseInt(index)].large : main_image_url,
       next = () => {
         this.setState({ animation: 'slideLeft' });
         if (type === 'search') return nextSearch();

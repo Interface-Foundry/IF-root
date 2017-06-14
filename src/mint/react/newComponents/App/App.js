@@ -5,15 +5,24 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route, Switch } from 'react-router';
+import { Route } from 'react-router';
 
-import { HeaderContainer, TabsContainer, SearchContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../newContainers';
+import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../newContainers';
 import { ErrorPage, Modal } from '..';
 
 //Analytics!
 import ReactGA from 'react-ga';
 
 export default class App extends Component {
+
+  static propTypes = {
+    fetchCart: PropTypes.func,
+    match: PropTypes.object,
+    popup: PropTypes.bool,
+    sidenav: PropTypes.bool,
+    togglePopup: PropTypes.func,
+    fetchMetrics: PropTypes.func
+  }
 
   _handeKeyPress(e) {
     // debugger
@@ -29,10 +38,9 @@ export default class App extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { fetchCart, fetchMetrics, match } = this.props;
-
     if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
-      fetchCart(nextProps.match.url.split('/')[2])
-      fetchMetrics(nextProps.match.url.split('/')[2])
+      fetchCart(nextProps.match.url.split('/')[2]);
+      fetchMetrics(nextProps.match.url.split('/')[2]);
     }
   }
 
@@ -42,13 +50,13 @@ export default class App extends Component {
       nextProps.sidenav !== this.props.sidenav ||
       nextProps.popup !== this.props.popup ||
       nextProps.match.url !== this.props.match.url
-    ) return true
+    ) return true;
 
-    return false
+    return false;
   }
 
   render() {
-    const { sidenav, popup, togglePopup, toggleSidenav, match } = this.props;
+    const { sidenav, popup, togglePopup, match } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }

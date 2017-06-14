@@ -39,11 +39,21 @@
 		}
 
 		&.blue {
-			background: white;
+			background: transparent;
 			color: $color-blue;
 			svg {
 				fill: $color-blue;
 				padding: $padding/2;
+				vertical-align: top !important;
+			}
+		}
+
+		&.locked {
+			background: transparent;
+			color: white;
+			svg {
+				fill: white;
+				padding: $padding;
 				vertical-align: top !important;
 			}
 		}

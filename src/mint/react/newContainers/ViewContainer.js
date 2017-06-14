@@ -3,18 +3,16 @@
 import { connect } from 'react-redux';
 import { View } from '../newComponents';
 
-import { 
+import {
   toggleSidenav,
   togglePopup,
   likeCart,
   unlikeCart
 } from '../newActions';
 
-import ReactGA from 'react-ga';
-
 const mapStateToProps = (state, ownProps) => {
   return {
-  	user: state.user,
+    user: state.user,
     cart: state.cart,
     sidenav: state.app.sidenav,
     popup: state.app.popup,
@@ -30,7 +28,3 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(View);
-
-
-
-

@@ -1,4 +1,4 @@
-// react/components/Settings/Settings.scss
+// react/components/modal/Settings/Settings.scss
 @import '../../../../react-common/styles/Constants';
 .settings-page {
   position: relative;
@@ -24,10 +24,10 @@
     height: 300px;
     width: 300px;
     background: url('//storage.googleapis.com/kip-random/many_kips/grabber.svg');
-		align-self: end;
-		position: relative;
-		right: -70px;
-		bottom: -20px;
+    align-self: end;
+    position: relative;
+    right: -70px;
+    bottom: -20px;
   }
   h4 {
     line-height: $nav-height;
@@ -36,3 +36,4 @@
     width: 100%;
   }
 }
+

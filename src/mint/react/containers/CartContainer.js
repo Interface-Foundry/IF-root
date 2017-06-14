@@ -29,13 +29,13 @@ const mapDispatchToProps = dispatch => ({
   selectItem: item => {
     ReactGA.event({
       category: 'Cart',
-      action: 'Selected Item in Cart',
+      action: 'Selected Item in Cart'
     });
     return dispatch(selectItem(item));
   },
   updateCart: (cart) => dispatch(updateCart(cart)),
   cancelRemoveItem: () => dispatch(cancelRemoveItem()),
-  cancelClearCart: () => dispatch(cancelClear()),
+  cancelClearCart: () => dispatch(cancelClear())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

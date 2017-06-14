@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from '..';
-import { Down, Right } from '../../../kip-website/themes/newSvg';
+import { Right } from '../../../kip-website/themes/newSvg';
 
 export default class Popup extends Component {
 
@@ -31,7 +31,7 @@ export default class Popup extends Component {
     validateCode: PropTypes.func,
     loginText: PropTypes.string,
     loginSubtext: PropTypes.string,
-    _toggleLoginScreen: PropTypes.func,
+    _toggleLoginScreen: PropTypes.func
   }
 
   _validateEmail(email) {
@@ -48,7 +48,7 @@ export default class Popup extends Component {
     if (code.length < 4) this.setState({ code: { edited: true, val: pos ? [val[0], code] : [code, val[1]] } });
     else this.setState({ code: { edited: true, val: [code.substr(0, 3), code.substr(3)] } });
 
-    if (val[0].length === 3) this.refs.code_1.focus();
+    if (val && val[0].length === 3) this.code_1.focus();
 
   }
 
@@ -72,15 +72,15 @@ export default class Popup extends Component {
     e.preventDefault();
     const {
       state: { mail: { val: mail }, code: { val: code } },
-      props: { validateCode },
+      props: { validateCode }
     } = this;
     await validateCode(mail, String(code[0]) + String(code[1]));
   }
 
   componentWillReceiveProps(nextProps) {
-    const { _toggleLoginScreen } = this.props;
-    const { newAccount, errors, ok, message, status } = nextProps;
-    if (newAccount) _toggleLoginScreen();
+    const { _toggleLoginScreen, newAccount } = this.props;
+    const { newAccount: nextNewAccount, errors, ok, message, status } = nextProps;
+    if (nextNewAccount && nextNewAccount !== newAccount) _toggleLoginScreen();
     if (errors) this.setState({ error: errors.message });
     if (!ok) this.setState({ error: message });
     else if (status === 'LOG_IN' && ok) _toggleLoginScreen();
@@ -98,7 +98,7 @@ export default class Popup extends Component {
 
     return (
       <section className='popup' onClick={(e) => {if(e.target.className === 'popup') _toggleLoginScreen();}}>
-        <form className='popup__card' onSubmit={!success ? _enterMail : _enterCode}>
+        <form className={`popup__card ${success ? 'codemode':''}`} onSubmit={!success ? _enterMail : _enterCode}>
           {
             window.location.href.includes('newcart') 
             ? null
@@ -120,8 +120,8 @@ export default class Popup extends Component {
             !success
               ? <input className={`loginMail ${!mail.edited ? 'empty' : ''}`} onChange={_updateMail} value={mail.val} type='email' required autoFocus placeholder='Enter your email'/>
               : <div className='autoTab'>
-                  <input ref='code_0' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 0)} value={code.val[0]||''} type="tel" pattern='[0-9]{3}' required autoFocus placeholder='000'/>
-                  <input ref='code_1' className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
+                  <input ref={(c) => { this.code_0 = c; }} className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 0)} value={code.val[0]||''} type="tel" pattern='[0-9]{3}' required autoFocus placeholder='000'/>
+                  <input ref={(c) => { this.code_1 = c; }} className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
                 </div>
           }
           <button type='submit'  value='Submit'>{!success ? 'Sign Up ': 'Log In '} <Right/></button>

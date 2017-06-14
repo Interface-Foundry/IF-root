@@ -93,7 +93,7 @@ const requestDecrementItem = (item) => ({
 });
 
 const requestUpdateItem = () => ({
-  type: REQUEST_UPDATE_ITEM,
+  type: REQUEST_UPDATE_ITEM
 });
 
 const receiveUpdateItem = (item, old_item_id) => ({
@@ -110,7 +110,7 @@ const setSearch = (index) => ({
 const setOldId = (old_item_id) => ({
   type: SET_OLD_ID,
   old_item_id
-})
+});
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ export function removeItem(cart_id, item_id) {
         .currentCart.itemDeleted) {
         await fetch(`/api/cart/${cart_id}/item/${item_id}`, {
           method: 'DELETE',
-          credentials: 'same-origin',
+          credentials: 'same-origin'
         });
         dispatch(receiveRemoveItem());
       }

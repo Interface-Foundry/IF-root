@@ -1,4 +1,4 @@
-// react/components/Settings/Settings.js
+// react/components/modal/Settings/Settings.js
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
@@ -53,7 +53,7 @@ export default class Settings extends Component {
     updateUser(id, { email_address: mail });
   }
 
-  render() {    
+  render() {
     const { props: { cart, user: { name, email_address } }, state: { editName, editMail } } = this;
     return (
       <div className='settings-page'>
@@ -93,6 +93,7 @@ export default class Settings extends Component {
           <li><Link to={`/cart/${cart.id}/m/feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
         </ul>
         <div className='reachKip'/>
+        <h4><a href='/api/logout'>Logout</a></h4>
         <h4>Kip Version 1.3.2 (Mint)</h4>
       </div>
     );

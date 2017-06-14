@@ -7,12 +7,10 @@ import {
   selectTab
 } from '../newActions';
 
-import ReactGA from 'react-ga';
-
 const mapStateToProps = (state, ownProps) => {
   return {
     cart: state.cart
-  }
+  };
 };
 
 // Just an example for mapping functions to the component. 

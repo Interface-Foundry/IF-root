@@ -10,7 +10,7 @@ import { Share } from '..';
 export default class SignIn extends Component {
 
   static propTypes = {
-    match: PropTypes.object.isRequired,
+    match: PropTypes.object.isRequired
   }
 
   render() {

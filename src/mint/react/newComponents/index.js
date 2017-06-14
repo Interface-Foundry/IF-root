@@ -8,8 +8,9 @@ export Buttons from './Buttons';
 export Tabs from './Tabs';
 
 export Modal from './Modal';
-export { Feedback, Settings, Share, EditCart } from './Modal';
+export { Feedback, Settings, Share, EditCart }
+from './Modal';
 
 export View from './View';
-export { Results, Cart, Invoice } from './View';
-
+export { Results, Cart, Invoice }
+from './View';

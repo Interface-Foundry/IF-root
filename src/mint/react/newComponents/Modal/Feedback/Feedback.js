@@ -1,4 +1,4 @@
-// react/components/Feedback/Feedback.js
+// react/components/modal/Feedback/Feedback.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -12,7 +12,7 @@ export default class Feedback extends Component {
   }
 
   static propTypes = {
-    handleSubmit: PropTypes.func,
+    handleSubmit: PropTypes.func
   }
 
   state = {
@@ -20,7 +20,7 @@ export default class Feedback extends Component {
   }
 
   _toggleRating = (value) => {
-    this.setState({ rating: value || !this.state.rating })
+    this.setState({ rating: value || !this.state.rating });
   }
 
   render() {
@@ -60,7 +60,7 @@ class RatingField extends Component {
     input: PropTypes.object,
     label: PropTypes.string,
     meta: PropTypes.object,
-    _toggleRating: PropTypes.func,
+    _toggleRating: PropTypes.func
   }
 
   render() {
@@ -70,21 +70,21 @@ class RatingField extends Component {
         <h1>{label}</h1>
         <ul>
           <li className='col-4' onClick={() => { 
-            onChange('good')
+            onChange('good');
             _toggleRating(false);
           }}>
             <Icon icon='Happy'/>
             <h3>Good</h3>
           </li>
           <li className='col-4' onClick={() => { 
-              onChange('okay')
+              onChange('okay');
               _toggleRating(false);
           }}>
             <Icon icon='Neutral'/>
             <h3>Okay</h3>
           </li>
           <li className='col-4' onClick={() => {
-             onChange('bad')
+             onChange('bad');
              _toggleRating(false);
           }}>
             <Icon icon='Sad'/>
@@ -111,7 +111,7 @@ class TextField extends Component {
 
   render() {
     const { input, label, placeholder, handleSubmit, type, meta: { touched, error, warning } } = this.props;
-    
+
     return (
       <div className='feedback'>
         <h1>{label}</h1>

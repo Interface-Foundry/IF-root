@@ -15,7 +15,7 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = dispatch => ({
   login: (cart_id, email) => dispatch(login(cart_id, email)),
-  validateCode: (email, code) => dispatch(validateCode(email, code)),
+  validateCode: (email, code) => dispatch(validateCode(email, code))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

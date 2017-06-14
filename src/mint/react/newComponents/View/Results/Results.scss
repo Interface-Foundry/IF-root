@@ -1,3 +1,5 @@
+// mint/react/components/View/Results/Results.scss
+
 @import '../../../../react-common/styles/Constants';
 @import '../../../../react-common/styles/Animations';
 
@@ -26,6 +28,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			font-size: 12px;
 			padding: 0 $padding;
 			border-radius: 5px;
+
+			&:disabled {
+				background: rgba(#333, 0.1);
+			}
 
 			&.more {
 				background: white;

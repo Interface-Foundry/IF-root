@@ -5,7 +5,7 @@ import { ArchivedCarts } from '../components';
 import { fetchAllCarts } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
-  archivedCarts: state.otherCarts.archivedCarts,
+  archivedCarts: state.otherCarts.archivedCarts
 });
 
 const mapDispatchToProps = dispatch => ({

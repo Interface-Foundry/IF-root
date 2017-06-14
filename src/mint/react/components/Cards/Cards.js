@@ -3,7 +3,6 @@
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import CategoryCard from './CategoryCard';
 import SearchCard from './SearchCard';
 import { getLastSearch } from '../../utils';
@@ -27,7 +26,8 @@ export default class Cards extends Component {
     position: PropTypes.number,
     clearItem: PropTypes.func,
     storeName: PropTypes.string,
-    currentCart: PropTypes.object
+    currentCart: PropTypes.object,
+    previewAmazonItem: PropTypes.func
   }
 
   state = {
@@ -41,18 +41,16 @@ export default class Cards extends Component {
       scrollCount = 0,
       scrollStep = Math.PI / (2000 / 15);
 
-    const element = ReactDOM.findDOMNode(this.refs.scroll)
-
     switch (direction) {
     case 'left':
-      end = element.scrollLeft - 600 > 1 ? element.scrollLeft - 600 : 1;
+      end = this.scroll.scrollLeft - 600 > 1 ? this.scroll.scrollLeft - 600 : 1;
       cosParameter = end / 2;
 
       this.scrollInterval = setInterval(() => {
-        if (element.scrollLeft >= end) {
+        if (this.scroll.scrollLeft >= end) {
           scrollCount = scrollCount + 1;
           scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
-          element.scrollLeft = element.scrollLeft - scrollMargin;
+          this.scroll.scrollLeft = this.scroll.scrollLeft - scrollMargin;
         } else {
           clearInterval(this.scrollInterval);
         }
@@ -60,14 +58,14 @@ export default class Cards extends Component {
 
       break;
     case 'right':
-      end = element.scrollLeft + 600;
+      end = this.scroll.scrollLeft + 600;
       cosParameter = end / 2;
 
       this.scrollInterval = setInterval(() => {
-        if (element.scrollLeft <= end) {
+        if (this.scroll.scrollLeft <= end) {
           scrollCount = scrollCount + 1;
           scrollMargin = cosParameter - cosParameter * Math.cos(scrollCount * scrollStep);
-          element.scrollLeft = element.scrollLeft + scrollMargin;
+          this.scroll.scrollLeft = this.scroll.scrollLeft + scrollMargin;
         } else {
           clearInterval(this.scrollInterval);
         }
@@ -78,7 +76,7 @@ export default class Cards extends Component {
   }
 
   renderCards() {
-    const { props: { currentCart, cards = [], cart_id, selectCard, cardType, search } } = this;
+    const { props: { currentCart, cards = [], cart_id, selectCard, cardType, previewAmazonItem } } = this;
 
     const activeCards = cards.map((card, i) => {
       return <li key={card._id || card.id} onClick={(e) => selectCard(i + 1, card)}>
@@ -89,7 +87,7 @@ export default class Cards extends Component {
     });
 
     return (
-      <div ref='scroll' className='scroll__horizontal'>
+      <div ref={(c) => { this.scroll = c; }} className='scroll__horizontal'>
         <span>
           {activeCards}
         </span>
@@ -122,16 +120,13 @@ export default class Cards extends Component {
             _scrollHorizontal('left');
           }}>
             <Icon icon='LeftChevron'/>
-          </div> 
-          { renderCards() }
-          <div className='icon right'
-            onClick={() => {
-              _scrollHorizontal('right');
-            }}>
-            <Icon icon='RightChevron'/>
-          </div>
-        </ul>
-      </div>
+          </div> { renderCards() } < div className = 'icon right'
+      onClick = {
+        () => {
+          _scrollHorizontal('right');
+        }
+      } >
+      <Icon icon='RightChevron'/> < /div> < /ul > < /div>
     );
   }
 }

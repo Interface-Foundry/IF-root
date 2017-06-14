@@ -3,10 +3,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import Store from './Store'
+import Store from './Store';
 
 export default class Stores extends Component {
-
+  static propTypes = {
+    stores: PropTypes.array,
+    _toggleLoginScreen: PropTypes.func,
+    user: PropTypes.object
+  }
   componentWillReceiveProps(nextProps) {
     const { stores, _toggleLoginScreen } = this.props;
 
@@ -16,7 +20,7 @@ export default class Stores extends Component {
   }
 
   render() {
-    const { stores, history: { push } } = this.props;
+    const { stores } = this.props;
     const otherStores = stores.slice() || [];
     const suggested = otherStores.shift() || [];
 
@@ -44,5 +48,3 @@ export default class Stores extends Component {
     );
   }
 }
-
-

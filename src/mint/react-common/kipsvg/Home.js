@@ -4,7 +4,7 @@ export default class Home extends Component {
 	render() {
 	  	return (
 			<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-				 width="184.347px" height="184.347px" viewBox="0 0 184.347 184.347" enable-background="new 0 0 184.347 184.347"
+				 width="184.347px" height="184.347px" viewBox="0 0 184.347 184.347" enableBackground="new 0 0 184.347 184.347"
 				 xmlSpace="preserve">
 			<g>
 				<g>

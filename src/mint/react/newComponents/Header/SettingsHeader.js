@@ -1,30 +1,31 @@
-// react/components/App/Header.js
+// react/components/Header/SettingsHeader.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../react-common/components';
-import { splitCartById } from '../../reducers';
 
 export default class SettingsHeader extends Component {
 
   static propTypes = {
     match: PropTypes.object.isRequired,
+    icon: PropTypes.string,
+    text: PropTypes.string,
+    user: PropTypes.object,
+    cart: PropTypes.object,
+    _toggleLoginScreen: PropTypes.func,
+    _toggleSidenav: PropTypes.func
   }
 
   render() {
-    const { 
+    const {
       icon,
       text,
-      user, 
+      user,
       cart,
       _toggleLoginScreen,
-      _toggleSidenav,
-      history: { push }
+      _toggleSidenav
     } = this.props;
-
-    console.log(user)
     return (
       <span className='settings'>
         <div className='header__left'>

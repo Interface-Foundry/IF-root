@@ -42,7 +42,7 @@ import {
   Gmail,
   Slack,
   Sms,
-  Whatsapp,
+  Whatsapp
 } from '../../styles';
 import {
   Share
@@ -55,9 +55,9 @@ export default class Icon extends Component {
   render() {
     switch (this.props.icon) {
     case 'Like':
-      return <IoAndroidFavorite/>
+      return <IoAndroidFavorite/>;
     case 'Loop':
-      return <IoLoop/>
+      return <IoLoop/>;
     case 'PriceTag':
       return <IoPricetag/>;
     case 'Hamburger':
