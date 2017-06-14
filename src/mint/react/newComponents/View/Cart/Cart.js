@@ -10,6 +10,7 @@ import { Icon } from '../../../../react-common/components';
 import Empty from '../Empty';
 
 export default class Cart extends Component {
+  
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,
@@ -17,6 +18,7 @@ export default class Cart extends Component {
     editId: PropTypes.func,
     removeItem: PropTypes.func
   }
+
   render() {
     const { cart, user, editId, editItem, removeItem } = this.props,
       userCarts = splitCartById(this.props, user),

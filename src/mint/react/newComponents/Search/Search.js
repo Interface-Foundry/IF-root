@@ -14,8 +14,7 @@ export default class Input extends Component {
     cart: PropTypes.object,
     query: PropTypes.string,
     submitQuery: PropTypes.func,
-    updateQuery: PropTypes.func,
-    history: PropTypes.object
+    updateQuery: PropTypes.func
   }
 
   state = {

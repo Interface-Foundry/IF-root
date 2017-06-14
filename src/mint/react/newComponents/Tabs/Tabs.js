@@ -8,7 +8,7 @@ export default class Tabs extends Component {
   static propTypes = {
     selectTab: PropTypes.func,
     cart: PropTypes.object,
-    tab: PropTypes.object
+    tab: PropTypes.string
   }
 
   render() {

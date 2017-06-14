@@ -8,10 +8,11 @@ import { timeFromDate } from '../../../utils';
 import { ButtonsContainer } from '../../../newContainers';
 
 export default class Details extends Component {
+
   static propTypes = {
     name: PropTypes.string,
     leader: PropTypes.object,
-    store: PropTypes.object,
+    store: PropTypes.string,
     store_locale: PropTypes.string,
     members: PropTypes.array,
     items: PropTypes.array,
@@ -19,16 +20,16 @@ export default class Details extends Component {
     updatedAt: PropTypes.string,
     createdAt: PropTypes.string,
     likes: PropTypes.array,
-    clones: PropTypes.array,
+    clones: PropTypes.number,
     id: PropTypes.string,
-    likeCart: PropTypes.function,
-    unlikeCart: PropTypes.function,
+    likeCart: PropTypes.func,
+    unlikeCart: PropTypes.func,
     user: PropTypes.object,
     amazon_cartid: PropTypes.string,
     locked: PropTypes.bool
   }
-  render() {
 
+  render() {
     const { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, locked } = this.props,
       metrics = [{
         name: 'Members',

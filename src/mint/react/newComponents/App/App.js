@@ -18,8 +18,8 @@ export default class App extends Component {
   static propTypes = {
     fetchCart: PropTypes.func,
     match: PropTypes.object,
-    popup: PropTypes.object,
-    sidenav: PropTypes.object,
+    popup: PropTypes.bool,
+    sidenav: PropTypes.bool,
     togglePopup: PropTypes.func,
     fetchMetrics: PropTypes.func
   }
