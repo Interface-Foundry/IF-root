@@ -10,10 +10,7 @@ var itemOptionsCollection = Waterline.Collection.extend({
   migrate: 'safe',
   attributes: {
     /**
-     * @type {string} id the option id, which for amazon items is the asin
-     * it's this way because:
-     *  - if you're on Medium Black shirt, mousing over the asin for Medium Red shirt should say "Red"
-     *  - but if you're on Large Red shirt, mousing over the asin for Medium Red shirt should say "Medium"
+     * @type {string}
      */
     id: {
       type: 'string',
@@ -38,6 +35,9 @@ var itemOptionsCollection = Waterline.Collection.extend({
 
     /** @type {string} the asin for this option, because every option on amazon has its own asin **/
     asin: 'string',
+
+    /** @type {string} the asin for this option's parent, to help tie options together **/
+    parent_asin: 'string',
 
     /** @type {number} the amount by which this option increases or decreases the item's base price per unit. not available for amazon */
     price_difference: 'float',
