@@ -1,11 +1,10 @@
 // mint/react/components/View/Empty/Empty.js
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 export default class EmptyCart extends Component {
 
-  render() {    
+  render() {
     return (
       <table className='empty cart'>
         <tbody>

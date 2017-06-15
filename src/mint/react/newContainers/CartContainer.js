@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { Cart } from '../newComponents';
 import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup } from '../newActions';
 import { isUrl, addSearchHistory } from '../utils';
-import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   editId: state.app.editId,

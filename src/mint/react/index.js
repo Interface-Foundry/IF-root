@@ -56,7 +56,7 @@ store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
   store.dispatch(fetchCart(cart_id));
   store.dispatch(fetchMetrics(cart_id));
-  store.dispatch(fetchCategories(cart_id))
+  store.dispatch(fetchCategories(cart_id));
 });
 
 ReactDOM.render(

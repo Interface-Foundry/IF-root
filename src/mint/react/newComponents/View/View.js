@@ -3,7 +3,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Details from './Details';
-import Empty from './Empty';
 import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer } from '../../newContainers';
 
 export default class App extends Component {

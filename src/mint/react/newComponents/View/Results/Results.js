@@ -16,7 +16,9 @@ export default class Results extends Component {
     cart: PropTypes.object,
     query: PropTypes.string,
     addItem: PropTypes.func,
-    selectItem: PropTypes.func
+    selectItem: PropTypes.func,
+    user: PropTypes.object,
+    togglePopup: PropTypes.func
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -53,10 +55,10 @@ export default class Results extends Component {
       }, []);
 
     if (selected)
-      partitionResults.splice(selected.row, 0, [{...selected.result, selected: true }]);
+      partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true }]);
 
-    if(numResults === 0) 
-      return <EmptyContainer />
+    if (numResults === 0)
+      return <EmptyContainer />;
 
     return (
       <table className='results'>

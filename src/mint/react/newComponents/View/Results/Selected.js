@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { displayCost, removeDangerousCharactersFromString } from '../../../utils';
-import { Right, Delete } from '../../../../react-common/kipsvg';
+import { Delete } from '../../../../react-common/kipsvg';
 
 import { Icon } from '../../../../react-common/components';
 
@@ -15,17 +15,14 @@ export default class Selected extends Component {
     cartAsins: PropTypes.array,
     selectItem: PropTypes.func,
     addItem: PropTypes.func,
-    arrow: PropTypes.number
-  }
-
-  state = {
-    quantity: 1
+    arrow: PropTypes.number,
+    user: PropTypes.object,
+    togglePopup: PropTypes.func
   }
 
   render() {
     const { user, cart, item, cartAsins, selectItem, addItem, arrow, togglePopup } = this.props,
-          { quantity } = this.state,
-            afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
+      afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
     return (
       <td key={item.id} colSpan='100%' className='selected'>

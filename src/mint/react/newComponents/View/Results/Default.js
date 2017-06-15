@@ -1,10 +1,7 @@
 // mint/react/components/View/Results/Default.js
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
 import { displayCost } from '../../../utils';
-import { Right } from '../../../../react-common/kipsvg';
-
 import { Icon } from '../../../../react-common/components';
 
 export default class Default extends Component {
@@ -14,9 +11,10 @@ export default class Default extends Component {
     cartAsins: PropTypes.array,
     selectItem: PropTypes.func,
     addItem: PropTypes.func,
-    togglePopup: PropTypes.func
+    togglePopup: PropTypes.func,
+    user: PropTypes.object
   }
-  
+
   render() {
     const { user, cart, item, cartAsins, selectItem, addItem, togglePopup } = this.props;
 

@@ -102,7 +102,8 @@ export default class App extends Component {
         session_id,
         user_account: { id },
         location: { pathname },
-        history: { replace }
+        history: { replace },
+        fetchAllCarts
       }
     } = this;
     const { cart_id: nextCart_id, session_id: nextSessionId, user_account: { id: nextId } } = nextProps;

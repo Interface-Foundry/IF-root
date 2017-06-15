@@ -1,63 +1,72 @@
 export {
-	postFeedback,
-	toggleSidenav,
-	togglePopup,
-	selectTab
-} from './app';
-
-export { 
-    loading,
-    notify,
-    notifyClear
-} from './common';
-
-export { 
-	get,
-	post,
-	del,
-	put
-} from './async';
-
-export { 
-	checkSession,
-	login,
-	validateCode
-} from './session';
-
-export { 
-	fetchCart,
-	fetchCarts,
-	updateCart, 
-	clearCart, 
-	deleteCart,
-	fetchMetrics,
-	likeCart,
-	unlikeCart,
-	reorderCart
-} from './cart';
+  postFeedback,
+  toggleSidenav,
+  togglePopup,
+  selectTab
+}
+from './app';
 
 export {
-	addItem,
-	editItem,
-	updateItem,
-	fetchItem,
-	removeItem,
-  	copyItem
-} from './item';
+  loading,
+  notify,
+  notifyClear
+}
+from './common';
 
-export { 
-	fetchStores,
-	setStore
-} from './store';
+export {
+  get,
+  post,
+  del,
+  put
+}
+from './async';
 
-export { 
-	updateUser
-} from './user';
+export {
+  checkSession,
+  login,
+  validateCode
+}
+from './session';
 
-export { 
-	selectItem,
-	submitQuery,
-	updateQuery,
-	toggleHistory,
+export {
+  fetchCart,
+  fetchCarts,
+  updateCart,
+  clearCart,
+  deleteCart,
+  fetchMetrics,
+  likeCart,
+  unlikeCart,
+  reorderCart
+}
+from './cart';
+
+export {
+  addItem,
+  editItem,
+  updateItem,
+  fetchItem,
+  removeItem,
+  copyItem
+}
+from './item';
+
+export {
+  fetchStores,
+  setStore
+}
+from './store';
+
+export {
+  updateUser
+}
+from './user';
+
+export {
+  selectItem,
+  submitQuery,
+  updateQuery,
+  toggleHistory,
   fetchCategories
-} from './search';
+}
+from './search';

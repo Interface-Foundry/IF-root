@@ -55,7 +55,7 @@ export const calculateItemTotal = (items) => {
 
 export const numberOfItems = (items) => {
   return items.reduce((acc, item) => acc + item.quantity, 0);
-}
+};
 
 export const removeDangerousCharactersFromString = (string) => {
   const allowedTags = [ 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',

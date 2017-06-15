@@ -46,7 +46,7 @@ export default class History extends Component {
           {
             suggestedCategories.map((category, i) => {
               return (
-                <li key={i} className={`history__term`}>
+                <li key={i} className={'history__term'}>
                   <div className='history__term-icon'>
                     <Icon icon='Eye'/>
                   </div>
