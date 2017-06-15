@@ -33,56 +33,59 @@ module.exports = {
   },
   module: {
     rules: [{
-        test: /\.jsx?$|\.js?$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            cacheDirectory: './webpack-cache',
-            'presets': [
-              'react',
-              'es2015',
-              'stage-0'
-            ]
-          }
+      test: /\.jsx?$|\.js?$/,
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          cacheDirectory: './webpack-cache',
+          babelrc: false,
+          'presets': [
+            'react',
+            'es2015',
+            'stage-0'
+          ],
+          plugins: [
+            'transform-react-remove-prop-types', ['transform-runtime', {
+              helpers: false,
+              polyfill: false,
+              regenerator: true,
+              moduleName: 'babel-runtime'
+            }]
+          ]
+        }
+      }
+    }, {
+      test: /\.scss$/,
+      exclude: /node_modules/,
+      use: [{
+        loader: 'style-loader'
+      }, {
+        loader: 'css-loader',
+        options: {
+          importLoaders: 1
         }
       }, {
-        test: /\.scss$/,
-        exclude: /node_modules/,
-        use: [{
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1,
-            }
-          },
-          {
-            loader: 'postcss-loader'
-          },
-          {
-            loader: 'sass-loader'
-          }
-        ]
-      },
-      {
-        test: /\.json?$/,
-        loader: 'json-loader',
-        exclude: /node_modules/
+        loader: 'postcss-loader'
       }, {
-        test: /\.css$/,
-        exclude: /node_modules/,
-        loader: 'style-loader!css-loader!autoprefixer?browsers=last 2 versions'
-      }, {
-        test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
-        exclude: /node_modules/,
-        loader: 'file-loader?name=fonts/[name].[ext]'
-      }, {
-        test: /\.(png|jpg)$/,
-        exclude: /node_modules/,
-        loader: 'file-loader?name=images/[name].[ext]'
-      }
-    ],
+        loader: 'sass-loader'
+      }]
+    }, {
+      test: /\.json?$/,
+      loader: 'json-loader',
+      exclude: /node_modules/
+    }, {
+      test: /\.css$/,
+      exclude: /node_modules/,
+      loader: 'style-loader!css-loader!autoprefixer?browsers=last 2 versions'
+    }, {
+      test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
+      exclude: /node_modules/,
+      loader: 'file-loader?name=fonts/[name].[ext]'
+    }, {
+      test: /\.(png|jpg)$/,
+      exclude: /node_modules/,
+      loader: 'file-loader?name=images/[name].[ext]'
+    }]
   }
 };

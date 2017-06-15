@@ -3,8 +3,7 @@ import { Header } from '../components';
 
 import {
   togglePopup,
-  toggleSidenav,
-  get
+  toggleSidenav
 } from '../actions';
 
 const mapStateToProps = (state, props) => {
