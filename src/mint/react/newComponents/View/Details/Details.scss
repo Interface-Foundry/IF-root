@@ -63,6 +63,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 				.text {
 					display: inline-block;
 					padding: 0 $padding;
+					width: calc(100% - #{$nav-height});
 
 					h1 {
 						font-size: 18px;
