@@ -141,7 +141,8 @@ class Invoice {
       var email = await db.Emails.create({
         recipients: user.email_address,
         subject: 'You owe Kip $'+ debts[user_id] ,
-        cart: invoice.cart
+        cart: invoice.cart,
+        template: 'summary_email'
       })
 
       email.template('payment', {
