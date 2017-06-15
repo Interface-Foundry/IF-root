@@ -11,7 +11,12 @@ import {
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
+  const params = decodeURIComponent(state.routing.location.search),
+    toast = params.match(/toast=([^&$]+)/),
+    status = params.match(/status=([^&$]+)/);
   return {
+    toast: toast ? toast[1] : null,
+    status: status ? status[1] : null,
     cart_id: state.cart.id,
     sidenav: state.app.sidenav,
     popup: state.app.popup

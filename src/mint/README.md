@@ -20,7 +20,7 @@ For hot reloading.
 1. `yarn frontend` -> `npm run frontend`
 	runs express and webpack-dev-server with hot-reloading for both website and mint.
 
-2. `yarn frontend` -> `npm run frontend`
+2. `yarn backend` -> `npm run backend`
   compiles frontend once (for production) and runs hot reloading for the backend only
 
 For static.
