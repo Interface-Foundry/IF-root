@@ -75,7 +75,7 @@
         flex: 1;
         padding: 0;
         a {
-          padding: 10px 2px;
+          padding: 0 2px;
           &.editIcon {
             @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
             padding: $padding $padding;
@@ -83,6 +83,14 @@
             border-radius: 5px 0 0 5px;
             &:hover {
               background: darken($secondaryColor, 5%);
+            }
+          }
+          p {
+            height: $nav-height;
+            line-height: $nav-height/1.6;
+
+            span {
+              line-height: $nav-height/4;
             }
           }
           &:last-child {
@@ -96,6 +104,14 @@
           margin: 5px 0 0 5%;
           width: 95%;
           @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+          .image {
+            @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+            border-radius: 5px 0 0 5px;
+            width: $nav-height - $padding*2;
+            height: 100%;
+            margin: $padding;
+            min-height: $nav-height - $padding*2;
+          }
           &:hover {
             background: rgba($secondaryColor, 0.5);
           }

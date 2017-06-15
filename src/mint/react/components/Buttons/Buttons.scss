@@ -68,10 +68,8 @@
 			}
 
       &:disabled {
-        background: rgba(#333, 0.1);
-        border: 1px solid rgba(#333, 0.3);
+        background: lighten(#333, 70);
         color: #333;
-        opacity: 0.5;
       }
 		}
 	}
