@@ -7,7 +7,7 @@ import { calculateItemTotal, displayCost, timeFromDate } from '../../../utils';
 import { splitCartById } from '../../../newReducers';
 
 import { Icon } from '../../../../react-common/components';
-import Empty from '../Empty';
+import { EmptyContainer } from '../../../newContainers';
 import CartButtons from './CartButtons';
 
 export default class Cart extends Component {
@@ -57,7 +57,7 @@ export default class Cart extends Component {
                       ))
                     }
                   </ul>
-                </div> : <Empty/>
+                </div> : <EmptyContainer />
               }
             </th>
           </tr>

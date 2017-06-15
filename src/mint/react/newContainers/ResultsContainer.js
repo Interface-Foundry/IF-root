@@ -10,6 +10,8 @@ const mapStateToProps = (state, ownProps) => ({
   cart: state.cart,
   query: state.search.query,
   selectedItemId: state.search.selectedItemId,
+  tab: state.app.viewTab,
+  categories: state.search.categories,
   results: state.search.results
 });
 

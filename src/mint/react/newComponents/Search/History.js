@@ -11,33 +11,57 @@ export default class History extends Component {
     selectedQuery: PropTypes.number,
     submitQuery: PropTypes.func,
     updateQuery: PropTypes.func,
+    categories: PropTypes.array,
     cart: PropTypes.object
   }
 
   render() {
-    const { props: { query, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
-    history = query.length > 0 ? getSearchHistory(query) : [];
+    const { props: { query, categories, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
+    history = query.length > 0 ? getSearchHistory(query) : [],
+    suggestedCategories = history.length > 0 ? categories.slice(0, 5) : [];
 
     return (
-      <ul className='history'>
-        {
-          history.map((previousSearch, i) => {
-            return (
-              <li key={i} className={`history__term ${i === selectedQuery ? 'selected' : ''}`}>
-                <div className='history__term-icon'>
-                  <Icon icon='Search'/>
-                </div>
-                <div className='history__term-query' onClick={(e) => {
-                  updateQuery(previousSearch);
-                  submitQuery(previousSearch, store, store_locale);
-                }}>
-                  <p>{previousSearch}</p>
-                </div>
-              </li>
-            );
-          })
-        }
-      </ul>
+      <span className='history'>
+        <ul className='previous'>
+          {
+            history.map((previousSearch, i) => {
+              return (
+                <li key={i} className={`history__term ${i === selectedQuery ? 'selected' : ''}`}>
+                  <div className='history__term-icon'>
+                    <Icon icon='Search'/>
+                  </div>
+                  <div className='history__term-query' onClick={(e) => {
+                    updateQuery(previousSearch);
+                    submitQuery(previousSearch, store, store_locale);
+                  }}>
+                    <p>{previousSearch}</p>
+                  </div>
+                </li>
+              );
+            })
+          }
+        </ul>
+        <ul className='categories'>
+          { history.length > 0 ? <span>Suggested --</span> : null }
+          {
+            suggestedCategories.map((category, i) => {
+              return (
+                <li key={i} className={`history__term`}>
+                  <div className='history__term-icon'>
+                    <Icon icon='Eye'/>
+                  </div>
+                  <div className='history__term-query' onClick={(e) => {
+                    updateQuery(category.humanName);
+                    submitQuery(category.humanName, store, store_locale);
+                  }}>
+                    <p>{category.humanName}</p>
+                  </div>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </span>
     );
   }
 }

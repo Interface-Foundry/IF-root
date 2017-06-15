@@ -2,8 +2,10 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
 import Default from './Default';
 import Selected from './Selected';
+import { EmptyContainer } from '../../../newContainers';
 
 const size = 3;
 
@@ -52,6 +54,9 @@ export default class Results extends Component {
 
     if (selected)
       partitionResults.splice(selected.row, 0, [{...selected.result, selected: true }]);
+
+    if(numResults === 0) 
+      return <EmptyContainer />
 
     return (
       <table className='results'>

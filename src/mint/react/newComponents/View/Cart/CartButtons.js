@@ -24,7 +24,8 @@ export default class CartButtons extends Component {
     return (
       <div className='action'>
         { editId === item.id && !cart.locked && user.id === item.added_by ? <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button> : null }
-        { editId !== item.id && !cart.locked && user.id === item.added_by ? <button onClick={() => editItem(item.id)}><span>Edit Item</span></button> : <button onClick={() => copyItem(cart.id, item.id)}><span>Copy Item</span></button> }
+        { editId !== item.id && !cart.locked && user.id === item.added_by ? <button onClick={() => editItem(item.id)}><span>Edit Item</span></button> : null }
+        { editId !== item.id && !cart.locked && user.id !== item.added_by ? <button onClick={() => copyItem(cart.id, item.id)}><span>Copy Item</span></button> : null }
         { cart.locked ? <button className="locked" disabled='true'><Icon icon='Locked'/></button> : null }
       </div> 
     );
