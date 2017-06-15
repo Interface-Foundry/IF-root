@@ -1,18 +1,16 @@
 // mint/react/components/index.js
-// export AddAmazonItem from './AddAmazonItem';
-// export AmazonForm from './AmazonForm';
-// export AddressForm from './AddressForm';
-// export App from './App';
-// export ArchivedCarts from './ArchivedCarts';
-// export Cart from './Cart';
-// export CartStore from './CartStore';
-// export Cards from './Cards';
-// export EditCart from './EditCart';
-// export ErrorPage from './ErrorPage';
-// export Feedback from './Feedback';
-// export Item from './Item';
-// export Modal from './Modal';
-// export ModifyFooter from './ModifyFooter';
-// export Settings from './Settings';
-// export Share from './Share';
-// export Toast from './Toast';
+export App from './App';
+export Header from './Header';
+export Stores from './Stores';
+export ErrorPage from './ErrorPage';
+export Search from './Search';
+export Buttons from './Buttons';
+export Tabs from './Tabs';
+
+export Modal from './Modal';
+export { Feedback, Settings, Share, EditCart }
+from './Modal';
+
+export View from './View';
+export { Results, Cart, Invoice, Empty }
+from './View';

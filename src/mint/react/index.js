@@ -9,9 +9,9 @@ import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 
-import Reducers from './newReducers';
-import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories } from './newActions';
-import { AppContainer } from './newContainers';
+import Reducers from './reducers';
+import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories } from './actions';
+import { AppContainer } from './containers';
 
 //Analytics!
 import ReactGA from 'react-ga';

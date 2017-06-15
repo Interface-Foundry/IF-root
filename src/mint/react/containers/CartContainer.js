@@ -1,41 +1,27 @@
-// react/containers/CartContainer.js
+// react/containers/SettingsContainer.js
 
 import { connect } from 'react-redux';
 import { Cart } from '../components';
-
-import { fetchCards } from '../actions/cards';
-import { selectItem, updateCart, cancelClear } from '../actions/cart';
-
-import { cancelRemoveItem } from '../actions/item';
-import { splitCartById } from '../reducers';
-import ReactGA from 'react-ga';
+import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup } from '../actions';
+import { isUrl, addSearchHistory } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart_id: state.currentCart.cart_id,
-  addingItem: state.currentCart.addingItem,
-  leader: state.currentCart.leader,
-  members: state.currentCart.members,
-  cards: state.cards.cards,
-  user_account: state.session.user_account,
-  items: splitCartById(state, state.session.user_account),
-  locked: state.currentCart.locked,
-  currentCart: state.currentCart,
-  position: state.cards.position,
-  carts: state.otherCarts.carts
+  editId: state.app.editId,
+  cart: state.cart,
+  query: state.search.query,
+  user: state.user
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchCards: (cart_id) => dispatch(fetchCards(cart_id)),
-  selectItem: item => {
-    ReactGA.event({
-      category: 'Cart',
-      action: 'Selected Item in Cart'
-    });
-    return dispatch(selectItem(item));
+  editItem: item_id => dispatch(editItem(item_id)),
+  removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)),
+  togglePopup: () => dispatch(togglePopup()),
+  submitQuery: (query, store, locale) => {
+    if (!isUrl(query)) addSearchHistory(query);
+    return dispatch(submitQuery(query, store, locale));
   },
-  updateCart: (cart) => dispatch(updateCart(cart)),
-  cancelRemoveItem: () => dispatch(cancelRemoveItem()),
-  cancelClearCart: () => dispatch(cancelClear())
+  copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id)),
+  updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

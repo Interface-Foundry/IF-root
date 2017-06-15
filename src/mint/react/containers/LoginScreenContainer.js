@@ -1,10 +1,15 @@
 import { connect } from 'react-redux';
 import { LoginScreen } from '../../react-common/components';
 
-import { login, validateCode } from '../actions/session';
+import {
+  get,
+  togglePopup,
+  login,
+  validateCode
+} from '../actions';
 
 const mapStateToProps = (state, props) => ({
-  user_account: state.session.user_account,
+  user: state.user,
   newAccount: state.session.newAccount,
   status: state.session.status,
   errors: state.session.errors,
@@ -15,7 +20,9 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = dispatch => ({
   login: (cart_id, email) => dispatch(login(cart_id, email)),
-  validateCode: (email, code) => dispatch(validateCode(email, code))
+  validateCode: (email, code) => dispatch(validateCode(email, code)),
+  get: (url, type) => dispatch(get(url, type)),
+  _toggleLoginScreen: () => dispatch(togglePopup())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

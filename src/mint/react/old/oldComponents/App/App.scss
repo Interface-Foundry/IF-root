@@ -1,0 +1,115 @@
+// react/components/App/App.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+body, html {
+  margin: 0;
+  overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  background: $kip-primary-color;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+  font-family: $main-font;
+  * {
+    outline: none;
+    box-sizing: border-box;
+    vertical-align: top;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+body {
+  background: $kip-secondary-color;
+}
+
+@media only screen and (max-width: 600px) {
+  table {
+    overflow-x: auto;
+    display: block;
+  }
+}
+
+.app, #root {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  margin: auto;
+  text-align: center;
+  background: $kip-secondary-color;
+  background-image: url(https://storage.googleapis.com/kip-random/website/kip_scribble_pattern.png);
+  background-size: 400px;
+}
+
+.app__view {
+  position: relative;
+  overflow: hidden;
+  overflow-y: scroll;
+  text-align: left;
+  -webkit-overflow-scrolling: touch;
+  height: calc(100% - #{$nav-height*2 });
+  &.large {
+    height: calc(100% - #{$nav-height});
+  }
+  @media (min-width: 900px) {
+    display: inline-block;
+    overflow-y: auto;
+    width: calc(100% - 250px);
+    height: calc(100% - #{$nav-height*2});
+  }
+}
+
+.image {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style: none;
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+  letter-spacing: 0.75px;
+}
+
+h1 {
+  font-size: 18px;
+}
+
+h2 {
+  font-size: 16px;
+}
+
+h3 {
+  font-size: 14px;
+}
+
+h4 {
+  font-size: 12px;
+}
+
+input, select:focus, textarea {
+  font-size: $input-font-size;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+

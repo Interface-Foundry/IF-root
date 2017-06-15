@@ -43,14 +43,6 @@ module.exports = {
               'react',
               'es2015',
               'stage-0'
-            ],
-            plugins: [
-              'transform-react-remove-prop-types', ['transform-runtime', {
-                helpers: false,
-                polyfill: false,
-                regenerator: true,
-                moduleName: 'babel-runtime',
-              }]
             ]
           }
         }

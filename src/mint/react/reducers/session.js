@@ -1,36 +1,13 @@
-import {
-  RECEIVE_UPDATE_SESSION,
-  UPDATE_USER,
-  LOGOUT
-} from '../constants/ActionTypes';
+// react/reducers/session.js
 
-const initialState = {
-  user_account: {},
-  animal: '',
-  createdAt: '',
-  updatedAt: '',
-  id: ''
-};
-
-export default function session(state = initialState, action) {
+export default function session(state = {}, action) {
   switch (action.type) {
-  case LOGOUT:
-    return initialState;
+  case 'LOGOUT':
+    return {};
   case 'SESSION_SUCCESS':
     return {
       ...state,
       ...action.response
-    };
-  case RECEIVE_UPDATE_SESSION:
-    return {
-      ...state,
-      ...action.newSession
-      // user_account: action.newSession.user || action.newSession.user_account
-    };
-  case UPDATE_USER:
-    return {
-      ...state,
-      user_account: action.user_account
     };
   default:
     return state;
