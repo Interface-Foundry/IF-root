@@ -21,6 +21,7 @@ const server = 'mint-dev'
 
 
 function deploy() {
+  console.log('running deploy')
   return new Promise((resolve, reject) => {
     // doing this sync for now, maybe async later
     var stdout = exec('git fetch origin && git reset --hard origin/mint', {
@@ -28,7 +29,7 @@ function deploy() {
     })
     console.log(stdout.toString())
 
-    stdout = exec('yarn install', {
+    stdout = exec('yarn', {
       cwd: __dirname
     })
     console.log(stdout.toString())
@@ -38,6 +39,11 @@ function deploy() {
       env: _.merge(process.env, {
         NODE_PATH: './react'
       })
+    })
+    console.log(stdout.toString())
+
+    stdout = exec('pm2 restart mint', {
+      cwd: __dirname
     })
     console.log(stdout.toString())
 
