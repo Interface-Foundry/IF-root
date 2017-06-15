@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem } from '../actions';
 import { isUrl, addSearchHistory } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -36,7 +36,8 @@ const mapDispatchToProps = dispatch => ({
       action: 'Item Selected'
     });
     return dispatch(selectItem(item_id));
-  }
+  },
+  updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Results);

@@ -17,11 +17,12 @@ export default class Selected extends Component {
     addItem: PropTypes.func,
     arrow: PropTypes.number,
     user: PropTypes.object,
-    togglePopup: PropTypes.func
+    togglePopup: PropTypes.func,
+    updateItem: PropTypes.func
   }
 
   render() {
-    const { user, cart, item, results, cartAsins, selectItem, addItem, arrow, togglePopup } = this.props,
+    const { user, cart, item, results, cartAsins, selectItem, addItem, arrow, togglePopup, updateItem } = this.props,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
     return (
@@ -60,6 +61,13 @@ export default class Selected extends Component {
             </div> : <div className='padding'/>
           }
           <div className='action'>
+            { 
+              !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <div className='update'>
+                <button onClick={() => item.quantity === 1 ? removeItem(cart.id, item.id) : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                <p>{ item.quantity }</p>
+                <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
+              </div> : null 
+            }
             { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}

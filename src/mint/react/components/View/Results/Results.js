@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 
 import Default from './Default';
 import Selected from './Selected';
+import { numberOfItems } from '../../../utils';
 import { EmptyContainer } from '../../../containers';
 
 const size = 3;
@@ -18,14 +19,15 @@ export default class Results extends Component {
     addItem: PropTypes.func,
     selectItem: PropTypes.func,
     user: PropTypes.object,
-    togglePopup: PropTypes.func
+    togglePopup: PropTypes.func,
+    updateItem: PropTypes.func
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if (
+      numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
       nextProps.selectedItemId !== this.props.selectedItemId ||
-      nextProps.results.length !== this.props.results.length ||
       nextProps.cart.items.length !== this.props.cart.items.length ||
       nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id
     ) return true;
@@ -36,14 +38,14 @@ export default class Results extends Component {
   render() {
     // Add
     let arrow, selected;
-    const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup } = this.props,
+    const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup, updateItem } = this.props,
       numResults = results.length,
       cartAsins = cart.items.map((item) => `${item.asin}-${item.added_by}`),
       partitionResults = results.reduce((acc, result, i) => {
         if (i % size === 0) acc.push([]);
         acc[acc.length - 1].push(result);
 
-        if (result.id === selectedItemId || numResults === 1) {
+        if (result.id === selectedItemId) {
           selected = {
             row: acc.length,
             result,
@@ -88,6 +90,7 @@ export default class Results extends Component {
                         selectedItemId={selectedItemId}
                         selectItem={selectItem}
                         togglePopup={togglePopup}
+                        updateItem={updateItem}
                         results={results}/>
                       ) : ( 
                         <Default 
