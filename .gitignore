@@ -77,3 +77,4 @@ TrainingCorpus
 components/cinna-slack/node_modules/*
 src/db/db
 
+*.orig

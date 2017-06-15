@@ -1,5 +1,6 @@
 // react/utils/formating.js
-import striptags from 'striptags';
+
+// import striptags from 'striptags';
 import { isValidEmail } from '.';
 
 export const commaSeparateNumber = (val, loc = undefined, opts = { maximumFractionDigits: 2 }) => {
@@ -58,9 +59,9 @@ export const numberOfItems = (items) => {
 };
 
 export const removeDangerousCharactersFromString = (string) => {
-  const allowedTags = [ 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
-  'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
-  'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre' ];
-
-  return striptags(string, allowedTags);
+  // const allowedTags = ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+  //   'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+  //   'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre'
+  // ];
+  return string;
 };

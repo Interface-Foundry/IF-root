@@ -3,7 +3,7 @@
 @import '../../../react-common/styles/Animations';
 .modal {
   position: absolute;
-  background: $kip-primary-color;
+  background: white;
   height: 100%;
   z-index: 100;
   top: 0;
@@ -64,7 +64,7 @@
       .form__modal__input__submit {
         @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
         cursor: pointer;
-        color: $kip-primary-color;
+        color: white;
         margin: 5px;
         height: 75%;
         .form__modal__input__submit__description {

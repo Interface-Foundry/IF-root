@@ -34,6 +34,10 @@ body {
   table {
     overflow-x: auto;
     display: block;
+    td {
+      width: 100%;
+      display: block;
+    }
   }
 }
 
@@ -53,19 +57,22 @@ body {
 
 .app__view {
   position: relative;
+  width: 100%;
   overflow: hidden;
   overflow-y: scroll;
   text-align: left;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height*2 });
-  &.large {
-    height: calc(100% - #{$nav-height});
+  height: calc(100% - #{$nav-height * 2});
+  @media only screen and (max-width: 600px) {
+    height: calc(100% - #{$nav-height * 2});
   }
-  @media (min-width: 900px) {
+  @media only screen and (min-width: 600px) {
     display: inline-block;
     overflow-y: auto;
-    width: calc(100% - 250px);
-    height: calc(100% - #{$nav-height*2});
+    height: calc(100% - #{$nav-height * 2});
+    &.squeeze {
+      width: calc(100% - 250px);
+    }
   }
 }
 

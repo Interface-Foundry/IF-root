@@ -1,6 +1,0 @@
-// react/components/Toast/index.js
-
-import Toast from './Toast';
-import './Toast.scss';
-
-export default Toast;

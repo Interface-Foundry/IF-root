@@ -1,20 +1,29 @@
 // react/reducers/cards.js
 
-import { RECEIVE_SEARCH } from '../constants/ActionTypes';
-
-const initialState = {
-  cards: [],
-  position: null
+const initialState = { 
+  selectedItemId: '',
+  history: false,
+  results: [], 
+  categories: [],
+  query: '' 
 };
 
 export default (state = initialState, action) => {
   switch (action.type) {
-  case RECEIVE_SEARCH:
-    return {
-      ...state,
-      ...action.response
-    };
-  default:
-    return state;
+    case 'CATEGORIES_SUCCESS':
+    case 'SEARCH_SUCCESS':
+    case 'SELECT_ITEM':
+    case 'UPDATE_QUERY':
+      return {
+        ...state,
+        ...action.response
+      };
+    case 'TOGGLE_HISTORY':
+      return {
+        ...state,
+        history: !state.history
+      };
+    default:
+      return state;
   }
 };

@@ -1,24 +1,25 @@
 // react/reducers/index.js
 
-import currentCart from './currentCart';
-import otherCarts from './otherCarts';
-import cartStores from './cartStores';
+import app from './app';
+import cart from './cart';
+import carts from './carts';
+import stores from './stores';
 import session from './session';
-import cards from './cards';
-import item from './item';
+import search from './search';
+import user from './user';
+
 import { combineReducers } from 'redux';
 import { routerReducer as routing } from 'react-router-redux';
-import { reducer as form } from 'redux-form';
 
 export default combineReducers({
-  currentCart,
-  otherCarts,
-  cards,
-  item,
+  app,
+  cart,
+  carts,
+  stores,
   session,
-  form,
-  routing,
-  cartStores
+  search,
+  user,
+  routing
 });
 
 // export selectors
@@ -27,9 +28,9 @@ export {
   getMemberById,
   splitCartById
 }
-from './currentCart';
+from './cart';
 
 export {
   getCartById
 }
-from './otherCarts';
+from './carts';
