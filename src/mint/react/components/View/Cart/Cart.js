@@ -27,7 +27,6 @@ export default class Cart extends Component {
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id;
 
-    console.log(userCarts)
     return (
       <table className='cart'>
         <thead>

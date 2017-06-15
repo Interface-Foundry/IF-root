@@ -38,7 +38,7 @@ export default class Results extends Component {
     let arrow, selected;
     const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup } = this.props,
       numResults = results.length,
-      cartAsins = cart.items.map((item) => item.asin),
+      cartAsins = cart.items.map((item) => `${item.asin}-${item.added_by}`),
       partitionResults = results.reduce((acc, result, i) => {
         if (i % size === 0) acc.push([]);
         acc[acc.length - 1].push(result);

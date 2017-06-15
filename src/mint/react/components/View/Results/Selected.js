@@ -26,7 +26,7 @@ export default class Selected extends Component {
 
     return (
       <td key={item.id} colSpan='100%' className='selected'>
-        <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''} ${afterClass}`}>
+        <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''} ${afterClass}`}>
           <div className='navigation'>
             <button className='left' onClick={() => selectItem(results[item.index - 1] ? results[item.index - 1].id : null)}>
               <Icon icon='LeftChevron'/>
@@ -39,7 +39,7 @@ export default class Selected extends Component {
             <Delete/>
           </button>
           {
-            cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
+            cartAsins.includes(`${item.asin}-${user.id}`) ? <span className='incart'> In Cart </span> : null
           }
           <div className={'image'} style={{
             backgroundImage: `url(${item.main_image_url})`
@@ -60,9 +60,10 @@ export default class Selected extends Component {
             </div> : <div className='padding'/>
           }
           <div className='action'>
-            { !user.id  ? <button onClick={() => togglePopup()}>✔ Add to Cart</button> : null }
+            { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-            { !cart.locked && user.id ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Add to Cart</span></button> : null}
+            { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
+            { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>In Cart</button> : null }
           </div>
         </div>
       </td>
