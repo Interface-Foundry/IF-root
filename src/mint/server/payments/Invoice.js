@@ -6,19 +6,24 @@ dbReady.then((models) => { db = models; })
 
 const userPaymentAmountHandler = {
   'split_equal': function (invoice) {
+    logging.info('even split')
+    logging.info('invoice:', invoice)
     var debts = {}
-    var perUser = invoice.total / (1.0 * invoice.users.length)
-    invoice.users.map(function (user) {
+    var perUser = invoice.total / (1.0 * invoice.members.length)
+    invoice.members.map(function (user) {
       debts[user.id] = perUser
     })
+    logging.info('debts', debts)
     return debts
   },
   'single': function (invoice) {
+    logging.info('single payer split')
     var debts = {}
     debts[invoice.leader] = invoice.total
     return debts
   },
   'split_by_item': function (invoice) {
+    logging.info('split by item')
     var debts = {}
     return debts
   }
@@ -95,9 +100,8 @@ class Invoice {
       throw new Error('Invoice needs to be attached to invoice')
     }
 
-    const newInvoice = await db.Invoices.create({
+    var newInvoice = await db.Invoices.create({
       leader: cart.leader,
-      members: cart.members.map(member => member.id),
       invoice_type: this.invoice,
       cart: cart.id,
       paid: false,
@@ -105,7 +109,16 @@ class Invoice {
       split_type: this.split
     })
 
-    return newInvoice
+    cart.members.map(function (m) {
+      newInvoice.members.add(m.id)
+    })
+
+    await newInvoice.save()
+    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
+
+    await this.sendCollectionEmail(invoice)
+
+    return invoice
   }
 
   /**
@@ -113,13 +126,12 @@ class Invoice {
    *
    * @param      {array}   users   The users
    */
-  async sendCollectionEmail () {
-    // logging.info('THIS', this)
-    this.users.map(async (user) => {
-      var amounts = await this.determineUserPaymentAmount()
-      logging.info('amounts', amounts)
+  async sendCollectionEmail (invoice) {
+    logging.info('send collection email called')
+    var amounts = await this.userPaymentAmounts(invoice)
+    invoice.members.map(async (user) => {
       var email = await db.Emails.create({
-        recipients:'user.email',
+        recipients: 'user.email',
         subject: 'Payment Subject',
         cart: this.cart
       })
@@ -150,8 +162,8 @@ class Invoice {
   }
 
 
-  async determineUserPaymentAmount() {
-    userPaymentAmountHandler[this.split_type]()
+  async userPaymentAmounts(invoice) {
+    return userPaymentAmountHandler[this.split](invoice)
   }
 }
 
