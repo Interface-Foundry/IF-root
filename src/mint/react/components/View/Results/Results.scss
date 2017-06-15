@@ -41,7 +41,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-radius: 5px 0 0 5px;   
       background: linear-gradient(
         to right, 
-        $secondaryColor, white
+        $secondaryColor, transparent
       );
       @media only screen and (max-width: 600px) {
         left: $padding;
@@ -55,7 +55,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-radius: 0 5px 5px 0;
       background: linear-gradient(
         to left, 
-        $secondaryColor, white
+        $secondaryColor, transparent
       );
       @media only screen and (max-width: 600px) {
         right: $padding;
