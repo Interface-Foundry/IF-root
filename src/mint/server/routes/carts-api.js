@@ -682,12 +682,12 @@ module.exports = function (router) {
    */
   router.post('/item/:item_id', (req, res) => co(function* () {
     // only available for logged-in Users
-    // if (!_.get(req, 'UserSession.user_account.id')) {
-    //   throw new Error('Unauthorized')
-    // }
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
 
     // this will be handy later now that we know it exists
-    // const userId = req.UserSession.user_account.id
+    const userId = req.UserSession.user_account.id
 
     // get the item
     var item = yield db.Items.findOne({ id: req.params.item_id })
