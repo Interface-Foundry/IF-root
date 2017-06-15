@@ -682,12 +682,12 @@ module.exports = function (router) {
    */
   router.post('/item/:item_id', (req, res) => co(function* () {
     // only available for logged-in Users
-    if (!_.get(req, 'UserSession.user_account.id')) {
-      throw new Error('Unauthorized')
-    }
+    // if (!_.get(req, 'UserSession.user_account.id')) {
+    //   throw new Error('Unauthorized')
+    // }
 
     // this will be handy later now that we know it exists
-    const userId = req.UserSession.user_account.id
+    // const userId = req.UserSession.user_account.id
 
     // get the item
     var item = yield db.Items.findOne({ id: req.params.item_id })
@@ -697,7 +697,7 @@ module.exports = function (router) {
     var cart = item.cart
 
     // check permissions
-    if (cart.leader !== userId && item.added_by !== userId) {
+    if (cart && cart.leader !== userId && item.added_by !== userId) {
       throw new Error('Unauthorized')
     }
 
@@ -708,8 +708,8 @@ module.exports = function (router) {
     _.merge(item, req.body)
     yield item.save()
 
-    // mark the cart as dirty
-    if (!cart.dirty) {
+    // mark the cart as dirty if there is one
+    if (cart && !cart.dirty) {
       cart.dirty = true
       yield cart.save()
     }
