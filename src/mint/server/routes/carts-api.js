@@ -111,11 +111,20 @@ module.exports = function (router) {
    * {"members":[{"email_address":"peter@interfacefoundry.com","createdAt":"2017-03-16T16:19:10.812Z","updatedAt":"2017-03-16T16:19:10.812Z","id":"bc694263-cf19-46ea-b3f1-bd463f82ce55"}],"items":[{"original_link":"watches","quantity":1,"createdAt":"2017-03-16T16:18:32.047Z","updatedAt":"2017-03-16T16:18:32.047Z","id":"58cabad83a5cd90e34b29610"}],"leader":{"email_address":"peter.m.brandt@gmail.com","createdAt":"2017-03-16T16:18:27.607Z","updatedAt":"2017-03-16T16:18:27.607Z","id":"257cd470-f19f-46cb-9201-79b8b4a95fe2"},"createdAt":"2017-03-16T16:18:23.433Z","updatedAt":"2017-03-16T16:19:10.833Z","id":"3b10fc45616e"}
    */
   router.get('/cart/:cart_id', (req, res) => co(function* () {
-
+    // doing a stupid to test
+    var user_id = _.get(req, 'UserSession.user_account.id');
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
-      .populate('leader')
-      .populate('members', selectMembersWithoutEmail)
-      .populate('items')
+        .populate('leader')
+        .populate('members', selectMembersWithoutEmail)
+        .populate('items')
+
+    if(user_id === cart.leader.id) {
+      cart = yield db.Carts.findOne({ id: req.params.cart_id })
+        .populate('leader')
+        .populate('members')
+        .populate('items')
+    }
+
 
     if (cart && cart.privacy == 'private') {
       // if the cart is set to "private", check to see if they're logged in and if they're a member of the cart

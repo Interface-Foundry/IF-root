@@ -33,10 +33,10 @@ export default class CartButtons extends Component {
             <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
           </div> : null 
         }
-        { !cart.locked && user.id && editId === item.id && (user.id === item.added_by || isLeader) ? <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button> : null }
-        { !cart.locked && user.id && editId !== item.id && (user.id === item.added_by || isLeader) ? <button onClick={() => editItem(item.id)}><span>Edit Item</span></button> : null }
-        { !cart.locked && user.id && editId !== item.id && (user.id !== item.added_by) ? <button onClick={() => copyItem(cart.id, item.id)}><span>Copy Item</span></button> : null }
-        { !user.id  ? <button onClick={() => togglePopup()}><span>Copy Item</span></button> : null }
+        { !cart.locked && user.id && editId === item.id && (user.id === item.added_by || isLeader) ? <button onClick={() => removeItem(cart.id, item.id)}>Remove</button> : null }
+        { !cart.locked && user.id && editId !== item.id && (user.id === item.added_by || isLeader) ? <button onClick={() => editItem(item.id)}><span>Edit</span></button> : null }
+        { !cart.locked && user.id && editId !== item.id && (user.id !== item.added_by) ? <button onClick={() => copyItem(cart.id, item.id)}><span>Copy</span></button> : null }
+        { !user.id  ? <button onClick={() => togglePopup()}><span>View</span></button> : null }
         { cart.locked ? <button className="locked" disabled='true'><Icon icon='Locked'/></button> : null }
       </div>
     );

@@ -27,6 +27,7 @@ export default class Cart extends Component {
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id;
 
+    console.log(userCarts)
     return (
       <table className='cart'>
         <thead>
@@ -34,11 +35,11 @@ export default class Cart extends Component {
             <th colSpan='100%'>
               {
                 myCart.length > 0 ? <div className='card'>
-                  <h1>{user.name} </h1>
-                  <h1 className='date'> <span> {timeFromDate(myCart[0].updatedAt)} </span> </h1>
+                  { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
+                  <h1 className='date'> <span>  </span> </h1>
                   <h4>
                     <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
-                    <span className='grey'>({numberOfItems(myCart)} items)</span>
+                    <span className='grey'>({numberOfItems(myCart)} items) ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>
                   </h4>
                   <ul>
                     {
@@ -68,11 +69,11 @@ export default class Cart extends Component {
               <tr key={userCart.id}>
                 <td colSpan='100%'>
                   <div className='card'>
-                    <h1>{userCart.name}</h1>
-                    <h1 className='date'> <span> {timeFromDate(userCart.items[0].updatedAt)} </span> </h1>
+                    { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
+                    <h1 className='date'> <span> </span> </h1>
                     <h4>
                       <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
-                      <span className='grey'>({numberOfItems(userCart.items)} items)</span>
+                      <span className='grey'>({numberOfItems(userCart.items)} items) ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>
                     </h4>
                     <ul>
                       {
