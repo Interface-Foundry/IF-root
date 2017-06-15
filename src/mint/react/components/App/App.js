@@ -47,7 +47,6 @@ export default class App extends Component {
     }
   }
 
-  // need this, otherwise page always rerender every scroll
   shouldComponentUpdate = (nextProps, nextState) =>
     nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast
 

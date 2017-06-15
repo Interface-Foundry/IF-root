@@ -38,7 +38,8 @@ export {
   likeCart,
   unlikeCart,
   reorderCart,
-  updatePrivacy
+  updatePrivacy,
+  cloneCart
 }
 from './cart';
 
