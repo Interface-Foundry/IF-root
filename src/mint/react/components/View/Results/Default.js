@@ -20,9 +20,9 @@ export default class Default extends Component {
 
     return (
       <td>
-        <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''}`} onClick={() => selectItem(item.id)}>
+        <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''}`} onClick={() => selectItem(item.id)}>
           {
-            cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
+            cartAsins.includes(`${item.asin}-${user.id}`) ? <span className='incart'> In Cart </span> : null
           }
           <div className={'image'} style={{
             backgroundImage: `url(${item.main_image_url})`
@@ -32,10 +32,11 @@ export default class Default extends Component {
             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
           </div> 
           <div className='action'>
-            <button className='more' onClick={() => selectItem(item.id)}>See More</button>
-            { !user.id  ? <button onClick={() => togglePopup()}>✔ Add to Cart</button> : null }
+            <button className='more' onClick={() => selectItem(item.id)}>More info</button>
+            { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-            { !cart.locked && user.id ? <button onClick={() => addItem(cart.id, item.id)}>✔ Add to Cart</button> : null }
+            { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}>✔ Save to Cart</button> : null }
+            { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>In Cart</button> : null }
           </div>
         </div>
       </td>

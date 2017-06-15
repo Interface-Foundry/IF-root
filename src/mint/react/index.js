@@ -51,12 +51,15 @@ const store = createStore(
 // Fetch everything required for the app to not break
 // Fetch Metrics
 const cart_id = location.pathname.split('/')[2];
+
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchCarts());
   store.dispatch(fetchStores());
-  store.dispatch(fetchCart(cart_id));
-  store.dispatch(fetchMetrics(cart_id));
   store.dispatch(fetchCategories(cart_id));
+
+  store.dispatch(fetchCart(cart_id)).then(() => {
+    store.dispatch(fetchMetrics(cart_id));
+  });
 });
 
 ReactDOM.render(

@@ -17,16 +17,17 @@ export default class Selected extends Component {
     addItem: PropTypes.func,
     arrow: PropTypes.number,
     user: PropTypes.object,
-    togglePopup: PropTypes.func
+    togglePopup: PropTypes.func,
+    updateItem: PropTypes.func
   }
 
   render() {
-    const { user, cart, item, results, cartAsins, selectItem, addItem, arrow, togglePopup } = this.props,
+    const { user, cart, item, results, cartAsins, selectItem, addItem, arrow, togglePopup, updateItem } = this.props,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
     return (
       <td key={item.id} colSpan='100%' className='selected'>
-        <div className={`card ${cartAsins.includes(item.asin) ? 'incart' : ''} ${afterClass}`}>
+        <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''} ${afterClass}`}>
           <div className='navigation'>
             <button className='left' onClick={() => selectItem(results[item.index - 1] ? results[item.index - 1].id : null)}>
               <Icon icon='LeftChevron'/>
@@ -39,7 +40,7 @@ export default class Selected extends Component {
             <Delete/>
           </button>
           {
-            cartAsins.includes(item.asin) ? <span className='incart'> In Cart </span> : null
+            cartAsins.includes(`${item.asin}-${user.id}`) ? <span className='incart'> In Cart </span> : null
           }
           <div className={'image'} style={{
             backgroundImage: `url(${item.main_image_url})`
@@ -60,9 +61,17 @@ export default class Selected extends Component {
             </div> : <div className='padding'/>
           }
           <div className='action'>
-            { !user.id  ? <button onClick={() => togglePopup()}>✔ Add to Cart</button> : null }
+            { 
+              !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <div className='update'>
+                <button onClick={() => item.quantity === 1 ? removeItem(cart.id, item.id) : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                <p>{ item.quantity }</p>
+                <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
+              </div> : null 
+            }
+            { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-            { !cart.locked && user.id ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Add to Cart</span></button> : null}
+            { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
+            { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>In Cart</button> : null }
           </div>
         </div>
       </td>
