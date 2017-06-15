@@ -1,6 +1,5 @@
 var db
 const dbReady = require('../../db')
-
 dbReady.then((models) => { db = models; })
 
 
@@ -22,9 +21,16 @@ const userPaymentAmountHandler = {
     debts[invoice.leader] = invoice.total
     return debts
   },
-  'split_by_item': function (invoice) {
+  'split_by_item': async function (invoice) {
     logging.info('split by item')
+    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items')
     var debts = {}
+    cart.items.map(function (item) {
+      logging.info('item', item)
+      if (debts[item.added_by]) debts[item.added_by] += item.price
+      else debts[item.added_by] = item.price
+    })
+    logging.info('debts', debts)
     return debts
   }
 }
@@ -127,13 +133,15 @@ class Invoice {
    * @param      {array}   users   The users
    */
   async sendCollectionEmail (invoice) {
+    logging.info('this', this)
     logging.info('send collection email called')
-    var amounts = await this.userPaymentAmounts(invoice)
-    invoice.members.map(async (user) => {
+    var debts = await this.userPaymentAmounts(invoice)
+    await Object.keys(debts).map(async function (user_id) {
+      var user = await db.UserAccounts.findOne({id: user_id})
       var email = await db.Emails.create({
-        recipients: 'user.email',
-        subject: 'Payment Subject',
-        cart: this.cart
+        recipients: user.email_address,
+        subject: 'You owe Kip $'+ debts[user_id] ,
+        cart: invoice.cart
       })
 
       email.template('payment', {
