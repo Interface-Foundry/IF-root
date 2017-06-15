@@ -43,8 +43,9 @@
 			width: 50%;
 			border-radius: 0;
 			padding: 0 $padding;
-
-			&.blue {
+			
+			&.blue,
+			&.locked {
 				background: $secondaryColor;
 				color: white;
 

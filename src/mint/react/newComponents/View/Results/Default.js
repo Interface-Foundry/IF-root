@@ -13,11 +13,12 @@ export default class Default extends Component {
     item: PropTypes.object,
     cartAsins: PropTypes.array,
     selectItem: PropTypes.func,
-    addItem: PropTypes.func
+    addItem: PropTypes.func,
+    togglePopup: PropTypes.func
   }
   
   render() {
-    const { cart, item, cartAsins, selectItem, addItem } = this.props;
+    const { user, cart, item, cartAsins, selectItem, addItem, togglePopup } = this.props;
 
     return (
       <td>
@@ -34,7 +35,9 @@ export default class Default extends Component {
           </div> 
           <div className='action'>
             <button className='more' onClick={() => selectItem(item.id)}>See More</button>
-            { cart.locked ? <button disabled={true}><Icon icon='Locked'/></button> : <button onClick={() => addItem(cart.id, item.id)}>Add to Cart <Right/></button> }
+            { !user.id  ? <button onClick={() => togglePopup()}>✔ Add to Cart</button> : null }
+            { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
+            { !cart.locked && user.id ? <button onClick={() => addItem(cart.id, item.id)}>✔ Add to Cart</button> : null }
           </div>
         </div>
       </td>

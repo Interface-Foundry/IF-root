@@ -23,6 +23,11 @@ export default (state = initialState, action = {}) => {
         ...state,
         popup: false
       };
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        popup: !action.response.user_account
+      };
     case 'TOGGLE_POPUP':
       return {
         ...state,

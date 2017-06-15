@@ -57,7 +57,7 @@ export default class Cart extends Component {
                       ))
                     }
                   </ul>
-                </div> : <EmptyContainer />
+                </div> : ( cart.locked ? null : <EmptyContainer /> )
               }
             </th>
           </tr>

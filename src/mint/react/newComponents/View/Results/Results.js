@@ -34,7 +34,7 @@ export default class Results extends Component {
   render() {
     // Add
     let arrow, selected;
-    const { cart, query, results, addItem, selectedItemId, selectItem } = this.props,
+    const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup } = this.props,
       numResults = results.length,
       cartAsins = cart.items.map((item) => item.asin),
       partitionResults = results.reduce((acc, result, i) => {
@@ -78,20 +78,24 @@ export default class Results extends Component {
                         key={item.id}
                         item={item} 
                         cart={cart} 
+                        user={user}
                         arrow={arrow}
                         cartAsins={cartAsins}
                         addItem={addItem} 
                         selectedItemId={selectedItemId}
-                        selectItem={selectItem}/>
+                        selectItem={selectItem}
+                        togglePopup={togglePopup}/>
                       ) : ( 
                         <Default 
                           key={item.id}
                           item={item} 
                           cart={cart} 
+                          user={user}
                           cartAsins={cartAsins}
                           addItem={addItem} 
                           selectedItemId={selectedItemId} 
-                          selectItem={selectItem}/>
+                          selectItem={selectItem}
+                          togglePopup={togglePopup}/>
                       );
                   })
                 }

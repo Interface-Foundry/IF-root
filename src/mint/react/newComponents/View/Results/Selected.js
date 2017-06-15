@@ -23,7 +23,7 @@ export default class Selected extends Component {
   }
 
   render() {
-    const { cart, item, cartAsins, selectItem, addItem, arrow } = this.props,
+    const { user, cart, item, cartAsins, selectItem, addItem, arrow, togglePopup } = this.props,
           { quantity } = this.state,
             afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
@@ -41,7 +41,6 @@ export default class Selected extends Component {
           }}/>
           <div className='text'> 
             <h1>{item.name}</h1>
-            <p> Store: {item.store} | {cart.store_locale} </p>
             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
             <div className='text__expanded'>
               <div dangerouslySetInnerHTML={{__html: removeDangerousCharactersFromString(item.description)}} />
@@ -54,7 +53,9 @@ export default class Selected extends Component {
             </div> : <div className='padding'/>
           }
           <div className='action'>
-            { cart.locked ? <button disabled={true}><Icon icon='Locked'/></button> : <button onClick={() => addItem(cart.id, item.id)}><span>Add to Cart <Right/></span></button> }
+            { !user.id  ? <button onClick={() => togglePopup()}>✔ Add to Cart</button> : null }
+            { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
+            { !cart.locked && user.id ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Add to Cart</span></button> : null}
           </div>
         </div>
       </td>
