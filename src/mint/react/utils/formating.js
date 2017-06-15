@@ -50,6 +50,19 @@ const formatLinkForApp = (app, link) => {
   }
 };
 
+const formatPrivacy = (lvl) => {
+  switch (Number(lvl)) {
+  case privacyLevels.PUBLIC:
+    return 'public';
+  case privacyLevels.PRIVATE:
+    return 'private';
+  case privacyLevels.DISPLAY:
+    return 'display';
+  default:
+    throw `${lvl} is not a valid privacy level`;
+  }
+};
+
 export const calculateItemTotal = (items) => {
   return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 };

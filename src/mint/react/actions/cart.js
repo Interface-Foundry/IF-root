@@ -1,4 +1,5 @@
 import { get, post, del, put } from './async';
+import { formatPrivacy } from '../utils';
 
 export const fetchCart = cart_id => get(
   `/api/cart/${cart_id}`,
@@ -91,3 +92,25 @@ export const unlikeCart = cart_id => put(
     receivedAt: Date.now()
   })
 );
+
+export const updatePrivacy = (cart_id, privacy) => put(
+  `/api/cart/${cart_id}/privacy/${privacy}`,
+  'UPDATE_CART', {},
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
+export const clearCart = cart_id => del(
+  `/api/cart/${cart_id}/clear`,
+  'CLEAR_CART',
+  (type) => ({
+    type: `${type}_SUCCESS`,
+    response: cart_id,
+    receivedAt: Date.now()
+  })
+);
+
+

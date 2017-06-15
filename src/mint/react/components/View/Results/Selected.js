@@ -63,7 +63,7 @@ export default class Selected extends Component {
           <div className='action'>
             { 
               !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <div className='update'>
-                <button onClick={() => item.quantity === 1 ? removeItem(cart.id, item.id) : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                 <p>{ item.quantity }</p>
                 <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
               </div> : null 

@@ -25,7 +25,8 @@ export {
   calculateItemTotal,
   numberOfItems,
   displayCost,
-  removeDangerousCharactersFromString
+  removeDangerousCharactersFromString,
+  formatPrivacy
 }
 from './formating';
 

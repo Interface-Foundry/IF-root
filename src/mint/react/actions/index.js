@@ -37,7 +37,8 @@ export {
   fetchMetrics,
   likeCart,
   unlikeCart,
-  reorderCart
+  reorderCart,
+  updatePrivacy
 }
 from './cart';
 

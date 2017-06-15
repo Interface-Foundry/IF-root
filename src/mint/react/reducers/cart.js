@@ -45,6 +45,11 @@ export default function cart(state = initialState, action) {
         items: [...state.items, action.response]
       };
     }
+  case 'CLEAR_CART_SUCCESS':
+    return {
+      ...state,
+      items: []
+    }
   case 'UPDATE_ITEM_SUCCESS':
     {
       return {

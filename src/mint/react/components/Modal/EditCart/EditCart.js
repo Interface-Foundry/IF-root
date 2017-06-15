@@ -89,10 +89,10 @@ class EditCart extends Component {
         }
         <div className='privacy'>
           <label> Privacy: </label>
-          <select onChange={_updatePrivacy}>
-            <option value='1' selected={cart && cart.privacy === 'public'}>Public</option>
-            <option value='2' selected={cart && cart.privacy === 'private'}>Private</option>
-            <option value='3' selected={cart && cart.privacy === 'display'}>Display</option>
+          <select onChange={_updatePrivacy} value={cart.privacy}>
+            <option value='public'>Public</option>
+            <option value='private'>Private</option>
+            <option value='display'>Display</option>
           </select>
         </div>
         <div className='pad'/>
