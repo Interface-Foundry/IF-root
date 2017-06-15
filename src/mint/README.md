@@ -10,15 +10,18 @@ Babel all day and all night (gotta love writing javascript that compiles to... m
 
 1. Install [NodeJS](nodejs.org)
 2. Install [Mongodb](mongodb.com)
-3. Go to `IF-root` directory and run `npm install`
-4. Go to `IF-root/src/mint` directory and run `npm install`
+3. Go to `IF-root` directory and run `npm install` or `yarn`
+4. Go to `IF-root/src/mint` directory and run `npm install` or `yarn`
 
 # HOW TO DO INTERNETS
 We are using pretty standard commands just to keep it easy, webpack builds react into public then express serves it up on port: 3000
 
 For hot reloading.
-1. `yarn dev` -> `npm run dev`
+1. `yarn frontend` -> `npm run frontend`
 	runs express and webpack-dev-server with hot-reloading for both website and mint.
+
+2. `yarn frontend` -> `npm run frontend`
+  compiles frontend once (for production) and runs hot reloading for the backend only
 
 For static.
 1. `yarn start` -> `npm run start`
