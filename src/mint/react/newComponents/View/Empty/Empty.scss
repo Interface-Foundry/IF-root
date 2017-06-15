@@ -12,9 +12,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		height: 150px;
 		width: 150px;
 		display: inline-block;
-		@include animation(bounceDownSmall 2s);
-		animation-iteration-count: 3; // too much twitching
-		animation-delay: 10s; //suprise!
 	}
 	h4 {
 		display: inline-block;
@@ -49,6 +46,43 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	}
 	span {
 		font-weight: bold;
+	}
+
+	&.results {
+		padding: $padding*2.5;
+		* {
+			display: block;
+			text-align: center;
+		}
+		& > svg {
+			height: $nav-height;
+			width: $nav-height;
+			margin: 0 auto;
+			transform: rotate(180deg);
+			padding: $padding*2 0 0;
+			@include animation(bounceDownSmallRotate 2s infinite);
+		}
+		h4 {
+			&:before {
+				display: none;
+			}
+			background: white;
+		}
+		h5 {
+			display: inline-block;
+			margin: $padding $padding;
+			width: auto;
+			opacity: 0.5;
+			cursor: pointer;
+			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+			&:hover {
+				opacity: 1;
+			}
+		}
+		.image {
+			margin: 0 auto;
+		}
 	}
 }
 

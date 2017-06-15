@@ -135,6 +135,18 @@
   }
 }
 
+@keyframes bounceDownSmallRotate {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translate3d(0, 0, 0) rotate(180deg);
+  }
+  40% {
+    transform: translate3d(0, 5px, 0) rotate(180deg);
+  }
+  60% {
+    transform: translate3d(0, 2.5px, 0) rotate(180deg);
+  }
+}
+
 @keyframes placeHolderShimmer {
   0% {
     background-position: -400px 0

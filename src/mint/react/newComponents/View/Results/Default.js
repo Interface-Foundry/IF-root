@@ -1,10 +1,7 @@
 // mint/react/components/View/Results/Default.js
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
 import { displayCost } from '../../../utils';
-import { Right } from '../../../../react-common/kipsvg';
-
 import { Icon } from '../../../../react-common/components';
 
 export default class Default extends Component {
@@ -13,11 +10,13 @@ export default class Default extends Component {
     item: PropTypes.object,
     cartAsins: PropTypes.array,
     selectItem: PropTypes.func,
-    addItem: PropTypes.func
+    addItem: PropTypes.func,
+    togglePopup: PropTypes.func,
+    user: PropTypes.object
   }
-  
+
   render() {
-    const { cart, item, cartAsins, selectItem, addItem } = this.props;
+    const { user, cart, item, cartAsins, selectItem, addItem, togglePopup } = this.props;
 
     return (
       <td>
@@ -30,11 +29,13 @@ export default class Default extends Component {
           }}/>
           <div className='text'> 
             <h1>{item.name}</h1>
-            <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
           </div> 
           <div className='action'>
             <button className='more' onClick={() => selectItem(item.id)}>See More</button>
-            { cart.locked ? <button disabled={true}><Icon icon='Locked'/></button> : <button onClick={() => addItem(cart.id, item.id)}>Add to Cart <Right/></button> }
+            { !user.id  ? <button onClick={() => togglePopup()}>✔ Add to Cart</button> : null }
+            { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
+            { !cart.locked && user.id ? <button onClick={() => addItem(cart.id, item.id)}>✔ Add to Cart</button> : null }
           </div>
         </div>
       </td>

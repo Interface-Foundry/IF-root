@@ -153,8 +153,15 @@
       a {
         display: inline-block;
       }
+      h3 {
+        svg {
+          padding: $padding/2;
+        }
+      }
+      text-align: center;
     }
     .header__right {
+      color: #333;
       svg {
         fill: #333;
       }

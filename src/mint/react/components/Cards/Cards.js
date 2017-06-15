@@ -101,7 +101,7 @@ export default class Cards extends Component {
 
     return (
       <div>
-        <ul ref='cards' className={'cards__section'}>
+        <ul ref={(c) => { this.cards = c; }} className={'cards__section'}>
           {
             storeName === 'ypo' ? <p className='cards__section__breadcrumb'>
               <span className={`cards__section__breadcrumb-type ${type.includes('search') ? 'yellow' : ''}`} onClick={() => clearItem()}>

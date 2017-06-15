@@ -16,6 +16,7 @@ export default class Sidenav extends Component {
     carts: PropTypes.arrayOf(PropTypes.object),
     archivedCarts: PropTypes.arrayOf(PropTypes.object),
     _toggleSidenav: PropTypes.func.isRequired,
+    large: PropTypes.bool,
     push: PropTypes.func
   }
 
@@ -64,7 +65,7 @@ export default class Sidenav extends Component {
         carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
         cart_id);
 
-      // https://www.amazon.com/dp/B01GF5AGN4/ref=sr_1_6
+    // https://www.amazon.com/dp/B01GF5AGN4/ref=sr_1_6
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={_toggleSidenav}>

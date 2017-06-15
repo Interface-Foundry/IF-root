@@ -27,7 +27,6 @@ export default class Hero extends Component {
 
   render() {
     const { animate, src, scrollToPosition, offsetTop, heroTemplate } = this.props;
-    console.log(src);
     return (
       <div className={`hero image ${animate ? 'start' : ''}`} style={{height: window.innerHeight}}>
           <div className='hero__main'>

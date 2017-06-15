@@ -2,8 +2,10 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
 import Default from './Default';
 import Selected from './Selected';
+import { EmptyContainer } from '../../../newContainers';
 
 const size = 3;
 
@@ -14,8 +16,11 @@ export default class Results extends Component {
     cart: PropTypes.object,
     query: PropTypes.string,
     addItem: PropTypes.func,
-    selectItem: PropTypes.func
+    selectItem: PropTypes.func,
+    user: PropTypes.object,
+    togglePopup: PropTypes.func
   }
+
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if (
@@ -31,7 +36,7 @@ export default class Results extends Component {
   render() {
     // Add
     let arrow, selected;
-    const { cart, query, results, addItem, selectedItemId, selectItem } = this.props,
+    const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup } = this.props,
       numResults = results.length,
       cartAsins = cart.items.map((item) => item.asin),
       partitionResults = results.reduce((acc, result, i) => {
@@ -50,7 +55,10 @@ export default class Results extends Component {
       }, []);
 
     if (selected)
-      partitionResults.splice(selected.row, 0, [{...selected.result, selected: true }]);
+      partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true }]);
+
+    if (numResults === 0)
+      return <EmptyContainer />;
 
     return (
       <table className='results'>
@@ -58,7 +66,7 @@ export default class Results extends Component {
           <tr>
             <th colSpan='100%'>
               <nav>
-                <p> Showing {numResults} results for: <span className='price'>"{query}"</span>  </p>
+                <p> About {numResults} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
               </nav>
             </th>
           </tr>
@@ -72,20 +80,24 @@ export default class Results extends Component {
                         key={item.id}
                         item={item} 
                         cart={cart} 
+                        user={user}
                         arrow={arrow}
                         cartAsins={cartAsins}
                         addItem={addItem} 
                         selectedItemId={selectedItemId}
-                        selectItem={selectItem}/>
+                        selectItem={selectItem}
+                        togglePopup={togglePopup}/>
                       ) : ( 
                         <Default 
                           key={item.id}
                           item={item} 
                           cart={cart} 
+                          user={user}
                           cartAsins={cartAsins}
                           addItem={addItem} 
                           selectedItemId={selectedItemId} 
-                          selectItem={selectItem}/>
+                          selectItem={selectItem}
+                          togglePopup={togglePopup}/>
                       );
                   })
                 }

@@ -2,19 +2,23 @@
 
 import { connect } from 'react-redux';
 import { Results } from '../newComponents';
-import { toggleHistory, submitQuery, addItem, selectItem } from '../newActions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup } from '../newActions';
 import { isUrl, addSearchHistory } from '../utils';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
+  user: state.user,
   cart: state.cart,
   query: state.search.query,
   selectedItemId: state.search.selectedItemId,
+  tab: state.app.viewTab,
+  categories: state.search.categories,
   results: state.search.results
 });
 
 const mapDispatchToProps = dispatch => ({
   toggleHistory: () => dispatch(toggleHistory()),
+  togglePopup: () => dispatch(togglePopup()),
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);
     return dispatch(submitQuery(query, store, locale));

@@ -31,7 +31,8 @@ import {
   IoChevronLeft,
   IoLogIn,
   IoIosBox,
-  IoLoop
+  IoLoop,
+  IoEye
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -100,6 +101,8 @@ export default class Icon extends Component {
       return <IoAndroidPersonAdd/>;
     case 'Member':
       return <IoAndroidPerson/>;
+    case 'Eye':
+      return <IoEye/>;
     case 'Plus':
       return <IoPlus/>;
     case 'Settings':

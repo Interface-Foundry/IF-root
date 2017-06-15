@@ -3,26 +3,29 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { calculateItemTotal, displayCost, timeFromDate } from '../../../utils';
+import { calculateItemTotal, displayCost, timeFromDate, numberOfItems } from '../../../utils';
 import { splitCartById } from '../../../newReducers';
 
 import { Icon } from '../../../../react-common/components';
-import Empty from '../Empty';
+import { EmptyContainer } from '../../../newContainers';
+import CartButtons from './CartButtons';
 
 export default class Cart extends Component {
   
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,
+    editId: PropTypes.string,
+    removeItem: PropTypes.func,
     editItem: PropTypes.func,
-    editId: PropTypes.func,
-    removeItem: PropTypes.func
+    copyItem: PropTypes.func
   }
 
   render() {
-    const { cart, user, editId, editItem, removeItem } = this.props,
+    const { cart, user, editId } = this.props,
       userCarts = splitCartById(this.props, user),
-      myCart = userCarts.my;
+      myCart = userCarts.my,
+      isLeader = user.id === cart.leader.id;
 
     return (
       <table className='cart'>
@@ -34,8 +37,8 @@ export default class Cart extends Component {
                   <h1>{user.name} </h1>
                   <h1 className='date'> <span> {timeFromDate(myCart[0].updatedAt)} </span> </h1>
                   <h4>
-                    <span className='price'>{displayCost(calculateItemTotal(myCart))}</span> &nbsp;
-                    <span className='grey'>({myCart.length} items)</span>
+                    <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
+                    <span className='grey'>({numberOfItems(myCart)} items)</span>
                   </h4>
                   <ul>
                     {
@@ -47,25 +50,14 @@ export default class Cart extends Component {
                           <div className='text'> 
                             <h1>{item.name}</h1>
                             <h4> Qty: {item.quantity} </h4>
-                            <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+                            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                           </div>
-                          {
-                            editId !== item.id ? 
-                              (
-                                cart.locked ? <div className='action locked'>
-                                  <button disabled='true'><Icon icon='Locked'/></button>
-                                </div> : <div className='action'>
-                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
-                                </div>
-                              ) : <div className='action'>
-                              <button onClick={() => removeItem(cart.id, item.id)}><span>Remove Item</span></button>
-                            </div> 
-                          }
+                          <CartButtons {...this.props} item={item}/>
                         </li>
                       ))
                     }
                   </ul>
-                </div> : <Empty/>
+                </div> : ( cart.locked ? null : <EmptyContainer /> )
               }
             </th>
           </tr>
@@ -79,8 +71,8 @@ export default class Cart extends Component {
                     <h1>{userCart.name}</h1>
                     <h1 className='date'> <span> {timeFromDate(userCart.items[0].updatedAt)} </span> </h1>
                     <h4>
-                      <span className='price'>{displayCost(calculateItemTotal(userCart.items))}</span> &nbsp;
-                      <span className='grey'>({userCart.items.length} items)</span>
+                      <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
+                      <span className='grey'>({numberOfItems(userCart.items)} items)</span>
                     </h4>
                     <ul>
                       {
@@ -92,19 +84,9 @@ export default class Cart extends Component {
                             <div className='text'> 
                               <h1>{item.name}</h1>
                               <h4> Qty: {item.quantity} </h4>
-                              <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+                              <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                             </div> 
-                            {
-                              editId !== item.id ? (
-                                cart.locked ? <div className='action locked'>
-                                  <button disabled='true'><Icon icon='Locked'/></button>
-                                </div> : <div className='action'>
-                                  <button onClick={() => editItem(item.id)}><span>Edit Item</span></button>
-                                </div>
-                              ) : <div className='action'>
-                                <button onClick={() => removeItem(cart.id, item.id)}>Remove Item</button>
-                              </div> 
-                            }
+                            <CartButtons {...this.props} item={item}/>
                           </li>
                         ))
                       }

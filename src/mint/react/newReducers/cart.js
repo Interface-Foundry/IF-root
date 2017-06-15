@@ -14,7 +14,7 @@ const initialState = {
   views: 0,
   likes: [],
   kip_pay_allowed: false,
-  privacy: "public",
+  privacy: 'public',
   locked: false
 };
 
@@ -37,6 +37,7 @@ export default function cart(state = initialState, action) {
       ...state,
       items: state.items.filter((item, i) => item.id !== action.response)
     };
+  case 'COPY_ITEM_SUCCESS':
   case 'ADD_ITEM_SUCCESS':
     {
       return {
@@ -50,6 +51,7 @@ export default function cart(state = initialState, action) {
         ...state,
         items: state.items.reduce((acc, item, i) => {
           item.id === action.response.item.id ? acc.push(action.response.item) : acc.push(item);
+          return acc;
         }, [])
       };
     }

@@ -14,7 +14,7 @@ export const displayCost = (val, currency) => {
   const opts = {
     maximumFractionDigits: 2,
     style: 'currency',
-    currency: currency || 'USD'
+    currency: currency === 'UK' ? 'GBP' : 'USD'
   };
   return val.toLocaleString({}, opts);
 };
@@ -51,6 +51,10 @@ const formatLinkForApp = (app, link) => {
 
 export const calculateItemTotal = (items) => {
   return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+};
+
+export const numberOfItems = (items) => {
+  return items.reduce((acc, item) => acc + item.quantity, 0);
 };
 
 export const removeDangerousCharactersFromString = (string) => {

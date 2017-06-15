@@ -17,6 +17,16 @@ export default function reducer(state = initialState, action = {}) {
       ...state,
       ...action.response
     }
+  case 'SESSION_SUCCESS':
+    return {
+      ...state,
+      popup: false
+    };
+  case 'LOGIN_SUCCESS':
+    return {
+      ...state,
+      popup: !action.response.user_account
+    };
   case 'TOGGLE_SIDENAV':
     return {
       ...state,

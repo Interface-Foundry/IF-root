@@ -1,24 +1,25 @@
 // mint/react/components/View/Empty/Empty.js
 
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
+import EmptySearch from './EmptySearch';
+import EmptyCart from './EmptyCart';
 
 export default class empty extends Component {
 
-  render() {
+  static propTypes = {
+    tab: PropTypes.string
+  }
 
-    return (
-      <table className='empty'>
-        <tbody>
-          <tr>
-            <td colSpan='100%'>
-              <div className='transparent'>
-                <h4><span>Hello!</span><br></br>Looks like you haven't added any items yet. Search above to get started, or invite others to add to the cart by tapping the Share button below 😊</h4>
-                <div className='image' style={{backgroundImage:'url(//storage.googleapis.com/kip-random/many_kips/presents_stare_sk.svg)'}}/>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    );
+  render() {
+    const { tab } = this.props;
+
+    switch (tab) {
+    case 'search':
+      return <EmptySearch {...this.props}/>;
+    case 'cart':
+      return <EmptyCart {...this.props}/>;
+    }
   }
 }

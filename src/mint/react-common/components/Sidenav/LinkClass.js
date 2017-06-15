@@ -4,7 +4,7 @@ import { PropTypes } from 'prop-types';
 export default class Link extends Component {
   static propTypes = {
     to: PropTypes.string,
-    children: PropTypes.array,
+    children: PropTypes.object,
     className: PropTypes.string
   };
 

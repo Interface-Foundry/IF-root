@@ -1,20 +1,18 @@
 // react/containers/SettingsContainer.js
 
 import { connect } from 'react-redux';
-import { Search } from '../newComponents';
-import { updateQuery, toggleHistory, submitQuery } from '../newActions';
+import { Empty } from '../newComponents';
+import { updateQuery, submitQuery } from '../newActions';
 import { isUrl, addSearchHistory } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
   cart: state.cart,
+  tab: state.app.viewTab,
   query: state.search.query,
-  results: state.search.results,
-  history: state.search.history,
   categories: state.search.categories
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleHistory: () => dispatch(toggleHistory()),
   updateQuery: (query) => dispatch(updateQuery(query)),
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);
@@ -22,4 +20,4 @@ const mapDispatchToProps = dispatch => ({
   }
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Search);
+export default connect(mapStateToProps, mapDispatchToProps)(Empty);

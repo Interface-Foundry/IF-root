@@ -159,6 +159,7 @@ var getChildren = function * (cart_id, type) {
 }
 
 module.exports = {
+  cloneItem: cloneItem,
   clone: clone,
   reorder: reorder,
   getParents: getParents,

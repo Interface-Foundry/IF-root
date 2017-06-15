@@ -6,6 +6,9 @@ var db
 const dbReady = require('../db')
 dbReady.then((models) => { db = models }).catch(e => console.error(e))
 
+
+https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/ref=sr_1_15?s=apparel&ie=UTF8&qid=1497472759&sr=1-15&nodeID=7141123011&psd=1&keywords=shirts
+
 var stores = [{
   skip: false,
   name: 'amazon_us',
@@ -21,6 +24,7 @@ var stores = [{
       }
     },{
       skip: false,
+      timeout: 25000,
       options: {
         text: 'shorts',
       },
@@ -35,6 +39,17 @@ var stores = [{
       check(results) {
         results.length.should.equal(1)
         results[0].name.should.equal('HiLetgo New Version NodeMCU LUA WiFi Internet ESP8266 Development')
+      }
+    },{
+      skip: false,
+      options: {
+        text: 'https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/ref=sr_1_15?s=apparel&ie=UTF8&qid=1497472759&sr=1-15&nodeID=7141123011&psd=1&keywords=shirts',
+      },
+      check(results) {
+        // should return options from URL search
+        console.log(results)
+        results.length.should.equal(1)
+        results[0].options.length.should.be.greaterThan(1)
       }
     },{
       skip: true,
@@ -84,6 +99,7 @@ describe('Stores', () => {
         if (search.options.category) search_description += ' category:' + search.options.category
         if (search.options.text) search_description += ' text:' + search.options.text
         it(search_description, async function () {
+          this.timeout(search.timeout || 2000)
           var storeInstance = StoreFactory.GetStore({store: store.name})
           var results = await storeInstance.search(search.options)
           search.check(results)

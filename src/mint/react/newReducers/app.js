@@ -7,7 +7,6 @@ const initialState = {
 
 export default (state = initialState, action = {}) => {
   switch (action.type) {
-    case 'UPDATE_ITEM_SUCCESS':
     case 'EDIT_ITEM': {
       return {
         ...state,
@@ -23,6 +22,11 @@ export default (state = initialState, action = {}) => {
       return {
         ...state,
         popup: false
+      };
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        popup: !action.response.user_account
       };
     case 'TOGGLE_POPUP':
       return {

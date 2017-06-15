@@ -59,7 +59,7 @@ class Store {
         // catch the common mistake where developers return an array of promises\
         return Promise.all(items)
       })
-      .then(this.processSearchItems) // and some optional post-processing
+      .then(this.processSearchItems.bind(this)) // and some optional post-processing
       .then(items => {
         // do some post-search analytics logging
         console.log('analyitics', {
