@@ -18,9 +18,14 @@ export default class Selected extends Component {
     arrow: PropTypes.number
   }
 
+  state = {
+    quantity: 1
+  }
+
   render() {
     const { cart, item, cartAsins, selectItem, addItem, arrow } = this.props,
-      afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
+          { quantity } = this.state,
+            afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
     return (
       <td key={item.id} colSpan='100%' className='selected'>
@@ -37,7 +42,7 @@ export default class Selected extends Component {
           <div className='text'> 
             <h1>{item.name}</h1>
             <p> Store: {item.store} | {cart.store_locale} </p>
-            <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
             <div className='text__expanded'>
               <div dangerouslySetInnerHTML={{__html: removeDangerousCharactersFromString(item.description)}} />
             </div>

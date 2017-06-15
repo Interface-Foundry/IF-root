@@ -39,6 +39,27 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			font-size: 12px;
 			margin-right: $padding;
 		}
+		.update {
+			padding: $padding 0;
+			* {
+				display: inline-block;
+				text-align: center;
+			}
+			button {
+				margin: 0;
+				height: $nav-height/2;
+
+				&:last-of-type {
+					margin-right: $padding;
+				}
+			}
+			p {
+				margin: 0;
+				padding: 0 $padding;
+				height: $nav-height/2;
+				line-height: $nav-height/2;
+			}
+		}
 	}
 
 	td, th {
@@ -89,7 +110,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 				position: relative;
 				padding: $padding $padding*2;
 				background: white;
-				@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
 				@media only screen and (max-width: 600px) {
 					padding: $padding/2 0;

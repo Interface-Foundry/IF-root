@@ -52,7 +52,7 @@ export default class History extends Component {
                   </div>
                   <div className='history__term-query' onClick={(e) => {
                     updateQuery(category.humanName);
-                    submitQuery(category.humanName, store, store_locale);
+                    submitQuery(category.machineName, store, store_locale);
                   }}>
                     <p>{category.humanName}</p>
                   </div>

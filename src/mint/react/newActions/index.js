@@ -42,7 +42,7 @@ export {
 	updateItem,
 	fetchItem,
 	removeItem,
-  copyItem
+  	copyItem
 } from './item';
 
 export { 

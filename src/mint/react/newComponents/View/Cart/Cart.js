@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { calculateItemTotal, displayCost, timeFromDate } from '../../../utils';
+import { calculateItemTotal, displayCost, timeFromDate, numberOfItems } from '../../../utils';
 import { splitCartById } from '../../../newReducers';
 
 import { Icon } from '../../../../react-common/components';
@@ -37,8 +37,8 @@ export default class Cart extends Component {
                   <h1>{user.name} </h1>
                   <h1 className='date'> <span> {timeFromDate(myCart[0].updatedAt)} </span> </h1>
                   <h4>
-                    <span className='price'>{displayCost(calculateItemTotal(myCart))}</span> &nbsp;
-                    <span className='grey'>({myCart.length} items)</span>
+                    <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
+                    <span className='grey'>({numberOfItems(myCart)} items)</span>
                   </h4>
                   <ul>
                     {
@@ -50,7 +50,7 @@ export default class Cart extends Component {
                           <div className='text'> 
                             <h1>{item.name}</h1>
                             <h4> Qty: {item.quantity} </h4>
-                            <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+                            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                           </div>
                           <CartButtons {...this.props} item={item}/>
                         </li>
@@ -71,8 +71,8 @@ export default class Cart extends Component {
                     <h1>{userCart.name}</h1>
                     <h1 className='date'> <span> {timeFromDate(userCart.items[0].updatedAt)} </span> </h1>
                     <h4>
-                      <span className='price'>{displayCost(calculateItemTotal(userCart.items))}</span> &nbsp;
-                      <span className='grey'>({userCart.items.length} items)</span>
+                      <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
+                      <span className='grey'>({numberOfItems(userCart.items)} items)</span>
                     </h4>
                     <ul>
                       {
@@ -84,7 +84,7 @@ export default class Cart extends Component {
                             <div className='text'> 
                               <h1>{item.name}</h1>
                               <h4> Qty: {item.quantity} </h4>
-                              <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+                              <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                             </div> 
                             <CartButtons {...this.props} item={item}/>
                           </li>

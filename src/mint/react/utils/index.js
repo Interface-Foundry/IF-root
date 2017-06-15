@@ -23,6 +23,7 @@ export {
   getNameFromEmail,
   addLinkToDeepLink,
   calculateItemTotal,
+  numberOfItems,
   displayCost,
   removeDangerousCharactersFromString
 }

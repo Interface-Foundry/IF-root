@@ -30,7 +30,7 @@ export default class Default extends Component {
           }}/>
           <div className='text'> 
             <h1>{item.name}</h1>
-            <h4> Price: <span className='price'>{displayCost(item.price)}</span> </h4>
+            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
           </div> 
           <div className='action'>
             <button className='more' onClick={() => selectItem(item.id)}>See More</button>

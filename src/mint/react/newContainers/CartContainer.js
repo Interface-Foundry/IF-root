@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Cart } from '../newComponents';
-import { submitQuery, addItem, editItem, removeItem, copyItem } from '../newActions';
+import { submitQuery, editItem, removeItem, copyItem, updateItem } from '../newActions';
 import { isUrl, addSearchHistory } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -20,7 +20,8 @@ const mapDispatchToProps = dispatch => ({
     if (!isUrl(query)) addSearchHistory(query);
     return dispatch(submitQuery(query, store, locale));
   },
-  copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id))
+  copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id)),
+  updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

@@ -51,6 +51,7 @@ export default function cart(state = initialState, action) {
         ...state,
         items: state.items.reduce((acc, item, i) => {
           item.id === action.response.item.id ? acc.push(action.response.item) : acc.push(item);
+          return acc;
         }, [])
       };
     }
