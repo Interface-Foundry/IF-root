@@ -227,7 +227,6 @@ exports.sendReceipt = function * (cart, req) {
     cartItems.map(function (item) {
       if (!userItems[item.added_by]) userItems[item.added_by] = [];
       userItems[item.added_by].push(item);
-      logging.info('item', item) //undefined
       totalItems += Number(item.quantity || 1);
       total += (Number(item.price) * Number(item.quantity || 1));
     });
@@ -237,7 +236,6 @@ exports.sendReceipt = function * (cart, req) {
     for (var k in userItems) {
       var addingUser = yield db.UserAccounts.findOne({id: k});
       if (!addingUser.name) addingUser.name || addingUser.email
-      logging.info('addingUser:', addingUser)
       users.push(addingUser);
       items.push(userItems[k]);
     }

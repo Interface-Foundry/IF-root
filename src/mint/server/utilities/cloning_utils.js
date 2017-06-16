@@ -49,7 +49,7 @@ var clone = function * (cart_id, user_id, reorder) {
   clone.dirty = false;
 
   // clone items in the cart
-  yield original.items.map(function * (item) { //this line is throwing a weird exception for some reason?
+  yield original.items.map(function * (item) {
     item = yield db.Items.findOne({id: item.id}).populate('details')
 
     //create new item
@@ -163,5 +163,6 @@ module.exports = {
   clone: clone,
   reorder: reorder,
   getParents: getParents,
-  getChildren: getChildren
+  getChildren: getChildren,
+  cloneItem: cloneItem
 }

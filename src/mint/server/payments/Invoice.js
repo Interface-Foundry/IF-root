@@ -1,14 +1,41 @@
+
+var moment = require('moment')
 const Cart = require('../cart/Cart')
 
 var db
 const dbReady = require('../../db')
-
 dbReady.then((models) => { db = models; })
 
 
 const userPaymentAmountHandler = {
-  'split_equal': function(invoice) {
-    return
+  'split_equal': function (invoice) {
+    logging.info('even split')
+    logging.info('invoice:', invoice)
+    var debts = {}
+    var perUser = invoice.total / (1.0 * invoice.members.length)
+    invoice.members.map(function (user) {
+      debts[user.id] = perUser
+    })
+    logging.info('debts', debts)
+    return debts
+  },
+  'split_single': function (invoice) {
+    logging.info('single payer split')
+    var debts = {}
+    debts[invoice.leader] = invoice.total
+    return debts
+  },
+  'split_by_item': async function (invoice) {
+    logging.info('split by item')
+    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items')
+    var debts = {}
+    cart.items.map(function (item) {
+      logging.info('item', item)
+      if (debts[item.added_by]) debts[item.added_by] += item.price
+      else debts[item.added_by] = item.price
+    })
+    logging.info('debts', debts)
+    return debts
   }
 }
 
@@ -81,16 +108,25 @@ class Invoice {
     let cart = Cart.GetById(this.cart)
     await cart.sync()
 
-    const newInvoice = await db.Invoices.create({
+    var newInvoice = await db.Invoices.create({
       leader: cart.leader,
-      members: cart.members.map(member => member.id),
       invoice_type: this.invoice,
       cart: cart.id,
       paid: false,
-      total: cart.subtotal
+      total: cart.subtotal,
+      split_type: this.split
     })
 
-    return newInvoice
+    cart.members.map(function (m) {
+      newInvoice.members.add(m.id)
+    })
+
+    await newInvoice.save()
+    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
+
+    await this.sendCollectionEmail(invoice)
+
+    return invoice
   }
 
   /**
@@ -98,17 +134,56 @@ class Invoice {
    *
    * @param      {array}   users   The users
    */
-  async emailUsers (users) {
-    logging.info('THIS', this)
-    users.map(async (user) => {
-      const email = await db.Emails.create({
-        recipients:'user.email',
-        subject: 'Payment Subject',
-        cart: this.cart
+  async sendCollectionEmail (invoice) {
+    var debts = await this.userPaymentAmounts(invoice)
+
+    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
+    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
+    else var baseUrl = 'mint-dev.kipthis.com'
+
+    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items').populate('members')
+    var userItems = {}
+    var items = []
+    var users = []
+    cart.items.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+    });
+    for (var k in userItems) {
+      var addingUser = await db.UserAccounts.findOne({id: k});
+      if (!addingUser.name) addingUser.name || addingUser.email
+      users.push(addingUser);
+      items.push(userItems[k]);
+    }
+
+    var totalItems = cart.items.reduce(function (sum, item) {
+      return sum + item.quantity
+    }, 0)
+
+    // logging.info('totalItems', totalItems)
+
+    await Object.keys(debts).map(async function (user_id) {
+      var user = await db.UserAccounts.findOne({id: user_id})
+      var email = await db.Emails.create({
+        recipients: user.email_address,
+        subject: 'Your Kip Charge',
+        template_name: 'collection'
       })
 
-      email.template('payment', {
-        username: user.name
+      // logging.info('cart members', cart.members)
+
+      await email.template('collection', {
+        username: user.name,
+        baseUrl: baseUrl,
+        id: invoice.cart,
+        items: items,
+        users: users,
+        date: moment().format('dddd, MMMM Do, h:mm a'),
+        total: invoice.total,
+        totalItems: totalItems,
+        cart: invoice.cart,
+        invoice_id: invoice.id,
+        user_amount: debts[user_id]
       })
 
       await email.send();
@@ -121,15 +196,11 @@ class Invoice {
    * @return     {Promise}  { description_of_the_return_value }
    */
   async paidInFull() {
-    logging.info('THIS', this)
     const payments = await db.Payments.find({invoice: this.id})
-    logging.info('payments', payments)
     const amountPaid = payments.reduce((prev, curr) => {
       return prev += curr.amount
     }, 0)
 
-    logging.info('AMOUNT PAID:', JSON.stringify(amountPaid))
-    logging.info('TOTAL:', this.total)
     if (amountPaid >= this.total) {
       return true
     }
@@ -137,8 +208,8 @@ class Invoice {
   }
 
 
-  async determineUserPaymentAmount() {
-    userPaymentAmountHandler[this.split_type]()
+  async userPaymentAmounts(invoice) {
+    return userPaymentAmountHandler[this.split](invoice)
   }
 }
 

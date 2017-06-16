@@ -169,6 +169,38 @@ module.exports = function (router) {
     res.send(invoices)
   })
   /**
+   * @api {get} /invoice/cart/:cart_id
+   * @apiDescription get all invoices related to a cart, if no invoices create one.
+   * @apiGroup Invoice
+   *
+   * @apiParam {type} :cart_id - cart_id to look for
+   */
+  router.get('/invoice/cart/:cart_id', async (req, res) => {
+    const invoices = await db.Invoices.GetByCartId(req.params.cart_id)
+    if (invoices.length === 0) {
+      const invoiceData = {
+        cart: req.params.cart_id,
+        split: 'equal'
+      }
+      const invoice = Invoice.Create('mint', invoiceData)
+      const newInvoice = await invoice.createInvoice()
+      return res.send(newInvoice)
+    }
+
+    res.send(invoices)
+  })
+
+  /**
+   * test sending email to all paying users
+   */
+  router.post('/invoice/test/email', async (req, res) => {
+    var invoice = await Invoice.GetById('22c3a9e5-91dc-484d-805e-b852a80cc189')
+    logging.info('invoice', invoice)
+    await invoice.sendCollectionEmail()
+    return "send emails DUNGEON FAMILY"
+  })
+
+  /**
   * @api {post} /invoice/:invoice_type/:cart_id create invoice
   * @apiDescription create an invoice for the specified cart
   * @apiGroup Invoice
@@ -181,6 +213,8 @@ module.exports = function (router) {
       cart: req.params.cart_id,
       split: _.get(req, 'body.split_type', 'equal')
     }, _.isUndefined)
+
+    logging.info('invoice data', invoiceData)
 
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
     const newInvoice = await invoice.createInvoice()
