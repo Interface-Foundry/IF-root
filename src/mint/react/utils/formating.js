@@ -2,6 +2,7 @@
 
 // import striptags from 'striptags';
 import { isValidEmail } from '.';
+const size = 3;
 
 export const commaSeparateNumber = (val, loc = undefined, opts = { maximumFractionDigits: 2 }) => {
   opts = {
@@ -70,6 +71,26 @@ export const calculateItemTotal = (items) => {
 export const numberOfItems = (items) => {
   return items.reduce((acc, item) => acc + item.quantity, 0);
 };
+
+export const splitAndMergeSearchWithCart = (items, results) => {
+  const cartAsins = items.map((item, i) => item.asin);
+
+  return results.reduce((acc, result, i) => {
+    if(cartAsins.includes(result.asin)) {
+      let cartItem = items.filter((c) => c.asin === result.asin)[0];
+
+      acc.push({
+        ...result,
+        id: cartItem.id,
+        quantity: cartItem.quantity
+      })
+    } else {
+      acc.push(result);
+    } 
+
+    return acc;
+  }, []);
+}
 
 export const removeDangerousCharactersFromString = (string) => {
   // const allowedTags = ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',

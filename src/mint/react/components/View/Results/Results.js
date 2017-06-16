@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 
 import Default from './Default';
 import Selected from './Selected';
-import { numberOfItems } from '../../../utils';
+import { numberOfItems, splitAndMergeSearchWithCart } from '../../../utils';
 import { EmptyContainer } from '../../../containers';
 
 const size = 3;
@@ -23,7 +23,7 @@ export default class Results extends Component {
     if (
       numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
       nextProps.selectedItemId !== this.props.selectedItemId ||
-      nextProps.cart.items.length !== this.props.cart.items.length ||
+      numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) ||
       nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id
     ) return true;
 
@@ -32,11 +32,13 @@ export default class Results extends Component {
 
   render() {
     // Need to think about left and right arrow keys incrementing value.
+    // Needs refactor, too many loops here.
     let arrow, selected;
     const { cart, query, results, selectedItemId } = this.props,
       numResults = results.length,
-      cartAsins = cart.items.map((item) => `${item.asin}-${item.added_by}`),
-      partitionResults = results.reduce((acc, result, i) => {
+      cartAsins = cart.items.map((item, i) => `${item.asin}-${item.added_by}`),
+      mergedResults = splitAndMergeSearchWithCart(cart.items, results, selectedItemId),
+      partitionResults = mergedResults.reduce((acc, result, i) => {
         if (i % size === 0) acc.push([]);
         acc[acc.length - 1].push(result);
 

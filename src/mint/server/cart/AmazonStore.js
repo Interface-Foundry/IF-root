@@ -292,6 +292,9 @@ class AmazonStore extends Store {
 
       var options = _.get(parent, 'Variations.Item', [])
 
+      if (!(options instanceof Array)) {
+       options = [options]
+      }
       // Make the current item's selected options easy to use
       var selectedItem = options.filter(o => o.ASIN === item.asin)[0]
       var selectedOptions = {}
