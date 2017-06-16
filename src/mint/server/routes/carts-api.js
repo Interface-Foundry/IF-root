@@ -813,6 +813,7 @@ module.exports = function (router) {
     var clone = yield cloning_utils.cloneItem(req.params.item_id, user_id, req.params.cart_id)
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
     cart.members.add(user_id)
+    cart.items.add(clone.id)
     yield cart.save()
     res.send(clone)
   }))
