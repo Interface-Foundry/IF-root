@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../../react-common/components';
-import { timeFromDate } from '../../../utils';
+import { timeFromDate, numberOfItems } from '../../../utils';
 import { ButtonsContainer } from '../../../containers';
 
 export default class Details extends Component {
@@ -105,7 +105,7 @@ export default class Details extends Component {
           <tr>
             <td>
               <nav>
-                <p> {items.length} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
+                <p> {numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
               </nav>
             </td>
           </tr>

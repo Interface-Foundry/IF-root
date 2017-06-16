@@ -18,21 +18,23 @@ export default class Selected extends Component {
     arrow: PropTypes.number,
     user: PropTypes.object,
     togglePopup: PropTypes.func,
-    updateItem: PropTypes.func
+    updateItem: PropTypes.func,
+    navigateLeftResults: PropTypes.func,
+    navigateRightResults: PropTypes.func
   }
 
   render() {
-    const { user, cart, item, results, cartAsins, selectItem, addItem, arrow, togglePopup, updateItem } = this.props,
+    const { user, cart, item, cartAsins, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults } = this.props,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''} ${afterClass}`}>
           <div className='navigation'>
-            <button className='left' onClick={() => selectItem(results[item.index - 1] ? results[item.index - 1].id : null)}>
+            <button className='left' onClick={() => navigateLeftResults()}>
               <Icon icon='LeftChevron'/>
             </button>
-            <button className='right' onClick={() => selectItem(results[item.index + 1] ? results[item.index + 1].id : null)}>
+            <button className='right' onClick={() => navigateRightResults()}>
               <Icon icon='RightChevron'/>
             </button>
           </div>

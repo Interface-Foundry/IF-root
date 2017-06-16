@@ -2,6 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { numberOfItems } from '../../utils';
 
 export default class Tabs extends Component {
 
@@ -15,7 +16,7 @@ export default class Tabs extends Component {
     const { tab, selectTab, cart } = this.props,
       tabs = cart.kip_pay_allowed ? [{
         tab: 'cart',
-        display: `Cart (${cart.items.length})`
+        display: `Cart (${numberOfItems(cart.items)})`
       }, {
         tab: 'search',
         display: 'Search'
@@ -24,7 +25,7 @@ export default class Tabs extends Component {
         display: 'Invoice'
       }] : [{
         tab: 'cart',
-        display: `Cart (${cart.items.length})`
+        display: `Cart (${numberOfItems(cart.items)})`
       }, {
         tab: 'search',
         display: 'Search'

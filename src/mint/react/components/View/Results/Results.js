@@ -15,12 +15,7 @@ export default class Results extends Component {
     selectedItemId: PropTypes.string,
     results: PropTypes.array,
     cart: PropTypes.object,
-    query: PropTypes.string,
-    addItem: PropTypes.func,
-    selectItem: PropTypes.func,
-    user: PropTypes.object,
-    togglePopup: PropTypes.func,
-    updateItem: PropTypes.func
+    query: PropTypes.string
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -38,7 +33,7 @@ export default class Results extends Component {
   render() {
     // Need to think about left and right arrow keys incrementing value.
     let arrow, selected;
-    const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup, updateItem } = this.props,
+    const { cart, query, results, selectedItemId } = this.props,
       numResults = results.length,
       cartAsins = cart.items.map((item) => `${item.asin}-${item.added_by}`),
       partitionResults = results.reduce((acc, result, i) => {
@@ -81,28 +76,16 @@ export default class Results extends Component {
                     return item.selected ? (
                       <Selected 
                         key={item.id}
-                        item={item} 
-                        cart={cart} 
-                        user={user}
-                        arrow={arrow}
                         cartAsins={cartAsins}
-                        addItem={addItem} 
-                        selectedItemId={selectedItemId}
-                        selectItem={selectItem}
-                        togglePopup={togglePopup}
-                        updateItem={updateItem}
-                        results={results}/>
+                        arrow={arrow}
+                        item={item}
+                        {...this.props}/>
                       ) : ( 
                         <Default 
                           key={item.id}
-                          item={item} 
-                          cart={cart} 
-                          user={user}
+                          item={item}
                           cartAsins={cartAsins}
-                          addItem={addItem} 
-                          selectedItemId={selectedItemId} 
-                          selectItem={selectItem}
-                          togglePopup={togglePopup}/>
+                          {...this.props}/>
                       );
                   })
                 }

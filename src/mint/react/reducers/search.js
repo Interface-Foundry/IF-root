@@ -11,8 +11,9 @@ const initialState = {
 export default (state = initialState, action) => {
   let itemIndex;
   switch (action.type) {
-    case 'CATEGORIES_SUCCESS':
+    case 'ITEM_SUCCESS':
     case 'SEARCH_SUCCESS':
+    case 'CATEGORIES_SUCCESS':
     case 'SELECT_ITEM':
     case 'UPDATE_QUERY':
       return {
