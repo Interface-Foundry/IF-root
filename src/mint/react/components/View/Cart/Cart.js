@@ -72,7 +72,7 @@ export default class Cart extends Component {
                     <h1 className='date'> <span> </span> </h1>
                     <h4>
                       <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
-                      <span className='grey'>({numberOfItems(userCart.items)} items) ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>
+                      <span className='grey'>({numberOfItems(userCart.items)} items) ❄ Updated {timeFromDate(userCart.updatedAt)}</span>
                     </h4>
                     <ul>
                       {

@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Cart } from '../components';
-import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup } from '../actions';
+import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup, fetchItem } from '../actions';
 import { isUrl, addSearchHistory } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -21,6 +21,7 @@ const mapDispatchToProps = dispatch => ({
     return dispatch(submitQuery(query, store, locale));
   },
   copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id)),
+  fetchItem: (item_id) => dispatch(fetchItem(item_id)),
   updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues))
 });
 

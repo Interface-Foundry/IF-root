@@ -38,7 +38,7 @@ export const fetchItem = item_id => get(
     response: {
       results: [json],
       history: false,
-      selectedItemId: json[0].id,
+      selectedItemId: json.id,
       tab: 'search'
     },
     receivedAt: Date.now()

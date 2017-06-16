@@ -5,7 +5,8 @@ import {
   get,
   togglePopup,
   login,
-  validateCode
+  validateCode,
+  fetchCarts
 } from '../actions';
 
 const mapStateToProps = (state, props) => ({
@@ -19,10 +20,14 @@ const mapStateToProps = (state, props) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  login: (cart_id, email) => dispatch(login(cart_id, email)),
-  validateCode: (email, code) => dispatch(validateCode(email, code)),
   get: (url, type) => dispatch(get(url, type)),
-  _toggleLoginScreen: () => dispatch(togglePopup())
+  _toggleLoginScreen: () => dispatch(togglePopup()),
+  login: (cart_id, email) => dispatch(login(cart_id, email)).then(() => {
+    dispatch(fetchCarts())
+  }),
+  validateCode: (email, code) => dispatch(validateCode(email, code)).then(() => {
+    dispatch(fetchCarts())
+  })
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

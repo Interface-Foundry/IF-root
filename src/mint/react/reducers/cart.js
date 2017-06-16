@@ -80,7 +80,7 @@ export const splitCartById = (state, props) => {
 
   return state.cart.items.reduce((acc, item) => {
     acc.quantity = acc.quantity + (item.quantity || 1);
-    let linkedMember = getMemberById(state.cart, { id: item.added_by });
+    let linkedMember = getMemberById(state.cart, { id: item.added_by }) || {};
 
     if (id === item.added_by) {
       acc['my'].push(item);

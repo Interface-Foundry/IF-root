@@ -55,7 +55,7 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fetchCart, fetchMetrics, match } = this.props;
+    const { fetchCart, fetchMetrics, match, cart } = this.props;
     if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
       fetchCart(nextProps.match.url.split('/')[2]);
       fetchMetrics(nextProps.match.url.split('/')[2]);

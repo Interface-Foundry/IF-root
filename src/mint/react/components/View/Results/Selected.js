@@ -80,5 +80,3 @@ export default class Selected extends Component {
     );
   }
 }
-
-// <div dangerouslySetInnerHTML={{__html: removeDangerousCharactersFromString(item.description)}} />

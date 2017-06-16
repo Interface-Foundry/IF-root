@@ -21,6 +21,7 @@ export default class Results extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     // need this, otherwise page always rerender every scroll
     if (
+      nextProps.user.id !== this.props.user.id ||
       numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
       nextProps.selectedItemId !== this.props.selectedItemId ||
       numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) ||

@@ -33,6 +33,7 @@ export default (state = initialState, action = {}) => {
         ...state,
         popup: !state.popup
       };
+    case 'ITEM_SUCCESS':
     case 'SEARCH_SUCCESS':
     case 'SELECT_VIEW_TAB':
       return {

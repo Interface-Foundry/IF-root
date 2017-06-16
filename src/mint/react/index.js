@@ -53,12 +53,12 @@ const store = createStore(
 const cart_id = location.pathname.split('/')[2];
 
 store.dispatch(checkSession()).then(() => {
-  store.dispatch(fetchCarts());
   store.dispatch(fetchStores());
   store.dispatch(fetchCategories(cart_id));
 
   store.dispatch(fetchCart(cart_id)).then(() => {
     store.dispatch(fetchMetrics(cart_id));
+    store.dispatch(fetchCarts());
   });
 });
 
