@@ -154,24 +154,24 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					display: inline-block;
 					margin-right: $padding*2;
 
-          &.cursor {
-            cursor: pointer;
-            &:hover {
-              .top {
-                svg {
-                  fill: $secondaryColor;
-                }
-                * {
-                  color: $secondaryColor;
-                }
-              }
-              .sub {
-                * {
-                  color: $secondaryColor;
-                }
-              }
-            }
-          }
+			         &.cursor {
+			            cursor: pointer;
+			            &:hover {
+			              	.top {
+				                svg {
+				                  	fill: $secondaryColor;
+				                }
+				                * {
+				                  	color: $secondaryColor;
+				                }
+			              	}
+			              	.sub {
+			                	* {
+			                  		color: $secondaryColor;
+			                	}
+			              	}
+			            }
+			        }
 
 					&.red {
 						.top {
@@ -224,9 +224,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			padding: $padding $padding 0;
 
 			span {
-				display: inline-block;
+				display: inline-block !important;
 				border-radius: 5px;
 				margin-right: $padding*2;
+
 
 				&.updated {
 					color: rgba(#111, 0.5);

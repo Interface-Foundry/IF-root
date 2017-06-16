@@ -1,7 +1,6 @@
 import { loading } from './';
 
 export const get = (url, type, cb) => {
-  console.log(url)
   loading(type);
   return async dispatch => {
     try {

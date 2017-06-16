@@ -83,8 +83,8 @@ export default class Details extends Component {
                     metrics.map((m) => (
                       <div key={m.name} className={
                           `metric 
-                          ${likedList.includes(user.id) && m.name === 'Likes' ? 'red cursor' : ''}
-                          ${ m.name === 'Re-Kips' ? 'cursor' : '' }` 
+                          ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}
+                          ${ m.name !== 'Members' ? 'cursor' : '' }` 
                         } onClick={() => {
                           m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === "Re-Kips" ? cloneCart(id): null
                         }}>
