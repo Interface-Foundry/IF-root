@@ -118,7 +118,7 @@ module.exports = function (router) {
         .populate('members', selectMembersWithoutEmail)
         .populate('items')
 
-    if(user_id === cart.leader.id) {
+    if(cart && user_id === cart.leader.id) {
       cart = yield db.Carts.findOne({ id: req.params.cart_id })
         .populate('leader')
         .populate('members')

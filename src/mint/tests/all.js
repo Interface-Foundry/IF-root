@@ -4,7 +4,6 @@ const fs = require('fs')
 const ignores = [
   'all.js',
   'amazon.tests.js',
-  'api.js',
   'deals.js',
   'cart.tests.js',
   'invoice.test.js',
