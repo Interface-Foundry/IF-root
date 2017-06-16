@@ -812,7 +812,7 @@ module.exports = function (router) {
     if (!user_id) throw new Error('User not logged in')
     var clone = yield cloning_utils.cloneItem(req.params.item_id, user_id, req.params.cart_id)
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
-    cart.items.add(clone.id)
+    cart.members.add(user_id)
     yield cart.save()
     res.send(clone)
   }))
@@ -1021,7 +1021,7 @@ module.exports = function (router) {
     if (!user_id) throw new Error('User not logged in')
 
     var clone = yield cloning_utils.cloneItem(item_id, user_id, cart_id)
-    
+
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
     cart.members.add(user_id)
     yield cart.save()
