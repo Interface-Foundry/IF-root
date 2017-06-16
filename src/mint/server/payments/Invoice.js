@@ -1,4 +1,6 @@
+
 var moment = require('moment')
+const Cart = require('../cart/Cart')
 
 var db
 const dbReady = require('../../db')
@@ -103,10 +105,8 @@ class Invoice {
    * @return     {Promise}  returns the new object created in db
    */
   async createInvoice () {
-    const cart = await db.Carts.findOne({id: this.cart}).populate('members')
-    if (!cart) {
-      throw new Error('Invoice needs to be attached to invoice')
-    }
+    let cart = Cart.GetById(this.cart)
+    await cart.sync()
 
     var newInvoice = await db.Invoices.create({
       leader: cart.leader,

@@ -354,7 +354,139 @@ class AmazonStore extends Store {
 
     return item
   }
+
+
+  /**
+   * sync cart to amazon api, gets subtotal and checkout link for cart with items
+   *
+   * @param      {object}   cart    the cart we are syncing
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async sync(cart) {
+    // if there are no amazon items in the cart then you can't sync it
+    if (cart.items.length === 0 || !cart.items[0].asin) {
+      throw new Error('can only sync carts that have amazon items, and items must be populated')
+    }
+
+    // to sync with amazon, we create a totally new cart
+    const cartAddAmazonParams = createAmazonCartWithItems(cart.items);
+    cartAddAmazonParams.AssociateTag = this.localeTag(this.locale)
+    const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
+
+    const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
+    const amazonCart = results.result.CartCreateResponse.Cart
+    return amazonCart
+  }
+
+  /**
+   * updateCart document in database with new cart properties specific to store
+   *
+   * @param      {<type>}   oldCartId  The old cartesian identifier
+   * @param      {<type>}   newCart    The new cartesian
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async updateCart(oldCartId, newCart) {
+    const cart = await db.Carts.findOne({id: oldCartId})
+    cart.subtotal = newCart.SubTotal.Amount / 100.00
+    cart.amazon_cartid = newCart.CartId
+    cart.amazon_hmac = newCart.HMAC
+    cart.amazon_purchase_url = newCart.PurchaseURL
+    cart.affiliate_checkout_url = await googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(newCart.PurchaseURL)}/id/mint/pid/shoppingcart`)
+    cart.dirty = false
+    await cart.save()
+  }
 }
+
+
+/**
+ * parse errors if any from creating an amazon cart
+ *
+ * @param {object} res the res from amazon after creating a cart
+ * @return {array} The errors from amazon into an array if the cart is still fine
+ *                 albeit changed objects/quantities, into an explicit object explaining
+ *                 what happened if not (TODO)
+ */
+function getErrorsFromAmazonCartCreate (res) {
+  if (!res.Request.Errors) {
+    console.log('no errors from creating cart, phew')
+    return null
+  }
+
+  if (res.Request.Errors.Error) {
+    var errorsArray = res.Request.Errors.Error
+    if (!(errorsArray instanceof Array)) {
+      errorsArray = [errorsArray]
+    }
+  }
+
+  return errorsArray.map(obj => {
+    console.log('dealing with error:', obj)
+    if (obj === 'AWS.ECommerceService.InvalidQuantity') {
+      try {
+        var itemID = obj.Message.match(/\b\w{10}\b/)
+        return {
+          'error': 'InvalidQuantity (either reduced or removed)',
+          'item': (itemID) ? itemID[0] : 'couldnt get what amazon item it was'
+        }
+      } catch (err) {
+        throw new Error('error getting item', res.Error.Message)
+      }
+    }
+  })
+}
+
+
+/**
+ * condense items from multiple users/same user with same asin to conform amazon
+ * format.
+ *
+ * @param      {array}  items   array of items from cart
+ * @return     {array}  same as above but if asin was already there just reduced into same object
+ */
+function condenseItems(items) {
+  var seenAsins = []
+  return items.reduce((prev, curr) => {
+    if (seenAsins.includes(curr.asin)) {
+      prev.find(x => x.asin === curr.asin).quantity += curr.quantity
+    } else {
+      seenAsins.push(curr.asin)
+      prev.push({
+        asin: curr.asin,
+        quantity: curr.quantity
+      })
+    }
+  return prev
+  }, [])
+}
+
+
+/**
+ * create an amazon cart instead of worrying about updating cart and removing etc
+ *
+ * @param {array} items - array of items that would include:
+ *                        ASIN - asin from amazon (TODO: allow for OfferListingId)
+ *                        Quantity - quantity
+ */
+function createAmazonCartWithItems (items) {
+  const useAsin = true
+  if (!items instanceof Array) {
+    items = [items]
+  }
+
+  // ability to use offerlistingid or asin later, just using asin rn
+
+  var amazonParams = {}
+
+  var condendesedItems = condenseItems(items)
+  var k = 1
+  for (i of condendesedItems) {
+    amazonParams[`Item.${k}.ASIN`] = i.asin
+    amazonParams[`Item.${k}.Quantity`] = i.quantity
+    k++
+  }
+  return amazonParams
+}
+
 
 /**
  * format cents to nice price.  amazon returns amount in cents
@@ -383,6 +515,16 @@ function getItemPrice(item, priceType) {
 const bookProductGroups = ['Book', 'eBooks']
 
 /**
+ * strip tags from a review
+ *
+ * @param      {<type>}  review  The review
+ */
+function stripTags(review) {
+  const tagRegex = /(<([^>]+)>)/ig
+  return review.replace(tagRegex, '')
+}
+
+/**
  * gets the description for an item depending on if its a book or what
  *
  * @param      {<type>}  item The item
@@ -394,7 +536,9 @@ function getDescription (item) {
       editorialReview = editorialReview[0]
     }
 
-    if (editorialReview && editorialReview.Content) return editorialReview.Content
+    if (editorialReview && editorialReview.Content) {
+      return stripTags(editorialReview.Content)
+    }
   }
   return item.ItemAttributes.Feature
 }

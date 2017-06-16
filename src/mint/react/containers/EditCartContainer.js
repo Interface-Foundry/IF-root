@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { EditCart } from '../components';
-import { updateCart, clearCart, deleteCart } from '../actions';
+import { updateCart, clearCart, deleteCart, updatePrivacy } from '../actions';
 
 // Ask hannah and add back in, look in Containers.
 const mapStateToProps = (state, ownProps) => {
@@ -15,6 +15,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   updateCart: (newCart) => dispatch(updateCart(newCart)),
   clearCart: (cart_id) => dispatch(clearCart(cart_id)),
+  updatePrivacy: (cart_id, privacy) => dispatch(updatePrivacy(cart_id, privacy)),
   deleteCart: (cart_id) => dispatch(deleteCart(cart_id))
 });
 

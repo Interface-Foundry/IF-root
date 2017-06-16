@@ -4,6 +4,7 @@
     "cwd": ".",
     "script": "./server/index.js",
     "combine_logs": true,
+    "log_date_format" : "YYYY-MM-DD HH:mm Z",
     "watch": false,
     "env": {
       "NODE_ENV": "production",

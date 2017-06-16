@@ -1,6 +1,12 @@
 const GetStore = require('./StoreFactory').GetStore
 const _ = require('lodash')
 
+var db
+const dbReady = require('../../db')
+
+dbReady.then((models) => { db = models; })
+
+
 class Cart {
   /**
    * Build a cart class from a cart database model, or settings for a new model
@@ -18,6 +24,17 @@ class Cart {
     this.store = GetStore(this)
   }
 
+  static async GetById(cartId) {
+    const cartObject = await db.Carts.findOne({id: cartId}).populate('members').populate('items')
+
+    if (cart.store_locale) {
+      cartObject.user_locale = cart.store_locale
+    }
+
+    const cart = new Cart(cartObject)
+    return cart
+  }
+
   /**
    * Saves a new cart to the database
    * @return {this} returns this instance of the cart class
@@ -33,6 +50,17 @@ class Cart {
 
   checkout() {
     this.store.checkout(this)
+  }
+
+  /**
+   * sync the cart with the 3rd party api
+   *
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async sync () {
+    const newCart = await this.store.sync(this)
+    await this.store.updateCart(this.id, newCart)
+    _.merge(this, newCart)
   }
 }
 

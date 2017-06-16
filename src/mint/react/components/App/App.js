@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
-import { ErrorPage, Modal } from '..';
+import { ErrorPage, Modal, Toast } from '..';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -21,11 +21,29 @@ export default class App extends Component {
     popup: PropTypes.bool,
     sidenav: PropTypes.bool,
     togglePopup: PropTypes.func,
-    fetchMetrics: PropTypes.func
+    fetchMetrics: PropTypes.func,
+    navigateLeftResults: PropTypes.func,
+    navigateRightResults: PropTypes.func,
+    toast: PropTypes.string,
+    status: PropTypes.string,
+    history: PropTypes.object
   }
 
   _handeKeyPress(e) {
-    // debugger
+    const { selectedItemId, navigateRightResults, navigateLeftResults } = this.props;
+
+    if (selectedItemId) {
+      switch (e.keyCode) {
+      case 39:
+        // right
+        navigateRightResults()
+        break;
+      case 37:
+        // left
+        navigateLeftResults()
+        break;
+      }
+    }
   }
 
   _logPageView(path, userId) {
@@ -44,25 +62,18 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    // need this, otherwise page always rerender every scroll
-    if (
-      nextProps.sidenav !== this.props.sidenav ||
-      nextProps.popup !== this.props.popup ||
-      nextProps.match.url !== this.props.match.url
-    ) return true;
-
-    return false;
-  }
+  shouldComponentUpdate = (nextProps, nextState) =>
+    nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
-    const { sidenav, popup, togglePopup, match } = this.props;
+    const { sidenav, popup, togglePopup, match, toast, status, history: { replace } } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
+          <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
 
           <Route path={'/newcart'} exact component={StoresContainer} />

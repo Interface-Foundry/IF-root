@@ -37,7 +37,9 @@ export {
   fetchMetrics,
   likeCart,
   unlikeCart,
-  reorderCart
+  reorderCart,
+  updatePrivacy,
+  cloneCart
 }
 from './cart';
 
@@ -67,6 +69,8 @@ export {
   submitQuery,
   updateQuery,
   toggleHistory,
-  fetchCategories
+  fetchCategories,
+  navigateRightResults,
+  navigateLeftResults
 }
 from './search';

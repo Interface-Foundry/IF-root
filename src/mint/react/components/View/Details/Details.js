@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../../react-common/components';
-import { timeFromDate } from '../../../utils';
+import { timeFromDate, numberOfItems } from '../../../utils';
 import { ButtonsContainer } from '../../../containers';
 
 export default class Details extends Component {
@@ -30,7 +30,7 @@ export default class Details extends Component {
   }
 
   render() {
-    const { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, locked } = this.props,
+    const { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, locked, cloneCart } = this.props,
       metrics = [{
         name: 'Members',
         icon: 'Member',
@@ -83,8 +83,11 @@ export default class Details extends Component {
                     metrics.map((m) => (
                       <div key={m.name} className={
                           `metric 
-                          ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}` 
-                        } onClick={() => m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : null}>
+                          ${likedList.includes(user.id) && m.name === 'Likes' ? 'red cursor' : ''}
+                          ${ m.name === 'Re-Kips' ? 'cursor' : '' }` 
+                        } onClick={() => {
+                          m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === "Re-Kips" ? cloneCart(id): null
+                        }}>
                         <div className='top'>
                           <Icon icon={m.icon}/>
                           <p>{m.value}</p>
@@ -102,7 +105,7 @@ export default class Details extends Component {
           <tr>
             <td>
               <nav>
-                <p> {items.length} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
+                <p> {numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
               </nav>
             </td>
           </tr>

@@ -50,7 +50,7 @@
     box-shadow: $card-box-shadow;
     ul {
       max-height: 200px;
-
+      overflow: auto;
       &.categories {
         & > span {
           display: block;

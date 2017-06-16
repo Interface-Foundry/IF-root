@@ -9,9 +9,11 @@ const initialState = {
 };
 
 export default (state = initialState, action) => {
+  let itemIndex;
   switch (action.type) {
-    case 'CATEGORIES_SUCCESS':
+    case 'ITEM_SUCCESS':
     case 'SEARCH_SUCCESS':
+    case 'CATEGORIES_SUCCESS':
     case 'SELECT_ITEM':
     case 'UPDATE_QUERY':
       return {
@@ -25,6 +27,24 @@ export default (state = initialState, action) => {
           item.asin === action.response.item.asin ? acc.push(action.response.item) : acc.push(item);
           return acc;
         }, [])
+      };
+    case 'SELECT_ITEM_LEFT':
+      itemIndex = state.results.findIndex((item) => {
+        return item.id === state.selectedItemId;
+      });
+
+      return {
+        ...state,
+        selectedItemId: itemIndex === 0 ? null : state.results[itemIndex - 1].id
+      };
+    case 'SELECT_ITEM_RIGHT':
+      itemIndex = state.results.findIndex((item) => {
+        return item.id === state.selectedItemId;
+      });
+
+      return {
+        ...state,
+        selectedItemId: itemIndex === state.results.length - 1 ? null : state.results[itemIndex + 1].id
       };
     case 'TOGGLE_HISTORY':
       return {

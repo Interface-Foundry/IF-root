@@ -7,7 +7,8 @@ import {
   toggleSidenav,
   togglePopup,
   likeCart,
-  unlikeCart
+  unlikeCart,
+  cloneCart
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -24,7 +25,8 @@ const mapDispatchToProps = dispatch => ({
   togglePopup: () => dispatch(togglePopup()),
   toggleSidenav: () => dispatch(toggleSidenav()),
   likeCart: (id) => dispatch(likeCart(id)),
-  unlikeCart: (id) => dispatch(unlikeCart(id))
+  unlikeCart: (id) => dispatch(unlikeCart(id)),
+  cloneCart: (cart_id) => dispatch(cloneCart(cart_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(View);
