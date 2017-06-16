@@ -1,3 +1,5 @@
+var moment = require('moment')
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -15,7 +17,7 @@ const userPaymentAmountHandler = {
     logging.info('debts', debts)
     return debts
   },
-  'single': function (invoice) {
+  'split_single': function (invoice) {
     logging.info('single payer split')
     var debts = {}
     debts[invoice.leader] = invoice.total
@@ -133,20 +135,55 @@ class Invoice {
    * @param      {array}   users   The users
    */
   async sendCollectionEmail (invoice) {
-    logging.info('this', this)
-    logging.info('send collection email called')
     var debts = await this.userPaymentAmounts(invoice)
+
+    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
+    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
+    else var baseUrl = 'mint-dev.kipthis.com'
+
+    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items').populate('members')
+    var userItems = {}
+    var items = []
+    var users = []
+    cart.items.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+    });
+    for (var k in userItems) {
+      var addingUser = await db.UserAccounts.findOne({id: k});
+      if (!addingUser.name) addingUser.name || addingUser.email
+      users.push(addingUser);
+      items.push(userItems[k]);
+    }
+
+    var totalItems = cart.items.reduce(function (sum, item) {
+      return sum + item.quantity
+    }, 0)
+
+    // logging.info('totalItems', totalItems)
+
     await Object.keys(debts).map(async function (user_id) {
       var user = await db.UserAccounts.findOne({id: user_id})
       var email = await db.Emails.create({
         recipients: user.email_address,
-        subject: 'You owe Kip $'+ debts[user_id] ,
-        cart: invoice.cart,
-        template: 'summary_email'
+        subject: 'Your Kip Charge',
+        template_name: 'collection'
       })
 
-      email.template('payment', {
-        username: user.name
+      // logging.info('cart members', cart.members)
+
+      await email.template('collection', {
+        username: user.name,
+        baseUrl: baseUrl,
+        id: invoice.cart,
+        items: items,
+        users: users,
+        date: moment().format('dddd, MMMM Do, h:mm a'),
+        total: invoice.total,
+        totalItems: totalItems,
+        cart: invoice.cart,
+        invoice_id: invoice.id,
+        user_amount: debts[user_id]
       })
 
       await email.send();

@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <!--[if !mso]><!-->
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Kip Cart</title>
+    <style type="text/css">
+        /* CLIENT-SPECIFIC STYLES */
+
+        /* Force Outlook to provide a "view in browser" message */
+        #outlook a {
+            padding:0;
+        }
+
+        /* Force Hotmail to display emails at full width */
+        .ExternalClass,
+        .ReadMsgBody {
+            width:100%;
+        }
+
+        /* Force Hotmail to display normal line spacing */
+        .ExternalClass,
+        .ExternalClass p,
+        .ExternalClass span,
+        .ExternalClass font,
+        .ExternalClass td,
+        .ExternalClass div {
+            line-height: 100%;
+        }
+
+        /* Prevent WebKit and Windows mobile changing default text sizes */
+        body,
+        table,
+        td,
+        a {
+            -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;
+        }
+
+        /* Remove spacing between tables in Outlook 2007 and up */
+        table,
+        td {
+            mso-table-lspace:0pt;
+            mso-table-rspace:0pt;
+        }
+
+        /* Allow smoother rendering of resized image in Internet Explorer */
+        img {
+            -ms-interpolation-mode:bicubic;
+        }
+
+        /* RESET STYLES */
+        img {
+            border:0;
+            line-height:100%;
+            outline:none;
+            text-decoration:none;
+        }
+        table {
+            border-collapse:collapse !important;
+        }
+        body {
+            height:100% !important;
+            margin:0;
+            padding:0;
+            width:100% !important;
+            background: #fff;
+            font-family: sans-serif;
+            -webkit-text-size-adjust:100%;
+            -ms-text-size-adjust:100%;
+        }
+        a {
+            color: #4a9ff1;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        p[class='blue'] {
+            text-decoration: none;
+            color: #4a9ff1;
+        }
+        div[class='main'] {
+            max-width: 700px;
+            height: 100%;
+            background: #ffffff;
+            overflow: hidden;
+            margin: 80px auto 40px auto;
+            box-shadow: 0 0 7px #cdcccc;
+            -webkit-box-shadow: 0 0 7px #cdcccc;
+            -moz-box-shadow: 0 0 7px #cdcccc;
+            -o-box-shadow: 0 0 7px #cdcccc;
+        }
+        div[class='logo'] {
+            min-width: 50px;
+        }
+        span[class="red"] {
+            color: #CE5019;
+        }
+        span[class="linethrough"] {
+            text-decoration: line-through;
+        }
+
+        @media screen and (max-width: 600px) {
+            div[class='main'] {
+                max-width: 100% !important;
+                margin: 0!important;
+            }
+            div[class='responsive-image'] {
+                height: 50px !important;
+            }
+            td[class='button'] {
+            	position: relative !important;
+                padding-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- responsible -->
+<input type="hidden" id="cartId" name="cartId" value="<%=cart.id%>">
+<!-- /Gmail hack -->
+<div style="display:none; white-space:nowrap; font:15px courier; color:#ffffff; line-height:0; width:600px !important; min-width:600px !important; max-width:600px !important;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+<!-- /Gmail hack -->
+<div class="main" style="max-width: 700px; margin: 20px auto; border: 1px solid #e1e1e1; overflow: hidden;">
+    <!-- FULL WIDTH CONTAINER ALWAYS NEED THIS-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #fff; color: #fcfcf9; max-width: 700px">
+        <tr >
+            <td align="middle" valign="middle">
+				<img width="1300" src='https://storage.googleapis.com/kip-random/emailpink1.png' style="font-size: 28px; text-align: left; color: #fcfcf9; height: auto; width: 100%;">
+            </td>
+        </tr>
+    </table>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #fff;max-width: 700px">
+        <tr>
+            <td style="padding:40px 40px 10px; font-size: 18px; color: #000;" align="left">
+                Hi <span style="border-bottom: 3px solid #ccecf6"><%=username%></span>,
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px 40px 40px; font-size: 18px; color: #000;" align="left">
+                Thanks for using Kip! Please pay $<%=user_amount%> at your earliest possible convenience 😊
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:10px 40px 40px; font-size: 18px; color: #000;" align="left">
+                Below is a link to your invoice:
+            </td>
+        </tr>
+        <tr>
+            <td >
+                <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                    <tr>
+                        <td style="padding:0 40px 10px; font-size: 28px; font-weight: bold; color: #4a9ff1;" align="left">
+                            <%=cart.name%>
+                        </td >
+                    </tr>
+                </table>
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" style=" background: #fff;">
+                    <tr>
+                        <td>
+                            <!-- WHEN MADE RESPONSIVE, THE FIRST HTML ELEMENT GETS PUT ON TOP, REGARDLESS OF ALIGN PROPERTY -->
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                <tr>
+                                    <td style=" padding: 0px 40px 33px; border-radius: 10px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
+                                         <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                             <tr>
+                                                 <td align="left" style="position: relative; padding: 20px 30px; color:#000; border: 1px solid #4a9ff1; border-radius: 5px; background: #f4f4ec;font-weight: 500;">
+                                               		<%=date%> <br><br>
+                                                 	<%=users.length%> Participant <br>
+                                                 	<%=totalItems%> Items from Amazon USA <br><br>
+                                                 	Cart Total: <span style="color: #CE5019;"><%=total%></span><br><br>
+                                                 	<table width="100%" border="0" cellspacing="0" cellpadding="0" class="mobile-button-container">
+                                                        <tr>
+                                                            <td class="button" align="left" style="padding: 10px;position: absolute; right: 10px; bottom: 10px;" class="padding-copy">
+                                                                <table border="0" cellspacing="0" cellpadding="0" class="responsive-table">
+                                                                    <tr>
+                                                                        <td align="center"><a href="<%=baseUrl%>/invoice/<%=invoice_id%>" target="_blank" style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: #4f4d4c; text-decoration: none; background-color: #ffe94d; border-top: 15px solid #ffe94d; border-bottom: 15px solid #ffe94d; border-left: 25px solid #ffe94d; border-right: 25px solid #ffe94d; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px; display: inline-block;" class="mobile-button">INVOICE &rarr;</a></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                 </td>
+                                             </tr>
+                                          </table>
+                                    </td >
+                                </tr>
+                                <tr>
+                                    <td style=" padding: 0px 40px 33px; border-radius: 10px; font-size: 20px; color: #4a9ff1; font-weight: 100;" align="left">
+                                         <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
+                                             <tr>
+                                                 <td align="left" style="position: relative; padding: 20px 30px; color:#000; border-radius: 5px; background: #f4f4ec;font-weight: 500;">
+                                                    <% for(var i=0; i<items.length; i++) {%>
+                                                     <span style="font-weight: bold"><%=users[i].name%></span> <br>
+                                                     <span style="font-weight: normal"><%=users[i].email_address%></span> <br><br>
+
+                                                        <% for(var j=0; j<items[i].length; j++) {%>
+                                                            <span style="color:#000;">
+                                                             <%=items[i][j].name%> <br>
+                                                             Qty: <%=items[i][j].quantity%> Price: $<%=items[i][j].price.toFixed(2)%><br><br>
+                                                            </span>
+                                                        <% } %>
+                                                     <% } %>
+                                                 </td>
+                                             </tr>
+                                          </table>
+                                    </td >
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px; font-size: 18px; padding-top: 8px;" align="left">
+                            Too many emails? Change your email preferences below
+                          <br/>
+                        </td >
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 700px;">
+        <tr>
+            <td bgcolor="#ccecf6" align="left" style="border-top: 1px solid #e1e1e1;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                    <tr>
+                        <td style="padding: 20px 40px;">
+                            <!-- UNSUBSCRIBE COPY -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" align="left" class="responsive-table">
+                                <tr>
+                                    <td align="center" valign="middle" style="font-size: 12px; padding: 20px 0 20px; line-height: 18px; font-family: Helvetica, Arial, sans-serif; color:#868585;">
+                                        <span class="appleFooter" style="color:#000;">You are recieving this email because you’ve opted in on our website.</span>                                       <br>
+                                        <span class="appleFooter" style="color:#000;">Update email preferences or unsubscribe any time below.</span>
+                                        <br>
+                                        <span class="appleFooter" style="color:#000;">Please note that if you unsubscribe from all emails we won’t be able to inform you if your shopping cart has been purchased.</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" >
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center">
+                                            <tr>
+                                                <td style="padding: 20px 0px 20px 0px;">
+                                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" align="center" class="responsive-table">
+                                                        <tr>
+                                                            <td align="center" valign="middle" style="font-size: 12px; line-height: 18px; font-family: Helvetica, Arial, sans-serif; color:#666666;">
+                                                                <span class="appleFooter" style="color:#000;">122 West 27th St, New York, NY 10001</span><br><a class="original-only" style="color: #000; text-decoration: none;">Kip © 2017</a><span class="original-only" style="font-family: Arial, sans-serif; font-size: 12px; color: #444444;">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span><a href="https://www.kipthis.com" style="color: #000; text-decoration: none;">kipthis.com</a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>
