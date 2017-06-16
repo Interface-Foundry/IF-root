@@ -41,11 +41,27 @@ module.exports = function (router) {
      */
     .post(async (req, res) => {
       const invoice = await Invoice.GetById(req.params.invoice_id)
-      if (_.get(req, 'body.option_chage')) {
-        await invoice.optionUpdate(req.body.option_change, req.body.option_data)
-      } else if (_.get(req, 'body.action')) {
+      if (_.get(req, 'body.action')) {
         await invoice.doAction(req.body.action)
       }
+      return res.send(invoice)
+    })
+
+    /**
+     * @api {put} /invoice/:invoice_id
+     * @apiDescription update options related to an invoice
+     * @apiGroup Invoice
+     *
+     * @apiParam {string} :invoice_id - the invoice id
+     * @apiParam {string} option_chage - the option we are updating (pay type)
+     * @apiParam {object} option_data - the options to change stuff to
+     */
+    .put(async (req, res) => {
+      const invoice = await Invoice.GetById(req.params.invoice_id)
+      if (_.get(req, 'body.option_chage')) {
+        await invoice.optionUpdate(req.body.option_change, req.body.option_data)
+      }
+
       return res.send(invoice)
     })
 
@@ -147,27 +163,6 @@ module.exports = function (router) {
     })
 
 
-  /**
-   * @api {get} /invoice/cart/:cart_id
-   * @apiDescription get all invoices related to a cart, if no invoices create one.
-   * @apiGroup Invoice
-   *
-   * @apiParam {type} :cart_id - cart_id to look for
-   */
-  router.get('/invoice/cart/:cart_id', async (req, res) => {
-    const invoices = await db.Invoices.GetByCartId(req.params.cart_id)
-    if (invoices.length === 0) {
-      const invoiceData = {
-        cart: req.params.cart_id,
-        split: 'equal'
-      }
-      const invoice = Invoice.Create('mint', invoiceData)
-      const newInvoice = await invoice.createInvoice()
-      return res.send(newInvoice)
-    }
-
-    res.send(invoices)
-  })
   /**
    * @api {get} /invoice/cart/:cart_id
    * @apiDescription get all invoices related to a cart, if no invoices create one.
