@@ -64,7 +64,7 @@ export default class Selected extends Component {
           }
           <div className='action'>
             { 
-              !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <div className='update'>
+              !cart.locked && user.id ? <div className={`update ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'grey' : ''}`}>
                 <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                 <p>{ item.quantity }</p>
                 <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
@@ -73,7 +73,7 @@ export default class Selected extends Component {
             { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
-            { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>In Cart</button> : null }
+            { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>Update {item.quantity} In Cart</button> : null }
           </div>
         </div>
       </td>

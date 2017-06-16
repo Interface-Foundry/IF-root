@@ -26,6 +26,7 @@ export {
   numberOfItems,
   displayCost,
   removeDangerousCharactersFromString,
+  splitAndMergeSearchWithCart,
   formatPrivacy
 }
 from './formating';
