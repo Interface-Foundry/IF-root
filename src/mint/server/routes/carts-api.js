@@ -908,6 +908,8 @@ module.exports = function (router) {
     console.log('store instance', (storeInstance || {})
       .name)
     var results = await storeInstance.search(searchOpts)
+    //for testing
+    // results = await
     res.send(results)
   })())
 
@@ -1019,6 +1021,11 @@ module.exports = function (router) {
     if (!user_id) throw new Error('User not logged in')
 
     var clone = yield cloning_utils.cloneItem(item_id, user_id, cart_id)
+    
+    var cart = yield db.Carts.findOne({id: req.params.cart_id})
+    cart.members.add(user_id)
+    yield cart.save()
+
     res.send(clone)
   }))
 
