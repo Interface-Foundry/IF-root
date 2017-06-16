@@ -60,11 +60,6 @@ export default function cart(state = initialState, action) {
         }, [])
       };
     }
-  case 'CODE_SUCCESS':
-    return {
-      ...state,
-      members: [...state.members, action.response.user_account]
-    };
   case 'DELETE_CART_SUCCESS':
     return initialState;
   default:
