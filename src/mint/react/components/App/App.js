@@ -22,13 +22,28 @@ export default class App extends Component {
     sidenav: PropTypes.bool,
     togglePopup: PropTypes.func,
     fetchMetrics: PropTypes.func,
+    navigateLeftResults: PropTypes.func,
+    navigateRightResults: PropTypes.func,
     toast: PropTypes.string,
     status: PropTypes.string,
     history: PropTypes.object
   }
 
   _handeKeyPress(e) {
-    // debugger
+    const { selectedItemId, navigateRightResults, navigateLeftResults } = this.props;
+
+    if (selectedItemId) {
+      switch (e.keyCode) {
+      case 39:
+        // right
+        navigateRightResults()
+        break;
+      case 37:
+        // left
+        navigateLeftResults()
+        break;
+      }
+    }
   }
 
   _logPageView(path, userId) {
@@ -48,7 +63,7 @@ export default class App extends Component {
   }
 
   shouldComponentUpdate = (nextProps, nextState) =>
-    nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast
+    nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
     const { sidenav, popup, togglePopup, match, toast, status, history: { replace } } = this.props;

@@ -36,7 +36,7 @@ export default class Results extends Component {
   }
 
   render() {
-    // Add
+    // Need to think about left and right arrow keys incrementing value.
     let arrow, selected;
     const { user, cart, query, results, addItem, selectedItemId, selectItem, togglePopup, updateItem } = this.props,
       numResults = results.length,

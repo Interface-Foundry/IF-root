@@ -7,6 +7,14 @@ export const selectItem = item_id => ({
   }
 });
 
+export const navigateRightResults = () => ({
+  type: 'SELECT_ITEM_RIGHT'
+});
+
+export const navigateLeftResults = () => ({
+  type: 'SELECT_ITEM_LEFT'
+});
+
 export const toggleHistory = () => ({
   type: 'TOGGLE_HISTORY'
 });

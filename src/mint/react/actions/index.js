@@ -69,6 +69,8 @@ export {
   submitQuery,
   updateQuery,
   toggleHistory,
-  fetchCategories
+  fetchCategories,
+  navigateRightResults,
+  navigateLeftResults
 }
 from './search';
