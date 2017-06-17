@@ -1,8 +1,8 @@
 import { loading } from './';
 
 export const get = (url, type, cb) => {
-  loading(type);
   return async dispatch => {
+    dispatch(loading(type));
     try {
       const response = await fetch(url, {
         credentials: 'same-origin'
@@ -19,8 +19,8 @@ export const get = (url, type, cb) => {
 };
 
 export const post = (url, type, item, cb) => {
-  loading(type);
   return async dispatch => {
+    dispatch(loading(type));
     try {
       const response = await fetch(url, {
         'method': 'POST',
@@ -42,8 +42,8 @@ export const post = (url, type, item, cb) => {
 };
 
 export const put = (url, type, item, cb) => {
-  loading(type);
   return async dispatch => {
+    dispatch(loading(type));
     try {
       const response = await fetch(url, {
         'method': 'PUT',
@@ -65,8 +65,8 @@ export const put = (url, type, item, cb) => {
 };
 
 export const del = (url, type, cb) => {
-  loading(type);
   return async dispatch => {
+    dispatch(loading(type));
     try {
       await fetch(url, {
         method: 'DELETE',

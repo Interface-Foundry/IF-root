@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { Results } from '../components';
 import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults } from '../actions';
-import { isUrl, addSearchHistory } from '../utils';
+import { isUrl, addSearchHistory, splitAndMergeSearchWithCart } from '../utils';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -13,7 +13,7 @@ const mapStateToProps = (state, ownProps) => ({
   selectedItemId: state.search.selectedItemId,
   tab: state.app.viewTab,
   categories: state.search.categories,
-  results: state.search.results
+  results: splitAndMergeSearchWithCart(state.cart.items, state.search.results, state.user)
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -1,0 +1,29 @@
+// react/components/ErrorPage/ErrorPage.scss
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.loading {
+  z-index: 100;
+  div{
+    position:absolute;
+    top: 0;
+    left:-15%;
+    width:10%;
+    animation: translate 6s infinite linear;
+    z-index: 100;
+  }
+  img {
+    position:absolute;
+    animation: upDown 1.5s alternate infinite ease-in-out;
+    width:100%;
+    z-index: 100;
+  }
+
+  @keyframes upDown {
+    to { transform: translatey(100px);}
+  }
+  @keyframes translate {
+    to { transform: translatex(1200%);}
+  }
+}
+

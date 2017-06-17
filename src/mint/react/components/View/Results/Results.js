@@ -19,7 +19,6 @@ export default class Results extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // need this, otherwise page always rerender every scroll
     if (
       nextProps.user.id !== this.props.user.id ||
       numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
@@ -32,18 +31,16 @@ export default class Results extends Component {
   }
 
   render() {
-    // Need to think about left and right arrow keys incrementing value.
-    // Needs refactor, too many loops here.
+    // Needs refactor, too many loop-di-loops here.
     let arrow, selected;
     const { cart, query, results, selectedItemId } = this.props,
       numResults = results.length,
       cartAsins = cart.items.map((item, i) => `${item.asin}-${item.added_by}`),
-      mergedResults = splitAndMergeSearchWithCart(cart.items, results, selectedItemId),
-      partitionResults = mergedResults.reduce((acc, result, i) => {
+      partitionResults = results.reduce((acc, result, i) => {
         if (i % size === 0) acc.push([]);
         acc[acc.length - 1].push(result);
 
-        if (result.id === selectedItemId) {
+        if (result.id === selectedItemId || result.oldId === selectedItemId) {
           selected = {
             row: acc.length,
             result,

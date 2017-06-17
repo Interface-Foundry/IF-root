@@ -72,16 +72,18 @@ export const numberOfItems = (items) => {
   return items.reduce((acc, item) => acc + item.quantity, 0);
 };
 
-export const splitAndMergeSearchWithCart = (items, results) => {
+export const splitAndMergeSearchWithCart = (items, results, user) => {
   const cartAsins = items.map((item, i) => item.asin);
 
   return results.reduce((acc, result, i) => {
-    if(cartAsins.includes(result.asin)) {
-      let cartItem = items.filter((c) => c.asin === result.asin)[0];
+    let cartItem = items.filter((c) => c.asin === result.asin && user.id === c.added_by)[0];
 
+    if(cartItem) {
       acc.push({
         ...result,
         id: cartItem.id,
+        oldId: result.id,
+        iframe_review_url: result.iframe_review_url,
         quantity: cartItem.quantity
       })
     } else {

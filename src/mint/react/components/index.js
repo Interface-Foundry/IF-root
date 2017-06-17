@@ -8,6 +8,7 @@ export Buttons from './Buttons';
 export Tabs from './Tabs';
 export Toast from './Toast';
 export Modal from './Modal';
+export Loading from './Loading';
 export { Feedback, Settings, Share, EditCart }
 from './Modal';
 

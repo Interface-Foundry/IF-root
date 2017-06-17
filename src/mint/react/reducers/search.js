@@ -23,6 +23,7 @@ export default (state = initialState, action) => {
     case 'UPDATE_ITEM_SUCCESS':
       return {
         ...state,
+        selectedItemId: action.response.item.id,
         results: state.results.reduce((acc, item, i) => {
           item.asin === action.response.item.asin ? acc.push(action.response.item) : acc.push(item);
           return acc;

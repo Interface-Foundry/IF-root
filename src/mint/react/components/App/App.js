@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 
 import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
-import { ErrorPage, Modal, Toast } from '..';
+import { ErrorPage, Modal, Toast, Loading } from '..';
 
 //Analytics!
 import ReactGA from 'react-ga';
@@ -20,6 +20,7 @@ export default class App extends Component {
     match: PropTypes.object,
     popup: PropTypes.bool,
     sidenav: PropTypes.bool,
+    loading: PropTypes.bool,
     togglePopup: PropTypes.func,
     fetchMetrics: PropTypes.func,
     navigateLeftResults: PropTypes.func,
@@ -31,15 +32,18 @@ export default class App extends Component {
 
   _handeKeyPress(e) {
     const { selectedItemId, navigateRightResults, navigateLeftResults } = this.props;
-
     if (selectedItemId) {
       switch (e.keyCode) {
       case 39:
         // right
+    console.log('keypress')
+
         navigateRightResults()
         break;
       case 37:
         // left
+    console.log('keypress')
+
         navigateLeftResults()
         break;
       }
@@ -63,15 +67,17 @@ export default class App extends Component {
   }
 
   shouldComponentUpdate = (nextProps, nextState) =>
-    nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+    nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
-    const { sidenav, popup, togglePopup, match, toast, status, history: { replace } } = this.props;
+    const { sidenav, popup, togglePopup, match, toast, loading, status, history: { replace } } = this.props;
+    console.log(loading)
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+        { loading ? <Loading/> : null }
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />

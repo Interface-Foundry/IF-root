@@ -1,4 +1,5 @@
 const initialState = {
+  loading: false,
   sidenav: false,
   popup: false,
   viewTab: 'cart',
@@ -6,6 +7,9 @@ const initialState = {
 };
 
 export default (state = initialState, action = {}) => {
+  if(action.type.includes('_LOADING')) state = { ...state, loading: true }
+  else if(action.type.includes('_SUCCESS')) state = { ...state, loading: false }
+
   switch (action.type) {
     case 'EDIT_ITEM': {
       return {
@@ -41,10 +45,9 @@ export default (state = initialState, action = {}) => {
         viewTab: action.response.tab
       };
     case '@@router/LOCATION_CHANGE':
+    default:
       return {
         ...state
       };
-    default:
-      return state;
   }
 };
