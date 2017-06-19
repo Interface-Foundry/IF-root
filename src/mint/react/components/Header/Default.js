@@ -12,8 +12,11 @@ export default class Default extends Component {
     match: PropTypes.object.isRequired,
     user: PropTypes.object,
     cart: PropTypes.object,
+    showUndoRemove: PropTypes.bool,
     _toggleLoginScreen: PropTypes.func,
-    _toggleSidenav: PropTypes.func
+    _toggleSidenav: PropTypes.func,
+    undoRemove: PropTypes.func,
+    oldCart: PropTypes.object
   }
 
   render() {

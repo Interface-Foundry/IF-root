@@ -47,8 +47,7 @@ export const fetchItem = item_id => get(
 
 export const copyItem = (cart_id, item_id) => post(
   `/api/item/${item_id}/clone/${cart_id}`,
-  'COPY_ITEM',
-  {},
+  'COPY_ITEM', {},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

@@ -24,6 +24,7 @@ module.exports = {
       minimize: true,
       debug: false
     }),
+    new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.optimize.UglifyJsPlugin({ minimize: true, compress: { warnings: false } }),
     new webpack.optimize.CommonsChunkPlugin({ name: 'common' })

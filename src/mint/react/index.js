@@ -8,7 +8,6 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
-
 import Reducers from './reducers';
 import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories } from './actions';
 import { AppContainer } from './containers';
@@ -17,9 +16,7 @@ import { AppContainer } from './containers';
 import ReactGA from 'react-ga';
 
 // import 'whatwg-fetch';
-if (module.hot
-  && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt'))
-  && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
+if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }
 

@@ -1,4 +1,4 @@
-// mint/react/components/View/View.js
+// mint/react/components/Details/Details.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -10,27 +10,31 @@ import { ButtonsContainer } from '../../../containers';
 export default class Details extends Component {
 
   static propTypes = {
-    name: PropTypes.string,
-    leader: PropTypes.object,
-    store: PropTypes.string,
-    store_locale: PropTypes.string,
-    members: PropTypes.array,
-    items: PropTypes.array,
-    thumbnail_url: PropTypes.string,
-    updatedAt: PropTypes.string,
-    createdAt: PropTypes.string,
-    likes: PropTypes.array,
-    clones: PropTypes.number,
-    id: PropTypes.string,
+    cart: PropTypes.object,
     likeCart: PropTypes.func,
     unlikeCart: PropTypes.func,
     user: PropTypes.object,
-    amazon_cartid: PropTypes.string,
-    locked: PropTypes.bool
+    locked: PropTypes.bool,
+    cloneCart: PropTypes.func,
+    undoRemove: PropTypes.func,
+    redoRemove: PropTypes.func,
+    oldCart: PropTypes.object
   }
 
   render() {
-    const { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id, likeCart, unlikeCart, user, locked, cloneCart } = this.props,
+    console.log({ props: this.props })
+    const {
+      cart: { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
+      likeCart,
+      unlikeCart,
+      user,
+      locked,
+      cloneCart,
+      undoRemove,
+      redoRemove,
+      cart,
+      oldCart
+    } = this.props,
       metrics = [{
         name: 'Members',
         icon: 'Member',
@@ -72,6 +76,10 @@ export default class Details extends Component {
                       </h1>
                       <h4>{store} {store_locale}</h4>
                       <h4>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h4>
+                      <section className='undoredo'>
+                        <div className='undo__button'><button onClick={() => undoRemove(cart, oldCart)}>Undo</button></div>
+                        <div className='redo__button'><button onClick={() => redoRemove(cart, oldCart)}>Redo</button></div>
+                      </section>
                     </div> 
                   </div>
                   <div className='right'>
@@ -86,7 +94,7 @@ export default class Details extends Component {
                           ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}
                           ${ m.name !== 'Members' ? 'cursor' : '' }` 
                         } onClick={() => {
-                          m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === "Re-Kips" ? cloneCart(id): null
+                          m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === 'Re-Kips' ? cloneCart(id): null;
                         }}>
                         <div className='top'>
                           <Icon icon={m.icon}/>

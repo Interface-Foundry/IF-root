@@ -1,4 +1,7 @@
 // react/reducers/index.js
+import { combineReducers } from 'redux';
+import { routerReducer as routing } from 'react-router-redux';
+import undoable from 'redux-undo';
 
 import app from './app';
 import cart from './cart';
@@ -8,12 +11,9 @@ import session from './session';
 import search from './search';
 import user from './user';
 
-import { combineReducers } from 'redux';
-import { routerReducer as routing } from 'react-router-redux';
-
 export default combineReducers({
   app,
-  cart,
+  cart: undoable(cart),
   carts,
   stores,
   session,

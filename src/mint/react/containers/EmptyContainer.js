@@ -6,7 +6,7 @@ import { updateQuery, submitQuery } from '../actions';
 import { isUrl, addSearchHistory } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart: state.cart,
+  cart: state.cart.present,
   tab: state.app.viewTab,
   query: state.search.query,
   categories: state.search.categories
