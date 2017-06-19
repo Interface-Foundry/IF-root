@@ -39,27 +39,23 @@ export default function cart(state = initialState, action) {
     };
   case 'COPY_ITEM_SUCCESS':
   case 'ADD_ITEM_SUCCESS':
-    {
-      return {
-        ...state,
-        items: [...state.items, action.response]
-      };
-    }
+    return {
+      ...state,
+      items: [...state.items, action.response]
+    };
   case 'CLEAR_CART_SUCCESS':
     return {
       ...state,
       items: []
     }
   case 'UPDATE_ITEM_SUCCESS':
-    {
-      return {
-        ...state,
-        items: state.items.reduce((acc, item, i) => {
-          item.id === action.response.item.id ? acc.push(action.response.item) : acc.push(item);
-          return acc;
-        }, [])
-      };
-    }
+    return {
+      ...state,
+      items: state.items.reduce((acc, item, i) => {
+        item.id === action.response.item.id ? acc.push(action.response.item) : acc.push(item);
+        return acc;
+      }, [])
+    };
   case 'DELETE_CART_SUCCESS':
     return initialState;
   default:
