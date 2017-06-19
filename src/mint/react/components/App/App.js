@@ -71,13 +71,12 @@ export default class App extends Component {
 
   render() {
     const { sidenav, popup, togglePopup, match, toast, loading, status, history: { replace } } = this.props;
-    console.log(loading)
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
-        { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup}/> : null }
+        { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        { loading ? <Loading/> : null }
+        { loading ? <Loading /> : null }
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
