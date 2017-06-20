@@ -101,9 +101,6 @@ class Invoice {
    * @return     {Promise}  returns the new object created in db
    */
   async createInvoice () {
-    logging.info('this', this)
-    return;
-
     let cart = Cart.GetById(this.cart)
     await cart.sync()
 

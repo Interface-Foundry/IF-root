@@ -14,8 +14,8 @@ class Cart {
    */
   constructor(cart) {
     // first set the default cart options if unset
-    cart.user_locale = cart.user_locale || 'US'
-    cart.items = cart.items || []
+    this.user_locale = cart.user_locale || 'US'
+    this.items = cart.items || []
 
     // set the properties from the cart
     _.merge(this, cart)
@@ -26,12 +26,14 @@ class Cart {
 
   static async GetById(cartId) {
     const cartObject = await db.Carts.findOne({id: cartId}).populate('members').populate('items')
-
-    if (cart.store_locale) {
-      cartObject.user_locale = cart.store_locale
+    var cart = new Cart(cartObject)
+    if (cartObject.store_locale) {
+      cart.user_locale = cartObject.store_locale
     }
 
-    const cart = new Cart(cartObject)
+
+    logging.info('cart', cart)
+    // logging.info('does cart.sync exist', cart.sync)
     return cart
   }
 
