@@ -119,9 +119,6 @@ class Invoice {
     await newInvoice.save()
     var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
 
-    // await this.sendCollectionEmail(invoice, true)
-    // await this.sendSuccessEmail(invoice)
-
     return invoice
   }
 
@@ -250,8 +247,12 @@ class Invoice {
   }
 
 
-  async userPaymentAmounts(invoice) {
-    return userPaymentAmountHandler[this.split_type](invoice)
+  async userPaymentAmounts() {
+    var baseAmounts = userPaymentAmountHandler[this.split_type](this)
+    //compare against payments we've already received
+    var payments = await db.Payments.find({invoice: this.id})
+    logging.info('payments:', payments)
+    return baseAmounts
   }
 }
 

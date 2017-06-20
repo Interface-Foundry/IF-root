@@ -79,12 +79,14 @@ class StripePaymentSource extends PaymentSource {
   }
 
   async pay (invoice, amount) {
-    const stripeResponse = await stripe.charges.create({
-      amount: amount,
-      currency: _.get(invoice, 'currency', 'usd'),
-      source: this.data.id
-    })
+    // commented out for testing purposes
 
+    // const stripeResponse = await stripe.charges.create({
+    //   amount: amount,
+    //   currency: _.get(invoice, 'currency', 'usd'),
+    //   source: this.data.id
+    // })
+    var stripeResponse = {}
 
     const payment = await db.Payments.create({
       invoice: invoice.id,

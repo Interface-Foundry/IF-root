@@ -111,9 +111,7 @@ module.exports = function (router) {
       }
       const invoice = await Invoice.GetById(req.params.invoice_id)
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
-      logging.info('got the payment source')
       const paymentAmount = req.body.payment_amount
-      logging.info('ditto amount')
       const payment = await paymentSource.pay(invoice, paymentAmount)
       logging.info('paid')
 
@@ -209,6 +207,14 @@ module.exports = function (router) {
     var invoice = await Invoice.GetById(req.params.invoice_id)
     await invoice.sendSuccessEmail(invoice)
     res.sendStatus(200)
+  })
+
+  //TESTING ROUTE to be deleted
+  router.get('/remainingpayments/:invoice_id', async (req, res) => {
+    logging.info('this route was hit')
+    var invoice = await Invoice.GetById(req.params.invoice_id)
+    var paymentsLeft = await invoice.userPaymentAmounts()
+    res.send(paymentsLeft)
   })
 
   /**
