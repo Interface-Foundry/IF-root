@@ -1,22 +1,20 @@
-
 var moment = require('moment')
 const Cart = require('../cart/Cart')
+
+const email_utils = require('../utilities/email_utils')
 
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-
 const userPaymentAmountHandler = {
   'split_equal': function (invoice) {
     logging.info('even split')
-    logging.info('invoice:', invoice)
     var debts = {}
     var perUser = invoice.total / (1.0 * invoice.members.length)
     invoice.members.map(function (user) {
       debts[user.id] = perUser
     })
-    logging.info('debts', debts)
     return debts
   },
   'split_single': function (invoice) {
@@ -30,11 +28,9 @@ const userPaymentAmountHandler = {
     var cart = await db.Carts.findOne({id: invoice.cart}).populate('items')
     var debts = {}
     cart.items.map(function (item) {
-      logging.info('item', item)
       if (debts[item.added_by]) debts[item.added_by] += item.price
       else debts[item.added_by] = item.price
     })
-    logging.info('debts', debts)
     return debts
   }
 }
@@ -127,8 +123,8 @@ class Invoice {
     await newInvoice.save()
     var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
 
-    // await this.sendCollectionEmail(invoice)
-    await this.sendSuccessEmail(invoice)
+    await this.sendCollectionEmail(invoice)
+    // await this.sendSuccessEmail(invoice)
 
     return invoice
   }

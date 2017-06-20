@@ -231,8 +231,6 @@ exports.sendReceipt = function * (cart, req) {
       total += (Number(item.price) * Number(item.quantity || 1));
     });
 
-    logging.info('userItems:', userItems)
-
     for (var k in userItems) {
       var addingUser = yield db.UserAccounts.findOne({id: k});
       if (!addingUser.name) addingUser.name || addingUser.email

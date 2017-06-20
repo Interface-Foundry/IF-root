@@ -119,22 +119,6 @@ var emailsCollection = Waterline.Collection.extend({
         me.sent_at = new Date();
         yield me.save();
       });
-    },
-
-    /** abstracting logic reformatting cart items to display properly on Koh's latest emails */
-    formatItems: function (cartItems) {
-      //organize items according to which user added them
-      var userItems = {};
-      var items= []
-      cartItems.map(function (item) {
-        if (!userItems[item.added_by]) userItems[item.added_by] = [];
-        userItems[item.added_by].push(item);
-      });
-      //and turn that from an object to a 2-D array
-      for (var k in userItems) {
-        items.push(userItems[k]);
-      }
-      return items
     }
   }
 });
