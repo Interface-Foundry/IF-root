@@ -20,7 +20,7 @@ const mapStateToProps = (state, ownProps) => {
     sidenav: state.app.sidenav,
     popup: state.app.popup,
     tab: state.app.viewTab,
-    oldCart: state.cart.past[0],
+    oldCart: state.cart.past,
     showRedo: state.cart.future.length,
     showUndo: state.cart.past.length
   };
@@ -32,17 +32,16 @@ const mapDispatchToProps = dispatch => ({
   likeCart: (id) => dispatch(likeCart(id)),
   unlikeCart: (id) => dispatch(unlikeCart(id)),
   cloneCart: (cart_id) => dispatch(cloneCart(cart_id)),
-  undoRemove: ({ items = [], id: cartId = '' }, { items: oldItems = [] }) => {
-    const oldItemsSet = new Set(oldItems),
-      reAddedItems = items.filter(i => !oldItemsSet.has(i));
-      console.log({oldItems, items, reAddedItems})
+  undoRemove: ({ items = [], id: cartId = '' }, cartElder) => {
+    const oldItems = cartElder[cartElder.length - 1].items,
+      itemsSet = new Set(items),
+      reAddedItems = oldItems.filter(i => !itemsSet.has(i));
     dispatch(addItem(cartId, reAddedItems[0].id)).then(() => {
-      // dispatch(ActionCreators.undo());
       dispatch(ActionCreators.clearHistory());
     });
 
   },
-  redoRemove: (cart, oldCart) => {
+  redoRemove: (cart, cartElder) => {
     dispatch(ActionCreators.redo());
   }
 });

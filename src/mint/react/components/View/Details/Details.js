@@ -18,7 +18,7 @@ export default class Details extends Component {
     cloneCart: PropTypes.func,
     undoRemove: PropTypes.func,
     redoRemove: PropTypes.func,
-    oldCart: PropTypes.object,
+    oldCart: PropTypes.array,
     showUndo: PropTypes.number,
     showRedo: PropTypes.number
   }

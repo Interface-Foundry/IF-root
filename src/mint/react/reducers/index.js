@@ -13,7 +13,11 @@ import user from './user';
 
 export default combineReducers({
   app,
-  cart: undoable(cart, { filter: includeAction(['REMOVE_ITEM_SUCCESS']) }),
+  cart: undoable(cart, {
+    filter: includeAction(['REMOVE_ITEM_LOADING', 'REMOVE_ITEM_SUCCESS']),
+    limit: 5,
+    debug: true
+  }),
   carts,
   stores,
   session,
@@ -23,7 +27,6 @@ export default combineReducers({
 });
 
 // export selectors
-
 export {
   getMemberById,
   splitCartById

@@ -7,13 +7,7 @@ import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer } f
 
 export default class App extends Component {
   static propTypes = {
-    tab: PropTypes.string,
-    cart: PropTypes.object,
-    user: PropTypes.object,
-    likeCart: PropTypes.func,
-    unlikeCart: PropTypes.func,
-    cloneCart: PropTypes.func,
-    oldCart: PropTypes.object
+    tab: PropTypes.string
   }
 
   render() {

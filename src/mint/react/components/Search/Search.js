@@ -13,9 +13,9 @@ export default class Input extends Component {
   static propTypes = {
     cart: PropTypes.object,
     query: PropTypes.string,
-    categories: PropTypes.array,
     submitQuery: PropTypes.func,
-    updateQuery: PropTypes.func
+    updateQuery: PropTypes.func,
+    history: PropTypes.bool
   }
 
   state = {
@@ -55,7 +55,7 @@ export default class Input extends Component {
   }
 
   render() {
-    const { history, cart: { store = '' }, query, categories, updateQuery } = this.props, { selectedQuery } = this.state;
+    const { history, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
 
     return (
       <form onSubmit={::this._handleSubmit} className='search'>

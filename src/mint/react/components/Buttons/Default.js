@@ -3,7 +3,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
-import { Cart } from '../../../react-common/kipsvg';
 import { calculateItemTotal, displayCost } from '../../utils';
 
 export default class Default extends Component {

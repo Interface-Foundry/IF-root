@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 
 import Default from './Default';
 import Selected from './Selected';
-import { numberOfItems, splitAndMergeSearchWithCart } from '../../../utils';
+import { numberOfItems } from '../../../utils';
 import { EmptyContainer } from '../../../containers';
 
 const size = 3;
@@ -15,19 +15,13 @@ export default class Results extends Component {
     selectedItemId: PropTypes.string,
     results: PropTypes.array,
     cart: PropTypes.object,
-    query: PropTypes.string
+    query: PropTypes.string,
+    user: PropTypes.object
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (
-      nextProps.user.id !== this.props.user.id ||
-      numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
-      nextProps.selectedItemId !== this.props.selectedItemId ||
-      numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) ||
-      nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id
-    ) return true;
-
-    return false;
+    return nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
+      nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id;
   }
 
   render() {

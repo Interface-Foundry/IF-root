@@ -27,7 +27,8 @@ export default class App extends Component {
     navigateRightResults: PropTypes.func,
     toast: PropTypes.string,
     status: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    selectedItemId: PropTypes.string
   }
 
   _handeKeyPress(e) {
@@ -36,15 +37,15 @@ export default class App extends Component {
       switch (e.keyCode) {
       case 39:
         // right
-    console.log('keypress')
+        // console.log('keypress');
 
-        navigateRightResults()
+        navigateRightResults();
         break;
       case 37:
         // left
-    console.log('keypress')
+        // console.log('keypress');
 
-        navigateLeftResults()
+        navigateLeftResults();
         break;
       }
     }
@@ -59,7 +60,7 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fetchCart, fetchMetrics, match, cart } = this.props;
+    const { fetchCart, fetchMetrics, match } = this.props;
     if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
       fetchCart(nextProps.match.url.split('/')[2]);
       fetchMetrics(nextProps.match.url.split('/')[2]);
