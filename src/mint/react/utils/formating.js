@@ -2,7 +2,6 @@
 
 // import striptags from 'striptags';
 import { isValidEmail } from '.';
-const size = 3;
 
 export const commaSeparateNumber = (val, loc = undefined, opts = { maximumFractionDigits: 2 }) => {
   opts = {
@@ -72,27 +71,24 @@ export const numberOfItems = (items) => {
   return items.reduce((acc, item) => acc + item.quantity, 0);
 };
 
-export const splitAndMergeSearchWithCart = (items, results, user) => {
-  const cartAsins = items.map((item, i) => item.asin);
-
-  return results.reduce((acc, result, i) => {
+export const splitAndMergeSearchWithCart = (items, results, user) =>
+  results.reduce((acc, result, i) => {
     let cartItem = items.filter((c) => c.asin === result.asin && user.id === c.added_by)[0];
 
-    if(cartItem) {
+    if (cartItem) {
       acc.push({
         ...result,
         id: cartItem.id,
         oldId: result.id,
         iframe_review_url: result.iframe_review_url,
         quantity: cartItem.quantity
-      })
+      });
     } else {
       acc.push(result);
-    } 
+    }
 
     return acc;
   }, []);
-}
 
 export const removeDangerousCharactersFromString = (string) => {
   // const allowedTags = ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',

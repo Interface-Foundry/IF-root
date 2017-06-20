@@ -12,11 +12,13 @@ export default class App extends Component {
     user: PropTypes.object,
     likeCart: PropTypes.func,
     unlikeCart: PropTypes.func,
-    cloneCart: PropTypes.func
+    cloneCart: PropTypes.func,
+    oldCart: PropTypes.object
   }
 
   render() {
-    const { tab, cart, user, likeCart, unlikeCart, cloneCart } = this.props,
+    const { tab } = this.props,
+      props = this.props,
       containers = {
         'search': ResultsContainer,
         'cart': CartContainer,
@@ -26,7 +28,7 @@ export default class App extends Component {
 
     return (
       <div className='view'>
-        { tab === 'cart' ? <Details {...cart} user={user} likeCart={likeCart} unlikeCart={unlikeCart} cloneCart={cloneCart}/> : null }
+        { tab === 'cart' ? <Details {...props} /> : null }
         { Component ? <Component /> : null }
         { tab === 'cart' ? <ButtonsContainer /> : null }
       </div>

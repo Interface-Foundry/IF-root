@@ -21,8 +21,9 @@ const mapStateToProps = (state, ownProps) => {
     toast: toast ? toast[1] : null,
     status: status ? status[1] : null,
     loading: state.app.loading,
-    cart: state.cart,
+    cart: state.cart.present,
     user: state.user,
+    cart_id: state.cart.present.id,
     sidenav: state.app.sidenav,
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup

@@ -10,7 +10,7 @@ import {
 
 const mapStateToProps = (state, props) => {
   return {
-    cart_id: state.cart.id,
+    cart_id: state.cart.id || state.cart.present.id,
     carts: state.carts.carts || [],
     archivedCarts: state.carts.archivedCarts || [],
     user_account: state.user,

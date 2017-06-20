@@ -11,7 +11,7 @@ import { EmptyContainer } from '../../../containers';
 import CartButtons from './CartButtons';
 
 export default class Cart extends Component {
-  
+
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,

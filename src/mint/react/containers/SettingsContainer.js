@@ -6,7 +6,7 @@ import { updateUser } from '../actions';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
-  cart: state.cart,
+  cart: state.cart.present,
   user: state.user
 });
 

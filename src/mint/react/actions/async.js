@@ -4,6 +4,7 @@ export const get = (url, type, cb) => {
   return async dispatch => {
     dispatch(loading(type));
     try {
+      dispatch(loading(type));
       const response = await fetch(url, {
         credentials: 'same-origin'
       });
@@ -20,7 +21,7 @@ export const get = (url, type, cb) => {
 
 export const post = (url, type, item, cb) => {
   return async dispatch => {
-    dispatch(loading(type));
+    dispatch(loading(type, item));
     try {
       const response = await fetch(url, {
         'method': 'POST',
@@ -43,7 +44,7 @@ export const post = (url, type, item, cb) => {
 
 export const put = (url, type, item, cb) => {
   return async dispatch => {
-    dispatch(loading(type));
+    dispatch(loading(type, item));
     try {
       const response = await fetch(url, {
         'method': 'PUT',

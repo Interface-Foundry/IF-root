@@ -9,7 +9,7 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart: state.cart
+    cart: state.cart.present
   };
 };
 

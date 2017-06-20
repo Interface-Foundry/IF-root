@@ -10,7 +10,7 @@ import {
 
 const mapStateToProps = (state, props) => {
   return {
-    cart: state.cart,
+    cart: state.cart.present,
     user: state.user
   };
 };

@@ -10,7 +10,7 @@ import {
 const mapStateToProps = (state, ownProps) => {
   return {
     tab: state.app.viewTab,
-    cart: state.cart
+    cart: state.cart.present
   };
 };
 

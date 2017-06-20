@@ -8,12 +8,12 @@ import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
   user: state.user,
-  cart: state.cart,
+  cart: state.cart.present,
   query: state.search.query,
   selectedItemId: state.search.selectedItemId,
   tab: state.app.viewTab,
   categories: state.search.categories,
-  results: splitAndMergeSearchWithCart(state.cart.items, state.search.results, state.user)
+  results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user)
 });
 
 const mapDispatchToProps = dispatch => ({

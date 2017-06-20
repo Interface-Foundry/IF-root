@@ -13,7 +13,7 @@ import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart: state.cart,
+    cart: state.cart.present,
     stores: state.stores,
     user: state.user
   };

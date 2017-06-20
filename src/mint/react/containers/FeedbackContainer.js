@@ -8,7 +8,7 @@ import { postFeedback } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    cart_id: state.cart.id
+    cart_id: state.cart.present.id
   };
 };
 
