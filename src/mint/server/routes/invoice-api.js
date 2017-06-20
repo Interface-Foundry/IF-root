@@ -186,13 +186,29 @@ module.exports = function (router) {
   })
 
   /**
-   * test sending email to all paying users
+   * @api {post} /api/invoice/:invoice_id/collect send initial collection emails
+   * @apiDescription send initial colleciton emails to everyone who owes money except for the admin
+   * @apiGroup Invoice
+   *
+   * @apiParam {string} :invoice_id id of the invoice whose users we are pinging
    */
-  router.post('/invoice/test/email', async (req, res) => {
-    var invoice = await Invoice.GetById('22c3a9e5-91dc-484d-805e-b852a80cc189')
-    logging.info('invoice', invoice)
+  router.post('/invoice/:invoice_id/collect', async (req, res) => {
+    var invoice = await Invoice.GetById(req.params.invoice_id)
     await invoice.sendCollectionEmail()
-    return "send emails DUNGEON FAMILY"
+    res.sendStatus(200)
+  })
+
+  /**
+   * @api {post} /api/invoice/:invoice_id/success send success emails
+   * @apiDescription send email to all users to announce that the order has successfully gone through
+   * @apiGroup Invoice
+   *
+   * @apiParam {string} :invoice_id id of the invoice whose users we are pinging
+   */
+  router.post('/invoice/:invoice_id/success', async (req, res) => {
+    var invoice = await Invoice.GetById('22c3a9e5-91dc-484d-805e-b852a80cc189')
+    await invoice.sendSuccessEmail(invoice)
+    res.sendStatus(200)
   })
 
   /**
@@ -206,7 +222,7 @@ module.exports = function (router) {
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
-      split: _.get(req, 'body.split_type', 'equal')
+      split_type: _.get(req, 'body.split_type', 'equal')
     }, _.isUndefined)
 
     logging.info('invoice data', invoiceData)

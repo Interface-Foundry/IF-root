@@ -20,11 +20,10 @@ const userPaymentAmountHandler = {
   'split_single': function (invoice) {
     logging.info('single payer split')
     var debts = {}
-    debts[invoice.leader] = invoice.total
+    debts[invoice.leader.id] = invoice.total
     return debts
   },
   'split_by_item': async function (invoice) {
-    logging.info('split by item')
     var cart = await db.Carts.findOne({id: invoice.cart}).populate('items')
     var debts = {}
     cart.items.map(function (item) {
@@ -110,7 +109,7 @@ class Invoice {
       cart: cart.id,
       paid: false,
       total: cart.subtotal,
-      split_type: this.split
+      split_type: this.split_type
     })
 
     cart.members.map(function (m) {
@@ -120,7 +119,7 @@ class Invoice {
     await newInvoice.save()
     var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
 
-    await this.sendCollectionEmail(invoice)
+    // await this.sendCollectionEmail(invoice, true)
     // await this.sendSuccessEmail(invoice)
 
     return invoice
@@ -130,42 +129,12 @@ class Invoice {
    * send success email after all payments have gone through
    */
   async sendSuccessEmail (invoice) {
-    //TODO
-  }
-
-  /**
-   * send polite reminder to users who haven't paid yet
-   */
-  async sendReminderEmail (invoice) {
-    //TODO
-  }
-
-  /**
-   * email all users about this invoice
-   *
-   * @param      {array}   invoice   This invoice
-   */
-  async sendCollectionEmail (invoice) {
-    var debts = await this.userPaymentAmounts(invoice)
-
+    var invoice = this
     if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
     else var baseUrl = 'mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: invoice.cart}).populate('items').populate('members')
-    // var userItems = {}
-    // var items = []
-    // var users = []
-    // cart.items.map(function (item) {
-    //   if (!userItems[item.added_by]) userItems[item.added_by] = [];
-    //   userItems[item.added_by].push(item);
-    // });
-    // for (var k in userItems) {
-    //   var addingUser = await db.UserAccounts.findOne({id: k});
-    //   if (!addingUser.name) addingUser.name || addingUser.email
-    //   users.push(addingUser);
-    //   items.push(userItems[k]);
-    // }
 
     var formattedItems = await email_utils.formatItems(cart.items)
     var items = formattedItems[0]
@@ -175,9 +144,60 @@ class Invoice {
       return sum + item.quantity
     }, 0)
 
-    // logging.info('totalItems', totalItems)
+    await cart.members.map(async function (user) {
+      // var user = await db.UserAccounts.findOne({id: user_id})
+      var email = await db.Emails.create({
+        recipients: user.email_address,
+        subject: 'Your Kip Order has been Placed',
+        template_name: 'summary_email'
+      })
+
+      await email.template('summary_email', {
+        username: user.name,
+        baseUrl: baseUrl,
+        id: invoice.cart,
+        items: items,
+        users: users,
+        date: moment().format('dddd, MMMM Do, h:mm a'),
+        total: invoice.total,
+        totalItems: totalItems,
+        cart: invoice.cart,
+        invoice_id: invoice.id
+      })
+
+      await email.send();
+    })
+  }
+
+  /**
+   * email all users about this invoice
+   *
+   * @param      {array}   invoice   This invoice
+   * @param      {boolean} reminder  Is this an initial collection email or a reminder?
+   */
+  async sendCollectionEmail (reminder) {
+    var invoice = this
+    var debts = await this.userPaymentAmounts(invoice)
+    logging.info('debts', debts)
+
+    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
+    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
+    else var baseUrl = 'mint-dev.kipthis.com'
+
+    logging.info('THIS', this)
+
+    var cart = await db.Carts.findOne({id: this.cart.id}).populate('items').populate('members')
+
+    var formattedItems = await email_utils.formatItems(cart.items)
+    var items = formattedItems[0]
+    var users = formattedItems[1]
+
+    var totalItems = cart.items.reduce(function (sum, item) {
+      return sum + item.quantity
+    }, 0)
 
     await Object.keys(debts).map(async function (user_id) {
+      logging.info('user_id', user_id)
       var user = await db.UserAccounts.findOne({id: user_id})
       var email = await db.Emails.create({
         recipients: user.email_address,
@@ -185,7 +205,8 @@ class Invoice {
         template_name: 'collection'
       })
 
-      // logging.info('cart members', cart.members)
+      if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] + ' at your earliest possible convenience.'
+      else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] + ' at your earliest possible convenience 😊'
 
       await email.template('collection', {
         username: user.name,
@@ -198,6 +219,7 @@ class Invoice {
         totalItems: totalItems,
         cart: invoice.cart,
         invoice_id: invoice.id,
+        text: text,
         user_amount: debts[user_id]
       })
 
@@ -224,7 +246,7 @@ class Invoice {
 
 
   async userPaymentAmounts(invoice) {
-    return userPaymentAmountHandler[this.split](invoice)
+    return userPaymentAmountHandler[this.split_type](invoice)
   }
 }
 
