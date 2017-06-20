@@ -1,5 +1,4 @@
 import { get, post, del, put } from './async';
-import { formatPrivacy } from '../utils';
 
 export const fetchCart = cart_id => get(
   `/api/cart/${cart_id}`,
@@ -122,5 +121,3 @@ export const clearCart = cart_id => del(
     receivedAt: Date.now()
   })
 );
-
-

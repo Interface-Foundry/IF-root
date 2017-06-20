@@ -1,6 +1,6 @@
 // react/components/View/Invoice/Invoice.js
 
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 // async function getInvoiceByCart(cartId) {

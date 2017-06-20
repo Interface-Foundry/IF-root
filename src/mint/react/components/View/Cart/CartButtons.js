@@ -11,18 +11,16 @@ export default class CartButtons extends Component {
     cart: PropTypes.object,
     user: PropTypes.object,
     item: PropTypes.object,
-    editItem: PropTypes.func,
     editId: PropTypes.string,
     removeItem: PropTypes.func,
     addItem: PropTypes.func,
-    togglePopup: PropTypes.func,
     copyItem: PropTypes.func,
     updateItem: PropTypes.func,
     fetchItem: PropTypes.func
   }
 
   render() {
-    const { cart, user, editId, item, editItem, removeItem, copyItem, updateItem, togglePopup, fetchItem } = this.props,
+    const { cart, user, editId, item, removeItem, copyItem, updateItem, fetchItem } = this.props,
       isLeader = user.id === cart.leader.id;
 
     return (

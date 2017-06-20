@@ -1,9 +1,8 @@
-import { get, post, del, put } from './async';
+import { get, post, put } from './async';
 
 export const createInvoice = (cart_id, invoice_type) => post(
   `/api/${invoice_type}/${cart_id}`,
-  'CREATE_INVOICE',
-  {},
+  'CREATE_INVOICE', {},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -31,11 +30,9 @@ export const fetchInvoices = cart_id => get(
   })
 );
 
-
-export const createPaymentSource = ( user_id, payment_body ) => post(
+export const createPaymentSource = (user_id, payment_body) => post(
   `/api/payment/${user_id}`,
-  'CREATE_PAYMENT',
-  { payment_body },
+  'CREATE_PAYMENT', { payment_body },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -45,8 +42,7 @@ export const createPaymentSource = ( user_id, payment_body ) => post(
 
 export const postPayment = (invoice_id, paymentsource_id) => post(
   `/api/invoice/payment/${invoice_id}`,
-  'ADD_PAYMENT',
-  { paymentsource_id },
+  'ADD_PAYMENT', { paymentsource_id },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -56,8 +52,7 @@ export const postPayment = (invoice_id, paymentsource_id) => post(
 
 export const sendPaymentCollectionEmails = invoice_id => post(
   `/api/invoice/${invoice_id}`,
-  'SEND_COLLECTION_EMAIL',
-  { action: 'email' },
+  'SEND_COLLECTION_EMAIL', { action: 'email' },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -65,11 +60,9 @@ export const sendPaymentCollectionEmails = invoice_id => post(
   })
 );
 
-
 export const updateInvoiceOptions = (invoice_id, option, data) => put(
   `/api/invoice/payment/${invoice_id}`,
-  'UPDATE_INVOICE_OPTIONS',
-  { option_chage: option, option_data: data },
+  'UPDATE_INVOICE_OPTIONS', { option_chage: option, option_data: data },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

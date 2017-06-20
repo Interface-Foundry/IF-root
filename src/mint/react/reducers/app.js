@@ -7,8 +7,8 @@ const initialState = {
 };
 
 export default (state = initialState, action = {}) => {
-  if(action.type.includes('_LOADING')) state = { ...state, loading: true }
-  else if(action.type.includes('_SUCCESS')) state = { ...state, loading: false }
+  if(action.type.includes('_LOADING')) state = { ...state, loading: true };
+  else if(action.type.includes('_SUCCESS')) state = { ...state, loading: false };
 
   switch (action.type) {
     case 'EDIT_ITEM': {
