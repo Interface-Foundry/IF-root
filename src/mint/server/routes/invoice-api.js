@@ -124,6 +124,45 @@ module.exports = function (router) {
       return res.send(payment)
     })
 
+  /**
+   * main ticket system route
+   */
+  router.route('/invoice/ticket')
+    /**
+     * @api {get} /invoice/ticket
+     * @apiDescription get all the invoices that need something or of specified type
+     * @apiGroup {GROUP}
+     *
+     * @apiParam {string} type (optional) - description of param
+     */
+    .get(async (req, res) => {
+      if (req.body.type) {
+        return await db.Invoices.find({status: req.body.type})
+      }
+      const invoices = await db.Invoices.find({
+        status: { '!' : 'done' }
+      })
+      return res.send(invoices)
+    })
+
+    /**
+    * @api {get} /invoice/ticket
+    * @apiDescription update invoice status
+    * @apiGroup Invoice
+    *
+    * @apiParam {string} invoice_id - invoice_id to use
+    * @apiParam {string} new_status - new_status to change to
+    */
+    .post(async (req, res) => {
+      const invoice_id = req.body.invoice_id
+      const newStatus = req.body.new_status
+
+      const invoice = await db.Invoices.findOne({id: invoice_id})
+      invoice.status = newStatus
+      await invoice.save()
+      return res.send(invoice)
+    })
+
 
   /**
    * main payment route

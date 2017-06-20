@@ -19,6 +19,21 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
+
+    /**
+     * ticket tracking
+     */
+    status: {
+      type: 'string',
+      enum: [
+      // customer side of invoice
+      'order_not_complete', 'collecting_payments', 'collecting_order_info',
+      // kip admin side of invoice
+      'kip_complete_order', 'kip_tracking', 'done', 'canceled'
+      ],
+      defaultsTo: 'order_not_complete'
+    },
+
     /** is a leader for invoice necessary or is that cart leader? */
     leader: Waterline.isA('user_accounts'),
 
