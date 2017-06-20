@@ -134,11 +134,11 @@ class Invoice {
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
     else var baseUrl = 'mint-dev.kipthis.com'
 
-    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items').populate('members')
+    var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members')
 
-    var formattedItems = await email_utils.formatItems(cart.items)
-    var items = formattedItems[0]
-    var users = formattedItems[1]
+    // var formattedItems = await email_utils.formatItems(cart.items)
+    // var items = formattedItems[0]
+    // var users = formattedItems[1]
 
     var totalItems = cart.items.reduce(function (sum, item) {
       return sum + item.quantity
@@ -148,16 +148,21 @@ class Invoice {
       // var user = await db.UserAccounts.findOne({id: user_id})
       var email = await db.Emails.create({
         recipients: user.email_address,
-        subject: 'Your Kip Order has been Placed',
-        template_name: 'summary_email'
+        subject: 'Your Kip Order has been Placed!',
+        template_name: 'success'
       })
 
-      await email.template('summary_email', {
+      var items = cart.items.filter(item => {
+        return item.added_by === user.id
+      })
+
+      logging.info('cart link:', baseUrl + '/cart/' + cart.id)
+      await email.template('success', {
         username: user.name,
         baseUrl: baseUrl,
-        id: invoice.cart,
+        id: cart.id,
         items: items,
-        users: users,
+        users: cart.members,
         date: moment().format('dddd, MMMM Do, h:mm a'),
         total: invoice.total,
         totalItems: totalItems,
@@ -178,13 +183,11 @@ class Invoice {
   async sendCollectionEmail (reminder) {
     var invoice = this
     var debts = await this.userPaymentAmounts(invoice)
-    logging.info('debts', debts)
+    // logging.info('debts', debts)
 
     if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
     else var baseUrl = 'mint-dev.kipthis.com'
-
-    logging.info('THIS', this)
 
     var cart = await db.Carts.findOne({id: this.cart.id}).populate('items').populate('members')
 
@@ -197,33 +200,34 @@ class Invoice {
     }, 0)
 
     await Object.keys(debts).map(async function (user_id) {
-      logging.info('user_id', user_id)
-      var user = await db.UserAccounts.findOne({id: user_id})
-      var email = await db.Emails.create({
-        recipients: user.email_address,
-        subject: 'Your Kip Charge',
-        template_name: 'collection'
-      })
+      if (user_id !== cart.leader) {
+        var user = await db.UserAccounts.findOne({id: user_id})
+        var email = await db.Emails.create({
+          recipients: user.email_address,
+          subject: 'Your Kip Charge',
+          template_name: 'collection'
+        })
 
-      if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] + ' at your earliest possible convenience.'
-      else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] + ' at your earliest possible convenience 😊'
+        if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] + ' at your earliest possible convenience.'
+        else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] + ' at your earliest possible convenience 😊'
 
-      await email.template('collection', {
-        username: user.name,
-        baseUrl: baseUrl,
-        id: invoice.cart,
-        items: items,
-        users: users,
-        date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: invoice.total,
-        totalItems: totalItems,
-        cart: invoice.cart,
-        invoice_id: invoice.id,
-        text: text,
-        user_amount: debts[user_id]
-      })
+        await email.template('collection', {
+          username: user.name,
+          baseUrl: baseUrl,
+          id: invoice.cart,
+          items: items,
+          users: users,
+          date: moment().format('dddd, MMMM Do, h:mm a'),
+          total: invoice.total,
+          totalItems: totalItems,
+          cart: invoice.cart,
+          invoice_id: invoice.id,
+          text: text,
+          user_amount: debts[user_id]
+        })
 
-      await email.send();
+        await email.send();
+      }
     })
   }
 

@@ -206,7 +206,7 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id id of the invoice whose users we are pinging
    */
   router.post('/invoice/:invoice_id/success', async (req, res) => {
-    var invoice = await Invoice.GetById('22c3a9e5-91dc-484d-805e-b852a80cc189')
+    var invoice = await Invoice.GetById(req.params.invoice_id)
     await invoice.sendSuccessEmail(invoice)
     res.sendStatus(200)
   })
