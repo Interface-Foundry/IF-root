@@ -33,6 +33,7 @@ var stores = [{
       }
     },{
       skip: false,
+      timeout: 25000,
       options: {
         text: 'B010O1G1ES'
       },
@@ -42,6 +43,7 @@ var stores = [{
       }
     },{
       skip: false,
+      timeout: 25000,
       options: {
         text: 'https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/ref=sr_1_15?s=apparel&ie=UTF8&qid=1497472759&sr=1-15&nodeID=7141123011&psd=1&keywords=shirts',
       },
@@ -49,7 +51,7 @@ var stores = [{
         // should return options from URL search
         console.log(results)
         results.length.should.equal(1)
-        results[0].options.length.should.be.greaterThan(1)
+        results[0].options.length.should.equal(0)
       }
     },{
       skip: true,

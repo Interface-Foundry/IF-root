@@ -15,6 +15,11 @@ const fs = require('fs'),
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
 if (process.env.NODE_ENV !== 'production') var reengagementEmailsJob = require('./send-reengagement-emails-job')
 
+// for testing
+if (typeof module.parent !== 'undefined') {
+  process.env.BUILD_MODE === 'prebuilt';
+}
+
 // live reloading
 if (process.env.BUILD_MODE !== 'prebuilt') {
   const webpackConfig = require('../webpack.dev.config.js');

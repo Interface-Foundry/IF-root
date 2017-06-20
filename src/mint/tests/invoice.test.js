@@ -78,7 +78,7 @@ describe('invoice tests', () => {
     assert(response)
   })
 
-  it.skip('create an invoice for a cart', async () => {
+  it('create an invoice for a cart', async () => {
     const response = await request.post({
       uri: `${localhost}/invoice/${mockInvoice.invoice_type}/${mockCart.id}`
     })

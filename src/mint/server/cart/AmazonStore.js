@@ -5,6 +5,7 @@ const {OperationHelper} = require('apac')
 const googl = require('goo.gl')
 const LRU = require('lru-cache')
 
+// get the waterline mint database
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => {
@@ -108,6 +109,9 @@ class AmazonStore extends Store {
 
       // cache it for later
       this.asinCache.set(asin, amazonItem)
+
+      // and like save a record in the db every time we scrape an item
+      db.RawConnection.collection('amazon_catalog_lookups').insertOne(escapeKeys(amazonItem))
     }
 
     return amazonItem
@@ -151,6 +155,11 @@ class AmazonStore extends Store {
         return [];
       }
     } else {
+      // save some metrics and raw data for later analysis
+      db.RawConnection.collection('amazon_text_searches').insertOne(escapeKeys({
+        options: options,
+        results: items
+      }))
       //save new items to the db
       return items
     }
@@ -259,6 +268,7 @@ class AmazonStore extends Store {
           store: 'amazon',
           name: i.ItemAttributes.Title,
           asin: i.ASIN,
+          parent_asin: i.ParentASIN,
           description: getDescription(i),
           price: price,
           original_link: i.ItemLinks.ItemLink[0].URL,
@@ -283,79 +293,90 @@ class AmazonStore extends Store {
     item.details = details.id;
     await item.save();
 
+    // asynchronously load item options so theyre available
+    this.getOptions(item)
+
+    // um let's just get the item fresh to make sure it's okay
+    item = await db.Items
+      .findOne({id: item.id})
+
+    return item
+  }
+
+  async getOptions(item) {
+    if (!item.parent_asin || item.parent_asin === item.asin) {
+      return item;
+    }
+
     // create new item options
     // this part is really really hard
-    if (res.ParentASIN && res.ParentASIN !== res.ASIN) {
-      var parent = await this.catalogLookup({
-        asin: res.ParentASIN
-      })
+    var parent = await this.catalogLookup({
+      asin: item.parent_asin
+    })
 
-      var options = _.get(parent, 'Variations.Item', [])
+    var options = _.get(parent, 'Variations.Item', [])
 
-      if (!(options instanceof Array)) {
-       options = [options]
-      }
-      // Make the current item's selected options easy to use
-      var selectedItem = options.filter(o => o.ASIN === item.asin)[0]
-      var selectedOptions = {}
-      var variationAttributes = selectedItem.VariationAttributes.VariationAttribute instanceof Array
-        ? selectedItem.VariationAttributes.VariationAttribute
-        : [selectedItem.VariationAttributes.VariationAttribute]
-      variationAttributes.map(attr => {
-        selectedOptions[attr.Name] = attr.Value
-      })
-
-      // make a list of all the options for all the option types
-      var allOptions = {} // hash where keys are dimension names, and values are options we've created already
-      options = options.map(o => {
-          var variationAttributes = o.VariationAttributes.VariationAttribute instanceof Array
-            ? o.VariationAttributes.VariationAttribute
-            : [o.VariationAttributes.VariationAttribute]
-          return variationAttributes.map(attr => {
-            // make sure we can handle this option type
-            if (!allOptions[attr.Name]) {
-              allOptions[attr.Name] = []
-            }
-
-            // check if we've already created this option
-            if (allOptions[attr.Name].includes(attr.Value)) {
-              return
-            } else {
-              allOptions[attr.Name].push(attr.Value)
-            }
-
-            // create an option in the db
-            return db
-              .ItemOptions
-              .create({
-                type: attr.Name,
-                name: attr.Value,
-                description: o.ItemAttributes.Title,
-                url: '',
-                asin: o.ASIN,
-                parent_asin: o.ParentASIN,
-                price_difference: null, // not defined for amazon
-                thumbnail_url: _.get(o, 'SmallImage.URL'),
-                main_image_url: _.get(o, 'LargeImage.URL'),
-                available: true,
-                selected: attr.Value === selectedOptions[attr.Name]
-              })
-          })
-        })
-
-      options = await Promise.all(_.flatten(options).filter(Boolean))
-      options.map(o => {
-        item.options.add(o.id)
-      })
-      await item.save()
+    if (!(options instanceof Array)) {
+     options = [options]
     }
+    // Make the current item's selected options easy to use
+    var selectedItem = options.filter(o => o.ASIN === item.asin)[0]
+    var selectedOptions = {}
+    var variationAttributes = selectedItem.VariationAttributes.VariationAttribute instanceof Array
+      ? selectedItem.VariationAttributes.VariationAttribute
+      : [selectedItem.VariationAttributes.VariationAttribute]
+    variationAttributes.map(attr => {
+      selectedOptions[attr.Name] = attr.Value
+    })
+
+    // make a list of all the options for all the option types
+    var allOptions = {} // hash where keys are dimension names, and values are options we've created already
+    options = options.map(o => {
+        var variationAttributes = o.VariationAttributes.VariationAttribute instanceof Array
+          ? o.VariationAttributes.VariationAttribute
+          : [o.VariationAttributes.VariationAttribute]
+        return variationAttributes.map(attr => {
+          // make sure we can handle this option type
+          if (!allOptions[attr.Name]) {
+            allOptions[attr.Name] = []
+          }
+
+          // check if we've already created this option
+          if (allOptions[attr.Name].includes(attr.Value)) {
+            return
+          } else {
+            allOptions[attr.Name].push(attr.Value)
+          }
+
+          // create an option in the db
+          return db
+            .ItemOptions
+            .create({
+              type: attr.Name,
+              name: attr.Value,
+              description: o.ItemAttributes.Title,
+              url: '',
+              asin: o.ASIN,
+              parent_asin: o.ParentASIN,
+              price_difference: null, // not defined for amazon
+              thumbnail_url: _.get(o, 'SmallImage.URL'),
+              main_image_url: _.get(o, 'LargeImage.URL'),
+              available: true,
+              selected: attr.Value === selectedOptions[attr.Name]
+            })
+        })
+      })
+
+    options = await Promise.all(_.flatten(options).filter(Boolean))
+    options.map(o => {
+      item.options.add(o.id)
+    })
+    await item.save()
 
     // um let's just get the item fresh to make sure it's okay
     item = await db.Items
       .findOne({id: item.id})
       .populate('options')
-
-    return item
   }
 
 
@@ -544,6 +565,28 @@ function getDescription (item) {
     }
   }
   return item.ItemAttributes.Feature
+}
+
+/**
+ * Function that removes leading dollar signs from property names, replaces with '_'
+ * @param  {[type]} obj [description]
+ * @return {[type]}        [description]
+ */
+function escapeKeys(obj) {
+  if (typeof obj === 'string') {
+    return obj;
+  }
+
+  Object.keys(obj).forEach(function (key) {
+    if (key.match(/[\$\.]/)) {
+      const newKey = key.replace(/[\$\.]/g, '_')
+      obj[newKey] = escapeKeys(obj[key]);
+      delete obj[key];
+    } else {
+      obj[key] = escapeKeys(obj[key]);
+    }
+  });
+  return obj;
 }
 
 module.exports = AmazonStore

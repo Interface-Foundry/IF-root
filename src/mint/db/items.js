@@ -51,6 +51,9 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} asin the amazon asin **/
     asin: 'string',
 
+    /** @type {string} paren_asin the parent amazon asin for this item, if it exists **/
+    parent_asin: 'string',
+
     /** @type {string} item description */
     description: 'string',
 
