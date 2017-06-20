@@ -190,18 +190,19 @@ class Invoice {
     else var baseUrl = 'mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: this.cart.id}).populate('items').populate('members')
+    var users = cart.members
 
-    var formattedItems = await email_utils.formatItems(cart.items)
-    var items = formattedItems[0]
-    var users = formattedItems[1]
-
+    // var formattedItems = await email_utils.formatItems(cart.items)
+    // var items = formattedItems[0]
+    // var users = formattedItems[1]
     var totalItems = cart.items.reduce(function (sum, item) {
       return sum + item.quantity
     }, 0)
 
     await Object.keys(debts).map(async function (user_id) {
-      if (user_id !== cart.leader) {
+      if (user_id !== cart.leader && !reminder) {
         var user = await db.UserAccounts.findOne({id: user_id})
+        var items = cart.items.filter(item => item.added_by === user_id)
         var email = await db.Emails.create({
           recipients: user.email_address,
           subject: 'Your Kip Charge',

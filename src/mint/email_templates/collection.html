@@ -192,9 +192,9 @@
                                          <table width="100%" cellspacing="0" cellpadding="0" border="0" class="responsive-table-column">
                                              <tr>
                                                  <td align="left" style="position: relative; padding: 20px 30px; color:#000; border-radius: 5px; background: #f4f4ec;font-weight: 500;">
-                                                    <% for(var i=0; i<items.length; i++) {%>
-                                                     <span style="font-weight: bold"><%=users[i].name%></span> <br>
-                                                     <span style="font-weight: normal"><%=users[i].email_address%></span> <br><br>
+                                                    <!-- <% for(var i=0; i<items.length; i++) {%> -->
+                                                     <!-- <span style="font-weight: bold"><%=users[i].name%></span> <br> -->
+                                                     <!-- <span style="font-weight: normal"><%=users[i].email_address%></span> <br><br> -->
 
                                                         <% for(var j=0; j<items[i].length; j++) {%>
                                                             <span style="color:#000;">
@@ -202,7 +202,7 @@
                                                              Qty: <%=items[i][j].quantity%> Price: $<%=items[i][j].price.toFixed(2)%><br><br>
                                                             </span>
                                                         <% } %>
-                                                     <% } %>
+                                                     <!-- <% } %> -->
                                                  </td>
                                              </tr>
                                           </table>
