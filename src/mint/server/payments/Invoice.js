@@ -101,7 +101,7 @@ class Invoice {
    * @return     {Promise}  returns the new object created in db
    */
   async createInvoice () {
-    let cart = Cart.GetById(this.cart)
+    let cart = await Cart.GetById(this.cart)
     await cart.sync()
 
     var newInvoice = await db.Invoices.create({
@@ -153,19 +153,23 @@ class Invoice {
     else var baseUrl = 'mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: invoice.cart}).populate('items').populate('members')
-    var userItems = {}
-    var items = []
-    var users = []
-    cart.items.map(function (item) {
-      if (!userItems[item.added_by]) userItems[item.added_by] = [];
-      userItems[item.added_by].push(item);
-    });
-    for (var k in userItems) {
-      var addingUser = await db.UserAccounts.findOne({id: k});
-      if (!addingUser.name) addingUser.name || addingUser.email
-      users.push(addingUser);
-      items.push(userItems[k]);
-    }
+    // var userItems = {}
+    // var items = []
+    // var users = []
+    // cart.items.map(function (item) {
+    //   if (!userItems[item.added_by]) userItems[item.added_by] = [];
+    //   userItems[item.added_by].push(item);
+    // });
+    // for (var k in userItems) {
+    //   var addingUser = await db.UserAccounts.findOne({id: k});
+    //   if (!addingUser.name) addingUser.name || addingUser.email
+    //   users.push(addingUser);
+    //   items.push(userItems[k]);
+    // }
+
+    var formattedItems = await email_utils.formatItems(cart.items)
+    var items = formattedItems[0]
+    var users = formattedItems[1]
 
     var totalItems = cart.items.reduce(function (sum, item) {
       return sum + item.quantity

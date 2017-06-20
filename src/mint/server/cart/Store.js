@@ -82,6 +82,10 @@ class Store {
   async processSearchItems(items) {
     return items
   }
+
+  // async sync () {
+  //
+  // }
 }
 
 module.exports = Store

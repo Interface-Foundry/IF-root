@@ -31,9 +31,6 @@ class Cart {
       cart.user_locale = cartObject.store_locale
     }
 
-
-    logging.info('cart', cart)
-    // logging.info('does cart.sync exist', cart.sync)
     return cart
   }
 
@@ -59,10 +56,11 @@ class Cart {
    *
    * @return     {Promise}  { description_of_the_return_value }
    */
-  async sync () {
-    const newCart = await this.store.sync(this)
-    await this.store.updateCart(this.id, newCart)
-    _.merge(this, newCart)
+  // async sync () {
+  sync () {
+    // const newCart = await this.store.sync(this)
+    // await this.store.updateCart(this.id, newCart)
+    // _.merge(this, newCart)
   }
 }
 
