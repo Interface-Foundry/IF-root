@@ -76,7 +76,7 @@ class Cart {
   /**
    * sync the cart with the 3rd party api
    *
-   * @return     {Promise}  { description_of_the_return_value }
+   * @return     {Promise}
    */
   // async sync () {
   sync () {

@@ -94,6 +94,7 @@ class Invoice {
     return handlers[action](actionData)
   }
 
+
   /**
    * Creates an invoice in the database.
    *

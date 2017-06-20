@@ -2,6 +2,7 @@ const _ = require('lodash')
 const moment = require('moment');
 
 const Invoice = require('../payments/Invoice.js')
+const Cart = require('../cart/Cart.js')
 const PaymentSource = require('../payments/PaymentSources.js')
 const utils = require('../utilities/invoice_utils.js')
 
@@ -14,6 +15,11 @@ module.exports = function (router) {
   // ------------------------------------
   // --------- GENERAL ROUTES  ----------
   // ------------------------------------
+
+  router.get('/invoice/test/:id', async (req, res) => {
+    let cart = await Cart.GetById(req.params.id)
+    res.send(cart)
+  })
 
   /**
    * main invoice route
