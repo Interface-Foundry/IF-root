@@ -8,14 +8,12 @@ import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
+import ReactGA from 'react-ga';
+
 import Reducers from './reducers';
 import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories } from './actions';
 import { AppContainer } from './containers';
 
-//Analytics!
-import ReactGA from 'react-ga';
-
-// import 'whatwg-fetch';
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }
@@ -51,12 +49,16 @@ const cart_id = location.pathname.split('/')[2];
 
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
-  store.dispatch(fetchCategories(cart_id));
-
-  store.dispatch(fetchCart(cart_id)).then(() => {
-    store.dispatch(fetchMetrics(cart_id));
+  if (cart_id) {
+    store.dispatch(fetchCart(cart_id))
+      .then(() => store.dispatch(fetchCategories(cart_id)))
+      .then(() => {
+        store.dispatch(fetchMetrics(cart_id));
+        store.dispatch(fetchCarts());
+      });
+  } else {
     store.dispatch(fetchCarts());
-  });
+  }
 });
 
 ReactDOM.render(

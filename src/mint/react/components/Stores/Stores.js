@@ -8,14 +8,14 @@ import Store from './Store';
 export default class Stores extends Component {
   static propTypes = {
     stores: PropTypes.array,
-    _toggleLoginScreen: PropTypes.func,
+    togglePopup: PropTypes.func,
     user: PropTypes.object
   }
   componentWillReceiveProps(nextProps) {
-    const { stores, _toggleLoginScreen } = this.props;
+    const { stores, togglePopup } = this.props;
 
     if (stores.length !== nextProps.stores.length && !nextProps.user.id) {
-      _toggleLoginScreen();
+      togglePopup();
     }
   }
 
