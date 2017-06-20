@@ -105,6 +105,9 @@ class Invoice {
    * @return     {Promise}  returns the new object created in db
    */
   async createInvoice () {
+    logging.info('this', this)
+    return;
+
     let cart = Cart.GetById(this.cart)
     await cart.sync()
 
@@ -124,15 +127,30 @@ class Invoice {
     await newInvoice.save()
     var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
 
-    await this.sendCollectionEmail(invoice)
+    // await this.sendCollectionEmail(invoice)
+    await this.sendSuccessEmail(invoice)
 
     return invoice
   }
 
   /**
+   * send success email after all payments have gone through
+   */
+  async sendSuccessEmail (invoice) {
+    //TODO
+  }
+
+  /**
+   * send polite reminder to users who haven't paid yet
+   */
+  async sendReminderEmail (invoice) {
+    //TODO
+  }
+
+  /**
    * email all users about this invoice
    *
-   * @param      {array}   users   The users
+   * @param      {array}   invoice   This invoice
    */
   async sendCollectionEmail (invoice) {
     var debts = await this.userPaymentAmounts(invoice)
