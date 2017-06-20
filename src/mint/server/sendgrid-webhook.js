@@ -15,9 +15,8 @@ dbReady.then((models) => { db = models; })
  * @type {Object}
  */
 router.post('/', (req, res) => co(function* () {
-  console.log('req.body', req.body);
   yield db.EmailEvents.create(req.body);
-  res.send('posted at by sendgrid');
+  res.status(200).end();
 }));
 
 //

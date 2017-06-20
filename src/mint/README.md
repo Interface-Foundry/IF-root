@@ -37,6 +37,7 @@ For static.
 * `SEND_EMAILS` - sends emails if set
   * `export SEND_EMAILS=1` or `true` or anything (even `0`) will send emails
   * `export SEND_EMAILS=''` will not send emails
+* `SENDGRID_WEBHOOK` - the url to use as the sendgrid response webhook for incoming email analytics info
 * `NO_LUMINATI` - uses a regular request instead of a proxied request through luminati. only use this as a very last resort. if you need to scrape deals or something, instead of running the scraper locally with `NO_LUMINATI=1` you can ask someone for a db dump of their scraped deals.
 * `SCRAPE_DEALS` - turn on and off the periodic scraping of deals, recommend to leave unset in development and just use a dump of the deals db.
 * `SEND_DAILY_DEALS` - turn on and off the emailing of daily deals to customers.
