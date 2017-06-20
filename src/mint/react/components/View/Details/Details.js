@@ -18,11 +18,12 @@ export default class Details extends Component {
     cloneCart: PropTypes.func,
     undoRemove: PropTypes.func,
     redoRemove: PropTypes.func,
-    oldCart: PropTypes.object
+    oldCart: PropTypes.object,
+    showUndo: PropTypes.number,
+    showRedo: PropTypes.number
   }
 
   render() {
-    console.log({ props: this.props })
     const {
       cart: { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
       likeCart,
@@ -32,6 +33,8 @@ export default class Details extends Component {
       cloneCart,
       undoRemove,
       redoRemove,
+      showUndo,
+      showRedo,
       cart,
       oldCart
     } = this.props,
@@ -77,8 +80,16 @@ export default class Details extends Component {
                       <h4>{store} {store_locale}</h4>
                       <h4>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h4>
                       <section className='undoredo'>
-                        <div className='undo__button'><button onClick={() => undoRemove(cart, oldCart)}>Undo</button></div>
-                        <div className='redo__button'><button onClick={() => redoRemove(cart, oldCart)}>Redo</button></div>
+                        {
+                          showUndo 
+                            ? <div className='undo__button'><button onClick={() => undoRemove(cart, oldCart)}>Undo</button></div>
+                            : null
+                        }
+                        {
+                          showRedo
+                            ? <div className='redo__button'><button onClick={() => redoRemove(cart, oldCart)}>Redo</button></div>
+                            : null
+                        }
                       </section>
                     </div> 
                   </div>

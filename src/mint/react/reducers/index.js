@@ -1,7 +1,7 @@
 // react/reducers/index.js
 import { combineReducers } from 'redux';
 import { routerReducer as routing } from 'react-router-redux';
-import undoable from 'redux-undo';
+import undoable, { includeAction } from 'redux-undo';
 
 import app from './app';
 import cart from './cart';
@@ -13,7 +13,7 @@ import user from './user';
 
 export default combineReducers({
   app,
-  cart: undoable(cart),
+  cart: undoable(cart, { filter: includeAction(['REMOVE_ITEM_SUCCESS']) }),
   carts,
   stores,
   session,
