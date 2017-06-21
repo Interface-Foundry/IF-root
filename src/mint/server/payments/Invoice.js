@@ -189,9 +189,6 @@ class Invoice {
     var cart = await db.Carts.findOne({id: this.cart.id}).populate('items').populate('members')
     var users = cart.members
 
-    // var formattedItems = await email_utils.formatItems(cart.items)
-    // var items = formattedItems[0]
-    // var users = formattedItems[1]
     var totalItems = cart.items.reduce(function (sum, item) {
       return sum + item.quantity
     }, 0)
@@ -246,13 +243,21 @@ class Invoice {
     return false
   }
 
-
+  /**
+   * determine how much each user has left to pay
+   * if a user as payed as much or more than they owe, they will be deleted from the return value
+   * 
+   * @return {object} { keys are user ids; values are the amount they have left to pay}
+   */
   async userPaymentAmounts() {
-    var baseAmounts = userPaymentAmountHandler[this.split_type](this)
-    //compare against payments we've already received
+    var amounts = userPaymentAmountHandler[this.split_type](this)
     var payments = await db.Payments.find({invoice: this.id})
     logging.info('payments:', payments)
-    return baseAmounts
+    payments.map(function (p) {
+      amounts[p.user] -= p.amount
+      if (amounts[p.user] <= 0) delete amounts[p.user]
+    })
+    return amounts
   }
 }
 
