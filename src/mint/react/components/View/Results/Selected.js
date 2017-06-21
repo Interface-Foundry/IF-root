@@ -72,6 +72,7 @@ export default class Selected extends Component {
               </div> : <div className='padding'/>
             }
             <div className='text__expanded'>
+              <span><a href={item.original_link}>View on Amazon.com</a></span>
               <div>
                 {item.description}
               </div>
