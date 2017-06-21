@@ -17,6 +17,13 @@
 		font-weight: bold;
 		border-radius: 5px;
 		border: 0;
+    line-height: ($nav-height - $padding);
+    white-space: nowrap;
+
+    @media only screen and (max-width: 600px) {
+      font-size: 14px;
+      white-space: inherit;
+    }
 
 		svg {
 			display: inline-block;
@@ -60,12 +67,32 @@
 
 		&.yellow {
 			background: $mainColor;
+      line-height: ($nav-height - $padding);
 
-			path {
-				fill: black;
-		    stroke: black;
-		    stroke-width: $padding;
-			}
+      @media only screen and (max-width: 600px) {
+        line-height: ($nav-height - $padding) / 2;
+      }
+
+      a {
+        display: block;
+      }
+
+      span {
+        line-height: ($nav-height - $padding);
+        @media only screen and (max-width: 600px) {
+          display: block;
+          line-height: ($nav-height - $padding) / 2;
+        }
+      }
+
+      .text {
+        display: inline-block;
+        width: calc(100% - #{$nav-height - $padding});
+        height: 100%;
+        @media only screen and (max-width: 600px) {
+          width: auto;
+        }
+      }
 
       &:disabled {
         background: lighten(#333, 70);
