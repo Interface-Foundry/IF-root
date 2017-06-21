@@ -70,7 +70,7 @@ export default class Selected extends Component {
                 <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
               </div> : null 
             }
-            { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
+            { !user.id  ? <button onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
             { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>Update {item.quantity} In Cart</button> : null }

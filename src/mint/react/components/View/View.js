@@ -7,7 +7,13 @@ import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer } f
 
 export default class App extends Component {
   static propTypes = {
-    tab: PropTypes.string
+    tab: PropTypes.string,
+    cart: PropTypes.object,
+    history: PropTypes.object
+  }
+  componentWillReceiveProps(nextProps) {
+    const { cart, history: { push } } = nextProps;
+    if (cart && !cart.ok) push('/newcart');
   }
 
   render() {

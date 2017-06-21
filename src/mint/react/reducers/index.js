@@ -14,9 +14,7 @@ import user from './user';
 export default combineReducers({
   app,
   cart: undoable(cart, {
-    filter: includeAction(['REMOVE_ITEM_LOADING', 'REMOVE_ITEM_SUCCESS']),
-    limit: 5,
-    debug: true
+    filter: includeAction(['REMOVE_ITEM_LOADING', 'REMOVE_ITEM_SUCCESS'])
   }),
   carts,
   stores,

@@ -15,7 +15,8 @@ const initialState = {
   likes: [],
   kip_pay_allowed: false,
   privacy: 'public',
-  locked: false
+  locked: false,
+  ok: true
 };
 
 export default function cart(state = initialState, action) {
@@ -24,6 +25,11 @@ export default function cart(state = initialState, action) {
     return {
       ...initialState,
       ...action.response
+    };
+  case 'CART_FAIL':
+    return {
+      ...state,
+      ok: false
     };
   case 'LIKE_CART_SUCCESS':
   case 'METRICS_SUCCESS':

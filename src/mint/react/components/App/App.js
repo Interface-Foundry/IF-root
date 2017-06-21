@@ -6,12 +6,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Route } from 'react-router';
+import ReactGA from 'react-ga';
 
 import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
 import { ErrorPage, Modal, Toast, Loading } from '..';
-
-//Analytics!
-import ReactGA from 'react-ga';
 
 export default class App extends Component {
 
@@ -71,17 +69,16 @@ export default class App extends Component {
     nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
-    const { sidenav, popup, togglePopup, match, toast, loading, status, history: { replace } } = this.props;
+    const { sidenav, popup, togglePopup, match, toast, status, history: { replace } } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        { loading ? <Loading /> : null }
+        
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
-
           <Route path={'/newcart'} exact component={StoresContainer} />
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
           <Route path={'/404'} exact component={ErrorPage} />

@@ -33,7 +33,7 @@ export default class Default extends Component {
           </div> 
           <div className='action'>
             <button className='more' onClick={() => selectItem(item.id)}>More info</button>
-            { !user.id  ? <button onClick={() => togglePopup()}>✔ Save to Cart</button> : null }
+            { !user.id  ? <button onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={() => addItem(cart.id, item.id)}>✔ Save to Cart</button> : null }
             { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>In Cart</button> : null }
