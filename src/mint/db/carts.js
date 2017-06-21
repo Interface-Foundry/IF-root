@@ -128,6 +128,8 @@ var cartsCollection = Waterline.Collection.extend({
       default: false
     },
 
+    invoice: Waterline.isA('invoices'),
+
     /** function to archive this object */
     archive: archive
   }
