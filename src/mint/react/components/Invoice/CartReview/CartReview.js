@@ -34,21 +34,21 @@ export default class CartReview extends Component {
     		<nav onClick={() => selectAccordion('review')}>
     			<h3>3. Items and shipping</h3>
           {
-              selectedIndex !== null && selectedAccordion !== 'review' ? <div className='text'> 
+              selectedIndex !== null && !selectedAccordion.includes('review') ? <div className='text'> 
                   <p>{numberOfItems(cart.items)} Items shipping {shippingOptions[selectedIndex].name} on {shippingOptions[selectedIndex].shippingDate}</p>
                   <span>change</span>
               </div> : null
           }
     		</nav>
     		{
-    			selectedAccordion === 'review' ? <div> 
+    			selectedAccordion.includes('review') ? <div> 
             <ul className='items'>
               <nav>
                 <h4>Cart Review</h4>
               </nav>
               {
                 cart.items.map((item) => (
-                  <li className='item'>
+                  <li key={item.id} className='item'>
                     <div className={'image'} style={{
                       backgroundImage: `url(${item.main_image_url})`
                     }}/>
