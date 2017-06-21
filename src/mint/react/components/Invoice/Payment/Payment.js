@@ -81,7 +81,7 @@ export default class Payment extends Component {
                           <div className='text'>
                             <h4>{payment.type} <span>ending in {payment.lastFour}</span></h4>
                             <p>{payment.name}</p>
-                            <p>expires: {moment(payment.expire).format('MM/YYYY')}</p>
+                            <p>{moment(payment.expire).format('MM/YYYY')}</p>
                           </div>
                       </li>
                   ))
