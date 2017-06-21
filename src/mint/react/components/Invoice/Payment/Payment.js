@@ -8,7 +8,7 @@ const paymentTypes = [
   'Pay For All',
   'Pay Mine Only',
   'Equal Split'
-]
+];
 
 const paymentDummy = [
     {
@@ -29,7 +29,7 @@ const paymentDummy = [
         name: 'Derp American Express',
         expire: new Date()
     }
-]
+];
 
 export default class Payment extends Component {
 

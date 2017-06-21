@@ -14,9 +14,9 @@ export default class Forms extends Component {
 
     switch (selectedAccordion.split(' form')[0]) {
       case 'payment':
-        return <PaymentForm {...this.props}/>
+        return <PaymentForm {...this.props}/>;
       case 'shipping':
-        return <ShippingForm {...this.props}/>
+        return <ShippingForm {...this.props}/>;
     }
   }
 
@@ -25,7 +25,7 @@ export default class Forms extends Component {
 
     return (
       <div className='forms' onClick={(e) => {
-        e.target.className === 'forms' ? selectAccordion(selectedAccordion.split(' form')[0]) : null
+        e.target.className === 'forms' ? selectAccordion(selectedAccordion.split(' form')[0]) : null;
       }}>
         <div className='forms__modal'>
           {

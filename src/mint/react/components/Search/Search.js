@@ -56,13 +56,12 @@ export default class Input extends Component {
 
   render() {
     const { history, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
-
     return (
       <form onSubmit={::this._handleSubmit} className='search'>
         <button type='submit' className='submit'>
             <Icon icon='Search'/>
         </button>
-        <input placeholder={`Search ${store.toUpperCase()} or paste URL`} value={query} autoFocus onChange={(e) => updateQuery(e.currentTarget.value)} autoComplete="off" spellCheck='true' onKeyDown={::this._handeKeyPress}/>
+        <input placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : ''} value={query} autoFocus onChange={(e) => updateQuery(e.currentTarget.value)} autoComplete="off" spellCheck='true' onKeyDown={::this._handeKeyPress}/>
         <button className='cancel' type='button' disabled={!query} onClick={(e) => updateQuery('')}>
             <Delete />
         </button>

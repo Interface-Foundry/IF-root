@@ -1,0 +1,13 @@
+// react/components/NotificationBubble/NotificationBubble.scss
+@import '../../styles/Constants';
+@import '../../styles/Animations';
+
+.notification_bubble {
+  @include animation(pulse 3s infinite);
+
+  border: 6px solid $mainColor;
+  border-radius: 18px;
+  height: 18px;
+  position: absolute;
+  width: 18px;
+}

@@ -9,10 +9,7 @@ export default class Header extends Component {
   render() {
     return (
       <nav className='navbar'>
-        <Route path={'/cart/:cart_id'} exact component={() => 
-              <Default {...this.props}/>
-            }
-        />
+        <Route path={'/cart/:cart_id'} exact component={() =>  <Default {...this.props}/> } />
         <Route path={'/cart/:cart_id/m/settings'} exact component={() => 
             <SettingsHeader text='Edit My Settings' icon="Settings" {...this.props}/>
           }

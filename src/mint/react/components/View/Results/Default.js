@@ -35,7 +35,7 @@ export default class Default extends Component {
             { !cartAsins.includes(`${item.asin}-${user.id}`) ? <button className='more' onClick={() => selectItem(item.id)}>More info</button> : null }
             { !user.id  ? <button onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-            { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={(e) => {e.stopPropagation(); addItem(cart.id, item.id)}}>✔ Save to Cart</button> : null }
+            { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={(e) => {e.stopPropagation(); addItem(cart.id, item.id);}}>✔ Save to Cart</button> : null }
             { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button disabled={true}>In Cart</button> : null }
           </div>
         </div>
