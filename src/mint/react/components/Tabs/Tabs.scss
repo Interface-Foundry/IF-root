@@ -4,29 +4,28 @@
 @import '../../../react-common/styles/Animations';
 
 .tabs {
-	border-bottom: 1px solid $border-color-light;
-	width: 100%;
-	height: $nav-height;
-	background: white;
-	padding: 0 $padding;
-	h1 {
-		display: inline-block;
-		padding: 0 $padding*2;
-		cursor: pointer;
-		line-height: $nav-height;
-		height: $nav-height;
-		font-size: 14px;
+  background: $color-blue;
+  border-bottom: 1px solid $border-color-light;
+  height: $nav-height / 2;
+  padding: 0 $padding;
+  width: 100%;
 
-		span {
-		    display: block;
-			border-bottom: 3px solid white;
-		    height: $nav-height - 1.5px;
-		}
+  h1 {
+    color: $color-white;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 15px;
+    padding: 0 ($padding * 2);
 
-		&.selected {
-			span {
-				border-bottom: 3px solid $secondaryColor;
-			}
-		}
-	}
+    span {
+      display: block;
+    }
+
+    &.selected {
+      span {
+        border-bottom: 4px solid $color-white;
+        height: 24px;
+      }
+    }
+  }
 }

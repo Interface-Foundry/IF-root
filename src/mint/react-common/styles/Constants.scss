@@ -3,12 +3,15 @@ $kip-primary-color: #fcfcf9;
 $kip-secondary-color: #ece7e4;
 $kip-faded-color: #93918c;
 $color-blue: #4a9ff1;
+$color-white: #fff;
 $border-color-light: #eae7e4;
 $price-color: #d65b00;
 $header-color: #4f4d4c;
 $nav-height: 50px;
 $padding: 10px;
+
 @import url('//fonts.googleapis.com/css?family=Raleway:500,600');
+
 $main-font: 'Arial', sans-serif;
 $secondary-font: 'Raleway', sans-serif;
 $input-font-size: 16px;
@@ -17,6 +20,6 @@ $secondaryColor: #4a9ff1;
 $thirdColor: #00cb7b;
 $fourthColor: #ff6961;
 $fifthColor: #ffb347;
-$card-box-shadow: 0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
+$card-box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 
 $warningColor: #f53f46;

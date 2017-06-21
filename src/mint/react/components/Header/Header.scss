@@ -1,6 +1,7 @@
 // react/components/Header/Header.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
+
 .navbar {
   position: relative;
   display: block;
@@ -11,53 +12,63 @@
   background: $secondaryColor;
   color: white;
   width: 100%;
+
   @media (min-width: 900px) {
     padding: 0;
   }
+
   .search {
     @media only screen and (max-width: 600px) {
       // display: none;
       margin: 10px 0;
     }
   }
+
   .header__left {
     display: inline-block;
     position: relative;
     height: 100%;
     white-space: nowrap;
-    padding: 0 $padding*3;
+    padding: 0 ($padding * 3);
     width: 75%;
+
     @media only screen and (max-width: 600px) {
       padding: 0 0 0 $padding;
     }
+
     a {
       display: inline-block;
+
       @media only screen and (max-width: 600px) {
         display: none;
       }
     }
+
     .navbar__icon {
       display: inline-block;
       width: auto;
       min-width: 50px;
       text-align: center;
       cursor: pointer;
+
       svg {
         height: 100%;
         vertical-align: top !important;
       }
     }
+
     .image {
       display: inline-block;
-      margin: $padding $padding/2 $padding $padding*2;
-      height: $nav-height - $padding*2;
-      width: $nav-height - $padding*2;
+      margin: $padding ($padding / 2) $padding ($padding * 2);
+      height: $nav-height - $padding * 2;
+      width: $nav-height - $padding * 2;
       border-radius: 100%;
       background-size: cover !important;
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
     }
+
     .members {
       position: absolute;
       height: 25px;
@@ -66,23 +77,30 @@
       left: 50px;
       font-size: 10px;
     }
+
     h3 {
       display: inline-block;
       white-space: nowrap;
       height: 50px;
       line-height: 50px;
       font-size: 27px;
+
       @media (min-width: 900px) {
         width: calc(100% - 50px);
       }
     }
+
     .bounce {
       @include animation(bounceDownSmall 1.5s);
+
       animation-iteration-count: 2; // too much twitching
+   
     }
+
     .navbar__modal__head {
       &.settings {
-        padding: 0 $padding*2 0 0;
+        padding: 0 ($padding * 2) 0 0;
+
         .header__left {
           a {
             @media only screen and (max-width: 600px) {
@@ -90,14 +108,16 @@
             }
           }
         }
+
         svg {
           font-size: 20px;
           vertical-align: top !important;
           line-height: $nav-height;
           height: $nav-height;
-          margin-right: $padding/2;
+          margin-right: $padding / 2;
         }
       }
+
       span {
         font-size: 14px;
         display: inline-block;
@@ -107,13 +127,15 @@
       }
     }
   }
+
   .header__right {
     display: inline-block;
     position: relative;
     height: $nav-height;
     text-align: right;
-    padding: 0 $padding*3;
+    padding: 0 ($padding * 3);
     width: 25%;
+
     p {
       display: inline-block;
       padding: 0;
@@ -121,52 +143,65 @@
       font-weight: bold;
       margin-right: $padding;
       cursor: pointer;
+
       span {
         border-bottom: 3px solid $mainColor;
       }
+
       &.name {
         @media only screen and (max-width: 600px) {
           display: none;
         }
       }
     }
+
     a {
       border-bottom: 3px solid $mainColor;
     }
+
     .navbar__icon {
       display: inline-block;
       height: $nav-height;
       justify-content: center;
       align-items: center;
       cursor: pointer;
+
       svg {
         vertical-align: top !important;
         height: 100%;
       }
     }
   }
+
   .settings {
     display: block;
     background: white;
+
     .header__left {
       color: #333;
+
       a {
         display: inline-block;
       }
+
       h3 {
         svg {
-          padding: $padding/2;
+          padding: $padding / 2;
         }
       }
+
       text-align: center;
     }
+
     .header__right {
       color: #333;
+
       svg {
         fill: #333;
       }
     }
   }
+
   .navbar__icon__close {
     position: relative;
     z-index: 10;
@@ -174,12 +209,13 @@
     cursor: pointer;
     height: $nav-height;
     width: $nav-height;
+
     svg {
       height: 100%;
     }
   }
+
   .no-pointer {
     cursor: default;
   }
 }
-

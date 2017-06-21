@@ -1,0 +1,22 @@
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+
+.forms {
+  position: fixed;
+  margin: 0 auto;
+  padding: $padding*5 $padding 0;
+  top: $nav-height*2;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 50;
+
+  .forms__modal {
+    height: 300px;
+    width: 100%;
+    background: white;
+    border-radius: 5px;
+    border: 1px solid $border-color-light;
+  }
+}
+

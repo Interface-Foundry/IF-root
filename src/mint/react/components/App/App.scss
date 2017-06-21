@@ -33,10 +33,10 @@ body {
 @media only screen and (max-width: 600px) {
   table {
     overflow-x: auto;
-    display: block;
+    // display: block;
     td {
       width: 100%;
-      display: block;
+      // display: block;
     }
   }
 }
@@ -51,7 +51,7 @@ body {
   margin: auto;
   text-align: center;
   background: $kip-secondary-color;
-  background-image: url(https://storage.googleapis.com/kip-random/website/kip_scribble_pattern.png);
+  background-image: url('//storage.googleapis.com/kip-random/website/kip_scribble_pattern.png');
   background-size: 400px;
 }
 
