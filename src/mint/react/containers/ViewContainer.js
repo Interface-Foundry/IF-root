@@ -12,11 +12,16 @@ import {
   unlikeCart,
   cloneCart,
   addItem,
-  fetchMetrics
+  fetchMetrics,
+  selectTab,
+  updateQuery,
+  submitQuery
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
+  const query = ownProps.history.location.search.match(/q=([^&$]+)/);
   return {
+    search: query ? query[1] : null,
     user: state.user,
     cart: state.cart.present,
     sidenav: state.app.sidenav,
@@ -24,7 +29,8 @@ const mapStateToProps = (state, ownProps) => {
     tab: state.app.viewTab,
     oldCart: state.cart.past,
     showRedo: state.cart.future.length,
-    showUndo: state.cart.past.length
+    showUndo: state.cart.past.length,
+    searchLoading: state.search.loading
   };
 };
 
@@ -44,10 +50,14 @@ const mapDispatchToProps = dispatch => ({
     dispatch(addItem(cartId, reAddedItems[0].id)).then(() => {
       dispatch(ActionCreators.clearHistory());
     });
-
   },
+  selectTab: (tab) => dispatch(selectTab(tab)),
   redoRemove: (cart, cartElder) => {
     dispatch(ActionCreators.redo());
+  },
+  submitQuery: (query, store, locale) => {
+    dispatch(updateQuery(query));
+    dispatch(submitQuery(encodeURIComponent(query), store, locale))
   }
 });
 
