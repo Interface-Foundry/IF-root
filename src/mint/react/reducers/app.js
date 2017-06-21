@@ -2,6 +2,7 @@ const initialState = {
   loading: false,
   sidenav: false,
   popup: false,
+  selectedAccordion: 'shipping',
   viewTab: 'cart',
   editId: null 
 };
@@ -11,6 +12,11 @@ export default (state = initialState, action = {}) => {
   else if(action.type.includes('_SUCCESS')) state = { ...state, loading: false };
 
   switch (action.type) {
+    case 'SELECT_INVOICE_ACCORDION':
+      return {
+        ...state,
+        ...action.response
+      };
     case 'EDIT_ITEM': {
       return {
         ...state,

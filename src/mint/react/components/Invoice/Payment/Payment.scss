@@ -1,0 +1,71 @@
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+
+.payment {
+	position: relative;
+	width: 100%;
+
+	ul {
+		padding: $padding;
+		li {
+			border: 1px solid white;
+			padding: $padding;
+			margin-bottom: $padding;
+			cursor: pointer;
+
+			&.selected {
+				border: 1px solid $secondaryColor;
+				background: rgba($secondaryColor, 0.2);
+				border-radius: $padding/2;
+
+				.circle {
+					border: 5px solid $secondaryColor;
+					background: white;
+				}
+			}
+
+			p {
+				display: inline-block;
+				font-size: 14px;
+			}
+
+			.circle {
+				display: inline-block;
+				border-radius: 100%;
+				height: $nav-height/3;
+				width: $nav-height/3;
+				margin: 0 $nav-height/6;
+				border: 1px solid $border-color-light;
+			}
+
+			.text {
+				display: inline-block;
+				width: calc(100% - #{$nav-height});
+
+				* {
+					display: inline-block;
+				}
+
+				span {
+					padding: 0 $padding 0 0;
+					font-weight: 100;
+				}
+
+				h4 {
+					width: 50%;
+				}
+
+				p {
+					width: 25%;
+
+					&:last-of-type {
+						text-align: right;
+					}
+				}
+			}
+
+
+		}
+	}
+}
+
