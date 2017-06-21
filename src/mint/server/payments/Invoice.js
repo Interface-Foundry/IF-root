@@ -176,7 +176,7 @@ class Invoice {
    */
   async sendEmailReminder () {
     logging.info('sendEmailReminder called')
-    return await this.sendCollectionEmail(true)
+    await this.sendCollectionEmail(true)
   }
 
   /**
@@ -185,13 +185,14 @@ class Invoice {
    * @param      {boolean} reminder  Is this an initial collection email or a reminder?
    */
   async sendCollectionEmail (reminder) {
+    // logging.info('send collection email called')
     var invoice = this
     var debts = await this.userPaymentAmounts(invoice)
     // logging.info('debts', debts)
 
-    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
-    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
-    else var baseUrl = 'mint-dev.kipthis.com'
+    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'http://kipthis.com'
+    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'http://localhost:3000'
+    else var baseUrl = 'http://mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: this.cart.id}).populate('items').populate('members')
     var users = cart.members
@@ -200,19 +201,22 @@ class Invoice {
       return sum + item.quantity
     }, 0)
 
+    // logging.info('about to map over owing users')
     await Object.keys(debts).map(async function (user_id) {
-      if (user_id !== cart.leader && !reminder) {
+      // logging.info('w/in the await')
+      if (reminder || user_id !== cart.leader) {
         var user = await db.UserAccounts.findOne({id: user_id})
         var items = cart.items.filter(item => item.added_by === user_id)
+        logging.info('preparing to email: ', user.email_address)
         var email = await db.Emails.create({
           recipients: user.email_address,
           subject: 'Your Kip Charge',
           template_name: 'collection'
         })
-
+        // logging.info('created email')
         if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] + ' at your earliest possible convenience.'
         else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] + ' at your earliest possible convenience 😊'
-
+        // logging.info('about to template')
         await email.template('collection', {
           username: user.name,
           baseUrl: baseUrl,
@@ -227,8 +231,9 @@ class Invoice {
           text: text,
           user_amount: debts[user_id]
         })
-
+        // logging.info('templated; about to send')
         await email.send();
+        logging.info('just sent collection email')
       }
     })
   }
@@ -259,7 +264,6 @@ class Invoice {
   async userPaymentAmounts() {
     var amounts = userPaymentAmountHandler[this.split_type](this)
     var payments = await db.Payments.find({invoice: this.id})
-    logging.info('payments:', payments)
     payments.map(function (p) {
       amounts[p.user] -= p.amount
       if (amounts[p.user] <= 0) delete amounts[p.user]

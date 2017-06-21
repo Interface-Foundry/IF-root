@@ -936,8 +936,6 @@ module.exports = function (router) {
    */
   router.get('/cart/:cart_id/reorder', (req, res) => co(function * () {
     var user_id = _.get(req, 'UserSession.user_account.id')
-    //for testing:
-    if (!user_id) user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
 
     var clone = yield cloning_utils.reorder(req.params.cart_id, user_id);
     logging.info('got clone', clone)
