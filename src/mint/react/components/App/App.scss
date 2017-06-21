@@ -62,14 +62,14 @@ body {
   overflow-y: scroll;
   text-align: left;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height * 2});
+  height: calc(100% - #{$nav-height * 1.5});
   @media only screen and (max-width: 600px) {
-    height: calc(100% - #{$nav-height * 2});
+    height: calc(100% - #{$nav-height * 1.5});
   }
   @media only screen and (min-width: 600px) {
     display: inline-block;
     overflow-y: auto;
-    height: calc(100% - #{$nav-height * 2});
+    height: calc(100% - #{$nav-height * 1.5});
     &.squeeze {
       width: calc(100% - 250px);
     }

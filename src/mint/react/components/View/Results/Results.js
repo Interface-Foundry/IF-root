@@ -66,13 +66,14 @@ export default class Results extends Component {
             partitionResults.map((itemrow, i) => (
               <tr key={i} >
                 {
-                  itemrow.map(item => {
+                  itemrow.map((item, i) => {
                     return item.selected ? (
                       <Selected 
                         key={item.id}
                         cartAsins={cartAsins}
                         arrow={arrow}
                         item={item}
+                        numResults={numResults}
                         {...this.props}/>
                       ) : ( 
                         <Default 

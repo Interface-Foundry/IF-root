@@ -2,6 +2,7 @@
 
 import { connect } from 'react-redux';
 import { reset, reduxForm } from 'redux-form';
+import { replace } from 'react-router-redux';
 import { Feedback } from '../components';
 import ReactGA from 'react-ga';
 import { postFeedback } from '../actions';
@@ -21,9 +22,8 @@ const mapDispatchToProps = dispatch => ({
           category: 'Feedback',
           action: 'Feedback Sent'
         });
-        const { history: { replace }, cart_id } = state;
         dispatch(reset('Feedback'));
-        replace(`/cart/${cart_id}?toast=Feedback sent, thanks! 😎&status=success`);
+        replace(`/cart/${state.cart_id}?toast=Feedback sent, thanks! 😎&status=success`);
       });
   }
 });

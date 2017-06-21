@@ -2,6 +2,7 @@
 
 import { connect } from 'react-redux';
 import { ActionCreators } from 'redux-undo';
+import { replace } from 'react-router-redux';
 
 import { View } from '../components';
 import {
@@ -10,7 +11,8 @@ import {
   likeCart,
   unlikeCart,
   cloneCart,
-  addItem
+  addItem,
+  fetchMetrics
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -31,7 +33,10 @@ const mapDispatchToProps = dispatch => ({
   toggleSidenav: () => dispatch(toggleSidenav()),
   likeCart: (id) => dispatch(likeCart(id)),
   unlikeCart: (id) => dispatch(unlikeCart(id)),
-  cloneCart: (cart_id) => dispatch(cloneCart(cart_id)),
+  cloneCart: (cart_id) => dispatch(cloneCart(cart_id)).then(() => {
+    dispatch(fetchMetrics(cart_id));
+    dispatch(replace(`/cart/${cart_id}?toast=Cart Re-kiped &status=success`));
+  }),
   undoRemove: ({ items = [], id: cartId = '' }, cartElder) => {
     const oldItems = cartElder[cartElder.length - 1].items,
       itemsSet = new Set(items),

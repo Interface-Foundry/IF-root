@@ -314,7 +314,7 @@
 
     @media (min-width: 900px) {
       background: white;
-      height: calc(100% - #{$nav-height * 2});
+      height: calc(100% - #{$nav-height * 1.5});
     }
 
     li {

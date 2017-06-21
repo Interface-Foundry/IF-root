@@ -41,35 +41,26 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       svg {
         height: $nav-height / 2;
         width: $nav-height / 2;
+        padding: 0 0 0 0;
+
+        @media only screen and (max-width: 600px) {
+          height: $nav-height / 1.5;
+          width: $nav-height / 1.5;
+          padding: 0 0 0;
+        }
       }
     }
 
     .left {
-      left: -$nav-height / 4;
-      border-radius: 5px 0 0 5px;
-      background: linear-gradient(to right, $secondaryColor, transparent);
-
-      @media only screen and (max-width: 600px) {
-        left: $padding;
-      }
-
-      svg {
-        padding: 0 $padding 0 0;
-      }
+      left: 0;
+      border-radius: 0 5px 5px 0;
+      background: rgba(#111, 0.1);
     }
 
     .right {
-      right: -$nav-height / 4;
-      border-radius: 0 5px 5px 0;
-      background: linear-gradient(to left, $secondaryColor, transparent);
-
-      @media only screen and (max-width: 600px) {
-        right: $padding;
-      }
-
-      svg {
-        padding: 0 0 0 $padding;
-      }
+      right: 0;
+      border-radius: 5px 0 0 5px;
+      background: rgba(#111, 0.1);
     }
   }
 
@@ -89,8 +80,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       height: 25px;
       line-height: 25px;
       font-size: 12px;
-      padding: 0 $padding;
+      padding: 0 $padding*3;
       border-radius: 5px;
+
+      &:last-of-type {
+        margin-left: $padding*3;
+      }
 
       &:disabled {
         background: rgba(#333, 0.1);
@@ -175,21 +170,41 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         border-top: 3px solid $secondaryColor;
         box-shadow: $card-box-shadow !important;
 
+        & > nav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: $nav-height/2;
+          line-height: $nav-height/2;
+          background: $secondaryColor;
+          color: white;
+          text-align: center;
+          display: none;
+          z-index: 10;
+
+          @media only screen and (max-width: 600px) {
+            display: block;
+          }
+        }
+
         @media only screen and (max-width: 600px) {
           margin: 0;
           min-height: 100%;
           overflow-y: auto;
+          padding: $padding*3 $padding $padding*6;
         }
 
         .close {
           position: absolute;
-          top: 10px;
-          left: 10px;
+          top: 5px;
+          left: 5px;
           height: $nav-height / 3;
           width: $nav-height / 3;
           padding: 0;
           border: 0;
-          background: white;
+          background: transparent;
+          z-index: 11;
 
           @media only screen and (max-width: 600px) {
             position: fixed;
@@ -197,6 +212,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
           svg {
             fill: $warningColor;
+            @media only screen and (max-width: 600px) {
+              fill: white;
+            }
           }
         }
 
@@ -230,7 +248,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         .iframe {
           position: relative;
           overflow: hidden;
-          width: 100%;
+          width: 90%;
           padding: ($padding * 2) 0 0;
 
           iframe {
@@ -256,15 +274,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
 
         .action {
-          position: absolute;
-          bottom: $padding * 2;
-          right: $padding * 2;
+          position: relative;
+          text-align: left;
 
           .update {
-            padding: $padding 0;
+            padding: 0 $padding 0 0;
+            display: inline-block;
 
             @media only screen and (max-width: 600px) {
               display: block;
+              padding: 0;
             }
 
             &.grey {
@@ -281,11 +300,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             button {
               margin: 0;
               height: $nav-height / 2;
+              background: white;
+              border: 1px solid $border-color-light;
+              padding: 0 $padding;
 
               @media only screen and (max-width: 600px) {
-                width: 25%;
-                margin: 0 0 ($padding / 2);
-                margin-right: 0 !important;
+                display: inline-block;
+                width: auto;
               }
             }
 
@@ -294,9 +315,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               padding: 0 $padding;
               height: $nav-height / 2;
               line-height: $nav-height / 2;
-
               @media only screen and (max-width: 600px) {
-                width: 50%;
+                display: inline-block;
               }
             }
           }
@@ -312,6 +332,18 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               width: 100%;
               height: $nav-height - $padding;
               font-size: 16px;
+              display: inline-block;
+
+              &.sticky {
+                @media only screen and (max-width: 600px) {
+                  position: fixed;
+                  bottom: 0;
+                  z-index: 10;
+                  left: 0;
+                  margin: 0;
+                  border-radius: 0;
+                }
+              }
 
               &:disabled {
                 background: rgba(#333, 0.1);
