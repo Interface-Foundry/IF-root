@@ -9,6 +9,9 @@
 		padding: $padding;
 		display: inline-block;
 		width: 50%;
+		nav {
+			margin-bottom: $padding;
+		}
 		li {
 			border: 1px solid white;
 			padding: $padding;

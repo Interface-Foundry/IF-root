@@ -10,7 +10,7 @@ const shippingOptions = [
   {
     name: "Fast",
     shippingDate: moment().add(1, 'days').format('DD/MM/YYYY'),
-    price: 10
+    price: 100
   },
   {
     name: "slow",
