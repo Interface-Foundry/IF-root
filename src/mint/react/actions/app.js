@@ -15,6 +15,13 @@ export const selectTab = tab => ({
   }
 });
 
+export const selectAccordion = selectedAccordion => ({
+  type: 'SELECT_INVOICE_ACCORDION',
+  response: {
+    selectedAccordion
+  }
+});
+
 export const postFeedback = (feedback) => (
   post(
     '/api/feedback',

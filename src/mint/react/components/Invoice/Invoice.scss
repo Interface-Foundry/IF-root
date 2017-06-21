@@ -1,0 +1,80 @@
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.invoice {
+	position: relative;
+	margin-top: $padding*1.5;
+	background: white;
+	border-radius: $padding/2;
+	width: 100%;
+	padding: $padding $padding*2;
+	border-top: 3px solid $secondaryColor;
+	box-shadow: $card-box-shadow !important;
+
+	.accordion {
+		border-bottom: 1px solid $border-color-light;
+		padding: $padding 0;
+
+		button {
+			background: transparent;
+			border: 0;
+			color: $secondaryColor;
+		}
+		
+		nav {
+			width: 100%;
+			padding: $padding 0;
+			cursor: pointer;
+
+			h3 {
+				display: inline-block;
+				font-size: 16px;
+				max-width: 50%;
+				padding: 0 $padding 0 0;
+			}
+			.text {
+				display: inline-block;
+				max-width: 50%;
+				padding: 0 $padding*5;
+
+				* {
+					display: inline-block;
+					line-height: $nav-height/3;
+				}
+
+				p {
+					display: block;
+
+					&:last-of-type {
+						display: inline-block;
+					}
+				}
+
+				span {
+					float: right;
+					padding: 0 $padding;
+					color: $secondaryColor;
+					font-weight: 100;
+					font-size: 12px;
+				}
+			}
+		}
+
+		& > div {
+			border: 1px solid $border-color-light;
+			padding: $padding $padding*2;
+			width: 95%;
+			margin: 0 auto;
+			border-radius: $padding/2;
+
+			nav {
+				border-bottom: 1px solid $border-color-light;
+			}
+		}
+		&:last-of-type {
+			border-bottom: 1px solid transparent;
+		}
+
+	}
+}
+

@@ -1,6 +1,9 @@
 var Waterline = require('waterline');
 var mongoAdapter = require('sails-mongo');
 
+// Connection URL
+const url = process.env.MONGODB_URI || 'mongodb://localhost:27017/mint';
+
 Waterline.isA = function (collection) {
   return {
     model: collection,
@@ -48,7 +51,7 @@ var config = {
   connections: {
     default: {
       adapter: 'mongo',
-      url: process.env.MONGODB_URI || 'mongodb://localhost:27017/mint'
+      url: url
     }
   }
 };
@@ -89,7 +92,11 @@ var initialize = new Promise((resolve, reject) => {
       models[k] = ontology.collections[k]
     })
 
-    resolve(models);
+    // open up another connection for raw queries
+    require('mongodb').MongoClient.connect(url, function(err, db) {
+      models.RawConnection = db
+      resolve(models)
+    });
   });
 });
 

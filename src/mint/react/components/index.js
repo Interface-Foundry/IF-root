@@ -9,9 +9,10 @@ export Tabs from './Tabs';
 export Toast from './Toast';
 export Modal from './Modal';
 export Loading from './Loading';
+export Invoice from './Invoice';
 export { Feedback, Settings, Share, EditCart }
 from './Modal';
 
 export View from './View';
-export { Results, Cart, Invoice, Empty }
+export { Results, Cart, Empty }
 from './View';

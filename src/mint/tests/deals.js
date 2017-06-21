@@ -2,9 +2,12 @@ const request = require('request-promise')
 const co = require('co')
 const assert = require('assert')
 require('should')
+require('../server/index')
+const dbReady = require('../db');
 
 describe('deals', () => {
   it('GET /api/deals should return some deals', () => co(function * () {
+    yield dbReady
     var deals = yield request({
       uri: 'http://localhost:3000/api/deals',
       method: 'GET',
