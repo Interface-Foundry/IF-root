@@ -8,16 +8,16 @@ import { calculateItemTotal, displayCost, timeFromDate, numberOfItems } from '..
 
 const shippingOptions = [
   {
-    name: "Fast",
+    name: 'Fast',
     shippingDate: moment().add(1, 'days').format('DD/MM/YYYY'),
     price: 100
   },
   {
-    name: "slow",
+    name: 'slow',
     shippingDate: moment().add(10, 'days').format('DD/MM/YYYY'),
     price: 10
   }
-]
+];
 
 export default class CartReview extends Component {
 

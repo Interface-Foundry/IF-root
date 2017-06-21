@@ -6,11 +6,11 @@
 $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 .results {
-	position: relative;
-	width: 100%;
-	height: auto;
-	margin: 0 auto;
-	border-collapse: collapse; 
+  position: relative;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border-collapse: collapse;
 
   @media only screen and (max-width: 600px) {
     & * {
@@ -18,17 +18,17 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     }
   }
 
-	.price {
-		color: $price-color;
-		display: inline-block;
-	}
+  .price {
+    color: $price-color;
+    display: inline-block;
+  }
 
   .navigation {
     & > * {
       position: absolute;
       height: $nav-height;
-      width: $nav-height/1.5;
-      top: calc(50% - #{$nav-height/2});
+      width: $nav-height / 1.5;
+      top: calc(50% - #{$nav-height / 2});
       border-radius: 0 5px 5px 0;
       border: 0;
       padding: 0;
@@ -39,43 +39,43 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       svg {
-        height: $nav-height/2;
-        width: $nav-height/2;
+        height: $nav-height / 2;
+        width: $nav-height / 2;
       }
     }
+
     .left {
-      left: -$nav-height/4;
-      border-radius: 5px 0 0 5px;   
-      background: linear-gradient(
-        to right, 
-        $secondaryColor, transparent
-      );
+      left: -$nav-height / 4;
+      border-radius: 5px 0 0 5px;
+      background: linear-gradient(to right, $secondaryColor, transparent);
+
       @media only screen and (max-width: 600px) {
         left: $padding;
       }
+
       svg {
         padding: 0 $padding 0 0;
-      }   
+      }
     }
+
     .right {
-      right: -$nav-height/4;
+      right: -$nav-height / 4;
       border-radius: 0 5px 5px 0;
-      background: linear-gradient(
-        to left, 
-        $secondaryColor, transparent
-      );
+      background: linear-gradient(to left, $secondaryColor, transparent);
+
       @media only screen and (max-width: 600px) {
         right: $padding;
       }
+
       svg {
         padding: 0 0 0 $padding;
       }
     }
   }
 
-	.action {
-		padding: $padding/2 0 0;
-		text-align: right;
+  .action {
+    padding: ($padding / 2) 0 0;
+    text-align: right;
 
     @media only screen and (max-width: 600px) {
       & * {
@@ -83,176 +83,186 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
     }
 
-		button {
-			border: 0;
-			background: $mainColor;
-			height: 25px;
-			line-height: 25px;
-			font-size: 12px;
-			padding: 0 $padding;
-			border-radius: 5px;
+    button {
+      border: 0;
+      background: $mainColor;
+      height: 25px;
+      line-height: 25px;
+      font-size: 12px;
+      padding: 0 $padding;
+      border-radius: 5px;
 
-			&:disabled {
-				background: rgba(#333, 0.1);
-			}
+      &:disabled {
+        background: rgba(#333, 0.1);
+        cursor: auto;
+      }
 
-			&.more {
-				background: white;
-				color: $secondaryColor;
-			}
+      &.more {
+        background: white;
+        color: $secondaryColor;
+      }
 
-			svg {
-		    height: 25px;
-		    display: inline-block;
-		    width: 10px;
-				@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-			}
+      svg {
+        height: 25px;
+        display: inline-block;
+        width: 10px;
 
-			&:hover {
-				svg {
-					transform: translate3d(3px, 0, 0);
-				}
-			}
-		}
-	}
+        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      }
 
-	th {
-		nav {
-			padding: $padding $padding*2 0;
-			p {
-				position: relative;
-				display: inline-block;
-				font-size: 14px;
-				font-weight: 500;
-				width: 100%;
-				@media only screen and (max-width: 600px) {
-					padding: $padding $padding 0;
-				}
+      &:hover {
+        svg {
+          transform: translate3d(3px, 0, 0);
+        }
+      }
+    }
+  }
 
-				.price {
-					display: initial;
-					max-width: 900px;
-					width: 100%;
-				}
-			}
+  th {
+    nav {
+      padding: $padding ($padding * 2) 0;
 
-			button {
-				display: inline-block;
-				margin-right: $padding;
-			}
+      p {
+        position: relative;
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 500;
+        width: 100%;
 
-			@media only screen and (max-width: 600px) {
-				padding: 0 $padding;
-			}
-		}
-	}
+        @media only screen and (max-width: 600px) {
+          padding: $padding $padding 0;
+        }
 
-	td {
-		padding: $padding/3 $padding/2;
-		width: (100%/3);
+        .price {
+          display: initial;
+          max-width: 900px;
+          width: 100%;
+        }
+      }
 
-		&.selected {
-			padding: $padding $padding/2 $padding/3;
+      button {
+        display: inline-block;
+        margin-right: $padding;
+      }
 
-			@media only screen and (max-width: 600px) {
-				position: fixed;
-				height: 100%;
-				top: 0;
-				left: 0;
-				padding: 0;
-				margin: 0 !important;
-				z-index: 50;
-				overflow-y: auto;
-			}
-			.card {
-				opacity: 1 !important;
-				padding: $padding $padding*2;
-				border-top: 3px solid $secondaryColor;
-				box-shadow: $card-box-shadow !important;
-				@media only screen and (max-width: 600px) {
-					margin: 0;
-				    min-height: 100%;
-					overflow-y: auto;
-				}
+      @media only screen and (max-width: 600px) {
+        padding: 0 $padding;
+      }
+    }
+  }
 
-				.close {
-					position: absolute;
-					top: 10px;
-					left: 10px;
-					height: $nav-height/3;
-					width: $nav-height/3;
-					padding: 0;
-					border: 0;
-					background: white;
+  td {
+    padding: ($padding / 3) ($padding / 2);
+    width: (100% / 3);
 
-					@media only screen and (max-width: 600px) {
-						position: fixed;
-					}
+    &.selected {
+      padding: $padding ($padding / 2) ($padding / 3);
 
-					svg {
-						fill: $warningColor;
-					}
-				}
+      @media only screen and (max-width: 600px) {
+        position: fixed;
+        height: 100%;
+        top: 0;
+        left: 0;
+        padding: 0;
+        margin: 0 !important;
+        z-index: 50;
+        overflow-y: auto;
+      }
 
-				.text {
-					width: calc(100% - #{$nav-height*5});
-					h1 {
-						font-size: 14px;
-						line-height: 20px;
-						min-height: 65px;	
-						&:after {
-						  content: none;
-						}
-					}
+      .card {
+        opacity: 1 !important;
+        padding: $padding ($padding * 2);
+        border-top: 3px solid $secondaryColor;
+        box-shadow: $card-box-shadow !important;
 
-					.text__expanded {
-						display: inline-block;
-						padding: $padding 0 0;
-						font-size: 14px;
-						line-height: 18px;	
-					}
+        @media only screen and (max-width: 600px) {
+          margin: 0;
+          min-height: 100%;
+          overflow-y: auto;
+        }
 
-					@media only screen and (max-width: 600px) {
-						width: 100%;
-						display: block;
-						padding: $padding;
-					}
-				}
+        .close {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          height: $nav-height / 3;
+          width: $nav-height / 3;
+          padding: 0;
+          border: 0;
+          background: white;
 
-				.iframe {
-					position: relative;
-					overflow: hidden;
-					width: 100%;
-					padding: $padding*2 0 0; 
+          @media only screen and (max-width: 600px) {
+            position: fixed;
+          }
 
-					iframe {
-						width: 100%;
-						border: 0;
-						overflow: hidden;		
-						@media only screen and (max-width: 600px) {
-							height: 230px;
-						}			
-					}
-				}
+          svg {
+            fill: $warningColor;
+          }
+        }
 
-				.image {
-					width: $nav-height*5;
-					height: $nav-height*5;
-					display: inline-block;
+        .text {
+          width: calc(100% - #{$nav-height * 5});
 
-					@media only screen and (max-width: 600px) {
-						width: 100%;
-						display: block;
-					}
-				}
+          h1 {
+            font-size: 14px;
+            line-height: 20px;
+            min-height: 65px;
 
-				.action {
-					position: absolute;
-					bottom: $padding*2;
-					right: $padding*2;
+            &:after {
+              content: none;
+            }
+          }
+
+          .text__expanded {
+            display: inline-block;
+            padding: $padding 0 0;
+            font-size: 14px;
+            line-height: 18px;
+          }
+
+          @media only screen and (max-width: 600px) {
+            width: 100%;
+            display: block;
+            padding: $padding;
+          }
+        }
+
+        .iframe {
+          position: relative;
+          overflow: hidden;
+          width: 100%;
+          padding: ($padding * 2) 0 0;
+
+          iframe {
+            width: 100%;
+            border: 0;
+            overflow: hidden;
+
+            @media only screen and (max-width: 600px) {
+              height: 230px;
+            }
+          }
+        }
+
+        .image {
+          width: $nav-height * 5;
+          height: $nav-height * 5;
+          display: inline-block;
+
+          @media only screen and (max-width: 600px) {
+            width: 100%;
+            display: block;
+          }
+        }
+
+        .action {
+          position: absolute;
+          bottom: $padding * 2;
+          right: $padding * 2;
 
           .update {
             padding: $padding 0;
+
             @media only screen and (max-width: 600px) {
               display: block;
             }
@@ -267,170 +277,178 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               display: inline-block;
               text-align: center;
             }
+
             button {
               margin: 0;
-              height: $nav-height/2;
+              height: $nav-height / 2;
 
               @media only screen and (max-width: 600px) {
                 width: 25%;
-                margin: 0 0 $padding/2;
+                margin: 0 0 ($padding / 2);
                 margin-right: 0 !important;
               }
             }
+
             p {
               margin: 0;
               padding: 0 $padding;
-              height: $nav-height/2;
-              line-height: $nav-height/2;
+              height: $nav-height / 2;
+              line-height: $nav-height / 2;
+
               @media only screen and (max-width: 600px) {
                 width: 50%;
               }
             }
           }
 
-					@media only screen and (max-width: 600px) {
-						position: relative;
-						display: block;
-						width: 100%;
-						bottom: auto;
-						right: auto;
+          @media only screen and (max-width: 600px) {
+            position: relative;
+            display: block;
+            width: 100%;
+            bottom: auto;
+            right: auto;
 
-						button {
-							width: 100%;
-							height: $nav-height - $padding;
-							font-size: 16px;
+            button {
+              width: 100%;
+              height: $nav-height - $padding;
+              font-size: 16px;
 
               &:disabled {
                 background: rgba(#333, 0.1);
               }
 
-							svg {
-								display: none;
-							}
-						}
-					}
-				}
+              svg {
+                display: none;
+              }
+            }
+          }
+        }
 
-				.padding {
-					height: 50px;
-				}
+        .padding {
+          height: 50px;
+        }
 
-				&:after {
-					content:"";
-					position: absolute;
-					top: -15px;
-					width: 0;
-					height: 0;
-					border-right: 13px solid transparent;
-					border-bottom: 15px solid $secondaryColor;
-					border-left: 13px solid transparent;
-				}
-				&.left {
-					&:after {
-						left: 15%;
-					}
-				}
-				&.middle {
-					&:after {
-						left: calc(50% - 15px);
-					}
-				}
-				&.right {
-					&:after {
-						left: calc(85% - 15px);
-					}
-				}
-			}
-		}
+        &:after {
+          content: '';
+          position: absolute;
+          top: -15px;
+          width: 0;
+          height: 0;
+          border-right: 13px solid transparent;
+          border-bottom: 15px solid $secondaryColor;
+          border-left: 13px solid transparent;
+        }
 
-		.card {
-			position: relative;
-			padding: $padding;
-			text-align: left;
-			background: white;
-			border-radius: 5px;
-			box-shadow: $card-box-shadow;
+        &.left {
+          &:after {
+            left: 15%;
+          }
+        }
 
+        &.middle {
+          &:after {
+            left: calc(50% - 15px);
+          }
+        }
 
+        &.right {
+          &:after {
+            left: calc(85% - 15px);
+          }
+        }
+      }
+    }
 
-			&.incart {
-				opacity: 0.6;
-				box-shadow: none;
+    .card {
+      position: relative;
+      padding: $padding;
+      text-align: left;
+      background: white;
+      border-radius: 5px;
+      box-shadow: $card-box-shadow;
 
-				.incart {
-					position: absolute;
-					top: -$padding;
-					right: $padding;
-					background: $thirdColor;
-					color: white;
-					padding: $padding/2 $padding;
-					border-radius: 5px;
-					font-weight: bold;
-					font-size: 10px;
-					box-shadow: $card-box-shadow;
+      &.incart {
+        opacity: 0.6;
+        box-shadow: none;
 
-					@media only screen and (max-width: 600px) {
-						top: -$padding/2;
-						box-shadow: none;
-					}
-				}
-			}
-			.image {
-				width: $nav-height*2;
-				height: $nav-height*2;
-				display: inline-block;
-			}
-			.text {
-				display: inline-block;
-				padding: 0 $padding;
-				width: calc(100% - #{$nav-height*2});
+        .incart {
+          position: absolute;
+          top: -$padding;
+          right: $padding;
+          background: $thirdColor;
+          color: white;
+          padding: ($padding / 2) $padding;
+          border-radius: 5px;
+          font-weight: bold;
+          font-size: 10px;
+          box-shadow: $card-box-shadow;
 
+          @media only screen and (max-width: 600px) {
+            top: -$padding / 2;
+            box-shadow: none;
+          }
+        }
+      }
 
-				h1 {
-					position: relative;
-					overflow: hidden;
-					font-size: 14px;
-					line-height: 20px;
-					height: 65px;
-					&:after {
-					  content: "";
-					  text-align: right;
-					  position: absolute;
-					  bottom: 5px;
-					  right: 0;
-					  width: 70%;
-					  height: 20px;
-					  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 80%);
-					}
-				}
-				p {
-					font-size: 10px;
-					line-height: 10px;
-					opacity: 0.5;
-					padding: 0 0 $padding;
-				}
-				h4 {
-					font-size: 14px;
-					line-height: 20px;
-					opacity: 0.8;
-				}
-			}
-		}
-	}
-	@media only screen and (max-width: 600px) {
-	    overflow-x: auto;
-	    display: block;
+      .image {
+        width: $nav-height * 2;
+        height: $nav-height * 2;
+        display: inline-block;
+      }
 
-	    td {
-	      width: 100% !important;
-	      display: block;
-	      padding: 0 3px;
-	      margin: 5px 0 10px;
+      .text {
+        display: inline-block;
+        padding: 0 $padding;
+        width: calc(100% - #{$nav-height * 2});
 
-	      &:last-of-type {
-	      	margin: 5px 0 5px;
-	      }
-	    }
-	}
+        h1 {
+          position: relative;
+          overflow: hidden;
+          font-size: 14px;
+          line-height: 20px;
+          height: 65px;
+
+          &:after {
+            content: '';
+            text-align: right;
+            position: absolute;
+            bottom: 5px;
+            right: 0;
+            width: 70%;
+            height: 20px;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 80%);
+          }
+        }
+
+        p {
+          font-size: 10px;
+          line-height: 10px;
+          opacity: 0.5;
+          padding: 0 0 $padding;
+        }
+
+        h4 {
+          font-size: 14px;
+          line-height: 20px;
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    overflow-x: auto;
+    display: block;
+
+    td {
+      width: 100% !important;
+      display: block;
+      padding: 0 3px;
+      margin: 5px 0 10px;
+
+      &:last-of-type {
+        margin: 5px 0 5px;
+      }
+    }
+  }
 }
-

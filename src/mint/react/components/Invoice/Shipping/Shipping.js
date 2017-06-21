@@ -28,7 +28,7 @@ const addressDummy = [
         zip: 36020,
         country: 'United Derps'
     }
-]
+];
 
 export default class Shipping extends Component {
 

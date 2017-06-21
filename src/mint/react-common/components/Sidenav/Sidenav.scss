@@ -1,6 +1,7 @@
 // react/components/App/Sidenav.scss
 @import '../../styles/Constants';
 @import '../../styles/Animations';
+
 .sidenav {
   position: absolute;
   top: 0;
@@ -11,17 +12,21 @@
   width: 100%;
   background: rgba($secondaryColor, 0.3);
   border-left: 1px solid $border-color-light;
+
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
   p {
     overflow: hidden;
   }
+
   .sidenav__overlay {
     width: calc(100% - 250px);
     background: transparent;
     height: 100%;
     float: left;
   }
+
   .sidenav__list {
     display: flex;
     flex-direction: column;
@@ -31,27 +36,34 @@
     position: absolute;
     right: 0;
     border-left: 1px solid $border-color-light;
+
     @include animation(scrollInLeft cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
     @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
     li {
       padding: 0 $padding 0 0;
+
       &.currentCart {
         background: #f6f6f6;
       }
+
       h4 {
         text-align: right;
-        padding: $padding/2 $padding;
-        cursor: pointer;
+        padding: ($padding / 2) $padding;
         &.show__more {
-          padding: $padding/2 $padding $padding*2;
+          padding: ($padding / 2) $padding ($padding * 2);
           color: #4a9ff1;
           text-indent: underline;
+
           svg {
             @include animation(bounceDownSmall 2s);
+
             animation-iteration-count: 3; // too much twitching
+         
           }
         }
       }
+
       &.sidenav__list__header {
         height: $nav-height;
         padding: 0;
@@ -59,82 +71,120 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+
         p {
           padding: 0 $padding;
           text-align: left;
           overflow: hidden;
           text-overflow: ellipsis;
         }
+
         svg {
           height: 100%;
         }
       }
+
       &.sidenav__list__view {
         overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
         flex: 1;
         padding: 0;
+
+        .sidenav__list__title {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          h4 {
+            font-size: 16px;
+            &.name {
+              cursor: pointer;
+              display: inline-block;
+              margin-right: $padding;
+
+              span {
+                border-bottom: 3px solid $mainColor;
+              }
+            }
+          }
+        }
+
         a {
           padding: 0 2px;
+
           &.editIcon {
             @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
             padding: $padding $padding;
             background: transparent;
             border-radius: 5px 0 0 5px;
+
             &:hover {
               background: darken($secondaryColor, 5%);
             }
           }
+
           p {
             height: $nav-height;
-            line-height: $nav-height/1.6;
+            line-height: $nav-height / 1.6;
 
             span {
-              line-height: $nav-height/4;
+              line-height: $nav-height / 4;
             }
           }
+
           &:last-child {
             flex: 1 1 auto;
           }
         }
+
         li {
           display: flex;
           flex-direction: row;
           border-radius: 5px 0 0 5px;
           margin: 5px 0 0 5%;
           width: 95%;
+
           @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
           .image {
             @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
             border-radius: 5px 0 0 5px;
-            width: $nav-height - $padding*2;
+            width: $nav-height - $padding * 2;
             height: 100%;
             margin: $padding;
-            min-height: $nav-height - $padding*2;
+            min-height: $nav-height - $padding * 2;
           }
+
           &:hover {
             background: rgba($secondaryColor, 0.5);
           }
         }
+
         p {
           text-align: right;
           font-size: 15px;
         }
+
         .icon {
           height: 100%;
           width: 20px;
+
           svg {
             min-height: 20px;
             height: 100%;
           }
         }
       }
+
       &.sidenav__list__actions {
         display: block;
         font-size: 20px;
+
         h4 {
           padding: 6px;
           border: none;
+
           svg {
             vertical-align: middle !important;
             font-size: 24px;
@@ -142,6 +192,7 @@
           }
         }
       }
+
       .icon {
         display: inline-block;
         width: $nav-height;
@@ -149,10 +200,12 @@
         text-align: center;
         cursor: pointer;
       }
+
       p {
         position: relative;
         font-size: 13px;
         text-align: right;
+
         span {
           right: $padding;
           bottom: -15px;
@@ -161,16 +214,19 @@
       }
     }
   }
+
   footer {
     width: 100%;
     padding: $padding;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
     a {
       padding: 3px 0;
       cursor: pointer;
       margin: 0 -20px 0 0;
+
       button {
         padding: 5px 20px 5px 5px;
         overflow: wrap;
@@ -188,33 +244,39 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+
         &:disabled {
           color: black;
           background-color: $kip-faded-color;
           cursor: not-allowed;
         }
+
         p {
           display: inline-block;
           vertical-align: middle;
           text-align: left;
           text-transform: uppercase;
         }
+
         svg {
           vertical-align: top !important;
           font-size: 23px;
           padding: 0;
-          width: $nav-height/2;
+          width: $nav-height / 2;
           margin-right: $padding;
         }
+
         &.side__share {
           height: unset;
           background: $secondaryColor;
           color: white;
         }
+
         &.side__new_cart {
           height: unset;
           background: $mainColor;
           color: black;
+
           @media (min-width: 900px) {
             background-color: $thirdColor;
             color: white;
@@ -235,11 +297,13 @@
     z-index: 0;
     background: $kip-secondary-color;
   }
+
   .sidenav__overlay {
     @media (min-width: 900px) {
       display: none;
     }
   }
+
   .sidenav__list {
     &.large {
       @media (min-width: 900px) {
@@ -247,16 +311,19 @@
         height: calc(100% - #{$nav-height});
       }
     }
+
     @media (min-width: 900px) {
       background: white;
-      height: calc(100% - #{$nav-height*2});
+      height: calc(100% - #{$nav-height * 2});
     }
+
     li {
       &.sidenav__list__header {
         @media (min-width: 900px) {
           display: none;
         }
       }
+
       &.sidenav__list__view {
         @media (min-width: 900px) {
           padding: $padding 0;
@@ -266,4 +333,3 @@
     }
   }
 }
-

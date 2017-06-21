@@ -72,13 +72,15 @@ export default class Sidenav extends Component {
         </div>
         <ul className={`sidenav__list ${large ? 'large' : ''}`}>
           <li className='sidenav__list__header'>
-            <p>{user_account.name ? user_account.name : ''}</p>
             <div className='icon' onClick={_toggleSidenav}>
               <Icon icon='Clear'/>
             </div>
           </li>
           <li className='sidenav__list__view'>
-            { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
+            <div className='sidenav__list__title'>
+              { user_account.name ? <h4 className='name'> <Link to={`/cart/${cart_id}/m/settings`}><span>{user_account.name}</span></Link> </h4> : '' } 
+              { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
+            </div>
             <ul>
               {leaderCarts.map((c, i) => {
                 if(i > 2 && show !== 'me') return null;
