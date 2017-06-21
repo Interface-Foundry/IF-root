@@ -172,9 +172,16 @@ class Invoice {
   }
 
   /**
+   * calls sendCollectEmail with the reminder flag on
+   */
+  async sendEmailReminder () {
+    logging.info('sendEmailReminder called')
+    return await this.sendCollectionEmail(true)
+  }
+
+  /**
    * email all users about this invoice
    *
-   * @param      {array}   invoice   This invoice
    * @param      {boolean} reminder  Is this an initial collection email or a reminder?
    */
   async sendCollectionEmail (reminder) {
@@ -246,7 +253,7 @@ class Invoice {
   /**
    * determine how much each user has left to pay
    * if a user as payed as much or more than they owe, they will be deleted from the return value
-   * 
+   *
    * @return {object} { keys are user ids; values are the amount they have left to pay}
    */
   async userPaymentAmounts() {

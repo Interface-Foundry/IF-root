@@ -169,7 +169,7 @@ module.exports = function (router) {
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    const invoices = await db.Invoices.GetByCartId(req.params.cart_id)
+    const invoices = await Invoice.GetByCartId(req.params.cart_id)
     if (invoices.length === 0) {
       const invoiceData = {
         cart: req.params.cart_id,

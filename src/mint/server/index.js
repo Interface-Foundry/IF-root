@@ -14,6 +14,7 @@ const fs = require('fs'),
 // start any jobs
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
 if (process.env.NODE_ENV !== 'production') var reengagementEmailsJob = require('./send-reengagement-emails-job')
+if (process.env.NODE_ENV !== 'production') var invoiceReminderEmailJob = require('./invoice-reminder-email-job')
 
 // for testing
 if (typeof module.parent !== 'undefined') {
