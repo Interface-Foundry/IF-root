@@ -30,6 +30,17 @@ export {
 from './session';
 
 export {
+  createInvoice,
+  fetchInvoice,
+  fetchInvoices,
+  createPaymentSource,
+  postPayment,
+  sendPaymentCollectionEmails,
+  updateInvoiceOptions
+}
+from './invoice';
+
+export {
   fetchCart,
   fetchCarts,
   updateCart,
