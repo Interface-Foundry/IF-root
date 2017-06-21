@@ -8,7 +8,7 @@ dbReady.then((models) => { db = models; }).catch(e => console.error(e));
 
 if (process.env.NODE_ENV !== 'production') {
   // reminder sent out once a day after the invoice is created
-  var reminderJob = new CronJob('30 * * * * *', function () {
+  var reminderJob = new CronJob('0 0 12 * * *', function () {
     logging.info('cron job executing')
     co(function * () {
       var invoices = yield db.Invoices.find({
