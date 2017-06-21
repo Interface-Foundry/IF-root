@@ -43,18 +43,18 @@ export default class Payment extends Component {
           { selectedCardIndex, selectedTypeIndex } = this.state;
           
     return (
-    	<div className='payment accordion' onClick={() => selectAccordion('payment')}>
-    		<nav>
+    	<div className='payment accordion'>
+    		<nav onClick={() => selectAccordion('payment')}>
     			<h3>2. Payment method</h3>
           {
-              selectedCardIndex !== null && selectedTypeIndex !== null && selectedAccordion !== 'payment' ? <div className='text'> 
+              selectedCardIndex !== null && selectedTypeIndex !== null && !selectedAccordion.includes('payment') ? <div className='text'> 
                   <p>{paymentTypes[selectedTypeIndex]} with {paymentDummy[selectedCardIndex].name} </p>
                   <span>change</span>
               </div> : null
           }
     		</nav>
     		{
-    			selectedAccordion === 'payment' ? <div> 
+    			selectedAccordion.includes('payment') ? <div> 
             <nav>
               <h4>Payment Type</h4>
             </nav>
@@ -86,7 +86,7 @@ export default class Payment extends Component {
                       </li>
                   ))
               }
-              <button>+ add card</button>
+              <button onClick={() => selectAccordion('payment form')}>+ add card</button>
             </ul>
 	    		</div> : null
     		}

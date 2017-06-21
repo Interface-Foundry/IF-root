@@ -33,7 +33,8 @@ export default class Cart extends Component {
           <tr>
             <th colSpan='100%'>
               {
-                myCart.length > 0 ? <div className='card'>
+                myCart.length
+                ? <div className='card'>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                   <h1 className='date'> <span>  </span> </h1>
                   <h4>
@@ -57,7 +58,7 @@ export default class Cart extends Component {
                       ))
                     }
                   </ul>
-                </div> : ( cart.locked ? null : <EmptyContainer /> )
+                </div> : null
               }
             </th>
           </tr>
@@ -96,6 +97,9 @@ export default class Cart extends Component {
               </tr>
             ))
           }
+          <tr>
+           { myCart.length ? null : ( cart.locked ? null : <EmptyContainer /> ) }
+          </tr>
         </tbody>
       </table>
     );
