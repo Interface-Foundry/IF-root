@@ -89,7 +89,7 @@ const del = function * (url, data) {
 }
 
 describe('api', function () {
-  this.timeout(8000)
+  this.timeout(80000)
   before(() => co(function * () {
     // clean up the db
     yield dbReady
@@ -373,14 +373,29 @@ describe('api', function () {
     assert(err)
   }))
 
-  // it('POST /api/user/:user_id/address should add a new address for/to a user', () => co(function * () {
-  //   //TODO post /api/user/:user_id/address
-  //   var address = post('/api/user/--/address', )
-  // }))
+  it('POST /api/user/:user_id/address should add a new address for/to a user', () => co(function * () {
+    var address = {
+      full_name: 'Madison mcTesty',
+      line_1: '86 Peter Coutts Cr',
+      line_2: '#8F',
+      city: 'East Windsor',
+      state: 'CT',
+      zip: '94305',
+      country: 'USA'
+    }
+    var result = yield post('/api/user/' + encodeURIComponent(mcTesty.id) + '/address', address)
+    assert(Object.keys(address).reduce(function (k, acc) {
+      return acc && result[k] === address[k]
+    }, true))
+    logging.info('address.user_account', address, mcTesty.id)
+    assert(result.user_account === mcTesty.id)
+  }))
 
-  // it('GET /api/user/address should get all of the addresses associated with the user', () => co(function * () {
-  //   //TODO get /api/user/address
-  // }))
+  it('GET /api/user/address should get all of the addresses associated with the user', () => co(function * () {
+    var addresses = yield get('/api/user/address')
+    assert(Array.isArray(addresses))
+    assert(addresses[0].user_account === mcTesty.id)
+  }))
 
   it('GET /api/cart/:cart_id/checkout should redirect to the amazon cart with the affiliate id', () => co(function * () {
     var res = yield get('/api/cart/' + mcTesty.cart_id + '/checkout', true)
