@@ -29,3 +29,15 @@ export const validateCode = (email, code) => post(
     receivedAt: Date.now()
   })
 );
+
+export const postFeedback = (feedback) => post(
+  '/api/feedback',
+  'FEEDBACK', { feedback },
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
+
