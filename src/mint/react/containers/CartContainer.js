@@ -4,13 +4,13 @@ import { connect } from 'react-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Cart } from '../components';
-import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup, fetchItem } from '../actions';
+import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup, fetchItem, selectCartItem } from '../actions';
 import { isUrl, addSearchHistory } from '../utils';
 
 const ONE_SECOND = 1000;
 
 const mapStateToProps = (state, ownProps) => ({
-  editId: state.app.editId,
+  editId: state.cart.present.editId,
   cart: state.cart.present,
   oldCart: state.cart.past[0],
   query: state.search.query,
@@ -18,6 +18,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+  selectCartItem: item_id => dispatch(selectCartItem(item_id)),
   editItem: item_id => dispatch(editItem(item_id)),
   removeItem: (cart_id, item_id) => {
     dispatch(removeItem(cart_id, item_id));

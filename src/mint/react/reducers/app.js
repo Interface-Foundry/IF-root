@@ -3,8 +3,7 @@ const initialState = {
   sidenav: false,
   popup: false,
   selectedAccordion: 'shipping',
-  viewTab: 'cart',
-  editId: null 
+  viewTab: 'cart'
 };
 
 export default (state = initialState, action = {}) => {

@@ -16,7 +16,8 @@ const initialState = {
   kip_pay_allowed: false,
   privacy: 'public',
   locked: false,
-  ok: true
+  ok: true,
+  editId: null 
 };
 
 export default function cart(state = initialState, action) {
@@ -31,6 +32,7 @@ export default function cart(state = initialState, action) {
       ...state,
       ok: false
     };
+  case 'SELECT_CART_ITEM':
   case 'LIKE_CART_SUCCESS':
   case 'METRICS_SUCCESS':
   case 'UPDATE_CART_SUCCESS':
