@@ -17,8 +17,9 @@ export default class History extends Component {
 
   render() {
     const { props: { query, categories, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
-    history = query.length > 0 ? getSearchHistory(query) : [],
+    history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
     suggestedCategories = history.length > 0 ? categories.slice(0, 5) : [];
+
 
     return (
       <span className='history'>
@@ -46,7 +47,7 @@ export default class History extends Component {
           {
             suggestedCategories.map((category, i) => {
               return (
-                <li key={i} className={'history__term'}>
+                <li key={i} className={`history__term ${i === ( selectedQuery - history.length ) ? 'selected' : ''}`}>
                   <div className='history__term-icon'>
                     <Icon icon='Eye'/>
                   </div>

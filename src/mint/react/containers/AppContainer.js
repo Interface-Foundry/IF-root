@@ -9,7 +9,8 @@ import {
   fetchCart,
   fetchMetrics,
   navigateRightResults,
-  navigateLeftResults
+  navigateLeftResults,
+  getMoreSearchResults
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -25,6 +26,8 @@ const mapStateToProps = (state, ownProps) => {
     user: state.user,
     cart_id: state.cart.present.id,
     sidenav: state.app.sidenav,
+    query: state.search.query,
+    page: state.search.page,
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup
   };
@@ -36,7 +39,8 @@ const mapDispatchToProps = dispatch => ({
   fetchCart: (id) => dispatch(fetchCart(id)),
   fetchMetrics: (id) => dispatch(fetchMetrics(id)),
   navigateRightResults: () => dispatch(navigateRightResults()),
-  navigateLeftResults: () => dispatch(navigateLeftResults())
+  navigateLeftResults: () => dispatch(navigateLeftResults()),
+  getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

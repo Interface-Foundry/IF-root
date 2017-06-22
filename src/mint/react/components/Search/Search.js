@@ -30,13 +30,16 @@ export default class Input extends Component {
   }
 
   _handeKeyPress(e) {
-    const { query, updateQuery } = this.props, { selectedQuery } = this.state,
-      history = query.length > 0 ? getSearchHistory(query) : [];
+    const { query, updateQuery, categories } = this.props, { selectedQuery } = this.state,
+      history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
+      suggestedCategories = history.length > 0 ? categories.slice(0, 5) : [];
+
+    const combined = [...history, ...suggestedCategories];
 
     if (query) {
       switch (e.keyCode) {
       case 40:
-        this.setState({ selectedQuery: history[selectedQuery + 1] ? selectedQuery + 1 : selectedQuery });
+        this.setState({ selectedQuery: combined[selectedQuery + 1] ? selectedQuery + 1 : selectedQuery });
         break;
       case 38:
         this.setState({ selectedQuery: selectedQuery - 1 });
@@ -44,8 +47,13 @@ export default class Input extends Component {
       case 13:
         e.preventDefault();
         if (selectedQuery > -1) {
-          updateQuery(history[selectedQuery]);
-          this._handleSubmit(history[selectedQuery]);
+          if(combined[selectedQuery].machineName) {
+            updateQuery(combined[selectedQuery].humanName);
+            this._handleSubmit(combined[selectedQuery].machineName);
+          } else {
+            updateQuery(combined[selectedQuery]);
+            this._handleSubmit(combined[selectedQuery]);
+          }
         } else {
           this._handleSubmit();
         }

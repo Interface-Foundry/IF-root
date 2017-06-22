@@ -27,6 +27,24 @@ export const updateQuery = query => ({
   }
 });
 
+export const getMoreSearchResults = (query, store, locale, page) => get(
+  `/api/itempreview?q=${query}&page=${page}&store=${store}&store_locale=${locale}`,
+  'LAZY_SEARCH',
+  (type, json) => {
+    return {
+      type: `${type}_SUCCESS`,
+      response: {
+        results: json.asin ? [json] : [...json],
+        history: false,
+        page: page,
+        selectedItemId: json.id || (json.length === 1 ? json[0].id : null),
+        tab: 'search'
+      },
+      receivedAt: Date.now()
+    }
+  }
+);
+
 export const submitQuery = (query, store, locale) => get(
   `/api/itempreview?q=${query}&store=${store}&store_locale=${locale}`,
   'SEARCH',
@@ -35,6 +53,7 @@ export const submitQuery = (query, store, locale) => get(
     response: {
       results: json.asin ? [json] : [...json],
       history: false,
+      page: 0,
       selectedItemId: json.id || (json.length === 1 ? json[0].id : null),
       tab: 'search'
     },

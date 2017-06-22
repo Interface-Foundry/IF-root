@@ -84,6 +84,7 @@ export {
   toggleHistory,
   fetchCategories,
   navigateRightResults,
-  navigateLeftResults
+  navigateLeftResults,
+  getMoreSearchResults
 }
 from './search';

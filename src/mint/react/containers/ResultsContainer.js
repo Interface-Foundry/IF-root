@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -10,6 +10,7 @@ const mapStateToProps = (state, ownProps) => ({
   user: state.user,
   cart: state.cart.present,
   query: state.search.query,
+  page: state.search.page,
   selectedItemId: state.search.selectedItemId,
   tab: state.app.viewTab,
   categories: state.search.categories,
@@ -39,7 +40,8 @@ const mapDispatchToProps = dispatch => ({
   },
   updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues)),
   navigateRightResults: () => dispatch(navigateRightResults()),
-  navigateLeftResults: () => dispatch(navigateLeftResults())
+  navigateLeftResults: () => dispatch(navigateLeftResults()),
+  getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Results);

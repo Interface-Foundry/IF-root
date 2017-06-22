@@ -16,7 +16,9 @@ export default class Results extends Component {
     results: PropTypes.array,
     cart: PropTypes.object,
     query: PropTypes.string,
-    user: PropTypes.object
+    user: PropTypes.object,
+    getMoreSearchResults: PropTypes.func,
+    page: PropTypes.number
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -27,7 +29,7 @@ export default class Results extends Component {
   render() {
     // Needs refactor, too many loop-di-loops here.
     let arrow, selected;
-    const { cart, query, results, selectedItemId } = this.props,
+    const { cart, query, page, results, selectedItemId, getMoreSearchResults } = this.props,
       numResults = results.length,
       cartAsins = cart.items.map((item, i) => `${item.asin}-${item.added_by}`),
       partitionResults = results.reduce((acc, result, i) => {
@@ -88,6 +90,7 @@ export default class Results extends Component {
             ))
           }
         </tbody>
+        <div className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page)}>Load more results</span></div>
       </table>
     );
   }

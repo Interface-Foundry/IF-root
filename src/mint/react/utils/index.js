@@ -37,6 +37,11 @@ export {
 from './testUtils';
 
 export {
+  checkPageScroll
+}
+from './scroll';
+
+export {
   cloudinary
 }
 from './cloudinary';

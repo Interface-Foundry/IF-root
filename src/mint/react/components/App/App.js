@@ -5,13 +5,19 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
 import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
 import { ErrorPage, Modal, Toast, Loading } from '..';
+import { checkPageScroll } from '../../utils';
 
 export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this._handleScroll = ::this._handleScroll;
+  }
 
   static propTypes = {
     fetchCart: PropTypes.func,
@@ -26,7 +32,20 @@ export default class App extends Component {
     toast: PropTypes.string,
     status: PropTypes.string,
     history: PropTypes.object,
-    selectedItemId: PropTypes.string
+    selectedItemId: PropTypes.string,
+    getMoreSearchResults: PropTypes.func
+  }
+
+  componentDidMount() {
+    const { _handleScroll } = this;
+    ReactDOM.findDOMNode(this.scroll)
+      .addEventListener('scroll', _handleScroll);
+  }
+
+  componentWillUnmount() {
+    const { _handleScroll } = this;
+    ReactDOM.findDOMNode(this.scroll)
+      .removeEventListener('scroll', _handleScroll);
   }
 
   _handeKeyPress(e) {
@@ -51,6 +70,22 @@ export default class App extends Component {
     });
   }
 
+  _handleScroll(e) {
+    const { location: { search }, query, cart, page, getMoreSearchResults } = this.props;
+
+    // lazy loading for search. Could also hook up the scroll to top on every new search query.
+    if(search) {
+      const scrollTop = ReactDOM.findDOMNode(this.scroll).scrollTop,
+        containerHeight = ReactDOM.findDOMNode(this.scroll).scrollHeight,
+        windowHeight = ReactDOM.findDOMNode(this.scroll).clientHeight;
+
+      // animate scroll, needs height of the container, and its distance from the top
+      if(checkPageScroll(scrollTop, containerHeight, windowHeight)) {
+        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1)
+      };
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     const { fetchCart, fetchMetrics, match } = this.props;
     if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
@@ -70,7 +105,7 @@ export default class App extends Component {
         { loading ? <Loading/> : null}
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
+        <div className={`app__view ${sidenav ? 'squeeze' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
           <Route path={'/newcart'} exact component={StoresContainer} />

@@ -5,6 +5,7 @@ const initialState = {
   history: false,
   results: [],
   categories: [],
+  page: 0,
   query: ''
 };
 
@@ -57,6 +58,15 @@ export default (state = initialState, action) => {
       ...state,
       loading: true
     };
+  case 'LAZY_SEARCH_SUCCESS':
+    return {
+      ...state,
+      results: [...state.results , ...action.response.results],
+      history: action.response.history,
+      page: action.response.page,
+      selectedItemId: action.response.selectedItemId,
+      tab: action.response.tab
+    }
   default:
     return state;
   }

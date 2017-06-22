@@ -6,6 +6,7 @@ import Details from './Details';
 import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer } from '../../containers';
 
 export default class App extends Component {
+
   static propTypes = {
     tab: PropTypes.string,
     cart: PropTypes.object,
@@ -22,7 +23,7 @@ export default class App extends Component {
     else if (search && cart.store && !searchLoading && !this.props.searchLoading)
       submitQuery(search, cart.store, cart.store_locale);
     else if (search) selectTab('search');
-    else if (!locSearch && tab === 'search') selectTab('cart'); // probably a better way than this
+    else if (!locSearch && tab === 'search') selectTab('cart'); 
   }
 
   render() {

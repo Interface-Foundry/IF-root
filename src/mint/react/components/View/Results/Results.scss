@@ -23,6 +23,26 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     display: inline-block;
   }
 
+  .load {
+    position: absolute;
+    display: block;
+    width: 100%;
+    border-top: 3px solid $secondaryColor;
+    bottom: -30px;
+    color: white;
+    text-align: center;
+
+    span {
+      cursor: pointer;
+      position: absolute;
+      font-size: 10px;
+      background: $secondaryColor;
+      padding: $padding/2 $padding;
+      border-radius: $padding/2;
+      margin-top: -13px;
+    }
+  }
+
   .navigation {
     & > * {
       position: absolute;

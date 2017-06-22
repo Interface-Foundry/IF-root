@@ -21,18 +21,7 @@ export default class Tabs extends Component {
 
   componentDidMount() {
     const { cart: { kip_pay_allowed, items, id }, search: { query } } = this.props;
-    const tabs = kip_pay_allowed ? [{
-      tab: 'cart',
-      url: `/cart/${id}`,
-      display: `Cart (${numberOfItems(items)})`
-    }, {
-      tab: 'search',
-      url: `/cart/${id}?q=${query}`,
-      display: 'Search'
-    }, {
-      tab: 'invoice',
-      display: 'Invoice'
-    }] : [{
+    const tabs = [{
       tab: 'cart',
       url: `/cart/${id}`,
       display: `Cart (${numberOfItems(items)})`
@@ -47,19 +36,7 @@ export default class Tabs extends Component {
   componentWillReceiveProps(nextProps) {
     const { cart: { kip_pay_allowed, items, id }, search: { query } } = nextProps,
     itemsChanged = items.length > this.props.cart.items.length,
-      tabs = kip_pay_allowed ? [{
-        tab: 'cart',
-        url: `/cart/${id}`,
-        display: `Cart (${numberOfItems(items)})`,
-        showBubble: itemsChanged
-      }, {
-        tab: 'search',
-        url: `/cart/${id}?q=${query}`,
-        display: 'Search'
-      }, {
-        tab: 'invoice',
-        display: 'Invoice'
-      }] : [{
+      tabs = [{
         tab: 'cart',
         url: `/cart/${id}`,
         display: `Cart (${numberOfItems(items)})`,
@@ -90,3 +67,26 @@ export default class Tabs extends Component {
     );
   }
 }
+
+
+
+    // const tabs = kip_pay_allowed ? [{
+    //   tab: 'cart',
+    //   url: `/cart/${id}`,
+    //   display: `Cart (${numberOfItems(items)})`
+    // }, {
+    //   tab: 'search',
+    //   url: `/cart/${id}?q=${query}`,
+    //   display: 'Search'
+    // }, {
+    //   tab: 'invoice',
+    //   display: 'Invoice'
+    // }] : [{
+    //   tab: 'cart',
+    //   url: `/cart/${id}`,
+    //   display: `Cart (${numberOfItems(items)})`
+    // }, {
+    //   tab: 'search',
+    //   url: `/cart/${id}?q=${query}`,
+    //   display: 'Search'
+    // }];
