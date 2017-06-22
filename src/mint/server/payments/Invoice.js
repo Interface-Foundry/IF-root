@@ -153,11 +153,11 @@ class Invoice {
         return item.added_by === user.id
       })
 
-      logging.info('cart link:', baseUrl + '/cart/' + cart.id)
+      // logging.info('cart link:', baseUrl + '/cart/' + cart.id)
+      logging.info('invoice.cart', invoice.cart)
       await email.template('success', {
         username: user.name,
         baseUrl: baseUrl,
-        id: cart.id,
         items: items,
         users: cart.members,
         date: moment().format('dddd, MMMM Do, h:mm a'),
@@ -220,7 +220,6 @@ class Invoice {
         await email.template('collection', {
           username: user.name,
           baseUrl: baseUrl,
-          id: invoice.cart,
           items: items,
           users: users,
           date: moment().format('dddd, MMMM Do, h:mm a'),

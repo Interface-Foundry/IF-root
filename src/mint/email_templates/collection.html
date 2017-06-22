@@ -196,10 +196,10 @@
                                                      <!-- <span style="font-weight: bold"><%=users[i].name%></span> <br> -->
                                                      <!-- <span style="font-weight: normal"><%=users[i].email_address%></span> <br><br> -->
 
-                                                        <% for(var j=0; j<items[i].length; j++) {%>
+                                                        <% for(var j=0; j<items.length; j++) {%>
                                                             <span style="color:#000;">
-                                                             <%=items[i][j].name%> <br>
-                                                             Qty: <%=items[i][j].quantity%> Price: $<%=items[i][j].price.toFixed(2)%><br><br>
+                                                             <%=items[j].name%> <br>
+                                                             Qty: <%=items[j].quantity%> Price: $<%=items[j].price.toFixed(2)%><br><br>
                                                             </span>
                                                         <% } %>
                                                      <!-- <% } %> -->
