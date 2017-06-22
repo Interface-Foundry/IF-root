@@ -70,7 +70,6 @@ export default class App extends Component {
         { loading ? <Loading/> : null}
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        
         <div className={`app__view ${sidenav ? 'squeeze' : ''}`}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />

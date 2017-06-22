@@ -3508,7 +3508,7 @@ growl@1.9.2:
   version "1.9.2"
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.9.2.tgz#0ea7743715db8d8de2c5ede1775e1b45ac85c02f"
 
-grpc@^1.1, grpc@^1.1.1, grpc@^1.2:
+grpc@^1.1, grpc@^1.1.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.2.4.tgz#ef0c8c708245d8fc797e39aa330dce409b3dd03c"
   dependencies:
@@ -3518,7 +3518,7 @@ grpc@^1.1, grpc@^1.1.1, grpc@^1.2:
     node-pre-gyp "^0.6.0"
     protobufjs "^5.0.0"
 
-grpc@^1.3.1:
+grpc@^1.2, grpc@^1.3.1:
   version "1.3.9"
   resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.3.9.tgz#184b2e219c5af7e80a564db6f5dc042e5fd9750d"
   dependencies:
