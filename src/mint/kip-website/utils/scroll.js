@@ -1,5 +1,5 @@
 export const animateScroll = (containerHeight, animationOffset, scrollTop, animationState, fixed) => {
-  let newState = { type: '' }
+  let newState = { type: '' };
   let animationStart = 0;
   let breakPointHeight = (containerHeight / 8);
  
@@ -11,7 +11,7 @@ export const animateScroll = (containerHeight, animationOffset, scrollTop, anima
         ...newState.response,
         fixed: scrollTop > 2
       }
-    }
+    };
   }
   return newState;
-}
+};

@@ -19,12 +19,12 @@ export default function reducer(state = initialState, action = {}) {
       ...state,
       carts: action.response.filter(c => !c.locked),
       archivedCarts: action.response.filter(c => c.locked)
-    }
+    };
   case 'POSTS_SUCCESS':
     return {
       ...state,
       posts: action.response.filter((p, i) => !!p.imageSrc)
-    }
+    };
   case 'LOGOUT':
     return {
       ...initialState

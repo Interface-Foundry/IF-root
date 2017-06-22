@@ -57,7 +57,7 @@ const mapDispatchToProps = dispatch => ({
   },
   submitQuery: (query, store, locale) => {
     dispatch(updateQuery(query));
-    dispatch(submitQuery(encodeURIComponent(query), store, locale))
+    dispatch(submitQuery(encodeURIComponent(query), store, locale));
   }
 });
 

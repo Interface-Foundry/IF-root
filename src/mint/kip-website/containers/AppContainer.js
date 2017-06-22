@@ -3,7 +3,7 @@ import App from '../components/App';
 
 import {
   registerHeight,
-  handleScroll,
+  handleScroll
 } from '../actions';
 
 const mapStateToProps = (state, props) => ({
@@ -15,11 +15,11 @@ const mapStateToProps = (state, props) => ({
   containerHeight: state.app.containerHeight,
   scrollTo: state.app.scrollTo,
   siteVersion: state.siteState.siteVersion
-})
+});
 
 const mapDispatchToProps = dispatch => ({
   handleScroll: (scrollTop, fixed, animationState, animationOffset, containerHeight) => dispatch(handleScroll(scrollTop, fixed, animationState, animationOffset, containerHeight)),
   registerHeight: (heightFromTop, containerHeight) => dispatch(registerHeight(heightFromTop, containerHeight))
-})
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

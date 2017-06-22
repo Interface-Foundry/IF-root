@@ -53,6 +53,6 @@ export default class EmailDrawn extends Component {
 	</g>
 </g>
 </svg>
-		)
+		);
 	}
 }

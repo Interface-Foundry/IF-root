@@ -79,7 +79,7 @@ export default class Tabs extends Component {
       <div className='tabs'>
         {
           tabs.map((t) => (
-            <h1 key={t.tab} onClick={() => {push(t.url); selectTab(t.tab)}} className={`${tab === t.tab ? 'selected' : ''}`}>
+            <h1 key={t.tab} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab ? 'selected' : ''}`}>
               {t.showBubble ? <AlertBubble  right={4} top={-6} /> : null}
               <span>{t.display}</span>
             </h1>

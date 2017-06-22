@@ -16,6 +16,6 @@ export default class DownArrow extends Component {
 		C191.178,76.5,188.729,75.888,186.894,76.5z"/>
 </g>
 </svg> 
-		)
+		);
 	}
 }
