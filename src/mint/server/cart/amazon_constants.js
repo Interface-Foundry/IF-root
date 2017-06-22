@@ -16,7 +16,7 @@ module.exports.credentials = {
     'maxRequestsPerSecond': 1,
     'locale': 'US'
   }],
-  'UK': [{
+  'GB': [{
     'awsId': 'AKIAIQWK3QCI5BOJTT5Q',
     'awsSecret': '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',
     'assocId': 'mottoros-21',
@@ -27,7 +27,7 @@ module.exports.credentials = {
     'awsSecret': '2Y1yQBReCzIVpDRpx6B8zfsNhDCPpF/P4iktUcj5',
     'assocId': 'mottoros-21',
     'maxRequestsPerSecond': 1,
-    'locale': 'UK'
+    'locale': 'GB'
   }],
   'CA': [{
     'awsId': 'AKIAIQWK3QCI5BOJTT5Q',
@@ -52,7 +52,7 @@ module.exports.locales = {
   US: {
     domain: 'amazon.com'
   },
-  UK: {
+  GB: {
     domain: 'amazon.co.uk'
   },
   CA: {
@@ -111,7 +111,7 @@ module.exports.categories = {
   },
 
   // http://docs.aws.amazon.com/AWSECommerceService/latest/DG/LocaleUK.html
-  'UK': {
+  'GB': {
     "Clothing": "Apparel",
     "Large Appliances": 'Appliances',
     "Car & Motorbike": 'Automotive',

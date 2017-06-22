@@ -903,9 +903,9 @@ module.exports = function (router) {
       text: q,
       category: _.get(req, 'query.category')
     }, _.isUndefined)
-    const store = _.get(req, 'query.store', 'amazon')
+    const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
-    var storeInstance = StoreFactory.GetStore({ store: store + '_' + locale.toLowerCase() })
+    var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
     console.log('store instance', (storeInstance || {})
       .name)
     var results = await storeInstance.search(searchOpts)

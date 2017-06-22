@@ -234,6 +234,7 @@ module.exports = function (router) {
     logging.info('invoice data', invoiceData)
 
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
+    logging.info('invoice', invoice)
     const newInvoice = await invoice.createInvoice()
     return res.send(newInvoice)
   })

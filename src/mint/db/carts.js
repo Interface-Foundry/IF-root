@@ -77,6 +77,10 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {string} the online retailer */
     store: {
       type: 'string',
+      enum: [
+        'Amazon',
+        'YPO'
+      ],
       defaultsTo: 'amazon',
       required: true
     },
@@ -94,6 +98,11 @@ var cartsCollection = Waterline.Collection.extend({
 
     store_locale: {
       type: 'string',
+      enum: [
+        'US',
+        'GB',
+        'CA'
+      ],
       required: true
     },
 

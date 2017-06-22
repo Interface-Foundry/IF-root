@@ -193,13 +193,13 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // Figure out what store they are shopping at and in what locale
   console.log('req.params.store', req.params)
   if (!req.params.store) {
-    cart.store = 'amazon'
+    cart.store = 'Amazon'
     cart.store_locale = 'US'
-  } else if (req.params.store === 'ypo') {
-    cart.store = 'ypo'
-    cart.store_locale = 'UK'
-  } else if (req.params.store.includes('amazon')) {
-    cart.store = 'amazon'
+  } else if (req.params.store === 'YPO') {
+    cart.store = 'YPO'
+    cart.store_locale = 'GB'
+  } else if (req.params.store.includes('Amazon')) {
+    cart.store = 'Amazon'
     cart.store_locale = req.params.store.split('_')[1]
   } else {
     throw new Error('Cannot create new cart for store ' + req.params.store)
@@ -212,8 +212,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // if any of these conditions are met, then kip pay is allowed
   cart.kip_pay_allowed = [
     cart.store === 'ypo',
-    cart.store_locale !== geo.country && geo.country !== 'GB', // TODO switch everything that is UK over to the official country code GB
-    cart.store_locale !== 'UK' && geo.country === 'GB'
+    cart.store_locale !== geo.country
   ].filter(Boolean).length > 0
 
   // Add the cart leader if they are logged in

@@ -3,12 +3,12 @@ const YPOStore = require('./YPOStore')
 
 // create all the amazon stores
 const stores = {};
-(['US', 'UK', 'CA']).map(store_locale => {
-  stores['amazon_' + store_locale.toLowerCase()] = new AmazonStore(store_locale)
+(['US', 'GB', 'CA']).map(store_locale => {
+  stores['Amazon_' + store_locale] = new AmazonStore(store_locale)
 })
 
 // add the YPO store
-stores['ypo_uk'] = new YPOStore()
+stores['YPO_GB'] = new YPOStore()
 
 /**
  * [description]
@@ -16,9 +16,10 @@ stores['ypo_uk'] = new YPOStore()
  * @return {[type]}      [description]
  */
 module.exports.GetStore = function(cart) {
-  if (stores[cart.store]) {
-    return stores[cart.store]
+  var store = cart.store + '_' + cart.store_locale
+  if (stores[store]) {
+    return stores[store]
   } else {
-    throw new Error(`Store ${cart.store} not supported (cart ${cart.id})`)
+    throw new Error(`Store ${store} not supported (cart ${cart.id})`)
   }
 }

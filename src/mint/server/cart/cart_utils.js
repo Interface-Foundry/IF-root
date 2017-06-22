@@ -25,34 +25,34 @@ function amazonHandlersMerge(fn) {
  */
 
 const syncCartHandlers = {
-  'amazon': amazon.syncAmazon
+  'Amazon': amazon.syncAmazon
 }
 
 const getItemHandlers = {
-  'amazon': amazon.getAmazonItem
+  'Amazon': amazon.getAmazonItem
 }
 
 const getCartHandlers = {
-  'amazon': amazon.getAmazonCart
+  'Amazon': amazon.getAmazonCart
 }
 
 const addItemHandlers = {
-  'amazon': amazon.addItemAmazon, // uses asin
-  'ypo': ypo.addItem
+  'Amazon': amazon.addItemAmazon, // uses asin
+  'YPO': ypo.addItem
 }
 
 const clearCartHandlers = {
-  'amazon': amazon.clearAmazonCart
+  'Amazon': amazon.clearAmazonCart
 }
 
 const itemPreviewHandlers = {
-  'amazon': amazon.itemPreview,
-  'ypo': ypo.itemPreview,
+  'Amazon': amazon.itemPreview,
+  'YPO': ypo.itemPreview,
 }
 
 const checkoutHandlers = {
-  'amazon': amazon.checkout,
-  'ypo': ypo.checkout
+  'Amazon': amazon.checkout,
+  'YPO': ypo.checkout
 }
 
 

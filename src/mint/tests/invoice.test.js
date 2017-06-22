@@ -32,7 +32,7 @@ describe('invoice tests', () => {
     this.timeout(50000)
 
     // create a user and a cart
-    var res = await client.get('/newcart/amazon_US', true)
+    var res = await client.get('/newcart/Amazon_US', true)
     cartId = res.request.uri.path.split('/')[2]
 
     // search and add some stuff

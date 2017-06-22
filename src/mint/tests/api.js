@@ -171,7 +171,7 @@ describe('api', function () {
   }))
 
   it('GET /newcart/store should create a new cart, redirect to /cart/:Cart_id, and send an email', () => co(function * () {
-    var res = yield get('/newcart/amazon_US', true)
+    var res = yield get('/newcart/Amazon_US', true)
 
     // make sure it's redirect to /cart/123456
     assert.equal(res.request.uri.path.split('/')[1], 'cart')
@@ -207,7 +207,7 @@ describe('api', function () {
     // McTesty should already be leader of one cart, but lets make mcTesty a member of a new cart, too
     var memberCart = yield db.Carts.create({
       name: 'Test Member Cart',
-      store: 'amazon',
+      store: 'Amazon',
       store_locale: 'CA'
     })
     memberCart.members.add(mcTesty.id)

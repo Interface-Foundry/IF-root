@@ -11,7 +11,8 @@ https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/r
 
 var stores = [{
   skip: false,
-  name: 'amazon_us',
+  name: 'Amazon',
+  locale: 'US',
   searches: [
     {
       skip: false,
@@ -66,7 +67,8 @@ var stores = [{
   ]
 }, {
   skip: false,
-  name: 'ypo_uk',
+  name: 'YPO',
+  locale: 'GB',
   searches: [
     {
       options: {
@@ -102,7 +104,7 @@ describe('Stores', () => {
         if (search.options.text) search_description += ' text:' + search.options.text
         it(search_description, async function () {
           this.timeout(search.timeout || 2000)
-          var storeInstance = StoreFactory.GetStore({store: store.name})
+          var storeInstance = StoreFactory.GetStore({store: store.name, store_locale: store.locale})
           var results = await storeInstance.search(search.options)
           search.check(results)
         })
