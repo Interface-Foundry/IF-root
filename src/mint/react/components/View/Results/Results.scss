@@ -80,11 +80,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       height: 25px;
       line-height: 25px;
       font-size: 12px;
-      padding: 0 $padding*3;
+      padding: 0 ($padding * 3);
       border-radius: 5px;
 
       &:last-of-type {
-        margin-left: $padding*3;
+        margin-left: $padding * 3;
       }
 
       &:disabled {
@@ -175,8 +175,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           top: 0;
           left: 0;
           right: 0;
-          height: $nav-height/2;
-          line-height: $nav-height/2;
+          height: $nav-height / 2;
+          line-height: $nav-height / 2;
           background: $secondaryColor;
           color: white;
           text-align: center;
@@ -192,7 +192,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           margin: 0;
           min-height: 100%;
           overflow-y: auto;
-          padding: $padding*3 $padding $padding*6;
+          padding: ($padding * 3) $padding ($padding * 6);
         }
 
         .close {
@@ -212,6 +212,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
           svg {
             fill: $warningColor;
+
             @media only screen and (max-width: 600px) {
               fill: white;
             }
@@ -322,6 +323,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               padding: 0 $padding;
               height: $nav-height / 2;
               line-height: $nav-height / 2;
+
               @media only screen and (max-width: 600px) {
                 display: inline-block;
               }
@@ -405,6 +407,54 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       background: white;
       border-radius: 5px;
       box-shadow: $card-box-shadow;
+
+      .card__loading {
+        @include animation(placeHolderShimmer 1s infinite);
+
+        background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+        background-size: 200% 100%;
+        min-height: 100px;
+        position: relative;
+
+        .overlay {
+          background: white;
+          position: absolute;
+
+          &.top {
+            height: 10px;
+            width: 100%;
+          }
+
+          &.vertical {
+            left: 60px;
+            height: 100%;
+            width: 10px;
+          }
+
+          &.bottom {
+            height: 20px;
+            width: 100%;
+            bottom: 0;
+            &.text {
+              height: 40px;
+              width: calc(100% - 70px);
+              right: 0;
+            }
+          }
+          &.mid {
+            width: calc(100% - 70px);
+            right: 0;
+            top: 25px;
+            height: 5px;
+            &.right {
+              height: 50px;
+              width: 25px;
+              right: 0;
+            }
+          }
+
+        }
+      }
 
       &.incart {
         opacity: 0.6;
