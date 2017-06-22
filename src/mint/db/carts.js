@@ -45,6 +45,12 @@ var cartsCollection = Waterline.Collection.extend({
     locked: 'boolean',
 
     /**
+     * Optional description of the cart
+     * @type {text}
+     */
+     description: 'text',
+
+    /**
      * If archived, the cart will not show up in user's side bar
      * @type {String}
      */

@@ -373,6 +373,15 @@ describe('api', function () {
     assert(err)
   }))
 
+  // it('POST /api/user/:user_id/address should add a new address for/to a user', () => co(function * () {
+  //   //TODO post /api/user/:user_id/address
+  //   var address = post('/api/user/--/address', )
+  // }))
+
+  // it('GET /api/user/address should get all of the addresses associated with the user', () => co(function * () {
+  //   //TODO get /api/user/address
+  // }))
+
   it('GET /api/cart/:cart_id/checkout should redirect to the amazon cart with the affiliate id', () => co(function * () {
     var res = yield get('/api/cart/' + mcTesty.cart_id + '/checkout', true)
 
