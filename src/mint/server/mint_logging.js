@@ -3,6 +3,12 @@ const expressWinston = require('express-winston');
 const logging = require('../../logging.js');
 const winston = require('winston');
 
+// enable google cloud logging in production and mint-dev
+if (process.env.NODE_ENV === 'production') {
+  require('@google/cloud-trace').start();
+  require('@google/cloud-debug').start();
+}
+
 var ExpressLogger = {
 
   // logger that just does basics

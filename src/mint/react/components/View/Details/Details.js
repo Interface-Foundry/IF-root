@@ -25,11 +25,10 @@ export default class Details extends Component {
 
   render() {
     const {
-      cart: { name, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
+      cart: { name, locked, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
       likeCart,
       unlikeCart,
       user,
-      locked,
       cloneCart,
       undoRemove,
       redoRemove,

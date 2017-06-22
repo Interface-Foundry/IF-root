@@ -27,6 +27,6 @@ export default class DownLeft extends Component {
 		C324.74,38.264,316.784,53.564,306.379,67.028z"/>
 </g>
 </svg>
-		)
+		);
 	}
 }

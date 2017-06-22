@@ -22,15 +22,13 @@ export const selectAccordion = selectedAccordion => ({
   }
 });
 
-export const postFeedback = (feedback) => (
-  post(
-    '/api/feedback',
-    'FEEDBACK',
-    feedback,
-    (type, json) => ({
-      type: `${type}_SUCCESS`,
-      response: json,
-      receivedAt: Date.now()
-    })
-  )
+export const postFeedback = (feedback) => post(
+  '/api/feedback',
+  'FEEDBACK',
+  feedback,
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
 );

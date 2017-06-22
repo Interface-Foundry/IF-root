@@ -90,9 +90,9 @@ class EditCart extends Component {
         <div className='privacy'>
           <label> Privacy: </label>
           <select onChange={_updatePrivacy} value={cart.privacy}>
-            <option value='public'>Public</option>
-            <option value='private'>Private</option>
-            <option value='display'>Display</option>
+            <option value='public'>Public - Anyone with link can join this cart</option>
+            <option value='private'>Private - Only those with the same email domain (i.e. kipthis.com in chris@kipthis.com) can view the cart</option>
+            <option value='display'>Display - Only the leader can add items to the cart, but anyone with a link can see it</option>
           </select>
         </div>
         <div className='pad'/>

@@ -21,7 +21,7 @@ import {
 const mapStateToProps = (state, ownProps) => {
   const query = ownProps.history.location.search.match(/q=([^&$]+)/);
   return {
-    search: query ? query[1] : null,
+    search: query ? decodeURIComponent(query[1]) : null,
     user: state.user,
     cart: state.cart.present,
     sidenav: state.app.sidenav,
@@ -57,7 +57,7 @@ const mapDispatchToProps = dispatch => ({
   },
   submitQuery: (query, store, locale) => {
     dispatch(updateQuery(query));
-    dispatch(submitQuery(encodeURIComponent(query), store, locale))
+    dispatch(submitQuery(encodeURIComponent(query), store, locale));
   }
 });
 

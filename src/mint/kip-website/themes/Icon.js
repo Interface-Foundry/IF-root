@@ -1,5 +1,5 @@
 /* @flow */
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {
 	IoChevronDown,
 	IoSoupCanOutline,
@@ -23,7 +23,7 @@ import {
 	IoSocialFacebook,
 	IoSocialTwitter,
 	IoCheckmarkRound
-} from 'react-icons/lib/io'
+} from 'react-icons/lib/io';
 
 import {
   Support,
@@ -46,75 +46,75 @@ export default class Icon extends Component {
 	render() {
   	switch (this.props.icon) {
   		case 'Right':
-        return <IoArrowRightC/>
+        return <IoArrowRightC/>;
 		  case 'Plus':
-			  return <IoPlus/>
+			  return <IoPlus/>;
 		  case 'Clear':
-			  return <IoCloseRound/>
+			  return <IoCloseRound/>;
 		  case 'Check':
-  			return <IoCheckmarkRound/>
+  			return <IoCheckmarkRound/>;
 		  case 'Up':
-			  return <IoChevronUp/>
+			  return <IoChevronUp/>;
       case 'Down':
-        return <IoChevronDown/>
+        return <IoChevronDown/>;
 		  case 'Cart':
-        return <IoAndroidCart/>
+        return <IoAndroidCart/>;
       case 'Server':
-        return <IoSoupCanOutline/>
+        return <IoSoupCanOutline/>;
       case 'Client':
-        return <IoLaptop/>
+        return <IoLaptop/>;
       case 'Mobile':
-      	return <IoIphone/>
+      	return <IoIphone/>;
       case 'Email':
-      	return <IoEmail/>
+      	return <IoEmail/>;
       case 'Github':
-      	return <IoSocialGithub/>
+      	return <IoSocialGithub/>;
       case 'Linkedin':
-      	return <IoSocialLinkedin/>
+      	return <IoSocialLinkedin/>;
      	case 'Support':
-      	return <Support/>
+      	return <Support/>;
      	case 'Empower':
-      	return <Empower/>
+      	return <Empower/>;
      	case 'Believe':
-      	return <Believe/>
+      	return <Believe/>;
       case 'Amazon':
-      	return <Amazon/>
+      	return <Amazon/>;
      	case 'Google':
-      	return <Google/>
+      	return <Google/>;
      	case 'Slack':
-      	return <Slack/>
+      	return <Slack/>;
 	    case 'Microsoft':
-      	return <Microsoft/>
+      	return <Microsoft/>;
 	    case 'Delivery':
-      	return <Delivery/>
+      	return <Delivery/>;
       case 'Menu':
-        return <IoNaviconRound/>
+        return <IoNaviconRound/>;
       case 'Clock':
-        return <IoClock/>
+        return <IoClock/>;
       case 'GraphDown':
-        return <IoArrowGraphDownLeft/>
+        return <IoArrowGraphDownLeft/>;
       case 'Happy':
-        return <IoHappy/>
+        return <IoHappy/>;
 	    case 'Logout':
-	      return <IoLogOut/>
+	      return <IoLogOut/>;
 	    case 'Login':
-	      return <IoLogIn/>
+	      return <IoLogIn/>;
 	    case 'Wallstreet':
-	    	return <Wallstreet/>
+	    	return <Wallstreet/>;
 	    case 'Fastcompany':
-	    	return <Fastcompany/>
+	    	return <Fastcompany/>;
 	    case 'Paymentsource':
-	    	return <Paymentsource />
+	    	return <Paymentsource />;
 	   	case 'Newsweek':
-	   		return <Newsweek />
+	   		return <Newsweek />;
 	    case 'Time':
-	    	return <Time/>
+	    	return <Time/>;
 	    case 'Venturebeat':
-	    	return <Venturebeat/>
+	    	return <Venturebeat/>;
 	    case 'Facebook':
-	    	return <IoSocialFacebook/>
+	    	return <IoSocialFacebook/>;
 	    case 'Twitter':
-	    	return <IoSocialTwitter/>
+	    	return <IoSocialTwitter/>;
   	}
   }
 }

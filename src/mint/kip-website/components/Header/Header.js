@@ -15,9 +15,9 @@ export default class Header extends Component {
       nextProps.title !== this.props.title ||
       nextProps.subtext !== this.props.subtext ||
       nextProps.color !== this.props.color
-    ) return true
+    ) return true;
 
-    return false
+    return false;
   }
 
   render() {

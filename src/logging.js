@@ -44,6 +44,12 @@ var transports = [
 ]
 
 
+var gcpTransport = (require('@google-cloud/logging-winston'))
+if (typeof gcpTransport.log === 'function') {
+  transports.push(gcpTransport)
+}
+
+
 if (process.env.LOGGING_MODE === 'database') {
   transports.push(new MongoDB({
     level: 'error',

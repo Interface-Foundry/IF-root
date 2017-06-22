@@ -1,29 +1,15 @@
-// react/components/ErrorPage/ErrorPage.scss
+// react/components/Loading/Loading.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
 
 .loading {
+  @include animation(placeHolderShimmer 2s infinite);
+
+  background: linear-gradient(to right, adjust-hue($thirdColor, 45deg) 8%, $thirdColor 18%, adjust-hue($thirdColor, 45deg) 33%);
+  background-size: 200% 3px;
+  height: 3px;
+  position: absolute;
+  top: 0;
+  width: 100%;
   z-index: 100;
-  div{
-    position:absolute;
-    top: 0;
-    left:-15%;
-    width:10%;
-    animation: translate 6s infinite linear;
-    z-index: 100;
-  }
-  img {
-    position:absolute;
-    animation: upDown 1.5s alternate infinite ease-in-out;
-    width:100%;
-    z-index: 100;
-  }
-
-  @keyframes upDown {
-    to { transform: translatey(100px);}
-  }
-  @keyframes translate {
-    to { transform: translatex(1200%);}
-  }
 }
-

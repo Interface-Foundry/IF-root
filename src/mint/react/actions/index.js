@@ -51,7 +51,8 @@ export {
   unlikeCart,
   reorderCart,
   updatePrivacy,
-  cloneCart
+  cloneCart,
+  selectCartItem
 }
 from './cart';
 

@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "find food and goods through a chat interface",
   "dependencies": {
+    "@google-cloud/logging-winston": "^0.4.1",
     "@google-cloud/vision": "^0.8.0",
     "@slack/client": "^3.7.0",
     "accounting": "^0.4.1",

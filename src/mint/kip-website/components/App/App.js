@@ -2,7 +2,7 @@
 /* eslint global-require: 0 */
 
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 
 import { Legal, ComparisonPage } from '..';
@@ -12,7 +12,7 @@ import { Route } from 'react-router-dom';
 
 export default class App extends Component {
   constructor(props) {
-    super(props)
+    super(props);
     this._handleScroll = ::this._handleScroll;
   }
 
@@ -37,13 +37,13 @@ export default class App extends Component {
       || nextProps.modal !== this.props.modal
       || nextProps.animationOffset !== this.props.animationOffset
       || nextProps.containerHeight !== this.props.containerHeight
-      || nextProps.scrollTo !== this.props.scrollTo
+      || nextProps.scrollTo !== this.props.scrollTo;
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.scrollTo !== this.props.scrollTo) {
       ReactDOM.findDOMNode(this.scroll)
-        .scrollTop = nextProps.scrollTo
+        .scrollTop = nextProps.scrollTo;
     }
   }
 
@@ -53,7 +53,7 @@ export default class App extends Component {
       { fixed, animationState, animationOffset, containerHeight, handleScroll } = this.props;
 
     // animate scroll, needs height of the container, and its distance from the top
-    handleScroll(containerHeight, animationOffset, scrollTop, animationState, fixed)
+    handleScroll(containerHeight, animationOffset, scrollTop, animationState, fixed);
   }
 
   render() {

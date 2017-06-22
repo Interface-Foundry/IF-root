@@ -14,10 +14,10 @@ const mapStateToProps = (state, props) => ({
   scrollTo: state.app.scrollTo,
   headerTemplate: state.siteState.header,
   src: sessionStorage.src || state.siteState.src
-})
+});
 
 const mapDispatchToProps = dispatch => ({
-  scrollToPosition: (pos) => dispatch(scrollToPosition(pos)),
-})
+  scrollToPosition: (pos) => dispatch(scrollToPosition(pos))
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

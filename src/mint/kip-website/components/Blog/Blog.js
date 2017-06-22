@@ -8,7 +8,7 @@ import { HeaderContainer, FooterContainer } from '../../containers';
 
 export default class Blog extends Component {
   constructor(props) {
-    super(props)
+    super(props);
   }
   static propTypes = {
     posts: PropTypes.array,

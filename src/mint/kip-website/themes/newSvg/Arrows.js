@@ -4,7 +4,7 @@ export default class Arrows extends Component {
 	render() {
 	  	return (
 			<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-				  viewBox="0 0 195.442 195.442" enable-background="new 0 0 195.442 195.442"
+				  viewBox="0 0 195.442 195.442" enableBackground="new 0 0 195.442 195.442"
 				 xmlSpace="preserve">
 			<g>
 				<g>

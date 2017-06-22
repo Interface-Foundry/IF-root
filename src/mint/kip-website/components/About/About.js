@@ -10,7 +10,7 @@ import { Down, Right } from '../../themes/newSvg';
 
 export default class About extends Component {
   constructor(props) {
-    super(props)
+    super(props);
   }
 
   state = {
@@ -21,7 +21,7 @@ export default class About extends Component {
     this.setState({
       offsetTop: ReactDOM.findDOMNode(this.why)
         .offsetTop - 50
-    })
+    });
   }
 
   static propTypes = {

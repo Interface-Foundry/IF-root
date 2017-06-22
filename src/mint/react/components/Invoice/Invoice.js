@@ -11,7 +11,7 @@ import Forms from './Forms';
 export default class Invoice extends Component {
   componentWillMount() {
     const { fetchInvoices, cart } = this.props;
-    fetchInvoices(cart.id)
+    fetchInvoices(cart.id);
   }
 
   render() {

@@ -9,7 +9,8 @@ const fs = require('fs'),
   path = require('path'),
   mintLogger = require('./mint_logging.js'),
   _ = require('lodash'),
-  co = require('co');
+  co = require('co'),
+  auth = require('basic-auth');
 
 // start any jobs
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
@@ -55,6 +56,17 @@ dbReady.then((models) => { db = models; })
 /**
  * BORING STUFF (TODO move this to a file name boilerplate.js)
  */
+if (process.env.BASIC_AUTH_PASSWORD) {
+  app.use((req, res, next) => {
+    const user = auth(req)
+    if (!user || user.pass !== process.env.BASIC_AUTH_PASSWORD) {
+      res.statusCode = 401
+      res.setHeader('WWW-Authenticate', 'Basic realm="example"')
+      return res.end('Access denied')
+    }
+    next()
+  })
+}
 app.enable('trust proxy'); // req.ip gets set from x-forwarded-for headers
 app.use(compress());
 app.set('view engine', 'ejs');

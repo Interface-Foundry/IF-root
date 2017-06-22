@@ -32,8 +32,10 @@ export const post = (url, type, item, cb) => {
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
+
       return dispatch(cb(type, await response.json()));
     } catch (error) {
+      debugger
       return dispatch({
         type: `${type}_FAIL`,
         error: error.err
