@@ -6,7 +6,8 @@ const initialState = {
   results: [],
   categories: [],
   page: 0,
-  query: ''
+  query: '',
+  loading: false
 };
 
 export default (state = initialState, action) => {
@@ -19,7 +20,8 @@ export default (state = initialState, action) => {
   case 'UPDATE_QUERY':
     return {
       ...state,
-      ...action.response
+      ...action.response,
+      loading: false
     };
   case 'UPDATE_ITEM_SUCCESS':
     return {
@@ -34,7 +36,6 @@ export default (state = initialState, action) => {
     itemIndex = state.results.findIndex((item) => {
       return item.id === state.selectedItemId;
     });
-
     return {
       ...state,
       selectedItemId: itemIndex === 0 ? null : state.results[itemIndex - 1].id
@@ -53,6 +54,7 @@ export default (state = initialState, action) => {
       ...state,
       history: !state.history
     };
+  case 'LAZY_SEARCH_LOADING':
   case 'SEARCH_LOADING':
     return {
       ...state,
@@ -61,12 +63,13 @@ export default (state = initialState, action) => {
   case 'LAZY_SEARCH_SUCCESS':
     return {
       ...state,
-      results: [...state.results , ...action.response.results],
+      results: [...state.results, ...action.response.results],
       history: action.response.history,
       page: action.response.page,
       selectedItemId: action.response.selectedItemId,
-      tab: action.response.tab
-    }
+      tab: action.response.tab,
+      loading: false
+    };
   default:
     return state;
   }
