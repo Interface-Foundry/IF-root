@@ -63,7 +63,7 @@ export default class Cart extends Component {
                             editId === item.id ? (
                               <div className='extra'>
                                 <div className='text__expanded'>
-                                  <span><a href={item.original_link}>View on Amazon.com</a></span>
+                                  <span><a href={`/api/item/${item.id}/clickthrough`}>View on Amazon.com</a></span>
                                   <div>
                                     {item.description}
                                   </div>

@@ -20,6 +20,16 @@ export const updateItem = (item_id, updatedValues) => post(
   })
 );
 
+export const navigateAffilateUrl = item_id => get(
+  `/api/item/${item_id}/clickthrough`,
+  'AFFILIATE_URL',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+)
+
 export const addItem = (cart_id, item_id) => post(
   `/api/cart/${cart_id}/item`,
   'ADD_ITEM', { item_id },
