@@ -1115,41 +1115,28 @@ module.exports = function (router) {
   }))
 
   /**
-   * @api {get}
-   * @apiDescription User leaves a cart.
+   * @api {get} Remove User
+   * @apiDescription Remove a user from the cart. Leader can remove anyone but themselves, members can only remove themselves.
    *  - If no invoice is created yet, then their items stay.
    *  - If the invoice is in "split even" mode, then other's invoices will have to update accordingly
    *  - If the invoice is in "pay for your own" mode, then the user's items are removed from cart
    */
-  router.get('/cart/:cart_id/leave', async () => {
-    var cart = await db.Carts.findOne({ id: req.params.cart_id }).populate('invoice')
+  router.get('/cart/:cart_id/removeUser/:user_id', async () => {
+    var cart = await Cart.getById(req.params.cart_id)
 
-    async function removeUser() {
-      cart.members
-    }
-
-    async function removeItems() {
-
-    }
-
-    async function updateInvoices() {
-
-    }
-
-    function done() {
-      res.status(200).end()
-    }
+    // hey a done function you can call at any time
+    const done = res.status(200).end.bind(res)
 
     // If no invoice is created yet, then their items stay.
     if (!cart.invoice) {
-      await removeUser()
+      await cart.removeUser(req.params.user_id)
       return done()
     }
 
     // If the invoice is in "split even" mode, then other's invoices will have
     // to update accordingly
     if (cart.invoice.split_type === 'split_equal') {
-      await removeUser()
+      await cart.removeUser(req.params.user_id)
       await updateInvoices()
       return done()
     }
@@ -1162,11 +1149,9 @@ module.exports = function (router) {
       return done()
     }
 
-    // If the invoice is in "single payer" mode, then 
+    // If the invoice is in "single payer" mode, and the user IS the owner, then
+    if (cart.invoie.split_type === '') {
 
-
-
-
-
+    }
   })
 }

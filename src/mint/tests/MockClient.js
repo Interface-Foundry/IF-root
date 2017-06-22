@@ -13,7 +13,7 @@ class MockClient {
 
   /**
    * Login in as a random user
-   * @type {[type]}
+   * @return {MockClient}
    */
   static async getRandomUser() {
     const email = 'test_user_' + (Math.random() * 10000000 | 0)  + '@example.com'
@@ -35,9 +35,9 @@ class MockClient {
 
   /**
    * Run a get request as this user
-   * @param  {[type]}  url      [description]
-   * @param  {[type]}  extended [description]
-   * @return {Promise}          [description]
+   * @param  {string}  url      the url to hit, like /api/session
+   * @param  {boolean} extended if you want the fulllll response back from request.js, headers and all
+   * @return {Promise}
    */
   async get(url, extended) {
     var body = await request({

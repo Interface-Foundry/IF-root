@@ -14,6 +14,7 @@ class Cart {
    */
   constructor(cart) {
     // first set the default cart options if unset
+    debugger;
     this.user_locale = cart.user_locale || 'US'
     this.items = cart.items || []
 
@@ -24,9 +25,29 @@ class Cart {
     this.store = GetStore(this)
   }
 
+  /**
+   * retrieves a cart from the database by id
+   * @param  {[type]}  cartId [description]
+   * @return {Promise}        [description]
+   */
   static async GetById(cartId) {
-    const cartObject = await db.Carts.findOne({id: cartId}).populate('members').populate('items')
+    if (!cartId) {
+      throw new Error('must supply cartId')
+    }
+
+    // Fetch from the database, populating everything
+    const cartObject = await db.Carts.findOne({id: cartId})
+      .populate('members')
+      .populate('items')
+      .populate('invoice')
+
+    if (!cartObject) {
+      throw new Error('no cart in the database for object with id ' + cartId)
+    }
+
+    // create as the object
     var cart = new Cart(cartObject)
+    debugger;
     if (cartObject.store_locale) {
       cart.user_locale = cartObject.store_locale
     }
@@ -42,8 +63,9 @@ class Cart {
     return Promise.resolve(this)
   }
 
-  add(item) {
+  async add(item) {
     this.items.push(item.id)
+
     return Promise.resolve(this)
   }
 

@@ -173,7 +173,7 @@ module.exports = function (router) {
     if (invoices.length === 0) {
       const invoiceData = {
         cart: req.params.cart_id,
-        split: 'equal'
+        split: 'split_equal'
       }
       const invoice = Invoice.Create('mint', invoiceData)
       const newInvoice = await invoice.createInvoice()
@@ -228,7 +228,7 @@ module.exports = function (router) {
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
-      split_type: _.get(req, 'body.split_type', 'equal')
+      split_type: _.get(req, 'body.split_type', 'split_equal')
     }, _.isUndefined)
 
     logging.info('invoice data', invoiceData)

@@ -23,7 +23,7 @@ if (typeof module.parent !== 'undefined') {
 }
 
 // live reloading
-if (process.env.BUILD_MODE !== 'prebuilt') {
+if (process.env.BUILD_MODE !== 'prebuilt' && typeof describe === 'undefined') {
   const webpackConfig = require('../webpack.dev.config.js');
   const compiler = require('webpack')(webpackConfig);
   app.use(require('webpack-dev-middleware')(compiler, {
@@ -94,7 +94,6 @@ app.use((req, res, next) => co(function* () {
   // req.session will always exist, thanks to the above client-sessions middleware
   // Check to make sure we have stored this user's session in the database
   if (!req.session.id) {
-    console.log('creating new session in the database')
     var session = yield db.Sessions.create({})
     req.session.id = session.id
     req.UserSession = session

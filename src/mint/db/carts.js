@@ -136,8 +136,37 @@ var cartsCollection = Waterline.Collection.extend({
 
     invoice: Waterline.isA('invoices'),
 
+    //
+    // Instance Methods
+    //
+
+    /**
+     * Removes a user from the order. Doesn't do anything with invoices.
+     * @param  {[type]}  user_id [description]
+     * @return {Promise}         [description]
+     */
+    async removeUser(user_id) {
+      if (!user_id) {
+        throw new Error('must supply user_id')
+      }
+
+      if (user_id === _.get(this, 'leader.id', this.leader)) {
+        throw new Error('cannot remove the leader from the order')
+      }
+
+      console.log(`removing user ${user_id} from cart ${this.id}`)
+
+      // remove the member from the order
+      if (_.get(this, 'members.remove')) {
+        this.members.remove(user_id)
+      } else {
+        throw new Error('not implemented yet')
+      }
+      await this.save()
+    },
+
     /** function to archive this object */
-    archive: archive
+    archive: archive,
   }
 });
 
