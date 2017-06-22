@@ -18,8 +18,8 @@ dbReady.then((models) => {
  */
 class YPOStore extends Store {
   constructor() {
-    super('YPO (UK)')
-    this.locale = 'UK'
+    super('YPO (GB)')
+    this.locale = 'GB'
   }
 
   /**
