@@ -31,7 +31,7 @@
         "space-before-function-paren": 0,
         "one-var": 0,
         "comma-dangle": [1, "never"],
-        "semi": [1, "always"],
+        "semi": [0, "always"],
         "quotes": [1, "single"],
         "no-extra-semi": 2,
         "semi-spacing": [

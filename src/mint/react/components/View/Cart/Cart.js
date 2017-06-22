@@ -48,7 +48,7 @@ export default class Cart extends Component {
                           <div className={'image'} style={{
                             backgroundImage: `url(${item.main_image_url})`
                           }}/>
-                          <div className='text'> 
+                          <div className='text'>
                             <h1>{item.name}</h1>
                             <h4> Price: <span className='price'>{displayCost(item.price * item.quantity, cart.store_locale)}</span> </h4>
                             { 
@@ -100,7 +100,7 @@ export default class Cart extends Component {
                             <div className={'image'} style={{
                               backgroundImage: `url(${item.main_image_url})`
                             }}/>
-                            <div className='text'> 
+                            <div className='text'>
                               <h1>{item.name}</h1>
                               <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                               { 
@@ -110,7 +110,7 @@ export default class Cart extends Component {
                                   <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
                                 </div> : null 
                               }
-                            </div> 
+                            </div>
                             {
                               editId === item.id ? (
                                 <div className='extra'>
