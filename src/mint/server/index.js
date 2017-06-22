@@ -59,7 +59,6 @@ dbReady.then((models) => { db = models; })
 if (process.env.BASIC_AUTH_PASSWORD) {
   app.use((req, res, next) => {
     const user = auth(req)
-    console.log('basic auth', user)
     if (!user || user.pass !== process.env.BASIC_AUTH_PASSWORD) {
       res.statusCode = 401
       res.setHeader('WWW-Authenticate', 'Basic realm="example"')
