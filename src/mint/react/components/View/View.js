@@ -9,11 +9,20 @@ export default class App extends Component {
   static propTypes = {
     tab: PropTypes.string,
     cart: PropTypes.object,
-    history: PropTypes.object
+    history: PropTypes.object,
+    selectTab: PropTypes.func,
+    submitQuery: PropTypes.func,
+    search: PropTypes.string,
+    searchLoading: PropTypes.bool
   }
+
   componentWillReceiveProps(nextProps) {
-    const { cart, history: { push } } = nextProps;
+    const { cart, searchLoading, submitQuery, tab, selectTab, search, history: { push,location, location: { search: locSearch } } } = nextProps;
     if (cart && !cart.ok) push('/newcart');
+    else if (search && cart.store && !searchLoading && !this.props.searchLoading)
+      submitQuery(search, cart.store, cart.store_locale);
+    else if (search) selectTab('search');
+    else if (!locSearch && tab === 'search') selectTab('cart'); // probably a better way than this
   }
 
   render() {

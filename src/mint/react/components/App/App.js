@@ -9,7 +9,7 @@ import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
 import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
-import { ErrorPage, Modal, Toast, Loading } from '..';
+import { ErrorPage, Modal, Toast } from '..';
 
 export default class App extends Component {
 
@@ -34,15 +34,9 @@ export default class App extends Component {
     if (selectedItemId) {
       switch (e.keyCode) {
       case 39:
-        // right
-        // console.log('keypress');
-
         navigateRightResults();
         break;
       case 37:
-        // left
-        // console.log('keypress');
-
         navigateLeftResults();
         break;
       }
@@ -66,7 +60,7 @@ export default class App extends Component {
   }
 
   shouldComponentUpdate = (nextProps, nextState) =>
-    nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+    nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.history.location.search !== this.props.history.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
     const { sidenav, popup, togglePopup, match, toast, status, history: { replace } } = this.props;

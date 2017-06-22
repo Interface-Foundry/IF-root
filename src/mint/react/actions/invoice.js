@@ -22,7 +22,7 @@ export const fetchInvoice = invoice_id => get(
 
 export const fetchInvoices = cart_id => get(
   `/api/invoice/cart/${cart_id}`,
-  'INVOICE',
+  'INVOICES',
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -62,7 +62,7 @@ export const sendPaymentCollectionEmails = invoice_id => post(
 
 export const updateInvoiceOptions = (invoice_id, option, data) => put(
   `/api/invoice/payment/${invoice_id}`,
-  'UPDATE_INVOICE_OPTIONS', { option_chage: option, option_data: data },
+  'UPDATE_INVOICE_OPTIONS', { option_change: option, option_data: data },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

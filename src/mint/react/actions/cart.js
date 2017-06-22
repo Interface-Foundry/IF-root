@@ -39,7 +39,7 @@ export const fetchMetrics = cart_id => get(
 
 export const cloneCart = cart_id => get(
   `/api/cart/${cart_id}/clone`,
-  'CART',
+  'CLONE_CART',
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

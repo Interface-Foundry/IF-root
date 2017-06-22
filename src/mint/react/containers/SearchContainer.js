@@ -1,6 +1,8 @@
 // react/containers/SettingsContainer.js
 
 import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
+
 import { Search } from '../components';
 import { updateQuery, toggleHistory, submitQuery } from '../actions';
 import { isUrl, addSearchHistory } from '../utils';
@@ -18,6 +20,7 @@ const mapDispatchToProps = dispatch => ({
   updateQuery: (query) => dispatch(updateQuery(query)),
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);
+    dispatch(push(`?q=${query}`));
     return dispatch(submitQuery(encodeURIComponent(query), store, locale));
   }
 });

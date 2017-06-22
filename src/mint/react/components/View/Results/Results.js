@@ -20,8 +20,8 @@ export default class Results extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
-      nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id;
+    return !!(nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
+      nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id);
   }
 
   render() {
@@ -66,13 +66,14 @@ export default class Results extends Component {
             partitionResults.map((itemrow, i) => (
               <tr key={i} >
                 {
-                  itemrow.map(item => {
+                  itemrow.map((item, i) => {
                     return item.selected ? (
                       <Selected 
                         key={item.id}
                         cartAsins={cartAsins}
                         arrow={arrow}
                         item={item}
+                        numResults={numResults}
                         {...this.props}/>
                       ) : ( 
                         <Default 

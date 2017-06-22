@@ -4,7 +4,8 @@ import { connect } from 'react-redux';
 import { Invoice } from '../components';
 
 import { 
-  selectAccordion
+  selectAccordion,
+  fetchInvoices
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -17,7 +18,8 @@ const mapStateToProps = (state, ownProps) => {
 // Just an example for mapping functions to the component. 
 // What this does it connect the functions to redux, so that the results of those functions get passed to our redux store. 
 const mapDispatchToProps = dispatch => ({
-  selectAccordion: (accordion) => dispatch(selectAccordion(accordion))
+  selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
+  fetchInvoices: (cart_id) => dispatch(fetchInvoices(cart_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Invoice);
