@@ -68,11 +68,11 @@ export default class Sidenav extends Component {
     // https://www.amazon.com/dp/B01GF5AGN4/ref=sr_1_6
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
-        <div className='sidenav__overlay' onClick={_toggleSidenav}>
+        <div className='sidenav__overlay' >
         </div>
         <ul className={`sidenav__list ${large ? 'large' : ''}`}>
           <li className='sidenav__list__header'>
-            <div className='icon' onClick={_toggleSidenav}>
+            <div className='icon' >
               <Icon icon='Clear'/>
             </div>
           </li>
@@ -85,7 +85,7 @@ export default class Sidenav extends Component {
               {leaderCarts.map((c, i) => {
                 if(i > 2 && show !== 'me') return null;
                 return ( 
-                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
+                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} >
                     <div className={'image'} style={{
                       backgroundImage: `url(${c.thumbnail_url ? c.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
                     }}/>
@@ -111,7 +111,7 @@ export default class Sidenav extends Component {
               {memberCarts.map((c, i) => {
                 if(i > 2 && show !== 'other') return null;
                 return (
-                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} onClick={_toggleSidenav}>
+                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} >
                     <div className='icon'>
                     </div>
                     <SideNavLink to={`/cart/${c.id}`}>
@@ -131,11 +131,11 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__actions'>
             {
               archivedCarts.length
-              ? <SideNavLink to={`/cart/${cart_id}/m/archive`} onClick={_toggleSidenav}><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
+              ? <SideNavLink to={`/cart/${cart_id}/m/archive`} ><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
               : null
             }
-            {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} onClick={_toggleSidenav}><h4><Icon icon='Settings'/> My Settings</h4></SideNavLink> : null }
-            <SideNavLink to={`/cart/${cart_id}/m/feedback`} onClick={_toggleSidenav}><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
+            {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} ><h4><Icon icon='Settings'/> My Settings</h4></SideNavLink> : null }
+            <SideNavLink to={`/cart/${cart_id}/m/feedback`} ><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
           </li>
           <footer className='sidenav__footer'>
             <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>
