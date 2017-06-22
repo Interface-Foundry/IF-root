@@ -3,21 +3,22 @@
 @import '../../../react-common/styles/Animations';
 
 .buttons {
-	position: relative;
-	height: $nav-height;
-	padding: 0 $padding*2;
-	button {
-		position: relative;
-		margin: $padding/2 $padding;
-		height: 100%;
-		line-height: $nav-height - $padding;
-		height: $nav-height - $padding;
-		padding: 0 $padding*3;	
-		font-size: 18px;
-		font-weight: bold;
-		border-radius: 5px;
-		border: 0;
-    line-height: ($nav-height - $padding);
+  position: relative;
+  height: $nav-height;
+  padding: 0 ($padding * 2);
+
+  button {
+    position: relative;
+    margin: ($padding / 2) $padding;
+    height: 100%;
+    line-height: $nav-height - $padding;
+    height: $nav-height - $padding;
+    padding: 0 ($padding * 3);
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 0;
+    line-height: $nav-height - $padding;
     white-space: nowrap;
 
     @media only screen and (max-width: 600px) {
@@ -25,49 +26,52 @@
       white-space: inherit;
     }
 
-		svg {
-			display: inline-block;
-			width: $nav-height - $padding;
-			height: $nav-height - $padding;
-		}
+    svg {
+      display: inline-block;
+      width: $nav-height - $padding;
+      height: $nav-height - $padding;
+    }
 
-		div {
-			display: inline-block;
-		}
+    div {
+      display: inline-block;
+    }
 
-		&.sub {
-			line-height: $nav-height - $padding*2.5;
-			span {
-				height: $padding;
-				line-height: $padding;
-				font-size: 14px;
-				bottom: 0;
-			}
-		}
+    &.sub {
+      line-height: $nav-height - $padding * 2.5;
 
-		&.blue {
-			background: transparent;
-			color: $color-blue;
-			svg {
-				fill: $color-blue;
-				padding: $padding/2;
-				vertical-align: top !important;
-			}
-		}
+      span {
+        height: $padding;
+        line-height: $padding;
+        font-size: 14px;
+        bottom: 0;
+      }
+    }
 
-		&.locked {
-			background: transparent;
-			color: white;
-			svg {
-				fill: white;
-				padding: $padding;
-				vertical-align: top !important;
-			}
-		}
+    &.blue {
+      background: transparent;
+      color: $color-blue;
 
-		&.yellow {
-			background: $mainColor;
-      line-height: ($nav-height - $padding);
+      svg {
+        fill: $color-blue;
+        padding: $padding / 2;
+        vertical-align: top !important;
+      }
+    }
+
+    &.locked {
+      background: transparent;
+      color: white;
+
+      svg {
+        fill: white;
+        padding: $padding;
+        vertical-align: top !important;
+      }
+    }
+
+    &.yellow {
+      background: $mainColor;
+      line-height: $nav-height - $padding;
 
       @media only screen and (max-width: 600px) {
         line-height: ($nav-height - $padding) / 2;
@@ -78,7 +82,8 @@
       }
 
       span {
-        line-height: ($nav-height - $padding);
+        line-height: $nav-height - $padding;
+
         @media only screen and (max-width: 600px) {
           display: block;
           line-height: ($nav-height - $padding) / 2;
@@ -89,6 +94,7 @@
         display: inline-block;
         width: calc(100% - #{$nav-height - $padding});
         height: 100%;
+
         @media only screen and (max-width: 600px) {
           width: auto;
         }
@@ -98,6 +104,6 @@
         background: lighten(#333, 70);
         color: #333;
       }
-		}
-	}
+    }
+  }
 }

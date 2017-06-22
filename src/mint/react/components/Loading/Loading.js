@@ -1,15 +1,11 @@
-// react/components/ErrorPage/ErrorPage.js
+// react/components/Loading/Loading.js
 
 import React, { Component } from 'react';
 
-export default class ErrorPage extends Component {
+export default class Loading extends Component {
   render() {
     return (
-      <div className='loading'> 
-        <div>
-          <img src='//storage.googleapis.com/kip-random/many_kips/rocket_R.svg'/>
-        </div>
-      </div>
+      <div className='loading'/>
     );
   }
 }

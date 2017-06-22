@@ -4,6 +4,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -13,6 +14,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -22,6 +24,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -31,6 +34,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -38,10 +42,11 @@
 
 @keyframes scrollInLeft {
   0% {
-    transform: translate3d(200px, 0, 0)
+    transform: translate3d(200px, 0, 0);
   }
+
   100% {
-    transform: translate3d(0px, 0, 0)
+    transform: translate3d(0px, 0, 0);
   }
 }
 
@@ -50,6 +55,7 @@
     opacity: 0;
     transform: translate3d(0, -100%, 0);
   }
+
   100% {
     opacity: 1;
     transform: translate3d(0, 0%, 0);
@@ -61,6 +67,7 @@
     opacity: 1;
     transform: translate3d(0, 0%, 0);
   }
+
   100% {
     opacity: 0;
     transform: translate3d(0, 100%, 0);
@@ -72,6 +79,7 @@
     opacity: 0;
     transform: translate3d(0, -25px, 0);
   }
+
   100% {
     opacity: 1;
     transform: translate3d(0, 0px, 0);
@@ -83,6 +91,7 @@
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
+
   100% {
     opacity: 0;
     transform: translate3d(100%, 0, 0);
@@ -94,6 +103,7 @@
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
+
   100% {
     opacity: 0;
     transform: translate3d(0, 100%, 0);
@@ -105,6 +115,7 @@
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
+
   100% {
     opacity: 0;
     transform: translate3d(0, -100%, 0);
@@ -115,9 +126,11 @@
   0% {
     box-shadow: 0 0 0 0 rgba(255, 223, 77, 1);
   }
+
   70% {
     box-shadow: 0 0 0 30px rgba(255, 223, 77, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(255, 223, 77, 0);
   }
@@ -127,9 +140,11 @@
   0%, 20%, 50%, 80%, 100% {
     transform: translate3d(0, 0, 0);
   }
+
   40% {
     transform: translate3d(0, 5px, 0);
   }
+
   60% {
     transform: translate3d(0, 2.5px, 0);
   }
@@ -139,9 +154,11 @@
   0%, 20%, 50%, 80%, 100% {
     transform: translate3d(0, 0, 0) rotate(180deg);
   }
+
   40% {
     transform: translate3d(0, 5px, 0) rotate(180deg);
   }
+
   60% {
     transform: translate3d(0, 2.5px, 0) rotate(180deg);
   }
@@ -149,19 +166,21 @@
 
 @keyframes placeHolderShimmer {
   0% {
-    background-position: -400px 0
+    background-position: 100% 0;
   }
+
   100% {
-    background-position: 400px 0
+    background-position: -100% 0;
   }
 }
 
 @keyframes progressBar {
   0% {
-    background-position: 0% 0
+    background-position: 0% 0;
   }
+
   100% {
-    background-position: 100% 0
+    background-position: 100% 0;
   }
 }
 
@@ -178,4 +197,3 @@
   -o-transition: $transition;
   transition: $transition;
 }
-
