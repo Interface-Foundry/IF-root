@@ -71,30 +71,30 @@ export default class Results extends Component {
             <th colSpan='100%'>
               <nav>
                 {
-                  loading 
+                  loading
                   ? ''
                   : <p> About {results.length} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
                 }
               </nav>
             </th>
           </tr>
-          { 
-            loading 
+          {
+            loading
             ? loadingArr
             : partitionResults.map((itemrow, i) => (
               <tr key={i} >
                 {
                   itemrow.map((item, i) => {
                     return item.selected ? (
-                      <Selected 
+                      <Selected
                         key={item.id}
                         cartAsins={cartAsins}
                         arrow={arrow}
                         item={item}
                         numResults={results.length}
                         {...this.props}/>
-                      ) : ( 
-                        <Default 
+                      ) : (
+                        <Default
                           key={item.id}
                           item={item}
                           cartAsins={cartAsins}
@@ -106,7 +106,7 @@ export default class Results extends Component {
             ))
           }
         </tbody>
-        <div className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page)}>Load more results</span></div>
+        <div className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></div>
       </table>
     );
   }
