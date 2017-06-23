@@ -22,8 +22,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		border-radius: $padding;
 		margin: $padding auto $padding*2;
 		max-width: 250px;
-		background-color: #eaf9ff;
-		font-weight: normal;
+		background-color: #54a2eb;
+		color: #fff;
+		font-weight: bold;
 		&:before {
 		  content:"";
 		  position: absolute;
@@ -32,13 +33,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 		  height: 0;
 		  bottom: calc(50% - 15px);
 		  border-top: 13px solid transparent;
-		  border-left: 15px solid #eaf9ff;
+		  border-left: 15px solid #54a2eb;
 		  border-bottom: 13px solid transparent;
 		  @media only screen and (max-width: 600px) {
 		  	bottom: -15px;
 		  	right: calc(50% - 15px);
 			border-left: 13px solid transparent;
-			border-top: 15px solid #eaf9ff;
+			border-top: 15px solid #54a2eb;
 			border-right: 13px solid transparent;
 			border-bottom: 0;
 		  }
@@ -46,6 +47,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 	}
 	span {
 		font-weight: bold;
+		font-size: 18px;
 	}
 
 	&.results {
@@ -66,7 +68,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			&:before {
 				display: none;
 			}
-			background: white;
+			background-color: #54a2eb;
 		}
 		h5 {
 			display: inline-block;

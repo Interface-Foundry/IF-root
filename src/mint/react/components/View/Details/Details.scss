@@ -112,9 +112,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 					}
 					h4 {
 						font-size: 14px;
-						height: 20px;
+						height: 14px;
 						font-weight: 100;
-						line-height: 20px;
+						line-height: 23px;
 						opacity: 0.8;
 
 						b {
@@ -124,6 +124,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 						.price {
 							color: $price-color;
 						}
+					}
+					h5 {
+						font-size: 12px;
+						height: 0px;
+						font-weight: 100;
+						line-height: 17px;
+						opacity: 0.5;
 					}
 				}
 			}
@@ -148,7 +155,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 			.metrics {
 				display: block;
 				width: 100%;
-				padding: $padding;
+				padding: 0px 5px 9px 13px;
 
 				.metric {
 					display: inline-block;
@@ -231,6 +238,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 				&.updated {
 					color: rgba(#111, 0.5);
+					font-size: 12px;
+					line-height: 18px;
 				}
 			}
 		}
