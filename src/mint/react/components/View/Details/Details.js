@@ -77,7 +77,7 @@ export default class Details extends Component {
                         }
                       </h1>
                       <h4>{store} {store_locale}</h4>
-                      <h4>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h4>
+                      <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>
                       <section className='undoredo'>
                         {
                           showUndo 

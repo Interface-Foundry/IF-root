@@ -43,7 +43,7 @@ const mapDispatchToProps = dispatch => ({
   unlikeCart: (id) => dispatch(unlikeCart(id)),
   cloneCart: (cart_id) => dispatch(cloneCart(cart_id)).then(() => {
     dispatch(fetchMetrics(cart_id));
-    dispatch(replace(`/cart/${cart_id}?toast=Cart Re-kiped &status=success`));
+    dispatch(replace(`/cart/${cart_id}?toast=Cart Re-Kipped &status=success`));
   }),
   undoRemove: ({ items = [], id: cartId = '' }, cartElder) => {
     const oldItems = cartElder[cartElder.length - 1].items,

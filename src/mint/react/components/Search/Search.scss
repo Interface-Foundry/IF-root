@@ -6,9 +6,12 @@
   width: 100%;
   max-width: 600px;
   margin: 10px 0 10px 30px;
-  height: 30px;
+  height: 34px;
   * {
     height: 100%;
+  }
+  &:focus {
+    background-color: #000;
   }
   input {
     width: calc(100% - #{$nav-height});
@@ -97,4 +100,5 @@
     }
   }
 }
+
 

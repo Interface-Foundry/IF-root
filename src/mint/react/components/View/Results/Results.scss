@@ -99,9 +99,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     & button {
       border: 0;
       background: $mainColor;
-      height: 25px;
+      height: 28px;
       line-height: 25px;
-      font-size: 12px;
+      font-size: 14px;
       padding: 0 ($padding * 3);
       border-radius: 5px;
 
@@ -129,6 +129,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         background: white;
         color: $secondaryColor;
         padding: 0;
+        font-weight: bold;
       }
 
       svg {

@@ -46,10 +46,19 @@ export const fetchItem = item_id => get(
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: {
-      results: [json],
-      history: false,
-      selectedItemId: json.id,
-      tab: 'search'
+      item: json
+    },
+    receivedAt: Date.now()
+  })
+);
+
+export const fetchSearchItem = item_id => get(
+  `/api/item/${item_id}`,
+  'SEARCH_ITEM',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: {
+      item: json
     },
     receivedAt: Date.now()
   })

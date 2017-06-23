@@ -71,7 +71,7 @@ export default class App extends Component {
   }
 
   _handleScroll(e) {
-    const { location: { search }, query, cart, page, getMoreSearchResults } = this.props;
+    const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
     if(search) {
@@ -80,7 +80,7 @@ export default class App extends Component {
         windowHeight = ReactDOM.findDOMNode(this.scroll).clientHeight;
 
       // animate scroll, needs height of the container, and its distance from the top
-      if(checkPageScroll(scrollTop, containerHeight, windowHeight)) {
+      if(checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
         getMoreSearchResults(query, cart.store, cart.store_locale, page + 1)
       };
     }

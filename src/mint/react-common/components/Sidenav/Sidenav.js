@@ -79,6 +79,7 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__view'>
             <div className='sidenav__list__title'>
               { user_account.name ? <h4 className='name'> <Link to={`/cart/${cart_id}/m/settings`}><span>{user_account.name}</span></Link> </h4> : '' } 
+              <br></br>
               { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
             </div>
             <ul>

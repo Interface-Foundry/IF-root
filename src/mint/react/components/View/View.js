@@ -20,8 +20,10 @@ export default class App extends Component {
 
 
   componentWillReceiveProps(nextProps) {
-    const { cart } = nextProps;
+    const { cart, tab, selectTab, history: { push,location, location: { search: locSearch } } } = nextProps;
     if (cart && !cart.ok) push('/newcart');
+    else if (!locSearch && tab === 'search') selectTab('cart'); 
+    else if (locSearch && tab === 'cart') selectTab('search'); 
   }
 
   render() {

@@ -14,7 +14,7 @@
     line-height: $nav-height - $padding;
     height: $nav-height - $padding;
     padding: 0 ($padding * 3);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     border-radius: 5px;
     border: 0;
@@ -24,12 +24,13 @@
     @media only screen and (max-width: 600px) {
       font-size: 14px;
       white-space: inherit;
+      border-top: 1px solid #fff;
     }
 
     svg {
       display: inline-block;
-      width: $nav-height - $padding;
-      height: $nav-height - $padding;
+      width: $nav-height - $padding * 1.5;
+      height: $nav-height - $padding * 1.5;
     }
 
     div {
@@ -42,7 +43,6 @@
       span {
         height: $padding;
         line-height: $padding;
-        font-size: 14px;
         bottom: 0;
       }
     }
@@ -86,7 +86,7 @@
 
         @media only screen and (max-width: 600px) {
           display: block;
-          line-height: ($nav-height - $padding) / 2;
+          line-height: ($nav-height - $padding) / 3;
         }
       }
 

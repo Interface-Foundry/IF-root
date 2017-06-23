@@ -60,6 +60,14 @@ export default function cart(state = initialState, action) {
       ...state,
       items: []
     };
+  case 'ITEM_SUCCESS':
+    return {
+      ...state,
+      items: state.items.reduce((acc, item, i) => {
+        item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item, added_by: item.added_by}) : acc.push(item);
+        return acc;
+      }, [])
+    };
   case 'UPDATE_ITEM_SUCCESS':
     return {
       ...state,

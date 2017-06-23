@@ -31,7 +31,7 @@ export default class CartButtons extends Component {
         { !cart.locked && user.id && (user.id !== item.added_by) ? <button onClick={() => copyItem(cart.id, item.id)}><span>Copy</span></button> : null }
         { !user.id  ? <button onClick={() => fetchItem(item.id)}><span>View</span></button> : null }
         { cart.locked ? <button className="locked" disabled='true'><Icon icon='Locked'/></button> : null }
-        { editId !== item.id ? <button className='info' onClick={() =>  selectCartItem(item.id)}>More Info</button> : <button className='info' onClick={() =>  selectCartItem(null)}>Hide Info</button> }
+        { editId !== item.id ? <button className='info' onClick={() => { fetchItem(item.id); selectCartItem(item.id)}}>More Info</button> : <button className='info' onClick={() =>  selectCartItem(null)}>Hide Info</button> }
       </div>
     );
   }

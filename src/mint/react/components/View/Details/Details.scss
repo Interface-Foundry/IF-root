@@ -25,7 +25,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   th {
     text-align: left;
-    padding: ($padding / 3) ($padding / 2) $padding;
+    padding: ($padding / 1.5) ($padding / 2) $padding;
 
     @media only screen and (max-width: 600px) {
       padding: 0 3px;
@@ -132,6 +132,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               color: $price-color;
             }
           }
+	      h5 {
+			font-size: 12px;
+			height: 0px;
+			font-weight: 100;
+			line-height: 17px;
+			opacity: 0.5;
+		  }
         }
       }
 
@@ -158,7 +165,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       .metrics {
         display: block;
         width: 100%;
-        padding: $padding;
+        padding: 0px 5px 9px 13px;
 
         .metric {
           display: inline-block;
@@ -246,7 +253,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         margin-right: $padding * 2;
 
         &.updated {
-          color: rgba(#111, 0.5);
+          	color: rgba(#111, 0.5);
+			font-size: 12px;
+			line-height: 18px;
         }
       }
     }

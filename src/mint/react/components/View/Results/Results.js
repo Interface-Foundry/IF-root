@@ -20,20 +20,22 @@ export default class Results extends Component {
     user: PropTypes.object,
     getMoreSearchResults: PropTypes.func,
     page: PropTypes.number,
-    loading: PropTypes.bool
+    loading: PropTypes.bool,
+    lazyLoading: PropTypes.bool
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return !!(nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
-      nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id);
+    return (nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
+      nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id || nextProps.lazyLoading !== this.props.lazyLoading || nextProps.loading !== this.props.loading);
   }
 
   render() {
     // Needs refactor, too many loop-di-loops here.
     let arrow, selected;
-    const { cart, query, page, results, selectedItemId, getMoreSearchResults, loading } = this.props,
+    const { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading } = this.props,
+      lazyRes = loading ? (new Array(10)).fill().map((_, i) => ({ loading: true, id: null })) : lazyLoading ? [...results, ...(new Array(10)).fill().map((_, i) => ({ loading: true, id: null }))] : results,
       cartAsins = cart.items.map((item, i) => `${item.asin}-${item.added_by}`),
-      partitionResults = results.reduce((acc, result, i) => {
+      partitionResults = lazyRes.reduce((acc, result, i) => {
         if (i % size === 0) acc.push([]);
         acc[acc.length - 1].push(result);
 
@@ -49,20 +51,9 @@ export default class Results extends Component {
         return acc;
       }, []);
 
-    if (selected) partitionResults.splice(selected.row, 0, [{...selected.result, selected: true, index: selected.index }]);
+    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index }]);
 
     if (!results.length && !loading) return <EmptyContainer />;
-
-    const loadingArr = [
-      ...partitionResults,
-      ...(new Array(10))
-      .fill()
-      .map((_, i) => <LoadingTile key={i}/>)
-      .reduce((a, c, i) => Object.assign([], a, {
-        [Math.floor(i / size)]: a[Math.floor(i / size)] ? [...a[Math.floor(i / size)], c] : [c]
-      }), [])
-      .map((a, i) => <tr key={i}>{a}</tr>)
-    ];
 
     return (
       <table className='results'>
@@ -72,28 +63,28 @@ export default class Results extends Component {
               <nav>
                 {
                   loading 
-                  ? ''
+                  ? 'Loading...'
                   : <p> About {results.length} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
                 }
               </nav>
             </th>
           </tr>
           { 
-            loading 
-            ? loadingArr
-            : partitionResults.map((itemrow, i) => (
-              <tr key={i} >
+            partitionResults.map((itemrow, i) => (
+            <tr key={i} >
                 {
                   itemrow.map((item, i) => {
-                    return item.selected ? (
-                      <Selected 
+                    return item.loading
+                    ? <LoadingTile key={i}/>
+                      : item.selected 
+                      ? (<Selected 
                         key={item.id}
                         cartAsins={cartAsins}
                         arrow={arrow}
                         item={item}
                         numResults={results.length}
                         {...this.props}/>
-                      ) : ( 
+                      ) : (
                         <Default 
                           key={item.id}
                           item={item}
@@ -103,10 +94,11 @@ export default class Results extends Component {
                   })
                 }
               </tr>
-            ))
+          ))
+
           }
         </tbody>
-        <div className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page)}>Load more results</span></div>
+        <div className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></div>
       </table>
     );
   }
