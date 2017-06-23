@@ -266,7 +266,7 @@ class AmazonStore extends Store {
     // create a new item
     try {
       var item = await db.Items.create({
-          store: 'amazon',
+          store: 'Amazon',
           name: i.ItemAttributes.Title,
           asin: i.ASIN,
           parent_asin: i.ParentASIN,
