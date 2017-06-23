@@ -326,6 +326,40 @@ describe('api', function () {
     assert.equal(cart.id, mcTesty.cart_id)
   }))
 
+  it('GET /api/cart/:cart_id/clone should create a clone', () => co(function * () {
+    var clone = yield get('/api/cart/' + mcTesty.cart_id + '/clone')
+    var original = yield db.Carts.findOne({id: mcTesty.cart_id})
+    // original set as the parent of the new cart
+    assert.equal(clone.parent_clone, original.id)
+    // the leader is the user that cloned the cart
+    assert.equal(clone.leader, mcTesty.id)
+    // the members did not transfer
+    assert.equal(clone.members.length, 0)
+  }))
+
+  it('GET /api/cart/:cart_id/reorder should create reorder version of the cart', () => co(function * () {
+    var reorder = yield get('/api/cart/' + mcTesty.cart_id + '/reorder')
+    var original = yield db.Carts.findOne({id: mcTesty.cart_id}).populate('leader').populate('members')
+    // original set as the parent of the new cart
+    assert.equal(reorder.parent_reorder, original.id)
+    // the leader is the same as the original
+    assert.equal(reorder.leader.id, original.leader.id)
+    // the members are the same in both carts
+    assert.deepEqual(reorder.members.length, original.members.length)
+  }))
+
+  it('GET /api/cart/:cart_id/metrics returns engagement metrics for the cart', () => co(function * () {
+    var metrics = yield get('/api/cart/' + mcTesty.cart_id + '/metrics')
+    var fields = ['views', 'clones', 'checkouts', 'likes']
+    // returns all the right metrics
+    assert(Object.keys(metrics).reduce(function (acc, k) {
+      console.log('k', k)
+      return fields.indexOf(k) > -1 && acc
+    }, true))
+    // we've made one clone
+    assert.equal(1, metrics.clones)
+  }))
+
   it('GET /api/user should return a user for an email address', () => co(function * () {
     var user = yield get('/api/user?email=' + encodeURIComponent(mcTesty.email))
     assert(user)

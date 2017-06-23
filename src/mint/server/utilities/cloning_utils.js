@@ -78,7 +78,7 @@ var clone = function * (cart_id, user_id, reorder) {
   }
   yield clone.save()
 
-  clone = yield db.Carts.findOne({id: clone.id}).populate('items')
+  clone = yield db.Carts.findOne({id: clone.id}).populate('items').populate('members')
   return clone;
 }
 
@@ -114,7 +114,7 @@ var reorder = function * (cart_id, user_id) {
   yield copy.save()
 
   // var original_test = yield db.Carts.findOne({id: cart_id}).populate('members').populate('items')
-  var copy_test = yield db.Carts.findOne({id: copy.id}).populate('members').populate('items')
+  var copy_test = yield db.Carts.findOne({id: copy.id}).populate('members').populate('items').populate('leader')
   // logging.info('original:', original_test)
   // logging.info('copy:', copy_test)
   return copy_test
