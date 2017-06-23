@@ -37,7 +37,10 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const { _handleScroll } = this;
+    const { _handleScroll, _logPageView } = this;
+
+    _logPageView();
+
     ReactDOM.findDOMNode(this.scroll)
       .addEventListener('scroll', _handleScroll);
   }
