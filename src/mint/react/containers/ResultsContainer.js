@@ -15,7 +15,8 @@ const mapStateToProps = (state, ownProps) => ({
   tab: state.app.viewTab,
   categories: state.search.categories,
   results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user),
-  loading: state.search.loading
+  loading: state.search.loading,
+  lazyLoading: state.search.lazyLoading
 });
 
 const mapDispatchToProps = dispatch => ({

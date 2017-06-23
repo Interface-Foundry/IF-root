@@ -7,7 +7,8 @@ const initialState = {
   categories: [],
   page: 0,
   query: '',
-  loading: false
+  loading: false,
+  lazyLoading: false
 };
 
 export default (state = initialState, action) => {
@@ -22,7 +23,6 @@ export default (state = initialState, action) => {
   case 'ITEM_SUCCESS':
   case 'SEARCH_SUCCESS':
   case 'CATEGORIES_SUCCESS':
-  case 'UPDATE_QUERY':
     return {
       ...state,
       ...action.response,
@@ -60,6 +60,10 @@ export default (state = initialState, action) => {
       history: !state.history
     };
   case 'LAZY_SEARCH_LOADING':
+    return {
+      ...state,
+      lazyLoading: true
+    };
   case 'SEARCH_LOADING':
     return {
       ...state,
@@ -73,7 +77,7 @@ export default (state = initialState, action) => {
       page: action.response.page,
       selectedItemId: action.response.selectedItemId,
       tab: action.response.tab,
-      loading: false
+      lazyLoading: false
     };
   default:
     return state;
