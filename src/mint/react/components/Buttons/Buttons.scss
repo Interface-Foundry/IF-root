@@ -103,6 +103,10 @@
       &:disabled {
         background: lighten(#333, 70);
         color: #333;
+
+        & span {
+          display: none; // we don't need the price I guess???? this is a mess
+        }
       }
     }
   }
