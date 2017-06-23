@@ -35,7 +35,6 @@ export const post = (url, type, item, cb) => {
 
       return dispatch(cb(type, await response.json()));
     } catch (error) {
-      debugger
       return dispatch({
         type: `${type}_FAIL`,
         error: error.err

@@ -11,7 +11,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import ReactGA from 'react-ga';
 
 import Reducers from './reducers';
-import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories } from './actions';
+import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
@@ -46,13 +46,22 @@ const store = createStore(
 // Fetch everything required for the app to not break
 // Fetch Metrics
 const cart_id = location.pathname.split('/')[2];
+const search = location.search.match(/q=([^&$]+)/);
+
+// submitQuery(search, cart.store, cart.store_locale)
 
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
   if (cart_id) {
     store.dispatch(fetchCart(cart_id))
-      .then(() => store.dispatch(fetchCategories(cart_id)))
-      .then(() => {
+      .then((res) => {
+        store.dispatch(fetchCategories(cart_id))
+
+        if (search) {
+          store.dispatch(updateQuery(decodeURIComponent(search[1])));
+          store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale))
+        }
+      }).then(() => {
         store.dispatch(fetchMetrics(cart_id));
         store.dispatch(fetchCarts());
       });

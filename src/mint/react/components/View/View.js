@@ -14,16 +14,14 @@ export default class App extends Component {
     selectTab: PropTypes.func,
     submitQuery: PropTypes.func,
     search: PropTypes.string,
-    searchLoading: PropTypes.bool
+    searchLoading: PropTypes.bool,
+    selectedItemId: PropTypes.string
   }
 
+
   componentWillReceiveProps(nextProps) {
-    const { cart, searchLoading, submitQuery, tab, selectTab, search, history: { push,location, location: { search: locSearch } } } = nextProps;
+    const { cart } = nextProps;
     if (cart && !cart.ok) push('/newcart');
-    else if (search && cart.store && !searchLoading && !this.props.searchLoading)
-      submitQuery(search, cart.store, cart.store_locale);
-    else if (search) selectTab('search');
-    else if (!locSearch && tab === 'search') selectTab('cart'); 
   }
 
   render() {

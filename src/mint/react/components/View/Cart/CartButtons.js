@@ -17,7 +17,8 @@ export default class CartButtons extends Component {
     copyItem: PropTypes.func,
     updateItem: PropTypes.func,
     fetchItem: PropTypes.func,
-    selectCartItem: PropTypes.func
+    selectCartItem: PropTypes.func,
+    fetchItem: PropTypes.func
   }
 
   render() {
