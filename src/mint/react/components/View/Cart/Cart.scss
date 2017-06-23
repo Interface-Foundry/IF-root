@@ -25,7 +25,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .action {
-    padding: $padding*2 0 0;
+    padding: $padding*1.5 0 8;
     text-align: right;
 
     button {
@@ -37,8 +37,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       line-height: 25px;
       color: #333;
       font-size: 14px;
-      font-weight: bold;
-      border-right: 1px solid #111;
+      opacity: 0.6;
+      
+      border-right: 1px solid #a7a7a7;
 
       &:last-of-type {
         border-right: 1px solid transparent;
@@ -46,6 +47,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       &.info {
         color: $secondaryColor;
+        font-weight: bold;
+        opacity: 1;
       }
     }
   }
@@ -87,12 +90,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       & > h4 {
         font-weight: 100;
+
+        z {
+          font-size: 15px;
+        }
       }
 
       ul {
         border-radius: 5px;
         padding: $padding 0;
-        margin: ($padding * 2) auto $padding;
+        margin: ($padding) auto 0;
       }
 
       li {
@@ -141,7 +148,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             span {
               color: $secondaryColor;
               padding: $padding 0;
-              font-size: 10px;
+              font-size: 12px;
             }
           }
         }
@@ -178,6 +185,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               padding: 0 $padding;
               height: $nav-height / 2;
               line-height: $nav-height / 2;
+              font-size: 13px;
             }
           }
 

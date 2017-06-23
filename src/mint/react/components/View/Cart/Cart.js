@@ -39,7 +39,9 @@ export default class Cart extends Component {
                     <span className='grey'>{numberOfItems(myCart)} items ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>
                   </h4>
                   <h4>
+                  <z>
                     Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
+                  </z>
                   </h4>
                   <ul>
                     {
