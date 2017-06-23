@@ -44,12 +44,12 @@ export default class Default extends Component {
         {
           cart.locked ? <span>
             <button className='yellow sub' onClick={() => reorderCart(cart.id)}> Re-Order {displayCost(total, cart.store_locale)} </button>
-            { cart.leader.id === user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button> : null }
+            { cart.leader.id == user.id || cart.leader == user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button> : null }
           </span> : <span>
             {
               cart.items.length === 0 ? 
-                <button className='yellow sub' disabled={true}> Checkout <span>{displayCost(total, cart.store_locale)} </span></button> : 
-                <button className='yellow sub'> <a href={`/api/cart/${cart.id}/checkout`}> <Icon icon='Cart'/> <div className='text'>Checkout <span> {displayCost(total, cart.store_locale)} </span></div></a> </button> 
+                <button className='yellow sub' disabled={true} > Checkout <span>{displayCost(total, cart.store_locale)} </span></button> : 
+                <button className='yellow sub' onClick={() => updateCart({ ...cart, locked: true })}> <a href={`/api/cart/${cart.id}/checkout`} target="_blank"> <Icon icon='Cart'/> <div className='text'>Checkout <span> {displayCost(total, cart.store_locale)} </span></div></a> </button> 
               }
             <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button>
           </span>

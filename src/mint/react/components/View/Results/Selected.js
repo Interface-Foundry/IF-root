@@ -33,10 +33,10 @@ export default class Selected extends Component {
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''} ${afterClass}`}>
           <div className='navigation'>
-            <button className='left' onClick={() => navigateLeftResults()}>
+            <button className='left' onClick={() => { navigateLeftResults() }}>
               <Icon icon='LeftChevron'/>
             </button>
-            <button className='right' onClick={() => navigateRightResults()}>
+            <button className='right' onClick={() => { navigateRightResults() }}>
               <Icon icon='RightChevron'/>
             </button>
           </div>
@@ -92,7 +92,7 @@ export default class Selected extends Component {
               </div> : <div className='padding'/>
             }
             <div className='text__expanded'>
-              <span><a href={`/api/item/${item.id}/clickthrough`}>View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+              <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
               <div>
                 {item.description}
               </div>
