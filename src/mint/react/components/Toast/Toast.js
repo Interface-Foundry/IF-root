@@ -11,7 +11,9 @@ export default class Toast extends Component {
     loc: PropTypes.object,
     replace: PropTypes.func
   }
+
   redirect = null
+  
   state = {
     showToast: false
   }

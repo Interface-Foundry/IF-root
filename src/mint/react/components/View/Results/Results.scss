@@ -97,6 +97,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       background: white;
       border: 1px solid $border-color-light;
 
+      @media only screen and (max-width: 600px) {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: $padding;
+
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+      }
+
       &:focus {
         font-size: 12px;
       }

@@ -48,8 +48,6 @@ const store = createStore(
 const cart_id = location.pathname.split('/')[2];
 const search = location.search.match(/q=([^&$]+)/);
 
-// submitQuery(search, cart.store, cart.store_locale)
-
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
   if (cart_id) {
