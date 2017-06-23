@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../../react-common/components';
-import { timeFromDate, numberOfItems } from '../../../utils';
+import { timeFromDate, numberOfItems, getStoreName } from '../../../utils';
 import { ButtonsContainer } from '../../../containers';
 
 export default class Details extends Component {
@@ -63,24 +63,24 @@ export default class Details extends Component {
                     <div className={'image'} style={{
                       backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
                     }}/>
-                    <div className='text'> 
+                    <div className='text'>
                       <h1>
-                        { 
+                        {
                           locked ? <div className='locked'>
                             <Icon icon='Locked'/>
-                            {name} 
+                            {name}
                           </div> : <Link to={`/cart/${id}/m/edit`}>
-                            {name} 
+                            {name}
                             <Icon icon='Edit'/>
                             <span>Edit</span>
                           </Link>
                         }
                       </h1>
-                      <h4>{store} {store_locale}</h4>
+                      <h4>{getStoreName(store, store_locale)}</h4>
                       <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>
                       <section className='undoredo'>
                         {
-                          showUndo 
+                          showUndo
                             ? <div className='undo__button'><button onClick={() => undoRemove(cart, oldCart)}>Undo</button></div>
                             : null
                         }
@@ -90,7 +90,7 @@ export default class Details extends Component {
                             : null
                         }
                       </section>
-                    </div> 
+                    </div>
                   </div>
                   <div className='right'>
                     <ButtonsContainer/>
@@ -100,9 +100,9 @@ export default class Details extends Component {
                   {
                     metrics.map((m) => (
                       <div key={m.name} className={
-                          `metric 
+                          `metric
                           ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}
-                          ${ m.name !== 'Members' ? 'cursor' : '' }` 
+                          ${ m.name !== 'Members' ? 'cursor' : '' }`
                         } onClick={() => {
                           m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === 'Re-Kips' ? cloneCart(id): null;
                         }}>

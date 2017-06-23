@@ -3,7 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { calculateItemTotal, displayCost, timeFromDate, numberOfItems } from '../../../utils';
+import { calculateItemTotal, displayCost, timeFromDate, numberOfItems, getStoreName } from '../../../utils';
 import { splitCartById } from '../../../reducers';
 
 import { Icon } from '../../../../react-common/components';
@@ -53,19 +53,19 @@ export default class Cart extends Component {
                           <div className='text'>
                             <h1>{item.name}</h1>
                             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
-                            { 
+                            {
                               !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
                                 <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                                 <p>{ item.quantity }</p>
                                 <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                              </div> : null 
+                              </div> : null
                             }
                           </div>
                           {
                             editId === item.id ? (
                               <div className='extra'>
                                 <div className='text__expanded'>
-                                  <span><a href={`/api/item/${item.id}/clickthrough`}>View on Amazon.com</a></span>
+                                  <span><a href={`/api/item/${item.id}/clickthrough`}>View on {getStoreName(cart.store, cart.store_locale)}</a></span>
                                   <div>
                                     {item.description}
                                   </div>
@@ -105,12 +105,12 @@ export default class Cart extends Component {
                             <div className='text'>
                               <h1>{item.name}</h1>
                               <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
-                              { 
+                              {
                                 !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
                                   <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                                   <p>{ item.quantity }</p>
                                   <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                                </div> : null 
+                                </div> : null
                               }
                             </div>
                             {

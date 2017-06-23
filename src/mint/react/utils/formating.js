@@ -97,3 +97,20 @@ export const removeDangerousCharactersFromString = (string) => {
   // ];
   return string;
 };
+
+export const getStoreName = (store, store_locale) => {
+  if (store === 'YPO') {
+    return 'YPO.co.uk'
+  } else if (store === 'Amazon') {
+    switch (store_locale) {
+      case 'GB':
+        return 'Amazon.co.uk'
+      case 'CA':
+        return 'Amazon.ca'
+      default:
+        return 'Amazon.com'
+    }
+  } else {
+    return ''
+  }
+}

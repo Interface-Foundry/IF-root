@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import Default from './Default';
 import Selected from './Selected';
 import LoadingTile from './LoadingTile';
-import { numberOfItems } from '../../../utils';
+import { numberOfItems, getStoreName } from '../../../utils';
 import { EmptyContainer } from '../../../containers';
 
 const size = 3;
@@ -62,22 +62,22 @@ export default class Results extends Component {
             <th colSpan='100%'>
               <nav>
                 {
-                  loading 
+                  loading
                   ? 'Loading...'
-                  : <p> About {results.length} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
+                  : <p> About {results.length} results for <span className='price'>"{query}"</span> from {getStoreName(cart.store, cart.store_locale)} </p>
                 }
               </nav>
             </th>
           </tr>
-          { 
+          {
             partitionResults.map((itemrow, i) => (
             <tr key={i} >
                 {
                   itemrow.map((item, i) => {
                     return item.loading
                     ? <LoadingTile key={i}/>
-                      : item.selected 
-                      ? (<Selected 
+                      : item.selected
+                      ? (<Selected
                         key={item.id}
                         cartAsins={cartAsins}
                         arrow={arrow}
@@ -85,7 +85,7 @@ export default class Results extends Component {
                         numResults={results.length}
                         {...this.props}/>
                       ) : (
-                        <Default 
+                        <Default
                           key={item.id}
                           item={item}
                           cartAsins={cartAsins}

@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { displayCost, removeDangerousCharactersFromString } from '../../../utils';
+import { displayCost, removeDangerousCharactersFromString, getStoreName } from '../../../utils';
 import { Delete } from '../../../../react-common/kipsvg';
 
 import { Icon } from '../../../../react-common/components';
@@ -50,34 +50,34 @@ export default class Selected extends Component {
           <div className={'image'} style={{
             backgroundImage: `url(${item.main_image_url})`
           }}/>
-          <div className='text'> 
+          <div className='text'>
             <h1>{item.name}</h1>
             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
             <div className='action'>
-              { 
+              {
                 !cart.locked && user.id ? <div className={`update ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'grey' : ''}`}>
                   <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                   <p>{ item.quantity }</p>
                   <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                </div> : null 
+                </div> : null
               }
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
               { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
               { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button className='sticky' onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
               { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button className='sticky' disabled={true}>Update {item.quantity} In Cart</button> : null }
             </div>
-            { 
+            {
               item.iframe_review_url ? <div className='iframe'>
                 <iframe scrolling="no" src={`${item.iframe_review_url}`}/>
               </div> : <div className='padding'/>
             }
             <div className='text__expanded'>
-              <span><a href={`/api/item/${item.id}/clickthrough`}>View on Amazon.com</a></span>
+              <span><a href={`/api/item/${item.id}/clickthrough`}>View on {getStoreName(cart.store, cart.store_locale)}</a></span>
               <div>
                 {item.description}
               </div>
             </div>
-          </div> 
+          </div>
         </div>
       </td>
     );

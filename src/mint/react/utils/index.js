@@ -27,7 +27,8 @@ export {
   displayCost,
   removeDangerousCharactersFromString,
   splitAndMergeSearchWithCart,
-  formatPrivacy
+  formatPrivacy,
+  getStoreName
 }
 from './formating';
 
