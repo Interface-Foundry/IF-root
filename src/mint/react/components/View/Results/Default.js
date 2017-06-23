@@ -12,14 +12,15 @@ export default class Default extends Component {
     selectItem: PropTypes.func,
     addItem: PropTypes.func,
     togglePopup: PropTypes.func,
-    user: PropTypes.object
+    user: PropTypes.object,
+    fetchSearchItem: PropTypes.func
   }
 
   render() {
-    const { user, cart, item, cartAsins, selectItem, addItem, togglePopup } = this.props;
+    const { user, cart, item, cartAsins, selectItem, addItem, togglePopup, fetchSearchItem } = this.props;
     return (
       <td>
-        <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''}`} onClick={() => !cartAsins.includes(`${item.asin}-${user.id}`) ? selectItem(item.id) : null}>
+        <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''}`} onClick={() => { if (!cartAsins.includes(`${item.asin}-${user.id}`)) { selectItem(item.id); fetchSearchItem(item.id) }}}>
           {
             cartAsins.includes(`${item.asin}-${user.id}`) ? <span className='incart'> In Cart </span> : null
           }
@@ -31,7 +32,7 @@ export default class Default extends Component {
             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
           </div> 
           <div className='action'>
-            { !cartAsins.includes(`${item.asin}-${user.id}`) ? <button className='more' onClick={() => selectItem(item.id)}>More info</button> : null }
+            { !cartAsins.includes(`${item.asin}-${user.id}`) ? <button className='more' onClick={() => { selectItem(item.id); fetchSearchItem(item.id) }}>More info</button> : null }
             { !user.id  ? <button onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !cartAsins.includes(`${item.asin}-${user.id}`) ? <button onClick={(e) => {e.stopPropagation(); addItem(cart.id, item.id);}}>✔ Save to Cart</button> : null }

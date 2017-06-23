@@ -62,7 +62,8 @@ export {
   updateItem,
   fetchItem,
   removeItem,
-  copyItem
+  copyItem,
+  fetchSearchItem
 }
 from './item';
 

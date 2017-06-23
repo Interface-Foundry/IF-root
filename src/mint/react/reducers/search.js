@@ -20,7 +20,6 @@ export default (state = initialState, action) => {
       ...state,
       ...action.response
     };
-  case 'ITEM_SUCCESS':
   case 'SEARCH_SUCCESS':
   case 'CATEGORIES_SUCCESS':
     return {
@@ -75,10 +74,17 @@ export default (state = initialState, action) => {
       results: [...state.results, ...action.response.results],
       history: action.response.history,
       page: action.response.page,
-      selectedItemId: action.response.selectedItemId,
       tab: action.response.tab,
       lazyLoading: false
     };
+  case 'SEARCH_ITEM_SUCCESS':
+    return {
+      ...state,
+      results: state.results.reduce((acc, item, i) => {
+        item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item}) : acc.push(item);
+        return acc;
+      }, [])
+    }
   default:
     return state;
   }
