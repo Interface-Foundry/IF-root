@@ -203,6 +203,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: $padding ($padding * 2);
         border-top: 3px solid $secondaryColor;
         box-shadow: $card-box-shadow !important;
+        height: unset;
 
         & > nav {
           position: fixed;
