@@ -1088,7 +1088,7 @@ module.exports = function (router) {
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
 
     switch (cart.store) {
-    case 'amazon':
+    case 'Amazon':
       if (amazonConstants.categories[cart.store_locale]) {
         var amazonCategories = amazonConstants.categories[cart.store_locale]
         var arrayCategories = Object.keys(amazonCategories)
@@ -1105,7 +1105,7 @@ module.exports = function (router) {
         throw new Error('Cannot fetch categories for unhandled amazon store locale: ' + cart.store_locale)
       }
       break;
-    case 'ypo':
+    case 'YPO':
       var arrayCategories = yield category_utils.getYpoCategories()
       res.send(arrayCategories)
       break;
