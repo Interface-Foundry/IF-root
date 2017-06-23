@@ -68,11 +68,11 @@ export default class Sidenav extends Component {
     // https://www.amazon.com/dp/B01GF5AGN4/ref=sr_1_6
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
-        <div className='sidenav__overlay' >
+        <div className='sidenav__overlay' onClick={() => _toggleSidenav()}>
         </div>
         <ul className={`sidenav__list ${large ? 'large' : ''}`}>
           <li className='sidenav__list__header'>
-            <div className='icon' >
+            <div className='icon' onClick={() => _toggleSidenav()}>
               <Icon icon='Clear'/>
             </div>
           </li>

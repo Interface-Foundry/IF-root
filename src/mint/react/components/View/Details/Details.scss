@@ -6,234 +6,249 @@
 $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 .details {
-	position: relative;
-	width: 100%;
-	height: auto;
-	margin: 0 auto;
-	border-collapse: collapse;
+  position: relative;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border-collapse: collapse;
 
-	@media only screen and (max-width: 600px) {
-	    overflow-x: auto;
-	    display: block;
-	}
+  @media only screen and (max-width: 600px) {
+    overflow-x: auto;
+    display: block;
+  }
 
-	* {
-		@media only screen and (max-width: 600px) {
-			display: block;
-		} 
-	}
+  * {
+    @media only screen and (max-width: 600px) {
+      display: block;
+    }
+  }
 
-	th {
-		text-align: left;
-		padding: $padding/3 $padding/2 $padding;
+  th {
+    text-align: left;
+    padding: ($padding / 3) ($padding / 2) $padding;
 
-		@media only screen and (max-width: 600px) {
-			padding: 0 3px;
-			display: block;
-		}
+    @media only screen and (max-width: 600px) {
+      padding: 0 3px;
+      display: block;
+    }
 
-		.card {
-			border-top: 3px solid $secondaryColor;
-			padding: 0;
-			&.locked {
-				border-top: 3px solid #555;
-				.cover {
-					background: #555;
-					color: white!important;
-				}
-			}
-			.cover {
-				padding: $padding;
-			}
+    .card {
+      border-top: 3px solid $secondaryColor;
+      padding: 0;
 
-			.left {
-				display: inline-block;
-				min-width: 50%;
+      &.locked {
+        border-top: 3px solid #555;
 
-				@media only screen and (max-width: 600px) {
-					display: block;
-					width: 100%;
-				}
-				.image {
-					height: $nav-height;
-					width: $nav-height;
-					display: inline-block;
-					border-radius: 5px;
-				}
-				.text {
-					display: inline-block;
-					padding: 0 $padding;
-					width: calc(100% - #{$nav-height});
+        .cover {
+          background: #555;
+          color: white !important;
+        }
+      }
 
-					h1 {
-						font-size: 18px;
-						height: 20px;
-						line-height: 20px;
-						cursor: pointer;
-						white-space: nowrap;
+      .cover {
+        padding: $padding;
+      }
 
-						.locked {
-							svg {
-								margin: 0 $padding 0 0;
-								fill: white;
-							}
-						}
+      .left {
+        display: inline-block;
+        width: 50%;
 
-						svg {
-							margin-left: $padding;
-							vertical-align: top !important;
-							padding: 0 $padding/5;
-							color: rgba(#333, 0.5);
-							display: inline-block;
-						}
+        @media only screen and (max-width: 600px) {
+          display: block;
+          width: 100%;
+        }
 
-						span {
-							display: inline-block;
-							font-weight: 100;
-							font-size: 12px;
-							color: rgba(#333, 0.5); 
-						}
+        .image {
+          height: $nav-height;
+          width: $nav-height;
+          display: inline-block;
+          border-radius: 5px;
+        }
 
-						&:hover {
-							span {
-								color: $warningColor;
-							}
+        .text {
+          display: inline-block;
+          padding: 0 $padding;
+          width: calc(100% - #{$nav-height});
 
-							svg {
-								color: $warningColor;
-							}
-						}
-					}
-					p {
-						font-size: 10px;
-						height: 10px;
-						line-height: 10px;
-						opacity: 0.5;
-					}
-					h4 {
-						font-size: 14px;
-						height: 20px;
-						font-weight: 100;
-						line-height: 20px;
-						opacity: 0.8;
+          h1 {
+            font-size: 18px;
+            height: 20px;
+            line-height: 20px;
+            cursor: pointer;
+            white-space: nowrap;
 
-						b {
-							display: inline-block;
-						}
+            .locked {
+              svg {
+                margin: 0 $padding 0 0;
+                fill: white;
+              }
+            }
 
-						.price {
-							color: $price-color;
-						}
-					}
-				}
-			}
-			.right {
-				display: inline-block;
-				min-width: 50%;
-				text-align: right;
-				.buttons {
-					display: inline-block;
-					height: auto;
+            svg {
+              margin-left: $padding;
+              vertical-align: top !important;
+              padding: 0 ($padding / 5);
+              color: rgba(#333, 0.5);
+              display: inline-block;
+            }
 
-					button {
-						display: block;
-						margin: $padding auto;
-					}
+            span {
+              display: inline-block;
+              font-weight: 100;
+              font-size: 12px;
+              color: rgba(#333, 0.5);
+            }
 
-					@media only screen and (max-width: 600px) {
-						display: none;
-					}
-				}
-			}
-			.metrics {
-				display: block;
-				width: 100%;
-				padding: $padding;
+            &:hover {
+              span {
+                color: $warningColor;
+              }
 
-				.metric {
-					display: inline-block;
-					margin-right: $padding*2;
+              svg {
+                color: $warningColor;
+              }
+            }
+          }
 
-			         &.cursor {
-			            cursor: pointer;
-			            &:hover {
-			              	.top {
-				                svg {
-				                  	fill: $secondaryColor;
-				                }
-				                * {
-				                  	color: $secondaryColor;
-				                }
-			              	}
-			              	.sub {
-			                	* {
-			                  		color: $secondaryColor;
-			                	}
-			              	}
-			            }
-			        }
+          p {
+            font-size: 10px;
+            height: 10px;
+            line-height: 10px;
+            opacity: 0.5;
+          }
 
-					&.red {
-						.top {
-							svg {
-								fill: $warningColor !important;
-							}
-						}
-					}
+          h4 {
+            font-size: 14px;
+            height: 20px;
+            font-weight: 100;
+            line-height: 20px;
+            opacity: 0.8;
 
+            b {
+              display: inline-block;
+            }
 
-					.top {
-						height: 25px;
-						line-height: 25px;
-						text-align: center;
-						svg {
-							vertical-align: top !important;
-							fill: rgba(#333, 0.6);
-						}
-						p {
-							padding: 0 0 0 $padding/2;
-							font-weight: 100;
-							color: rgba(#333, 0.6);
-						}
-						* {
-							height: 25px;
-							line-height: 25px;
-							display: inline-block;
-						}
-					}
-					.sub {
-						text-align: center;					
-						* {
-							font-weight: 100;
-							font-size: 12px;
-							color: rgba(#333, 0.6);
-						}
-					}
-				}
-			}
-		}
-	}
+            .price {
+              color: $price-color;
+            }
+          }
+        }
+      }
 
-	td {
-		font-size: 14px;
-		font-weight: 500;
-		text-align: left;
-		width: 100%;
+      .right {
+        display: inline-block;
+        width: 50%;
+        text-align: right;
 
-		nav {
-			padding: $padding $padding 0;
+        .buttons {
+          display: inline-block;
+          height: auto;
 
-			span {
-				display: inline-block !important;
-				border-radius: 5px;
-				margin-right: $padding*2;
+          button {
+            display: block;
+            margin: $padding auto;
+          }
 
+          @media only screen and (max-width: 600px) {
+            display: none;
+          }
+        }
+      }
 
-				&.updated {
-					color: rgba(#111, 0.5);
-				}
-			}
-		}
-	}
+      .metrics {
+        display: block;
+        width: 100%;
+        padding: $padding;
+
+        .metric {
+          display: inline-block;
+          margin-right: $padding * 2;
+
+          &.cursor {
+            cursor: pointer;
+
+            &:hover {
+              .top {
+                svg {
+                  fill: $secondaryColor;
+                }
+
+                * {
+                  color: $secondaryColor;
+                }
+              }
+
+              .sub {
+                * {
+                  color: $secondaryColor;
+                }
+              }
+            }
+          }
+
+          &.red {
+            .top {
+              svg {
+                fill: $warningColor !important;
+              }
+            }
+          }
+
+          .top {
+            height: 25px;
+            line-height: 25px;
+            text-align: center;
+
+            svg {
+              vertical-align: top !important;
+              fill: rgba(#333, 0.6);
+            }
+
+            p {
+              padding: 0 0 0 ($padding / 2);
+              font-weight: 100;
+              color: rgba(#333, 0.6);
+            }
+
+            * {
+              height: 25px;
+              line-height: 25px;
+              display: inline-block;
+            }
+          }
+
+          .sub {
+            text-align: center;
+
+            * {
+              font-weight: 100;
+              font-size: 12px;
+              color: rgba(#333, 0.6);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  td {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    width: 100%;
+
+    nav {
+      padding: $padding $padding 0;
+
+      span {
+        display: inline-block !important;
+        border-radius: 5px;
+        margin-right: $padding * 2;
+
+        &.updated {
+          color: rgba(#111, 0.5);
+        }
+      }
+    }
+  }
 }
-

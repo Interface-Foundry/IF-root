@@ -32,7 +32,6 @@ export default class Results extends Component {
     // Needs refactor, too many loop-di-loops here.
     let arrow, selected;
     const { cart, query, page, results, selectedItemId, getMoreSearchResults, loading } = this.props,
-      numResults = results.length,
       cartAsins = cart.items.map((item, i) => `${item.asin}-${item.added_by}`),
       partitionResults = results.reduce((acc, result, i) => {
         if (i % size === 0) acc.push([]);
@@ -50,19 +49,19 @@ export default class Results extends Component {
         return acc;
       }, []);
 
-    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index }]);
+    if (selected) partitionResults.splice(selected.row, 0, [{...selected.result, selected: true, index: selected.index }]);
 
-    if (numResults === 0 && !loading) return <EmptyContainer />;
+    if (!results.length && !loading) return <EmptyContainer />;
 
     const loadingArr = [
       ...partitionResults,
       ...(new Array(10))
-        .fill()
-        .map((_, i) => <LoadingTile key={i}/>)
-        .reduce((a, c, i) => Object.assign([], a, {
-          [Math.floor(i / size)]: a[Math.floor(i / size)] ? [...a[Math.floor(i / size)], c] : [c]
-        }), [])
-        .map((a, i) => <tr key={i}>{a}</tr>)
+      .fill()
+      .map((_, i) => <LoadingTile key={i}/>)
+      .reduce((a, c, i) => Object.assign([], a, {
+        [Math.floor(i / size)]: a[Math.floor(i / size)] ? [...a[Math.floor(i / size)], c] : [c]
+      }), [])
+      .map((a, i) => <tr key={i}>{a}</tr>)
     ];
 
     return (
@@ -74,7 +73,7 @@ export default class Results extends Component {
                 {
                   loading 
                   ? ''
-                  : <p> About {numResults} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
+                  : <p> About {results.length} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
                 }
               </nav>
             </th>
@@ -92,7 +91,7 @@ export default class Results extends Component {
                         cartAsins={cartAsins}
                         arrow={arrow}
                         item={item}
-                        numResults={numResults}
+                        numResults={results.length}
                         {...this.props}/>
                       ) : ( 
                         <Default 

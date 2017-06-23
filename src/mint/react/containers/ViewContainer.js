@@ -22,9 +22,11 @@ const mapStateToProps = (state, ownProps) => {
   const query = ownProps.history.location.search.match(/q=([^&$]+)/);
   return {
     search: query ? decodeURIComponent(query[1]) : null,
+    urlSearch: !!query,
     user: state.user,
     cart: state.cart.present,
     sidenav: state.app.sidenav,
+    selectedItemId: state.search.selectedItemId,
     popup: state.app.popup,
     tab: state.app.viewTab,
     oldCart: state.cart.past,
