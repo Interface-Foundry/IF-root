@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { displayCost } from '../../../utils';
 import { Icon } from '../../../../react-common/components';
-import LoadingTile from './LoadingTile';
 
 export default class Default extends Component {
   static propTypes = {
@@ -18,7 +17,6 @@ export default class Default extends Component {
 
   render() {
     const { user, cart, item, cartAsins, selectItem, addItem, togglePopup } = this.props;
-    if (!item) return <LoadingTile />;
     return (
       <td>
         <div className={`card ${cartAsins.includes(`${item.asin}-${user.id}`) ? 'incart' : ''}`} onClick={() => !cartAsins.includes(`${item.asin}-${user.id}`) ? selectItem(item.id) : null}>

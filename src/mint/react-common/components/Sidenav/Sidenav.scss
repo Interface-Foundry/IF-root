@@ -50,6 +50,7 @@
       h4 {
         text-align: right;
         padding: ($padding / 2) $padding;
+
         &.show__more {
           padding: ($padding / 2) $padding ($padding * 2);
           color: #4a9ff1;
@@ -91,15 +92,18 @@
         padding: 0;
 
         .sidenav__list__title {
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
+          display: block;
+
           h4 {
             font-size: 16px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 100%;
+
             &.name {
               cursor: pointer;
               display: inline-block;
-              margin-right: $padding;
 
               span {
                 border-bottom: 3px solid $mainColor;
