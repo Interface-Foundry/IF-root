@@ -118,8 +118,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       &:disabled {
         background: rgba(#333, 0.1);
         cursor: auto;
-        justify-self: flex-end;
         margin: 0;
+      }
+
+      &:only-child {
+        margin-left: auto;
       }
 
       &.more {
@@ -445,7 +448,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
         background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
         background-size: 200% 100%;
-        min-height: 150px;
+        height: 100px;
         position: relative;
 
         .overlay {
@@ -560,8 +563,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   @media only screen and (max-width: 865px) {
-    overflow-x: auto;
-    display: block;
+    // overflow-x: auto;
+    // display: block;
 
     td {
       width: 100% !important;
