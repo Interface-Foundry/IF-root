@@ -953,6 +953,7 @@ module.exports = function (router) {
     // go to prototype
     // return res.redirect('/prototype/checkout')
     // get the cart
+    console.log('cart_id:', req.params.cart_id)
     var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
     // checkout removes the items from the cart object, so we have to make a copy
     var items = cart.items.slice()
@@ -974,8 +975,9 @@ module.exports = function (router) {
 
     cart.items = items;
     cart.locked = true;
-    yield cart.save()
     yield cartUtils.sendReceipt(cart, req)
+    yield cart.save()
+
   }))
 
   /**
