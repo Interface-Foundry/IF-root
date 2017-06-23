@@ -31,11 +31,11 @@ var feedbackCollection = Waterline.Collection.extend({
 
     rating: {
       type: 'string',
-      enum: [
-        'good',
-        'ok',
-        'bad'
-      ]
+      // enum: [
+      //   'good',
+      //   'ok',
+      //   'bad'
+      // ]
     },
 
     text: 'string'
