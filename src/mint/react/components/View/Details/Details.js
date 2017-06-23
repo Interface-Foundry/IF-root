@@ -17,10 +17,8 @@ export default class Details extends Component {
     locked: PropTypes.bool,
     cloneCart: PropTypes.func,
     undoRemove: PropTypes.func,
-    redoRemove: PropTypes.func,
     oldCart: PropTypes.array,
-    showUndo: PropTypes.number,
-    showRedo: PropTypes.number
+    showUndo: PropTypes.bool
   }
 
   render() {

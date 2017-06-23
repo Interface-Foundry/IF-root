@@ -15,7 +15,8 @@ import {
   fetchMetrics,
   selectTab,
   updateQuery,
-  submitQuery
+  submitQuery,
+  fetchCarts
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -41,8 +42,10 @@ const mapDispatchToProps = dispatch => ({
   likeCart: (id) => dispatch(likeCart(id)),
   unlikeCart: (id) => dispatch(unlikeCart(id)),
   cloneCart: (cart_id) => dispatch(cloneCart(cart_id)).then(() => {
-    dispatch(fetchMetrics(cart_id));
-    dispatch(replace(`/cart/${cart_id}?toast=Cart Re-Kipped &status=success`));
+    dispatch(fetchMetrics(cart_id))
+      .then(() => dispatch(replace(`/cart/${cart_id}?toast=Cart Re-Kipped &status=success`)))
+      .then(() => dispatch(fetchCarts()));
+
   }),
   undoRemove: ({ items = [], id: cartId = '' }, cartElder) => {
     const oldItems = cartElder[cartElder.length - 1].items,

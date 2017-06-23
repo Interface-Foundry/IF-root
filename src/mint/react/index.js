@@ -54,8 +54,7 @@ store.dispatch(checkSession()).then(() => {
     store.dispatch(fetchCart(cart_id))
       .then((res) => {
         store.dispatch(fetchCategories(cart_id))
-
-        if (search) {
+        if (search && search[1]) {
           store.dispatch(updateQuery(decodeURIComponent(search[1])));
           store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale))
         }

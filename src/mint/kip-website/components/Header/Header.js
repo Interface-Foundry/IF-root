@@ -1,27 +1,26 @@
-/* eslint react/prefer-stateless-function: 0, react/forbid-prop-types: 0 */
-/* eslint global-require: 0 */
 import React, { Component } from 'react';
-import moment from 'moment';
-import Scroll from 'react-scroll';
-
-import { Icon } from '../../themes';
-import { Down, Right, EmailDrawn, FacebookDrawn, TwitterDrawn } from '../../themes/newSvg';
+import { PropTypes } from 'prop-types';
 
 export default class Header extends Component {
 
+  static propTypes = {
+    title: PropTypes.string,
+    subtext: PropTypes.string,
+    color: PropTypes.string,
+    cart: PropTypes.object
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
-    // need this, otherwise page always rerender every scroll
-    if(
+    return (
       nextProps.title !== this.props.title ||
       nextProps.subtext !== this.props.subtext ||
       nextProps.color !== this.props.color
-    ) return true;
-
-    return false;
+    )
   }
 
   render() {
-    const { title, subtext = [], color, offsetTop, scrollToPosition, headerTemplate } = this.props;
+    console.log(this.props)
+    const { title, subtext = [], color } = this.props;
 
     return (
       <section className={`header ${color}`}>
