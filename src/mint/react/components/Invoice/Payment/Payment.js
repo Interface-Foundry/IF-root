@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
+import Stripe from './Stripe'
 
 const paymentTypes = [
   'Pay For All',
@@ -41,20 +42,20 @@ export default class Payment extends Component {
   render() {
   	const { selectedAccordion, selectAccordion } = this.props,
           { selectedCardIndex, selectedTypeIndex } = this.state;
-          
+
     return (
     	<div className='payment accordion'>
     		<nav onClick={() => selectAccordion('payment')}>
     			<h3>2. Payment method</h3>
           {
-              selectedCardIndex !== null && selectedTypeIndex !== null && !selectedAccordion.includes('payment') ? <div className='text'> 
+              selectedCardIndex !== null && selectedTypeIndex !== null && !selectedAccordion.includes('payment') ? <div className='text'>
                   <p>{paymentTypes[selectedTypeIndex]} with {paymentDummy[selectedCardIndex].name} </p>
                   <span>change</span>
               </div> : null
           }
     		</nav>
     		{
-    			selectedAccordion.includes('payment') ? <div> 
+    			selectedAccordion.includes('payment') ? <div>
             <nav>
               <h4>Payment Type</h4>
             </nav>
@@ -86,7 +87,7 @@ export default class Payment extends Component {
                       </li>
                   ))
               }
-              <button onClick={() => selectAccordion('payment form')}>+ add card</button>
+              <Stripe />
             </ul>
 	    		</div> : null
     		}
