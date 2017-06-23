@@ -130,7 +130,7 @@ class AmazonStore extends Store {
       Condition: 'New',
       SearchIndex: options.category || 'All', //the valid categories vary by locale
       ResponseGroup: 'ItemAttributes,Images,OfferFull,BrowseNodes,SalesRank,Variations,Reviews',
-      ItemPage: options.page || 1
+      ItemPage: options.page + 1
     };
     var results = await this.opHelper.execute('ItemSearch', amazonParams);
 
@@ -144,7 +144,7 @@ class AmazonStore extends Store {
 
     if (!items || items.length === 0) {
       // search wasn't buggy, but there were no results, so relax the search query
-      console.error("Searching " + query + ' yielded no results');
+      console.error("Searching " + options.text + ' yielded no results');
 
       // remove the last word, and try the search again
       var newQuery = options.text.split(/[^\w]/).slice(0, -1).join(' ')

@@ -901,7 +901,8 @@ module.exports = function (router) {
     }
     const searchOpts = _.omitBy({
       text: q,
-      category: _.get(req, 'query.category')
+      category: _.get(req, 'query.category'),
+      page: _.get(req, 'query.page')
     }, _.isUndefined)
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
