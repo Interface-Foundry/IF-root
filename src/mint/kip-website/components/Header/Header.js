@@ -19,7 +19,6 @@ export default class Header extends Component {
   }
 
   render() {
-    console.log(this.props)
     const { title, subtext = [], color } = this.props;
 
     return (
