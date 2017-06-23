@@ -46,7 +46,7 @@ var transports = [
 
 var gcpTransport = (require('@google-cloud/logging-winston'))
 if (typeof gcpTransport.log === 'function') {
-  transports.push(gcpTransport)
+  // transports.push(gcpTransport)
 }
 
 
