@@ -75,7 +75,7 @@ export default class Results extends Component {
                 {
                   itemrow.map((item, i) => {
                     return item.loading
-                    ? <LoadingTile />
+                    ? <LoadingTile key={i}/>
                       : item.selected 
                       ? (<Selected 
                         key={item.id}

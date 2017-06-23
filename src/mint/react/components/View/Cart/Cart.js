@@ -50,10 +50,10 @@ export default class Cart extends Component {
                           }}/>
                           <div className='text'>
                             <h1>{item.name}</h1>
-                            <h4> Price: <span className='price'>{displayCost(item.price * item.quantity, cart.store_locale)}</span> </h4>
+                            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                             { 
                               !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
-                                <button onClick={() => item.quantity === 1 ? removeItem(cart.id, item.id) : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                                <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                                 <p>{ item.quantity }</p>
                                 <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
                               </div> : null 
@@ -105,7 +105,7 @@ export default class Cart extends Component {
                               <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                               { 
                                 !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
-                                  <button onClick={() => item.quantity === 1 ? removeItem(cart.id, item.id) : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                                  <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                                   <p>{ item.quantity }</p>
                                   <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
                                 </div> : null 
