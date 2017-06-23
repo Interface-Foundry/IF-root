@@ -71,24 +71,30 @@ export const numberOfItems = (items) => {
   return items.reduce((acc, item) => acc + item.quantity, 0);
 };
 
-export const splitAndMergeSearchWithCart = (items, results, user) =>
-  results.reduce((acc, result, i) => {
-    let cartItem = items.filter((c) => c.asin === result.asin && user.id === c.added_by)[0];
+export const splitAndMergeSearchWithCart = (items, results, user) => results.reduce((acc, result, i) => {
+  let cartItem = items.filter((c) => c.asin === result.asin && user.id === c.added_by)[0];
 
-    if (cartItem) {
-      acc.push({
-        ...result,
-        id: cartItem.id,
-        oldId: result.id,
-        iframe_review_url: result.iframe_review_url,
-        quantity: cartItem.quantity
-      });
-    } else {
-      acc.push(result);
-    }
+  if (cartItem) {
+    acc.push({
+      ...result,
+      id: cartItem.id,
+      oldId: result.id,
+      iframe_review_url: result.iframe_review_url,
+      quantity: cartItem.quantity
+    });
+  } else {
+    acc.push(result);
+  }
+  return acc;
+}, []);
 
+export const splitOptionsByType = (options = []) => {
+  return options.reduce((acc, option) => {
+    if(!acc[option.type]) acc[option.type] = [{id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name}]
+    else acc[option.type].push({id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name})
     return acc;
-  }, []);
+  }, {})
+}
 
 export const removeDangerousCharactersFromString = (string) => {
   // const allowedTags = ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',

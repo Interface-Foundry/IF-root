@@ -63,7 +63,8 @@ export {
   fetchItem,
   removeItem,
   copyItem,
-  fetchSearchItem
+  fetchSearchItem,
+  fetchItemVariation
 }
 from './item';
 

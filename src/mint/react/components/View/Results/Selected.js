@@ -2,7 +2,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { displayCost, removeDangerousCharactersFromString, getStoreName } from '../../../utils';
+import { displayCost, removeDangerousCharactersFromString, getStoreName, splitOptionsByType } from '../../../utils';
+
 import { Delete } from '../../../../react-common/kipsvg';
 
 import { Icon } from '../../../../react-common/components';
@@ -20,11 +21,12 @@ export default class Selected extends Component {
     togglePopup: PropTypes.func,
     updateItem: PropTypes.func,
     navigateLeftResults: PropTypes.func,
-    navigateRightResults: PropTypes.func
+    navigateRightResults: PropTypes.func,
+    fetchItemVariation: PropTypes.func
   }
 
   render() {
-    const { user, cart, item, numResults, cartAsins, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults } = this.props,
+    const { user, cart, item, numResults, cartAsins, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation } = this.props,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
 
     return (
@@ -67,6 +69,24 @@ export default class Selected extends Component {
               { !cart.locked && user.id && cartAsins.includes(`${item.asin}-${user.id}`) ? <button className='sticky' disabled={true}>Update {item.quantity} In Cart</button> : null }
             </div>
             {
+              item.options ? ( 
+                <div className='options'>
+                  {
+                    Object.keys(item.options).map((key, index) => (
+                      <select key={key} value={key} onChange={(e) => fetchItemVariation(e.currentTarget.value, cart.store, cart.store_locale)}>
+                        <option key={key} value={key} disabled={true}>{key}</option>
+                        {
+                          item.options[key].map((option) => (
+                            <option key={option.id} value={option.asin}>{option.name}</option>
+                          ))
+                        }
+                      </select>
+                    ))
+                  }
+                </div>
+              ) : null
+            }
+            { 
               item.iframe_review_url ? <div className='iframe'>
                 <iframe scrolling="no" src={`${item.iframe_review_url}`}/>
               </div> : <div className='padding'/>

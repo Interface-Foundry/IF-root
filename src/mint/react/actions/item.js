@@ -64,6 +64,18 @@ export const fetchSearchItem = item_id => get(
   })
 );
 
+export const fetchItemVariation = (option_asin, store, locale) => get(
+  `/api/itempreview?q=${option_asin}&store=${store}&store_locale=${locale}`,
+  'ITEM_OPTION',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: {
+      item: json[0]
+    },
+    receivedAt: Date.now()
+  })
+)
+
 export const copyItem = (cart_id, item_id) => post(
   `/api/item/${item_id}/clone/${cart_id}`,
   'COPY_ITEM', {},

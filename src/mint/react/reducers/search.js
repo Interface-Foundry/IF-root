@@ -2,6 +2,7 @@
 
 const initialState = {
   selectedItemId: '',
+  lastUpdatedId: null,
   history: false,
   results: [],
   categories: [],
@@ -80,8 +81,19 @@ export default (state = initialState, action) => {
   case 'SEARCH_ITEM_SUCCESS':
     return {
       ...state,
+      lastUpdatedId: action.response.item.id,
       results: state.results.reduce((acc, item, i) => {
         item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item}) : acc.push(item);
+        return acc;
+      }, [])
+    }
+  case 'ITEM_OPTION_SUCCESS':
+    return {
+      ...state,
+      lastUpdatedId: action.response.item.id,
+      selectedItemId: action.response.item.id,
+      results: state.results.reduce((acc, item, i) => {
+        item.id === state.selectedItemId ? acc.push({ ...item, ...action.response.item}) : acc.push(item);
         return acc;
       }, [])
     }

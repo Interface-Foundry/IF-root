@@ -33,6 +33,7 @@ export default class Default extends Component {
   render() {
     const {
       cart,
+      user,
       reorderCart,
       updateCart
     } = this.props,
@@ -43,7 +44,7 @@ export default class Default extends Component {
         {
           cart.locked ? <span>
             <button className='yellow sub' onClick={() => reorderCart(cart.id)}> Re-Order {displayCost(total, cart.store_locale)} </button>
-            <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button>
+            { cart.leader.id === user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button> : null }
           </span> : <span>
             {
               cart.items.length === 0 ? 

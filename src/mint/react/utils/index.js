@@ -28,7 +28,8 @@ export {
   removeDangerousCharactersFromString,
   splitAndMergeSearchWithCart,
   formatPrivacy,
-  getStoreName
+  getStoreName,
+  splitOptionsByType
 }
 from './formating';
 
