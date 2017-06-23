@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -16,7 +16,8 @@ const mapStateToProps = (state, ownProps) => ({
   categories: state.search.categories,
   results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user),
   loading: state.search.loading,
-  lazyLoading: state.search.lazyLoading
+  lazyLoading: state.search.lazyLoading,
+  lastUpdatedId: state.search.lastUpdatedId
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -44,6 +45,7 @@ const mapDispatchToProps = dispatch => ({
   navigateRightResults: () => dispatch(navigateRightResults()),
   navigateLeftResults: () => dispatch(navigateLeftResults()),
   fetchSearchItem: (item_id) => dispatch(fetchSearchItem(item_id)),
+  fetchItemVariation: (option_asin, store, locale) => dispatch(fetchItemVariation(option_asin, store, locale)),
   getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page))
 });
 

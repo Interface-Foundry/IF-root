@@ -18,12 +18,13 @@ export default class App extends Component {
     selectedItemId: PropTypes.string
   }
 
-
   componentWillReceiveProps(nextProps) {
-    const { cart, tab, selectTab, history: { push,location, location: { search: locSearch } } } = nextProps;
+    const { cart, tab, selectTab, history: { push, location: { search: locSearch } } } = nextProps;
+    const search = locSearch.match(/q=([^&$]+)*/);
+
     if (cart && !cart.ok) push('/newcart');
-    else if (!locSearch && tab === 'search') selectTab('cart'); 
-    else if (locSearch && tab === 'cart') selectTab('search'); 
+    else if (!search && tab === 'search') selectTab('cart');
+    else if (search && tab === 'cart') selectTab('search');
   }
 
   render() {

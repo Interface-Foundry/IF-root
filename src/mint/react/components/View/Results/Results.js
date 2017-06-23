@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import Default from './Default';
 import Selected from './Selected';
 import LoadingTile from './LoadingTile';
-import { numberOfItems } from '../../../utils';
+import { numberOfItems, splitOptionsByType, getStoreName } from '../../../utils';
 import { EmptyContainer } from '../../../containers';
 
 const size = 3;
@@ -25,7 +25,7 @@ export default class Results extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return (nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
+    return (nextProps.lastUpdatedId !== this.props.lastUpdatedId || nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
       nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id || nextProps.lazyLoading !== this.props.lazyLoading || nextProps.loading !== this.props.loading);
   }
 
@@ -43,7 +43,8 @@ export default class Results extends Component {
           selected = {
             row: acc.length,
             result,
-            index: i
+            index: i,
+            options: splitOptionsByType(result.options)
           };
           arrow = acc[acc.length - 1].length - 1;
         }
@@ -51,7 +52,7 @@ export default class Results extends Component {
         return acc;
       }, []);
 
-    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index }]);
+    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
 
     if (!results.length && !loading) return <EmptyContainer />;
 
@@ -62,22 +63,22 @@ export default class Results extends Component {
             <th colSpan='100%'>
               <nav>
                 {
-                  loading 
+                  loading
                   ? 'Loading...'
-                  : <p> About {results.length} results for <span className='price'>"{query}"</span> from {cart.store} {cart.store_locale} </p>
+                  : <p> About {results.length} results for <span className='price'>"{query}"</span> from {getStoreName(cart.store, cart.store_locale)} </p>
                 }
               </nav>
             </th>
           </tr>
-          { 
+          {
             partitionResults.map((itemrow, i) => (
             <tr key={i} >
                 {
                   itemrow.map((item, i) => {
                     return item.loading
                     ? <LoadingTile key={i}/>
-                      : item.selected 
-                      ? (<Selected 
+                      : item.selected
+                      ? (<Selected
                         key={item.id}
                         cartAsins={cartAsins}
                         arrow={arrow}
@@ -85,7 +86,7 @@ export default class Results extends Component {
                         numResults={results.length}
                         {...this.props}/>
                       ) : (
-                        <Default 
+                        <Default
                           key={item.id}
                           item={item}
                           cartAsins={cartAsins}

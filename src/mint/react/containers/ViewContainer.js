@@ -15,7 +15,8 @@ import {
   fetchMetrics,
   selectTab,
   updateQuery,
-  submitQuery
+  submitQuery,
+  fetchCarts
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -30,8 +31,7 @@ const mapStateToProps = (state, ownProps) => {
     popup: state.app.popup,
     tab: state.app.viewTab,
     oldCart: state.cart.past,
-    showRedo: state.cart.future.length,
-    showUndo: state.cart.past.length,
+    showUndo: !!state.cart.past.length,
     searchLoading: state.search.loading
   };
 };
@@ -42,8 +42,10 @@ const mapDispatchToProps = dispatch => ({
   likeCart: (id) => dispatch(likeCart(id)),
   unlikeCart: (id) => dispatch(unlikeCart(id)),
   cloneCart: (cart_id) => dispatch(cloneCart(cart_id)).then(() => {
-    dispatch(fetchMetrics(cart_id));
-    dispatch(replace(`/cart/${cart_id}?toast=Cart Re-Kipped &status=success`));
+    dispatch(fetchMetrics(cart_id))
+      .then(() => dispatch(replace(`/cart/${cart_id}?toast=Cart Re-Kipped &status=success`)))
+      .then(() => dispatch(fetchCarts()));
+
   }),
   undoRemove: ({ items = [], id: cartId = '' }, cartElder) => {
     const oldItems = cartElder[cartElder.length - 1].items,
@@ -54,9 +56,6 @@ const mapDispatchToProps = dispatch => ({
     });
   },
   selectTab: (tab) => dispatch(selectTab(tab)),
-  redoRemove: (cart, cartElder) => {
-    dispatch(ActionCreators.redo());
-  },
   submitQuery: (query, store, locale) => {
     dispatch(updateQuery(query));
     dispatch(submitQuery(encodeURIComponent(query), store, locale));

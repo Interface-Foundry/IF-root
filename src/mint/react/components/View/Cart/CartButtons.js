@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { splitOptionsByType } from '../../../utils';
 import { Icon } from '../../../../react-common/components';
 
 export default class CartButtons extends Component {
@@ -23,7 +24,9 @@ export default class CartButtons extends Component {
 
   render() {
     const { cart, user, editId, item, removeItem, copyItem, updateItem, fetchItem, selectCartItem } = this.props,
-      isLeader = user.id === cart.leader.id;
+      isLeader = user.id === cart.leader.id,
+      options = splitOptionsByType(item.options);
+
 
     return (
       <div className='action'>

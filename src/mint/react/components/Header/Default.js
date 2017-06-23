@@ -3,26 +3,24 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Icon } from '../../../react-common/components';
+import { Icon, AlertBubble } from '../../../react-common/components';
 import { SearchContainer } from '../../containers';
 
 export default class Default extends Component {
 
   static propTypes = {
-    match: PropTypes.object.isRequired,
     user: PropTypes.object,
     cart: PropTypes.object,
-    showUndoRemove: PropTypes.bool,
+    showAlert: PropTypes.bool,
     _toggleLoginScreen: PropTypes.func,
-    _toggleSidenav: PropTypes.func,
-    undoRemove: PropTypes.func,
-    oldCart: PropTypes.object
+    _toggleSidenav: PropTypes.func
   }
 
   render() {
     const {
       user,
       cart,
+      showAlert,
       _toggleLoginScreen,
       _toggleSidenav
     } = this.props;
@@ -42,7 +40,10 @@ export default class Default extends Component {
         </div>
         <div className='header__right'>
           {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}
-          <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div>
+          <div className='navbar__icon' onClick={_toggleSidenav}>
+            <Icon icon='Hamburger'/>
+            {showAlert ? <AlertBubble top={13} right={25} /> : null}
+          </div>
         </div>
       </span>
     );

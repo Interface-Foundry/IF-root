@@ -20,7 +20,7 @@ export default class Tabs extends Component {
   }
 
   componentDidMount() {
-    const { cart: { kip_pay_allowed, items, id }, search: { query } } = this.props;
+    const { cart: { items, id }, search: { query } } = this.props;
     const tabs = [{
       tab: 'cart',
       url: `/cart/${id}`,
@@ -34,7 +34,7 @@ export default class Tabs extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { cart: { kip_pay_allowed, items, id }, search: { query } } = nextProps,
+    const { cart: { items, id }, search: { query } } = nextProps,
     itemsChanged = items.length > this.props.cart.items.length,
       tabs = [{
         tab: 'cart',
@@ -68,25 +68,23 @@ export default class Tabs extends Component {
   }
 }
 
-
-
-    // const tabs = kip_pay_allowed ? [{
-    //   tab: 'cart',
-    //   url: `/cart/${id}`,
-    //   display: `Cart (${numberOfItems(items)})`
-    // }, {
-    //   tab: 'search',
-    //   url: `/cart/${id}?q=${query}`,
-    //   display: 'Search'
-    // }, {
-    //   tab: 'invoice',
-    //   display: 'Invoice'
-    // }] : [{
-    //   tab: 'cart',
-    //   url: `/cart/${id}`,
-    //   display: `Cart (${numberOfItems(items)})`
-    // }, {
-    //   tab: 'search',
-    //   url: `/cart/${id}?q=${query}`,
-    //   display: 'Search'
-    // }];
+// const tabs = kip_pay_allowed ? [{
+//   tab: 'cart',
+//   url: `/cart/${id}`,
+//   display: `Cart (${numberOfItems(items)})`
+// }, {
+//   tab: 'search',
+//   url: `/cart/${id}?q=${query}`,
+//   display: 'Search'
+// }, {
+//   tab: 'invoice',
+//   display: 'Invoice'
+// }] : [{
+//   tab: 'cart',
+//   url: `/cart/${id}`,
+//   display: `Cart (${numberOfItems(items)})`
+// }, {
+//   tab: 'search',
+//   url: `/cart/${id}?q=${query}`,
+//   display: 'Search'
+// }];

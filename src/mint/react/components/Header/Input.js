@@ -14,7 +14,7 @@ export default class Input extends Component {
 
     return (
       <div className='input'>
-        <input placeholder={`Search or Paste ${store.toUpperCase()} URL`} autoFocus autoComplete="off" spellCheck='true'/>
+        <input placeholder={`Search or Paste ${store.toUpperCase()} URL`} autoComplete="off" spellCheck='true'/>
         <button type='submit'>
             <Icon icon='Search'/>
         </button>

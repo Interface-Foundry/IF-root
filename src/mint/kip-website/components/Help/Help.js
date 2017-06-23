@@ -130,9 +130,11 @@ export default class Help extends Component {
                 </a>
             }
           </div>
+          {src === 'slack' ?
           <section className="col-12 row-1 video">
-            {src === 'slack' ? <iframe width="100%" height="100%" src="https://www.youtube.com/embed/hKL1omE4nGg?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe> : null}
+             <iframe width="100%" height="100%" src="https://www.youtube.com/embed/hKL1omE4nGg?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe> 
           </section>
+          : null}
           <h1>
             <span>
               {faq.title}

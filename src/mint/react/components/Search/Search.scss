@@ -18,6 +18,8 @@
     border: 0;
     padding: 0 $padding;
     font-size: 14px;
+    -webkit-appearance: none;
+    border-radius: 0;
   }
   button {
     background: white;

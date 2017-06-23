@@ -29,7 +29,8 @@ const mapStateToProps = (state, ownProps) => {
     query: state.search.query,
     page: state.search.page,
     selectedItemId: state.search.selectedItemId,
-    popup: state.app.popup
+    popup: state.app.popup,
+    lazyLoading: state.search.lazyLoading
   };
 };
 

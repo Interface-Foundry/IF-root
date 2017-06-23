@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../../../react-common/components';
-import { timeFromDate, numberOfItems } from '../../../utils';
+import { timeFromDate, numberOfItems, getStoreName } from '../../../utils';
 import { ButtonsContainer } from '../../../containers';
 
 export default class Details extends Component {
@@ -17,10 +17,8 @@ export default class Details extends Component {
     locked: PropTypes.bool,
     cloneCart: PropTypes.func,
     undoRemove: PropTypes.func,
-    redoRemove: PropTypes.func,
     oldCart: PropTypes.array,
-    showUndo: PropTypes.number,
-    showRedo: PropTypes.number
+    showUndo: PropTypes.bool
   }
 
   render() {
@@ -31,9 +29,7 @@ export default class Details extends Component {
       user,
       cloneCart,
       undoRemove,
-      redoRemove,
       showUndo,
-      showRedo,
       cart,
       oldCart
     } = this.props,
@@ -63,34 +59,22 @@ export default class Details extends Component {
                     <div className={'image'} style={{
                       backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
                     }}/>
-                    <div className='text'> 
+                    <div className='text'>
                       <h1>
-                        { 
+                        {
                           locked ? <div className='locked'>
                             <Icon icon='Locked'/>
-                            {name} 
+                            {name}
                           </div> : <Link to={`/cart/${id}/m/edit`}>
-                            {name} 
+                            {name}
                             <Icon icon='Edit'/>
                             <span>Edit</span>
                           </Link>
                         }
                       </h1>
-                      <h4>{store} {store_locale}</h4>
+                      <h4>{getStoreName(store, store_locale)}</h4>
                       <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>
-                      <section className='undoredo'>
-                        {
-                          showUndo 
-                            ? <div className='undo__button'><button onClick={() => undoRemove(cart, oldCart)}>Undo</button></div>
-                            : null
-                        }
-                        {
-                          showRedo
-                            ? <div className='redo__button'><button onClick={() => redoRemove(cart, oldCart)}>Redo</button></div>
-                            : null
-                        }
-                      </section>
-                    </div> 
+                    </div>
                   </div>
                   <div className='right'>
                     <ButtonsContainer/>
@@ -100,9 +84,9 @@ export default class Details extends Component {
                   {
                     metrics.map((m) => (
                       <div key={m.name} className={
-                          `metric 
+                          `metric
                           ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}
-                          ${ m.name !== 'Members' ? 'cursor' : '' }` 
+                          ${ m.name !== 'Members' ? 'cursor' : '' }`
                         } onClick={() => {
                           m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === 'Re-Kips' ? cloneCart(id): null;
                         }}>
@@ -123,7 +107,11 @@ export default class Details extends Component {
           <tr>
             <td>
               <nav>
-                <p> {numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
+                {
+                  showUndo
+                  ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo.</button></p></div>
+                  : <p>{numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span></p>
+                }
               </nav>
             </td>
           </tr>

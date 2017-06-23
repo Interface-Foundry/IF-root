@@ -84,6 +84,35 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     }
   }
 
+  .options {
+    padding: $padding*2 15px 0 15px;
+
+    select {
+      position: relative;
+      margin-right: $padding*2;
+      -webkit-appearance: none; 
+      padding: $padding $padding*2;
+      font-size: 12px;
+      cursor: pointer;
+      background: white;
+      border: 1px solid $border-color-light;
+
+      @media only screen and (max-width: 600px) {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: $padding;
+
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+      }
+
+      &:focus {
+        font-size: 12px;
+      }
+    }
+  }
+
   .action {
     padding: 5px 15px 0 15px;
     text-align: right;
@@ -195,8 +224,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         left: 0;
         padding: 0;
         margin: 0 !important;
-        z-index: 50;
         overflow-y: auto;
+        z-index: 100;
       }
 
       .card {

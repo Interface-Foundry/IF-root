@@ -5,9 +5,8 @@ import { togglePopup, toggleSidenav } from '../actions';
 const mapStateToProps = (state, props) => {
   return {
     cart: state.cart.present,
-    oldCart: state.cart.past[0],
-    user: state.user,
-    showUndoRemove: state.cart.past.length > 0
+    numCarts: state.carts.carts.length,
+    user: state.user
   };
 };
 
