@@ -1070,7 +1070,7 @@ module.exports = function (router) {
     if (process.env.YPO_ENABLED !== undefined || process.env.YPO_ENABLED === false) {
       logging.info('hiding ypo on production')
       stores = stores.filter(function (s) {
-        return s.store_type != 'ypo'
+        return s.store_type != 'YPO'
       });
     }
 
