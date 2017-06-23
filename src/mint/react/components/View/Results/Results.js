@@ -51,7 +51,7 @@ export default class Results extends Component {
         return acc;
       }, []);
 
-    if (selected) partitionResults.splice(selected.row, 0, [{...selected.result, selected: true, index: selected.index }]);
+    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index }]);
 
     if (!results.length && !loading) return <EmptyContainer />;
 

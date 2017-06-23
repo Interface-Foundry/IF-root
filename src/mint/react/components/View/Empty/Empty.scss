@@ -4,87 +4,91 @@
 $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
 .empty {
-	position: relative;
-	padding: $padding 0 0;
-	text-align: center;
-	width: 100%;
-	.image {
-		height: 150px;
-		width: 150px;
-		display: inline-block;
-	}
-	h4 {
-		display: inline-block;
-		font-size:14px;
-		position: relative;
-		text-align: left;
-		padding: $padding $padding*2 ;
-		border-radius: $padding;
-		margin: $padding auto $padding*2;
-		max-width: 250px;
-		background-color: #54a2eb;
-		color: #fff;
-		font-weight: bold;
-		&:before {
-		  content:"";
-		  position: absolute;
-		  right: -15px;
-		  width: 0;
-		  height: 0;
-		  bottom: calc(50% - 15px);
-		  border-top: 13px solid transparent;
-		  border-left: 15px solid #54a2eb;
-		  border-bottom: 13px solid transparent;
-		  @media only screen and (max-width: 600px) {
-		  	bottom: -15px;
-		  	right: calc(50% - 15px);
-			border-left: 13px solid transparent;
-			border-top: 15px solid #54a2eb;
-			border-right: 13px solid transparent;
-			border-bottom: 0;
-		  }
-		}
-	}
-	span {
-		font-weight: bold;
-		font-size: 18px;
-	}
+  position: relative;
+  padding: $padding 0 0;
+  text-align: center;
+  width: 100%;
 
-	&.results {
-		padding: $padding*2.5;
-		* {
-			display: block;
-			text-align: center;
-		}
-		& > svg {
-			height: $nav-height;
-			width: $nav-height;
-			margin: 0 auto;
-			transform: rotate(180deg);
-			padding: $padding*2 0 0;
-			@include animation(bounceDownSmallRotate 2s infinite);
-		}
-		h4 {
-			&:before {
-				display: none;
-			}
-			background-color: #54a2eb;
-		}
-		h5 {
-			display: inline-block;
-			margin: $padding $padding;
-			width: auto;
-			opacity: 0.5;
-			cursor: pointer;
-			@include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+  .image {
+    height: 150px;
+    width: 150px;
+    display: inline-block;
+  }
 
-			&:hover {
-				opacity: 1;
-			}
-		}
-		.image {
-			margin: 0 auto;
-		}
-	}
+  h4 {
+    display: inline-block;
+    font-size: 14px;
+    position: relative;
+    text-align: left;
+    padding: $padding ($padding * 2);
+    border-radius: $padding;
+    margin: $padding auto ($padding * 2);
+    max-width: 250px;
+    background-color: #54a2eb;
+    color: #fff;
+    font-weight: bold;
+
+    &:before {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      bottom: -15px;
+      right: calc(50% - 15px);
+      border-left: 13px solid transparent;
+      border-top: 15px solid #54a2eb;
+      border-right: 13px solid transparent;
+      border-bottom: 0;
+    }
+  }
+
+  span {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  &.results {
+    padding: $padding * 2.5;
+
+    * {
+      display: block;
+      text-align: center;
+    }
+
+    & > svg {
+      height: $nav-height;
+      width: $nav-height;
+      margin: 0 auto;
+      transform: rotate(180deg);
+      padding: ($padding * 2) 0 0;
+
+      @include animation(bounceDownSmallRotate 2s infinite);
+    }
+
+    h4 {
+      &:before {
+        display: none;
+      }
+
+      background-color: #54a2eb;
+    }
+
+    h5 {
+      display: inline-block;
+      margin: $padding $padding;
+      width: auto;
+      opacity: 0.5;
+      cursor: pointer;
+
+      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .image {
+      margin: 0 auto;
+    }
+  }
 }
-
