@@ -123,6 +123,7 @@ class AmazonStore extends Store {
   * @return {[type]}         Promise for Array
   */
   async textSearch(options) {
+    console.log('search options', options)
     const amazonParams = {
       Availability: 'Available',
       Keywords: options.text,

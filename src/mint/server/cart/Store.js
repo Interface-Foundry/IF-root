@@ -16,6 +16,7 @@ class Store {
    * @return {Promise([Items])}         promise for an array of items
    */
   search(options) {
+    console.log('Store search options', options)
     // set the page
     options.page = options.page || 1
 
