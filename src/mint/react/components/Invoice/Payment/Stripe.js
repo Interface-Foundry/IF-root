@@ -13,12 +13,12 @@ export default class Stripe extends Component {
   }
 
   onToken = (token) => {
-    fetch('/api/payment/', {
+    fetch('/api/payment', {
       method: 'POST',
-      body: JSON.stringify(token),
+      body: JSON.stringify(token)
     }).then(response => {
       response.json().then(data => {
-        alert(`We are in business, ${data.email}`);
+        alert(`charge worked, ${data.email}`);
       });
     });
   }
@@ -32,11 +32,13 @@ export default class Stripe extends Component {
       <StripeCheckout
         token={this.onToken}
         stripeKey="pk_test_8bnLnE2e1Ch7pu87SmQfP8p7"
+        email="users_email@from_frontend.xyz"
         name="Kip"
         description="Mint"
         panelLabel="PAY UP"
+        amount={1}
       >
-      <button> + add card with stripe</button>
+        <button>+ add card with stripe</button>
       </StripeCheckout>
     )
   }
