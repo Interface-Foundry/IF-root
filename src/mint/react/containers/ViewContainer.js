@@ -30,8 +30,7 @@ const mapStateToProps = (state, ownProps) => {
     popup: state.app.popup,
     tab: state.app.viewTab,
     oldCart: state.cart.past,
-    showRedo: state.cart.future.length,
-    showUndo: state.cart.past.length,
+    showUndo: !!state.cart.past.length,
     searchLoading: state.search.loading
   };
 };
@@ -54,9 +53,6 @@ const mapDispatchToProps = dispatch => ({
     });
   },
   selectTab: (tab) => dispatch(selectTab(tab)),
-  redoRemove: (cart, cartElder) => {
-    dispatch(ActionCreators.redo());
-  },
   submitQuery: (query, store, locale) => {
     dispatch(updateQuery(query));
     dispatch(submitQuery(encodeURIComponent(query), store, locale));

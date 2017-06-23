@@ -20,7 +20,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart, user, editId, removeItem, updateItem } = this.props,
+    const { cart, user, editId, updateItem } = this.props,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id;

@@ -14,9 +14,7 @@ export default class Default extends Component {
     cart: PropTypes.object,
     showUndoRemove: PropTypes.bool,
     _toggleLoginScreen: PropTypes.func,
-    _toggleSidenav: PropTypes.func,
-    undoRemove: PropTypes.func,
-    oldCart: PropTypes.object
+    _toggleSidenav: PropTypes.func
   }
 
   render() {

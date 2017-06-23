@@ -132,13 +132,14 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               color: $price-color;
             }
           }
-	      h5 {
-			font-size: 12px;
-			height: 0px;
-			font-weight: 100;
-			line-height: 17px;
-			opacity: 0.5;
-		  }
+
+          h5 {
+            font-size: 12px;
+            height: 0px;
+            font-weight: 100;
+            line-height: 17px;
+            opacity: 0.5;
+          }
         }
       }
 
@@ -247,15 +248,65 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     nav {
       padding: $padding $padding 0;
 
+      .undo__button {
+        @include animation(fadeInDown cubic-bezier(0, 0, 0.2, 1) 1s);
+
+        align-items: center;
+        background: $mainColor;
+        border-radius: 5px;
+        box-shadow: $card-box-shadow;
+        display: flex;
+        flex-direction: column;
+        font-size: 14px;
+        font-weight: 800;
+
+        justify-content: center;
+        margin: auto;
+        text-align: center;
+        width: 100%;
+
+        p {
+          display: table-cell;
+          margin-top: 25%;
+          margin-bottom: 25%;
+          flex: 1 1 auto;
+        }
+
+        &:after {
+          @include animation(progressBar linear 10s);
+
+          position: relative;
+          content: '';
+          display: block;
+          height: 2px;
+          width: 100%;
+          background: linear-gradient(to right, red 0%, red 45%, transparent 50%);
+          background-size: 200% 2px;
+          bottom: 0;
+          margin: 0 ($padding / 2);
+        }
+
+        button {
+          background: transparent;
+          border: 0;
+          font-family: $main-font;
+          font-size: 14px;
+          font-weight: 800;
+          margin: 0;
+          padding: 0;
+          text-decoration: underline;
+        }
+      }
+
       span {
         display: inline-block !important;
         border-radius: 5px;
         margin-right: $padding * 2;
 
         &.updated {
-          	color: rgba(#111, 0.5);
-			font-size: 12px;
-			line-height: 18px;
+          color: rgba(#111, 0.5);
+          font-size: 12px;
+          line-height: 18px;
         }
       }
     }

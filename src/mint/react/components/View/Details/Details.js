@@ -31,9 +31,7 @@ export default class Details extends Component {
       user,
       cloneCart,
       undoRemove,
-      redoRemove,
       showUndo,
-      showRedo,
       cart,
       oldCart
     } = this.props,
@@ -78,18 +76,6 @@ export default class Details extends Component {
                       </h1>
                       <h4>{getStoreName(store, store_locale)}</h4>
                       <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>
-                      <section className='undoredo'>
-                        {
-                          showUndo
-                            ? <div className='undo__button'><button onClick={() => undoRemove(cart, oldCart)}>Undo</button></div>
-                            : null
-                        }
-                        {
-                          showRedo
-                            ? <div className='redo__button'><button onClick={() => redoRemove(cart, oldCart)}>Redo</button></div>
-                            : null
-                        }
-                      </section>
                     </div>
                   </div>
                   <div className='right'>
@@ -123,7 +109,11 @@ export default class Details extends Component {
           <tr>
             <td>
               <nav>
-                <p> {numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span>  </p>
+                {
+                  showUndo
+                  ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo.</button></p></div>
+                  : <p>{numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span></p>
+                }
               </nav>
             </td>
           </tr>
