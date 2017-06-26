@@ -205,8 +205,7 @@ exports.getRetailer = function (item) {
  * @return     {<type>}  { description_of_the_return_value }
  */
 exports.sendReceipt = function * (cart, req) {
-  // logging.info('cart:', cart)
-  console.log('cart? : ', cart);
+  console.log('cart : ', cart);
   const userAccount = req.UserSession.user_account
   //send receipt email
   const cartItems = cart.items;

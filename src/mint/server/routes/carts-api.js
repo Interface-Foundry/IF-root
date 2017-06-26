@@ -6,6 +6,7 @@ const amazonConstants = require('../cart/amazon_constants')
 const ypoConstants = require('../cart/ypo_constants')
 const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
+const Cart = require('../cart/Cart')
 const camel = require('../deals/deals')
 const googl = require('goo.gl')
 const path = require('path')
@@ -976,9 +977,12 @@ module.exports = function (router) {
 
     cart.items = items;
     cart.locked = true;
-    yield cartUtils.sendReceipt(cart, req)
+    // yield cartUtils.sendReceipt(cart, req)
+    // this is redundant w the emails invoices will send out
+    // leaving it in for now bc those aren't fully here yet
     yield cart.save()
-
+    cart = yield Cart.GetById(cart.id)
+    yield cart.sendCartSummary(req)
   }))
 
   /**
