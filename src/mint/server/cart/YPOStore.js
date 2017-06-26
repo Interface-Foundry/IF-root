@@ -44,7 +44,8 @@ class YPOStore extends Store {
   async categorySearch(options) {
     const category = options.category
     const items = await db.YpoInventoryItems.find({category_2: category})
-      .skip(10 * (options.page - 1))
+    logging.info('options.page', options.page)
+      .skip(10 * (options.page ? options.page - 1 : 1))
       .limit(10)
 
     return items
@@ -96,6 +97,45 @@ class YPOStore extends Store {
   async processSearchItems(amazonItems) {
     const items = await Promise.all(amazonItems.map(createYpoItem))
     return items
+  }
+
+  async checkout(cart, req, res) {
+    const leader = await db.UserAccounts.findOne({id: cart.leader})
+    const address = await db.Addresses.findOne({user_account: leader.id})
+    let cartFinal = {
+      items: cart.items.map(item => {
+        return {
+          'store': item.store,
+          'name': item.name,
+          'code': item.asin,
+          'price': item.price,
+          'quantity': item.quantity,
+          'cart': cart.id
+        }
+      }),
+      name: cart.name,
+      cart_id: cart.id,
+      ordered_by: {
+        'username': leader.name || leader.email_address.split('@')[0],
+        'email': leader.email_address,
+        'orderedAt': (new Date()).toString()
+      },
+      ypo_delivery_details: {
+        'account_number': leader.account_number,
+        'account_name': leader.account_name,
+        'address_1': address.line_1 || '',
+        'address_2': address.line_1 || '',
+        'town': address.city,
+        'region': address.state,
+        'postcode': address.zip,
+        'delivery_message': address.delivery_message,
+        'voucher_code': leader.ypo_voucher_code
+      }
+    }
+    const builder = new xml2js.Builder()
+    const xml = builder.buildObject(cartFinal)
+    res.set('Content-Type', 'text/xml');
+    return res.send(xml)
   }
 }
 

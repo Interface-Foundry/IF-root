@@ -102,6 +102,16 @@ class Cart {
     return this.cart
   }
 
+  async checkout (req, res) {
+    if (this.store === undefined) {
+      throw new Error('Store required for checkout')
+    }
+    logging.info('this.store', this.store)
+    // const store = GetStore(this)
+    // logging.info('STORE:', store)
+    await this.store.checkout(this, req, res)
+  }
+
   async sendCartSummary (req) {
     const userAccount = req.UserSession.user_account
     if (!userAccount) {

@@ -961,7 +961,10 @@ module.exports = function (router) {
     var items = cart.items.slice()
     var user_id = _.get(req, 'UserSession.user_account.id')
 
-    yield cartUtils.checkout(cart, req, res)
+    var fullCart = yield Cart.GetById(cart.id)
+
+    // yield cartUtils.checkout(cart, req, res)
+    yield fullCart.checkout(req, res)
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
@@ -977,12 +980,10 @@ module.exports = function (router) {
 
     cart.items = items;
     cart.locked = true;
-    // yield cartUtils.sendReceipt(cart, req)
     // this is redundant w the emails invoices will send out
     // leaving it in for now bc those aren't fully here yet
     yield cart.save()
-    cart = yield Cart.GetById(cart.id)
-    yield cart.sendCartSummary(req)
+    yield fullCart.sendCartSummary(req)
   }))
 
   /**
