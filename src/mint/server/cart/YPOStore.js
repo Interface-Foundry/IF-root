@@ -84,8 +84,9 @@ class YPOStore extends Store {
         updatedAt: false
       })
       .limit(10)
-      .skip(10 * (options.page - 1))
+      .skip(10 * (options.page ? options.page - 1 : 1))
       .toArray()
+    logging.info('ypoItems', ypoItems)
     return ypoItems
   }
 
@@ -140,10 +141,11 @@ class YPOStore extends Store {
 }
 
 function createYpoItem (item) {
+  logging.info('create YPO item called')
   delete item.id
   delete item._id
   return db.Items.create({
-    store: 'ypo',
+    store: 'YPO',
     name: item.name,
     asin: item.item_code.toString(),
     description: item.description,
