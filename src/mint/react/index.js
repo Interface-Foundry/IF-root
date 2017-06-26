@@ -45,21 +45,21 @@ const store = createStore(
 // Check session
 // Fetch everything required for the app to not break
 // Fetch Metrics
-const cart_id = location.pathname.split('/')[2];
-const search = location.search.match(/q=([^&$]+)/);
+const cart_id = location.pathname.match(/cart\/(\w*)\/?/),
+  search = location.search.match(/q=([^&$]+)/);
 
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
-  if (cart_id) {
-    store.dispatch(fetchCart(cart_id))
+  if (cart_id && cart_id[1]) {
+    store.dispatch(fetchCart(cart_id[1]))
       .then((res) => {
-        store.dispatch(fetchCategories(cart_id))
+        store.dispatch(fetchCategories(cart_id[1]))
         if (search && search[1]) {
           store.dispatch(updateQuery(decodeURIComponent(search[1])));
           store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale))
         }
       }).then(() => {
-        store.dispatch(fetchMetrics(cart_id));
+        store.dispatch(fetchMetrics(cart_id[1]));
         store.dispatch(fetchCarts());
       });
   } else {

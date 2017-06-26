@@ -166,8 +166,8 @@
   },
   "scripts": {
     "build": "webpack -p --progress",
-    "start": "npm run build & env BUILD_MODE=prebuilt node ./server",
-    "frontend": "env SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common",
+    "start": "npm run build & BUILD_MODE=prebuilt node ./server",
+    "frontend": "SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common",
     "backend-email": "npm run build & SEND_EMAILS=1; BUILD_MODE=prebuilt nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common ",
     "backend": "npm run build & SEND_EMAILS=; BUILD_MODE=prebuilt nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common ",
     "email": "SEND_EMAILS=1 nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common",

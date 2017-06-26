@@ -1,12 +1,12 @@
 // react/components/Modal/index.js
 
+import './Modal.scss';
 import Modal from './Modal';
 
-import './Modal.scss';
+export ArchivedCarts from './ArchivedCarts'
+export EditCart from './EditCart';
+export Feedback from './Feedback';
+export Settings from './Settings';
+export Share from './Share';
 
 export default Modal;
-
-export Feedback from './Feedback';
-export Share from './Share';
-export Settings from './Settings';
-export EditCart from './EditCart';

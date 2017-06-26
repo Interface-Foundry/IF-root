@@ -12,7 +12,7 @@ export default class SettingsHeader extends Component {
     icon: PropTypes.string,
     text: PropTypes.string,
     user: PropTypes.object,
-    cart: PropTypes.object,
+    history: PropTypes.object,
     _toggleLoginScreen: PropTypes.func,
     _toggleSidenav: PropTypes.func
   }
@@ -22,16 +22,16 @@ export default class SettingsHeader extends Component {
       icon,
       text,
       user,
-      cart,
+      history: { goBack },
       _toggleLoginScreen,
       _toggleSidenav
     } = this.props;
     return (
       <span className='settings'>
         <div className='header__left'>
-          <Link className='navbar__icon__close' to={`/cart/${cart.id}/`}>
+          <a href='#' className='navbar__icon__close' onClick={(e)=> {e.preventDefault(); goBack()}}>
             <Icon icon='Left'/>
-          </Link>
+          </a>
           <h3 className='navbar__modal__head'>
             <Icon icon={icon}/>
             <span className='underline'>{text}</span>

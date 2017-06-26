@@ -22,7 +22,7 @@ export default class App extends Component {
     const { cart, tab, selectTab, history: { push, location: { search: locSearch } } } = nextProps;
     const search = locSearch.match(/q=([^&$]+)*/);
 
-    if (cart && !cart.ok) push('/newcart');
+    if (!cart.ok) push('/newcart');
     else if (!search && tab === 'search') selectTab('cart');
     else if (search && tab === 'cart') selectTab('search');
   }

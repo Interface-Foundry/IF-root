@@ -25,6 +25,12 @@ export default class App extends Component {
     popup: PropTypes.bool,
     sidenav: PropTypes.bool,
     loading: PropTypes.bool,
+    query: PropTypes.string,
+    cart: PropTypes.object,
+    page: PropTypes.number,
+    lazyLoading: PropTypes.bool,
+    user: PropTypes.object,
+    location: PropTypes.object,
     togglePopup: PropTypes.func,
     fetchMetrics: PropTypes.func,
     navigateLeftResults: PropTypes.func,
@@ -90,14 +96,17 @@ export default class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { _logPageView } = this;
-    const { fetchCart, fetchMetrics, match, user: { id } } = this.props;
-    const { user: { id: nextId }, location: { pathname } } = nextProps;
-    if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
-      fetchCart(nextProps.match.url.split('/')[2]);
-      fetchMetrics(nextProps.match.url.split('/')[2]);
+    const {
+      _logPageView,
+      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id } }
+    } = this, { user: { id: nextId }, location: { pathname: nextPathname } } = nextProps;
+    const cartId = pathname.match(/cart\/(\w*)\/?/),
+      nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
+    if ((cartId && nextCartId && cartId[1] !== nextCartId[1]) || (!cartId && nextCartId)) {
+      fetchCart(nextCartId[1]);
+      fetchMetrics(nextCartId[1]);
     }
-    console.log({ props: this.props })
+
     if (!id && nextId && process.env.GA) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
@@ -109,8 +118,7 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate = (nextProps, nextState) =>
-    nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.match.url !== this.props.match.url || nextProps.history.location.search !== this.props.history.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+  shouldComponentUpdate = (nextProps, nextState) => nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
     const { sidenav, popup, togglePopup, match, toast, status, loading, history: { replace } } = this.props;
@@ -125,6 +133,7 @@ export default class App extends Component {
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
           <Route path={'/newcart'} exact component={StoresContainer} />
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
+          <Route path={'/m/*'} exact component={Modal} />
           <Route path={'/404'} exact component={ErrorPage} />
         </div>
         { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  

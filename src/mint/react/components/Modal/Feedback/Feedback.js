@@ -2,7 +2,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Field } from 'redux-form';
 import { Icon } from '../../../../react-common/components';
 
 export default class Feedback extends Component {
@@ -15,6 +14,7 @@ export default class Feedback extends Component {
 
   static propTypes = {
     handleSubmit: PropTypes.func,
+    postFeedback: PropTypes.func,
     cart_id: PropTypes.string
   }
 
@@ -26,7 +26,8 @@ export default class Feedback extends Component {
   _handleSubmit = (e) => {
     e.preventDefault()
     const { postFeedback, cart_id } = this.props;
-    postFeedback(this.state, cart_id)
+
+    postFeedback(this.state, cart_id ? cart_id : 'no_cart')
   }
 
   _setRating = (value) => {

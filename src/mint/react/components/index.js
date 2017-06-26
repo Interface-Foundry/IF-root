@@ -1,18 +1,16 @@
 // mint/react/components/index.js
+
 export App from './App';
-export Header from './Header';
-export Stores from './Stores';
-export ErrorPage from './ErrorPage';
-export Search from './Search';
 export Buttons from './Buttons';
+export ErrorPage from './ErrorPage';
+export Header from './Header';
+export Invoice from './Invoice';
+export Loading from './Loading';
+export Modal from './Modal';
+export Search from './Search';
+export Stores from './Stores';
 export Tabs from './Tabs';
 export Toast from './Toast';
-export Modal from './Modal';
-export Loading from './Loading';
-export Invoice from './Invoice';
-export { Feedback, Settings, Share, EditCart }
-from './Modal';
-
 export View from './View';
-export { Results, Cart, Empty }
-from './View';
+export { Feedback, Settings, Share, EditCart, ArchivedCarts } from './Modal';
+export { Results, Cart, Empty } from './View';
