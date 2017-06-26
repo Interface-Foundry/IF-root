@@ -27,11 +27,14 @@
       width: 130px;
       height: 130px;
       margin: 0 ($padding * 2) 0 0;
+      box-shadow: $card-box-shadow;
+      border-radius: 10px;
 
       .image {
-        width: 50%;
-        height: 50%;
-        background-size:cover;
+        flex-grow: 1;
+        flex-shrink: 0;
+        flex-basis: 50%;
+        background-size: cover;
       }
     }
   }

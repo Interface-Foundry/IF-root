@@ -3,7 +3,6 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 import { Link } from 'react-router-dom';
-import { displayCost } from '../../../utils'
 
 export default class ArchivedCarts extends Component {
 
@@ -26,7 +25,6 @@ export default class ArchivedCarts extends Component {
                 <p className='cartStore'>{c.store} ({c.store_locale})</p>
                 <p className='cartItemsCount'>{c.items.length} Item{c.items.length === 1 ? '' : 's'}</p>
                 <p className='cartMembersCount'>{c.members.length} Member{c.members.length === 1 ? '' : 's'}</p>
-                <p className='subtotal'>{displayCost(c.subtotal)}</p>
               </div>
             </Link>
           </li>)
@@ -47,7 +45,7 @@ class CartPreview extends Component {
 
   componentWillMount() {
     const { imageUrls } = this.props;
-    while (imageUrls && this.state.images.length < 4) {
+    while (imageUrls.length > 0 && this.state.images.length < 4) {
       this.state.images.push(...imageUrls.splice(Math.floor(Math.random() * imageUrls.length), 1));
     }
   }
