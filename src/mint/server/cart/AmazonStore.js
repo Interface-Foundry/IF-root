@@ -395,7 +395,7 @@ class AmazonStore extends Store {
 
     // to sync with amazon, we create a totally new cart
     const cartAddAmazonParams = createAmazonCartWithItems(cart.items);
-    cartAddAmazonParams.AssociateTag = this.localeTag(this.locale)
+    cartAddAmazonParams.AssociateTag = this.credentials.assocId
     const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
 
     const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
@@ -419,6 +419,18 @@ class AmazonStore extends Store {
     cart.affiliate_checkout_url = await googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(newCart.PurchaseURL)}/id/mint/pid/shoppingcart`)
     cart.dirty = false
     await cart.save()
+  }
+
+  async checkout (cart, req, res) {
+    if (!cart.dirty) {
+      // yay cart is locked so we're pretty sure it hasn't meen messed with
+      return res.redirect(cart.affiliate_checkout_url)
+    } else {
+      // make sure the amazon cart is in sync with the cart in our database
+      var amazonCart = await this.sync(cart)
+      // redirect to the cart url
+      return res.redirect(cart.affiliate_checkout_url)
+    }
   }
 }
 

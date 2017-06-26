@@ -134,10 +134,6 @@ class Invoice {
 
     var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members')
 
-    // var formattedItems = await email_utils.formatItems(cart.items)
-    // var items = formattedItems[0]
-    // var users = formattedItems[1]
-
     var totalItems = cart.items.reduce(function (sum, item) {
       return sum + item.quantity
     }, 0)

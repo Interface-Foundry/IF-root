@@ -1,5 +1,6 @@
 const GetStore = require('./StoreFactory').GetStore
 const _ = require('lodash')
+const moment = require('moment');
 
 var db
 const dbReady = require('../../db')
@@ -83,6 +84,80 @@ class Cart {
     // const newCart = await this.store.sync(this)
     // await this.store.updateCart(this.id, newCart)
     // _.merge(this, newCart)
+  }
+
+  async deleteItemFromCart (item, userId) {
+    if (!item) {
+      throw new Error('Item not found')
+    }
+
+    // Make sure user has permission to delete it, leaders can delete anything,
+    // members can delete their own stuff
+    if (this.cart.leader !== userId && item.added_by !== userId) {
+      throw new Error('Unauthorized')
+    }
+
+    this.cart.items.remove(item.id)
+    await this.cart.save()
+    return this.cart
+  }
+
+  async checkout (req, res) {
+    if (this.store === undefined) {
+      throw new Error('Store required for checkout')
+    }
+    logging.info('this.store', this.store)
+    // const store = GetStore(this)
+    // logging.info('STORE:', store)
+    await this.store.checkout(this, req, res)
+  }
+
+  async sendCartSummary (req) {
+    const userAccount = req.UserSession.user_account
+    if (!userAccount) {
+      throw new Error('no user')
+    }
+
+    var summary = await db.Emails.create({
+      recipients: userAccount.email_address,
+      sender: 'hello@kip.ai',
+      subject: `Kip Cart List for ${this.name}`,
+      template_name: 'summary_email',
+      unsubscribe_group_id: 2485
+    });
+
+    var userItems = {}; //organize items according to which user added them
+    var items= []
+    var users = []
+    var total = 0;
+    var totalItems = 0;
+    this.items.map(function (item) {
+      if (!userItems[item.added_by]) userItems[item.added_by] = [];
+      userItems[item.added_by].push(item);
+      totalItems += Number(item.quantity || 1);
+      total += (Number(item.price) * Number(item.quantity || 1));
+    });
+
+    for (var k in userItems) {
+      var addingUser = await db.UserAccounts.findOne({id: k});
+      if (!addingUser.name) addingUser.name || addingUser.email
+      users.push(addingUser);
+      items.push(userItems[k]);
+    }
+
+    await summary.template('summary_email', {
+      username: userAccount.name || userAccount.email_address,
+      baseUrl: 'http://' + (req.get('host') || 'mint-dev.kipthis.com'),
+      id: this.id,
+      items: items,
+      users: users,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
+      total: '$' + total.toFixed(2),
+      totalItems: totalItems,
+      cart: this
+    })
+    logging.info('sending summary')
+    await summary.send()
   }
 }
 

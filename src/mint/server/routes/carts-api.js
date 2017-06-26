@@ -6,6 +6,7 @@ const amazonConstants = require('../cart/amazon_constants')
 const ypoConstants = require('../cart/ypo_constants')
 const amazon = require('../cart/amazon_cart')
 const cartUtils = require('../cart/cart_utils')
+const Cart = require('../cart/Cart')
 const camel = require('../deals/deals')
 const googl = require('goo.gl')
 const path = require('path')
@@ -346,9 +347,9 @@ module.exports = function (router) {
     }
     const newItemId = req.body.new_item_id
     const user_id = req.UserSession.user_account.id
-    let cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    // let cart = yield db.Carts.findOne({ id: req.params.cart_id })
     const oldItem = yield db.Items.findOne({ id: req.params.item_id })
-
+    let cart = yield Cart.GetById(req.params.cart_id)
     // make sure cart and item exist
     if (!cart) {
       throw new Error('Cart not found')
@@ -357,7 +358,8 @@ module.exports = function (router) {
       throw new Error('Old Item not found')
     }
 
-    cart = yield cartUtils.deleteItemFromCart(oldItem, cart, user_id)
+    // cart = yield cartUtils.deleteItemFromCart(oldItem, cart, user_id)
+    cart = cart.deleteItemFromCart(oldItem, user_id)
     const newItem = yield db.Items.findOne({ id: newItemId })
 
     // join the two database documents
@@ -959,7 +961,10 @@ module.exports = function (router) {
     var items = cart.items.slice()
     var user_id = _.get(req, 'UserSession.user_account.id')
 
-    yield cartUtils.checkout(cart, req, res)
+    var fullCart = yield Cart.GetById(cart.id)
+
+    // yield cartUtils.checkout(cart, req, res)
+    yield fullCart.checkout(req, res)
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
@@ -975,9 +980,10 @@ module.exports = function (router) {
 
     cart.items = items;
     cart.locked = true;
-    yield cartUtils.sendReceipt(cart, req)
+    // this is redundant w the emails invoices will send out
+    // leaving it in for now bc those aren't fully here yet
     yield cart.save()
-
+    yield fullCart.sendCartSummary(req)
   }))
 
   /**
