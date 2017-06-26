@@ -173,7 +173,7 @@ module.exports = function (router) {
   /**
    * main payment route
    */
-  router.route('/payment/:user_id')
+  router.route('/payment')
     /**
      * @api {get} /payment/:user_id get payment sources
      * @apiDescription get payment sources for a user (i.e. stripe, venmo, etc.)
@@ -195,11 +195,8 @@ module.exports = function (router) {
      * @apiParam {json} payment_info - whatever response from specific payment source
      */
     .post(async (req, res) => {
-      if (!_.get(req, 'body.payment_source')) {
-        throw new Error('If creating new payment source need source specified')
-      }
-      const paymentType = req.body.payment_source
-      const paymentSource = await PaymentSource.Create(paymentType, {user: req.params.user_id})
+      const userId = req.UserSession.user_account.id
+      const paymentSource = await PaymentSource.Create('stripe', {user: userId})
       const createdSource = await paymentSource.createPaymentSource(req.body)
       logging.info('new payment source:', createdSource)
       return res.send(createdSource)

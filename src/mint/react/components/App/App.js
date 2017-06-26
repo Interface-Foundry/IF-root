@@ -77,23 +77,35 @@ export default class App extends Component {
     const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
-    if(search) {
+    if (search) {
       const scrollTop = ReactDOM.findDOMNode(this.scroll).scrollTop,
         containerHeight = ReactDOM.findDOMNode(this.scroll).scrollHeight,
         windowHeight = ReactDOM.findDOMNode(this.scroll).clientHeight;
 
       // animate scroll, needs height of the container, and its distance from the top
-      if(checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
+      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
         getMoreSearchResults(query, cart.store, cart.store_locale, page + 1)
-      };
+      }
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const { fetchCart, fetchMetrics, match } = this.props;
+    const { _logPageView } = this;
+    const { fetchCart, fetchMetrics, match, user: { id } } = this.props;
+    const { user: { id: nextId }, location: { pathname } } = nextProps;
     if (nextProps.match.url.split('/')[2] !== match.url.split('/')[2]) {
       fetchCart(nextProps.match.url.split('/')[2]);
       fetchMetrics(nextProps.match.url.split('/')[2]);
+    }
+    console.log({ props: this.props })
+    if (!id && nextId && process.env.GA) {
+      ReactGA.initialize('UA-51752546-10', {
+        gaOptions: {
+          userId: nextId
+        }
+      });
+
+      _logPageView(pathname, nextId); //log initial load
     }
   }
 
