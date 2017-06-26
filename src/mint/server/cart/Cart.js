@@ -84,6 +84,23 @@ class Cart {
     // await this.store.updateCart(this.id, newCart)
     // _.merge(this, newCart)
   }
+
+  async deleteItemFromCart (item, userId) {
+    logging.info('this', this)
+    if (!item) {
+      throw new Error('Item not found')
+    }
+
+    // Make sure user has permission to delete it, leaders can delete anything,
+    // members can delete their own stuff
+    if (this.cart.leader !== userId && item.added_by !== userId) {
+      throw new Error('Unauthorized')
+    }
+
+    this.cart.items.remove(item.id)
+    await this.cart.save()
+    return this.cart
+  }
 }
 
 module.exports = Cart
