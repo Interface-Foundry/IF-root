@@ -6,8 +6,8 @@
   @include animation(placeHolderShimmer 2s infinite);
 
   background: linear-gradient(to right, adjust-hue($thirdColor, 45deg) 8%, $thirdColor 18%, adjust-hue($thirdColor, 45deg) 33%);
-  background-size: 200% 3px;
-  height: 3px;
+  background-size: 200% 5px;
+  height: 5px;
   position: absolute;
   top: 0;
   width: 100%;

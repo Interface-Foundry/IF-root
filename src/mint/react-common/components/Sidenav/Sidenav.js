@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import LinkClass from './LinkClass';
 import moment from 'moment';
 import { Icon } from '..';
+import { moveToFront } from '../../utils';
 
 export default class Sidenav extends Component {
   static propTypes = {
@@ -40,32 +41,21 @@ export default class Sidenav extends Component {
     }
   }
 
-  // moves cart with id to front of list
-  // Cool function, try to put stuff like this in the utilities folder so we can use it in other places.
-  _moveToFront(carts, id) {
-    return carts.reduce((acc, cart) => {
-      if (cart.id === id) return [cart, ...acc];
-      else return [...acc, cart];
-    }, []);
-  }
-
   render() {
     const {
-      _moveToFront,
       props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, large },
       state: { show }
     } = this;
 
-    const SideNavLink = (!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? LinkClass : Link;
+    const SideNavLink = (window.location.pathname.includes('/cart') || window.location.pathname.includes('/m/') || window.location.pathname.includes('/newcart') || window.location.pathname.includes('/404')) ? Link : LinkClass;
 
-    let leaderCarts = _moveToFront(
+    let leaderCarts = moveToFront(
         carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
         cart_id),
-      memberCarts = _moveToFront(
+      memberCarts = moveToFront(
         carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
         cart_id);
 
-    // https://www.amazon.com/dp/B01GF5AGN4/ref=sr_1_6
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={() => _toggleSidenav()}>
@@ -78,7 +68,7 @@ export default class Sidenav extends Component {
           </li>
           <li className='sidenav__list__view'>
             <div className='sidenav__list__title'>
-              { user_account.name ? <h4 className='name'> <Link to={`/cart/${cart_id}/m/settings`}><span>{user_account.name}</span></Link> </h4> : '' } 
+              { user_account.name ? <h4 className='name'> <Link to={'/m/settings'}><span>{user_account.name}</span></Link> </h4> : '' } 
               <br></br>
               { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
             </div>
@@ -88,11 +78,11 @@ export default class Sidenav extends Component {
                 return ( 
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} >
                     <div className={'image'} style={{
-                      backgroundImage: `url(${c.thumbnail_url ? c.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
+                      backgroundImage: `url(${c.thumbnail_url})`
                     }}/>
                     <SideNavLink to={`/cart/${c.id}`}>
                       <p>
-                        {c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}
+                        {c.name}
                         {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
                         {!c.locked ? <span><br/>{c.store} {c.store_locale}</span> : null}
                       </p>
@@ -116,7 +106,7 @@ export default class Sidenav extends Component {
                     <div className='icon'>
                     </div>
                     <SideNavLink to={`/cart/${c.id}`}>
-                      <p>{c.name ? c.name : `${c.leader.name ? c.leader.name + '\'s ' : ''}Kip Cart`}</p>
+                      <p>{c.name}</p>
                     </SideNavLink>
                   </li>
                 );
@@ -132,11 +122,11 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__actions'>
             {
               archivedCarts.length
-              ? <SideNavLink to={`/cart/${cart_id}/m/archive`} ><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
+              ? <SideNavLink to={'/m/archive'} ><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
               : null
             }
-            {user_account.name ? <SideNavLink to={`/cart/${cart_id}/m/settings`} ><h4><Icon icon='Settings'/> My Settings</h4></SideNavLink> : null }
-            <SideNavLink to={`/cart/${cart_id}/m/feedback`} ><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
+            {user_account.name ? <SideNavLink to={'/m/settings'}><h4><Icon icon='Settings'/> My Settings</h4></SideNavLink> : null }
+            <SideNavLink to={'/m/feedback'} ><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
           </li>
           <footer className='sidenav__footer'>
             <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>

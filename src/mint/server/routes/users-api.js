@@ -469,7 +469,7 @@ module.exports = function (router) {
    * @apiParamExample Request
    * post /api/feedback {
    *  rating: "bad",
-   *  text: "can't add 36 oz beer bong to my cart. unacceptable."
+   *  text: "can't add 36 oz beer bong to my cart. unacceptable." 😳
    * }
    */
   router.post('/feedback', (req, res) => co(function* () {

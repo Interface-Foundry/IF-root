@@ -1,0 +1,38 @@
+// react/components/Modal/ArchivedCarts/ArchivedCarts.scss
+@import '../../../../react-common/styles/Constants';
+
+.archivedCarts {
+  height: 100%;
+  overflow: auto;
+
+  .archivedCart {
+    align-content: stretch;
+    background: $color-white;
+    border: 2px solid $kip-faded-color;
+    border-radius: $padding;
+    display: flex;
+    filter: grayscale(70%);
+    justify-content: stretch;
+    margin: $padding;
+    padding: 2 * $padding;
+    text-align: left;
+
+    &:hover {
+      filter: grayscale(0%);
+    }
+
+    .image-container {
+      display: flex;
+      flex-wrap: wrap;
+      width: 130px;
+      height: 130px;
+      margin: 0 ($padding * 2) 0 0;
+
+      .image {
+        width: 50%;
+        height: 50%;
+        background-size:cover;
+      }
+    }
+  }
+}
