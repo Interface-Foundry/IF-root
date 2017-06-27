@@ -85,13 +85,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .options {
-    padding: $padding*2 15px 0 15px;
+    padding: ($padding * 2) 15px 0 15px;
 
     select {
       position: relative;
-      margin-right: $padding*2;
-      -webkit-appearance: none; 
-      padding: $padding $padding*2;
+      margin-right: $padding * 2;
+      -webkit-appearance: none;
+      padding: $padding ($padding * 2);
       font-size: 12px;
       cursor: pointer;
       background: white;

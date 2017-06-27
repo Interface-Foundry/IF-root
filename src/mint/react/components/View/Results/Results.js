@@ -29,13 +29,15 @@ export default class Results extends Component {
     myItems: []
   }
 
-  shouldComponentUpdate = (nextProps, nextState) =>
-    nextProps.lastUpdatedId !== this.props.lastUpdatedId
-    || nextProps.user.id !== this.props.user.id
-    || numberOfItems(nextProps.results) !== numberOfItems(this.props.results)
-    || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items)
-    || nextProps.selectedItemId !== this.props.selectedItemId
-    || nextProps.results[0] && (nextProps.results[0].id !== this.props.results[0].id)
+  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading, user: { id }, results = [], cart: { items = [] } }) =>
+    lastUpdatedId !== this.props.lastUpdatedId
+    || id !== this.props.user.id
+    || numberOfItems(results) !== numberOfItems(this.props.results)
+    || numberOfItems(items) !== numberOfItems(this.props.cart.items)
+    || selectedItemId !== this.props.selectedItemId
+    || loading !== this.props.loading
+    || lazyLoading !== this.props.lazyLoading
+    || (numberOfItems(results) > 0 && numberOfItems(this.props.results) > 0) && (results[0] !== this.props.results[0])
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
     if (results.length === 0 && !loading && this.props.loading !== loading) {
@@ -58,7 +60,7 @@ export default class Results extends Component {
       state: { myItems }
     } = this;
 
-    if (!results.length && !loading) return <EmptyContainer />; // don't bother with the loops if there aren't results
+    if (!results.length && !(loading || lazyLoading)) return <EmptyContainer />; // don't bother with the loops if there aren't results
 
     const displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
       ? [...results, ...(new Array(10)).fill({ loading: true })]
@@ -131,7 +133,11 @@ export default class Results extends Component {
 
           }
         </tbody>
-        <td className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
+        <tfoot>
+          <tr>
+            <td className='load' colSpan="100%"><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
+          </tr>
+        </tfoot>
       </table>
     );
   }
