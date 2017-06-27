@@ -440,9 +440,9 @@ module.exports = function (router) {
    * @apiParamExample Request
    * DELETE https://mint.kipthis.com/api/cart/123456
    */
-  router.delete('/cart/:cart_id', (req, res) => co(function* () {
+  router.delete('/cart/:cart_id', async (req, res) => {
     // only leaders have sudo rm -rf permission
-    const cart = yield db.Carts.findOne({
+    const cart = await db.Carts.findOne({
         id: req.params.cart_id
       })
       .populate('leader')
@@ -462,10 +462,10 @@ module.exports = function (router) {
     }
 
     // archive the cart
-    yield cart.archive()
+    await cart.archive()
     res.status(200)
       .end()
-  }))
+  })
 
   /**
    * @api {delete} /api/cart/:cart_id/item/:item_id Delete Item
