@@ -15,10 +15,14 @@
   }
 
   .box {
+    background: $color-white;
     border: 3px solid mix($color-white, $primaryColor, 85%);
     border-radius: $padding;
     flex: 1 0;
+    justify-content: space-around;
     margin: $padding;
+    max-width: 600px;
+    min-width: 300px;
 
     .image {
       background-size: 275px;
@@ -28,10 +32,6 @@
 
   .action {
     padding: ($padding * 2) 0;
-
-    @media only screen and (max-width: 600px) {
-      padding: ($padding * 2) 0 0;
-    }
 
     button {
       @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
