@@ -87,7 +87,7 @@ export default class Payment extends Component {
                       </li>
                   ))
               }
-              <Stripe />
+              <Stripe {...this.props}/>
             </ul>
 	    		</div> : null
     		}

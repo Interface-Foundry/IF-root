@@ -3,24 +3,30 @@
 import { connect } from 'react-redux';
 import { Invoice } from '../components';
 
-import { 
+import {
   selectAccordion,
-  fetchInvoices
+  fetchInvoices,
+  createInvoice,
+  fetchInvoice,
+  createPaymentSource
 } from '../actions';
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    cart: state.cart.present,
-    selectedAccordion: state.app.selectedAccordion
-  };
-};
+const mapStateToProps = (state, ownProps) => ({
+  selectedAccordion: state.app.selectedAccordion,
+  cart: state.cart.present,
+  user: state.user
+});
 
-// Just an example for mapping functions to the component. 
-// What this does it connect the functions to redux, so that the results of those functions get passed to our redux store. 
+// Just an example for mapping functions to the component.
+// What this does it connect the functions to redux, so that the results of those functions get passed to our redux store.
 const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
-  fetchInvoices: (cart_id) => dispatch(fetchInvoices(cart_id))
+  fetchInvoices: (cart_id) => dispatch(fetchInvoices(cart_id)),
+  createInvoice: (cart_id, invoice_type) => dispatch(createInvoice(cart_id, invoice_type)),
+  fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
+  createPaymentSource: (user_id, payment_data, payment_source) => dispatch(createPaymentSource(user_id, payment_data, payment_source))
 });
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(Invoice);
 

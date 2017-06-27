@@ -9,34 +9,21 @@ export default class Stripe extends Component {
   static propTypes = {
     invoice: PropTypes.object,
     user: PropTypes.object,
+    cart: PropTypes.object,
     createPaymentSource: PropTypes.func
   }
 
-  onToken = (token) => {
-    fetch('/api/payment', {
-      method: 'POST',
-      body: JSON.stringify(token)
-    }).then(response => {
-      response.json().then(data => {
-        alert(`charge worked, ${data.email}`);
-      });
-    });
-  }
-
-
   render() {
     const { invoice, user, createPaymentSource } = this.props
-
     return (
-
       <StripeCheckout
-        token={this.onToken}
+        token={(stripe_data) => createPaymentSource(user.id, stripe_data, 'stripe')}
         stripeKey="pk_test_8bnLnE2e1Ch7pu87SmQfP8p7"
-        email="users_email@from_frontend.xyz"
+        email={user.email_address}
         name="Kip"
         description="Mint"
         panelLabel="PAY UP"
-        amount={1}
+        amount={100}
       >
         <button>+ add card with stripe</button>
       </StripeCheckout>

@@ -30,9 +30,20 @@ export const fetchInvoices = cart_id => get(
   })
 );
 
-export const createPaymentSource = (user_id, payment_body) => post(
+export const fetchPaymentSources = user_id => get(
   `/api/payment/${user_id}`,
-  'CREATE_PAYMENT', { payment_body },
+  'PAYMENTSOURCES',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+)
+
+export const createPaymentSource = (user_id, payment_data, payment_source) => post(
+  `/api/payment/${user_id}`,
+  'CREATE_PAYMENT',
+  {'payment_data': payment_data, 'payment_source': payment_source},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
