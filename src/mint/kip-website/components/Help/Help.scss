@@ -24,7 +24,7 @@
       cursor: pointer;
       box-shadow: $button-box-shadow;
 
-      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      @include transition(all 0.33s $material-bezier);
 
       &:hover {
         svg {
@@ -38,7 +38,7 @@
         width: 25px;
         padding: 0;
 
-        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        @include transition(all 0.33s $material-bezier);
 
         @media only screen and (max-width: 600px) {
           height: 20px;
@@ -46,7 +46,7 @@
       }
 
       &:focus {
-        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+        @include animation(pulseScale $material-bezier 1.33s);
       }
 
       @media only screen and (max-width: 600px) {
@@ -283,11 +283,11 @@
       }
 
       .slide-enter {
-        @include animation(fadeAndSlideInRight cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+        @include animation(fadeAndSlideInRight $material-bezier 0.66s);
       }
 
       .slide-leave {
-        @include animation(fadeAndSlideOutLeft cubic-bezier(0.4, 0, 0.2, 1) 0.66s);
+        @include animation(fadeAndSlideOutLeft $material-bezier 0.66s);
       }
     }
   }
@@ -339,7 +339,7 @@
           border-radius: 500px;
           background: $primaryColor;
 
-          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+          @include transition(all 0.33s $material-bezier);
         }
       }
 

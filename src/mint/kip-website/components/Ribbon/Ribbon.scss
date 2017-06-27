@@ -15,8 +15,8 @@
   text-align: center;
   border-bottom: 2px solid transparent;
   margin-top: $padding*2;
-  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.7s);
-  @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+  @include animation(fadeInDown $material-bezier 0.7s);
+  @include transition(all 0.33s $material-bezier);
   @media only screen and (max-width: 690px) {
     border-bottom: 0px solid transparent;
     margin-top: 0;
@@ -26,7 +26,7 @@
       width: 100%;
       border-bottom: 2px solid white;
       padding: 0 0 $padding;
-      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      @include transition(all 0.33s $material-bezier);
     }
   }
   &.background {
@@ -117,7 +117,7 @@
       font-size: 16px;
       cursor: pointer;
       &:focus {
-        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+        @include animation(pulseScale $material-bezier 1.33s);
       }
       &.slack {
         margin-right: $padding*2;
@@ -151,7 +151,7 @@
       color: #42403f;
       box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08);
       &:focus {
-        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+        @include animation(pulseScale $material-bezier 1.33s);
       }
     }
     a {

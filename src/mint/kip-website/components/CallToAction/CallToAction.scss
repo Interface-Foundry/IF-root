@@ -5,6 +5,7 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: space-around;
   margin-bottom: 100px;
   position: relative;
   z-index: 2;
@@ -19,7 +20,6 @@
     border: 3px solid mix($color-white, $primaryColor, 85%);
     border-radius: $padding;
     flex: 1 0;
-    justify-content: space-around;
     margin: $padding;
     max-width: 600px;
     min-width: 300px;
@@ -34,7 +34,7 @@
     padding: ($padding * 2) 0;
 
     button {
-      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+      @include transition(all 0.33s $material-bezier);
 
       background: $color-white;
       border: 0;
@@ -46,13 +46,15 @@
       padding: $padding ($padding * 4);
 
       &:hover {
-        svg {
-          transform: translate3d(5px, 0, 0);
+        span {
+          svg {
+            transform: translate3d(5px, 0, 0);
+          }
         }
       }
 
       svg {
-        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        @include transition(all 0.33s $material-bezier);
 
         fill: $color-white;
         height: 25px;
@@ -65,7 +67,7 @@
       }
 
       &:focus {
-        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+        @include animation(pulseScale $material-bezier 1.33s);
       }
 
       @media only screen and (max-width: 600px) {
@@ -82,6 +84,67 @@
           @media only screen and (max-width: 600px) {
             padding: $padding ($padding * 2);
           }
+        }
+      }
+    }
+
+    &.learn-more {
+      padding: 0;
+
+      a {
+        button {
+          background: transparent;
+          box-shadow: none;
+          color: $thirdColor;
+          font-size: 20px;
+          line-height: $ribbonHeight;
+
+          &:focus {
+            @include animation(pulseScale $material-bezier 1.33s);
+          }
+
+          span {
+            position: relative;
+
+            &::after {
+              @include transition(all 0.33s $material-bezier);
+
+              border-color: $thirdColor;
+              border-radius: 150px;
+              bottom: -3px;
+              content: '';
+              height: 3px;
+              left: 0;
+              position: absolute;
+              width: 100%;
+            }
+          }
+
+          &:hover {
+            span {
+              &::after {
+                background: $thirdColor;
+              }
+            }
+          }
+
+          svg {
+            @include transition(all 0.33s $material-bezier);
+
+            background: transparent;
+            fill: $thirdColor !important;
+            height: $ribbonHeight;
+            padding: 15px 0;
+            width: auto;
+          }
+        }
+      }
+    }
+
+    &.add-to-slack {
+      a {
+        button {
+          background: $primaryColor;
         }
       }
     }

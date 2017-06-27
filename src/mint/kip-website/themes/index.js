@@ -22,3 +22,4 @@ export Facebook from './Facebook';
 export Outlook from './Outlook';
 export SlackIcon from './SlackIcon';
 export Gmail from './Gmail';
+export SlackWhite from './SlackWhite';

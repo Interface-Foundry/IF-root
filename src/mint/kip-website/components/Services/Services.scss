@@ -169,7 +169,7 @@
       line-height: $ribbonHeight;
       cursor: pointer;
       &:focus {
-        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+        @include animation(pulseScale $material-bezier 1.33s);
       }
       &.slack {
         margin-right: $padding*2;
@@ -186,7 +186,7 @@
           bottom: -3px;
           border-radius: 150px;
           background: transparent;
-          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+          @include transition(all 0.33s $material-bezier);
         }
       }
       &:hover {
@@ -205,7 +205,7 @@
         width: auto;
         fill: $primaryColor !important;
         background: transparent;
-        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+        @include transition(all 0.33s $material-bezier);
       }
     }
   }

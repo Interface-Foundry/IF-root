@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 import { Right } from '../../themes/newSvg';
+import { SlackWhite } from '../../themes/'
 
 export default class CallToAction extends Component {
   static propTypes = {
@@ -33,7 +34,7 @@ export default class CallToAction extends Component {
          <p>{slack.desc}</p>
           <a href='https://slack.com/oauth/authorize?scope=commands+bot+users%3Aread&client_id=2804113073.14708197459'>
             <button>
-              <span>{slack.action} <Right/></span>
+              <SlackWhite className='slack-logo' /> <span> {slack.action} <Right/></span>
             </button>
           </a>
         </div>

@@ -20,4 +20,6 @@ $thirdColor: #26db6b;
 $tmlColor: rgb(249, 38, 111);
 $viewHeight: calc(100% - #{$ribbonHeight});
 $warningColor: #f53f46;
-$button-box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)
+$button-box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+$material-bezier: cubic-bezier(0.4, 0, 0.2, 1);
+

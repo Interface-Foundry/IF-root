@@ -112,7 +112,7 @@ p {
     z-index: 1000;
     .sidenav__list {
       border: 0;
-      @include animation(scrollInRight cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
+      @include animation(scrollInRight $material-bezier 0.33s);
     }
   }
 }
