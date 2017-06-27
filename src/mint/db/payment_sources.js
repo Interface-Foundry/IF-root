@@ -19,6 +19,14 @@ const paymentSourceCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
+    /**
+     * if a user deletes a payment source just mark deleted
+     */
+    deleted: {
+      type: 'boolean',
+      defaultsTo: 'false'
+    },
+
     /** is a leader for invoice necessary or is that cart leader? */
     user: Waterline.isA('user_accounts'),
 

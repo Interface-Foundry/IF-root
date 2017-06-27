@@ -182,7 +182,10 @@ module.exports = function (router) {
      * @apiParam {string} :user_id - which user
      */
     .get(async (req, res) => {
-      // need some check probably
+      const userId = req.params.user_id
+      const paymentSources = await PaymentSource.GetForUserId(userId)
+      logging.info('got user payment sources', paymentSources)
+      return res.send(paymentSources)
     })
 
     /**

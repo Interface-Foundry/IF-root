@@ -35,6 +35,20 @@ class PaymentSource {
     return new paymentSourceHandlers[source](sourceData)
   }
 
+  static async GetForUserId (userId) {
+    const paymentSources = await db.PaymentSources.find({user: userId, deleted: false})
+    return paymentSources.map(source => {
+      if (source.payment_vendor === 'stripe') {
+        return {
+          id: source.id,
+          last4: source.sources.data[0].last4,
+          exp_month: source.sources.data[0].exp_month,
+          exp_year: source.sources.data[0].exp_year
+        }
+      }
+    })
+  }
+
   // //this is #fakenews -- for testing
   // async pay (invoice, amount) {
   //   logging.info('pay called')
@@ -64,10 +78,10 @@ class StripePaymentSource extends PaymentSource {
 
   async createPaymentSource (paymentInfo) {
     const user = await db.UserAccounts.findOne({id: this.user})
-
+    console.log('creating paymentSource!!!', paymentInfo)
     const stripeResponse = await stripe.customers.create({
       email: user.email_address,
-      source: paymentInfo.token //was commented out? intentionally? who knows
+      source: paymentInfo.id
     })
 
     const paymentSource = await db.PaymentSources.create({
