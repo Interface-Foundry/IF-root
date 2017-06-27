@@ -39,6 +39,21 @@ const initialState = {
     categories: [],
     competitors: [{ image: '', data: [] }]
   },
+  callToAction: {
+    howItWorksAction: '',
+    web: {
+      img: '',
+      hed: '',
+      desc: '',
+      action: ''
+    },
+    slack: {
+      img: '',
+      hed: '',
+      desc: '',
+      action: ''
+    }
+  },
   footer: {
     links: []
   },

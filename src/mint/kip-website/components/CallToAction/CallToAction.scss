@@ -1,0 +1,89 @@
+@import '../../themes/constants';
+@import '../../themes/animations';
+
+.call-to-action {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 100px;
+  position: relative;
+  z-index: 2;
+
+  .learn-more {
+    flex: 1 1 100%; // take up the full line;
+    padding: $padding * 3;
+  }
+
+  .box {
+    border: 3px solid mix($color-white, $primaryColor, 85%);
+    border-radius: $padding;
+    flex: 1 0;
+    margin: $padding;
+
+    .image {
+      background-size: 275px;
+      height: 150px;
+    }
+  }
+
+  .action {
+    padding: ($padding * 2) 0;
+
+    @media only screen and (max-width: 600px) {
+      padding: ($padding * 2) 0 0;
+    }
+
+    button {
+      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+      background: $color-white;
+      border: 0;
+      border-radius: $padding / 2;
+      box-shadow: $button-box-shadow;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      padding: $padding ($padding * 4);
+
+      &:hover {
+        svg {
+          transform: translate3d(5px, 0, 0);
+        }
+      }
+
+      svg {
+        @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+        fill: $color-white;
+        height: 25px;
+        padding: 0;
+        width: 25px;
+
+        @media only screen and (max-width: 600px) {
+          height: 20px;
+        }
+      }
+
+      &:focus {
+        @include animation(pulseScale cubic-bezier(0.4, 0, 0.2, 1) 1.33s);
+      }
+
+      @media only screen and (max-width: 600px) {
+        font-size: 14px;
+      }
+    }
+
+    a {
+      &:first-of-type {
+        button {
+          background: $warningColor;
+          color: $color-white;
+
+          @media only screen and (max-width: 600px) {
+            padding: $padding ($padding * 2);
+          }
+        }
+      }
+    }
+  }
+}

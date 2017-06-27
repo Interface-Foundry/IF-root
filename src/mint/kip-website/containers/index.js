@@ -1,6 +1,7 @@
 export AboutContainer from './AboutContainer';
 export AppContainer from './AppContainer';
 export BlogContainer from './BlogContainer';
+export CallToActionContainer from './CallToActionContainer'
 export CompareContainer from './CompareContainer';
 export FooterContainer from './FooterContainer';
 export HeaderContainer from './HeaderContainer';

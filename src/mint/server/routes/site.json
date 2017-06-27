@@ -47,6 +47,21 @@
         "slackActionText": "Add to Slack Now"
       }
     },
+    "callToAction": {
+      "howItWorksAction": "How Kip Works",
+      "web": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
+        "hed": "Start Using Kip Now",
+        "desc": "",
+        "action": "Use Kip Web"
+      },
+      "slack": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
+        "hed": "Invite Kip To Your Slack Team",
+        "desc": "",
+        "action": "Add To Slack"
+      }
+    },
     "footer": {
       "links": [{
         "title": "Terms of Use",
@@ -240,6 +255,21 @@
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
+      }
+    },
+    "callToAction": {
+      "howItWorksAction": "How Kip Works",
+      "web": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
+        "hed": "Start Using Kip Now",
+        "desc": "",
+        "action": "Use Kip Web"
+      },
+      "slack": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
+        "hed": "Invite Kip To Your Slack Team",
+        "desc": "",
+        "action": "Add To Slack"
       }
     },
     "footer": {
@@ -437,6 +467,21 @@
         "slackActionText": "Add to Slack Now"
       }
     },
+    "callToAction": {
+      "howItWorksAction": "How Kip Works",
+      "web": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
+        "hed": "Start Using Kip Now",
+        "desc": "",
+        "action": "Use Kip Web"
+      },
+      "slack": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
+        "hed": "Invite Kip To Your Slack Team",
+        "desc": "",
+        "action": "Add To Slack"
+      }
+    },
     "footer": {
       "links": [{
         "title": "Terms of Use",
@@ -630,6 +675,21 @@
         }],
         "actionText": "Use Kip Now",
         "slackActionText": "Add to Slack Now"
+      }
+    },
+    "callToAction": {
+      "howItWorksAction": "How Kip Works",
+      "web": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/holding_phone_sk.svg",
+        "hed": "Start Using Kip Now",
+        "desc": "",
+        "action": "Use Kip Web"
+      },
+      "slack": {
+        "img": "//storage.googleapis.com/kip-random/many_kips/penguin_family_sk.svg",
+        "hed": "Invite Kip To Your Slack Team",
+        "desc": "",
+        "action": "Add To Slack"
       }
     },
     "footer": {

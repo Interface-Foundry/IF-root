@@ -1,40 +1,46 @@
 @import '../../themes/constants';
 @import '../../themes/animations';
+
 .footer {
-  position: relative;
-  text-align: center;
   background: mix(white, $primaryColor, 95%);
   color: white;
-  padding: 0 $padding*2 $padding*5;
+  padding: 0 ($padding * 2) ($padding * 5);
+  position: relative;
+  text-align: center;
+
   p {
-    font-size: 12px;
     color: $primaryColor;
+    font-size: 12px;
     margin-bottom: $padding;
-    z-index: 1;
     position: relative;
+    z-index: 1;
   }
+
   .footer__icons {
     z-index: 1;
+
     svg {
       fill: $primaryColor;
+      height: $ribbonHeight / 2;
       margin: 0 $padding;
-      height: $ribbonHeight/2;
-      width: $ribbonHeight/2;
+      width: $ribbonHeight / 2;
       z-index: 1;
     }
   }
-  &>svg {
-    position: absolute;
-    left: -50%;
+
+  & > svg {
     bottom: 90%;
-    z-index: -1;
-    width: 200%;
     height: auto;
+    left: -50%;
     min-width: 1200px;
+    position: absolute;
+    width: 200%;
+
     g {
       fill: mix(white, $primaryColor, 95%) !important;
       z-index: 0;
     }
+
     @media only screen and (max-width: 600px) {
       bottom: 98%;
     }

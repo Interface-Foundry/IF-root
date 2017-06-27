@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 
 import { Icon } from '../../themes';
-import { HeroContainer, ServicesContainer, CompareContainer, FooterContainer } from '../../containers';
+import { HeroContainer, ServicesContainer, CompareContainer, FooterContainer, CallToActionContainer } from '../../containers';
 
 export default class Landing extends Component {
 
@@ -53,11 +53,9 @@ export default class Landing extends Component {
           <div className="icon col-1"><Icon icon='Delivery'/></div>
           <div className="icon col-1"/>
         </div>
-
-        <div ref={(landing) => this.landing = landing}>
-          <ServicesContainer />
-        </div>
+        <ServicesContainer ref={(landing) => this.landing = landing} />
         <CompareContainer />
+        <CallToActionContainer />
         <FooterContainer />
       </div>
     );

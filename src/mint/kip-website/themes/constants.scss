@@ -1,29 +1,23 @@
 $bgColor: #4f4d4c;
-$secondBgColor: rgb(37, 37, 37);
-$fgColor: #fcfcf9;
-
-$heroFontColor: rgb(26, 26, 26);
-$fontColor: rgb(134, 133, 133);
 $borderColor: #dde5ed;
-
-$tmlColor: rgb(249, 38, 111);
-
-$warningColor: #f53f46;
-$primaryColor: #4a9ff1;
-$secondaryColor: #ffdf4d;
-$thirdColor: #26db6b;
-$fourthColor: #ff6961;
-$fifthColor: rgb(243, 166, 86);
-
-$priceColor: #d65b00;
-
-$fontFamily: 'Arial', sans-serif;
-$secondaryFontFamily: 'Raleway', sans-serif;
-
-$ribbonHeight: 50px;
-$sidenavWidth: 200px;
-$viewHeight: calc(100% - #{$ribbonHeight});
-
-$padding: 10px;
-
 $borderRadius: 10px;
+$color-white: #fff;
+$fgColor: #fcfcf9;
+$fifthColor: rgb(243, 166, 86);
+$fontColor: rgb(134, 133, 133);
+$fontFamily: 'Arial', sans-serif;
+$fourthColor: #ff6961;
+$heroFontColor: rgb(26, 26, 26);
+$padding: 10px;
+$priceColor: #d65b00;
+$primaryColor: #4a9ff1;
+$ribbonHeight: 50px;
+$secondaryColor: #ffdf4d;
+$secondaryFontFamily: 'Raleway', sans-serif;
+$secondBgColor: rgb(37, 37, 37);
+$sidenavWidth: 200px;
+$thirdColor: #26db6b;
+$tmlColor: rgb(249, 38, 111);
+$viewHeight: calc(100% - #{$ribbonHeight});
+$warningColor: #f53f46;
+$button-box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)

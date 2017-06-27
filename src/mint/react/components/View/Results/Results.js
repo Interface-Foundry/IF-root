@@ -35,12 +35,11 @@ export default class Results extends Component {
     || numberOfItems(nextProps.results) !== numberOfItems(this.props.results)
     || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items)
     || nextProps.selectedItemId !== this.props.selectedItemId
-    || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id
+    || nextProps.results[0] && (nextProps.results[0].id !== this.props.results[0].id)
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
     if (results.length === 0 && !loading && this.props.loading !== loading) {
       console.log({ msg: 'REDIRECTING!!!!', results, loading })
-
       // replace(`${location.pathname}${location.search}&toast=No Results Found!&status=warn`)
     }
 
@@ -61,11 +60,11 @@ export default class Results extends Component {
 
     if (!results.length && !loading) return <EmptyContainer />; // don't bother with the loops if there aren't results
 
-    const displayedResults = (loading || lazyLoading) // best: O(1) worst: O(2n)
-      ? [...results, ...(new Array(10)).fill().map((_, i) => ({ loading: true }))]
+    const displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
+      ? [...results, ...(new Array(10)).fill({ loading: true })]
       : results;
 
-    // O(n*m) where m is myItems.length
+    // best: O(n), worst O(n*m) where m is myItems.length
     const partitionResults = displayedResults.reduce((acc, result, i) => {
       if (i % size === 0) acc.push([]);
 

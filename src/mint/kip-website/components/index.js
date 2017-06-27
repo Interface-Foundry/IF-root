@@ -1,6 +1,7 @@
 export About from './About';
 export App from './App';
 export Blog from './Blog';
+export CallToAction from './CallToAction';
 export Compare from './Compare';
 export ComparisonPage from './ComparisonPage';
 export Footer from './Footer';
