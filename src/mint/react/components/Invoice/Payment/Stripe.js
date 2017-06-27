@@ -15,14 +15,16 @@ export default class Stripe extends Component {
 
   render() {
     const { invoice, user, createPaymentSource } = this.props
+    const self = this
     return (
       <StripeCheckout
-        token={(stripe_data) => createPaymentSource(user.id, stripe_data, 'stripe')}
+        token={(stripe_data) => createPaymentSource(stripe_data, 'stripe')}
         stripeKey="pk_test_8bnLnE2e1Ch7pu87SmQfP8p7"
         email={user.email_address}
         name="Kip"
         description="Mint"
         panelLabel="PAY UP"
+        allowRememberMe={false}
         amount={100}
       >
         <button>+ add card with stripe</button>

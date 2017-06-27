@@ -35,6 +35,7 @@ export {
   createInvoice,
   fetchPaymentSources,
   createPaymentSource,
+  deletePaymentSource,
   postPayment,
   sendPaymentCollectionEmails,
   updateInvoiceOptions

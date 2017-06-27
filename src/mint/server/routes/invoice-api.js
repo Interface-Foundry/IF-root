@@ -173,7 +173,7 @@ module.exports = function (router) {
   /**
    * main payment route
    */
-  router.route('/payment/:user_id')
+  router.route('/payment')
     /**
      * @api {get} /payment/:user_id get payment sources
      * @apiDescription get payment sources for a user (i.e. stripe, venmo, etc.)
@@ -182,7 +182,7 @@ module.exports = function (router) {
      * @apiParam {string} :user_id - which user
      */
     .get(async (req, res) => {
-      const userId = req.params.user_id
+      const userId = req.UserSession.user_account.id
       const paymentSources = await PaymentSource.GetForUserId(userId)
       logging.info('got user payment sources', paymentSources)
       return res.send(paymentSources)
@@ -198,14 +198,29 @@ module.exports = function (router) {
      * @apiParam {json} payment_info - whatever response from specific payment source
      */
     .post(async (req, res) => {
-      const userId = req.params.user_id
+      const userId = req.UserSession.user_account.id
       const paymentSourceType = _.get(req, 'body.payment_source', 'stripe')
       const paymentSource = await PaymentSource.Create(paymentSourceType, {user: userId})
       const createdSource = await paymentSource.createPaymentSource(req.body.payment_data)
       logging.info('new payment source:', createdSource)
-      return res.send(createdSource)
+      const paymentSources = await PaymentSource.GetForUserId(userId)
+      return res.send(paymentSources)
     })
 
+  router.route('/payment/:paymentsource_id')
+    /**
+     * @api {delete} /payment/:paymentsource_id
+     * @apiDescription delete the paymentsource
+     * @apiGroup PaymentSources
+     *
+     * @apiParam {string} :paymentsource_id - id of payment source
+     */
+    .delete(async (req, res) => {
+      const userId = req.UserSession.user_account.id
+      const paymentId = req.params.paymentsource_id
+      await PaymentSource.DeletePaymentSource(userId, paymentId)
+      res.status(200).end()
+    })
 
   /**
    * @api {get} /invoice/cart/:cart_id

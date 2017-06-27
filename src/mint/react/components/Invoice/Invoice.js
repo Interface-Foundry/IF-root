@@ -11,15 +11,14 @@ import Forms from './Forms';
 export default class Invoice extends Component {
   static propTypes = {
     cart: PropTypes.object,
-    user: PropTypes.object,
     fetchInvoices: PropTypes.func,
     fetchPaymentSources: PropTypes.func
   }
 
 componentWillMount() {
-    const { fetchPaymentSources, fetchInvoices, cart, user } = this.props;
+    const { fetchPaymentSources, fetchInvoices, cart } = this.props;
     fetchInvoices(cart.id);
-    fetchPaymentSources(user.id);
+    fetchPaymentSources();
   }
 
 

@@ -2,6 +2,7 @@ const Waterline = require('waterline')
 const uuid = require('uuid')
 
 const constants = require('../server/constants.js')
+var archive = require('./cold_storage')
 
 /**
  * Payments collection is the collection of payment sources
@@ -19,14 +20,6 @@ const paymentSourceCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
-    /**
-     * if a user deletes a payment source just mark deleted
-     */
-    deleted: {
-      type: 'boolean',
-      defaultsTo: 'false'
-    },
-
     /** is a leader for invoice necessary or is that cart leader? */
     user: Waterline.isA('user_accounts'),
 
@@ -37,7 +30,10 @@ const paymentSourceCollection = Waterline.Collection.extend({
     },
 
     /** peripheral data from source */
-    data: 'json'
+    data: 'json',
+
+    /** function to archive this object */
+    archive: archive
   }
 })
 

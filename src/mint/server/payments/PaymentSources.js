@@ -36,7 +36,7 @@ class PaymentSource {
   }
 
   static async GetForUserId (userId) {
-    const paymentSources = await db.PaymentSources.find({user: userId, deleted: false})
+    const paymentSources = await db.PaymentSources.find({user: userId})
     const sourcesArray = paymentSources.map(source => {
       if (source.payment_vendor === 'stripe') {
         return {
@@ -49,6 +49,16 @@ class PaymentSource {
       }
     })
     return sourcesArray
+  }
+
+  static async DeletePaymentSource(userId, paymentsourceId) {
+    const paymentSource = await db.PaymentSources.findOne({id: paymentsourceId})
+    if (paymentSource.user !== userId) {
+      logging.info('userid', userId)
+      logging.info('paymentSource', paymentSource)
+      throw new Error('Can only delete Payment Source if payment_source.user is same as userId')
+    }
+    await paymentSource.archive()
   }
 
   // //this is #fakenews -- for testing
@@ -80,7 +90,6 @@ class StripePaymentSource extends PaymentSource {
 
   async createPaymentSource (paymentInfo) {
     const user = await db.UserAccounts.findOne({id: this.user})
-    console.log('creating paymentSource!!!', paymentInfo)
     const stripeResponse = await stripe.customers.create({
       email: user.email_address,
       source: paymentInfo.id

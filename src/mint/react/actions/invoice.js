@@ -1,4 +1,4 @@
-import { get, post, put } from './async';
+import { get, post, put, del } from './async';
 
 export const createInvoice = (cart_id, invoice_type) => post(
   `/api/${invoice_type}/${cart_id}`,
@@ -30,23 +30,33 @@ export const fetchInvoices = cart_id => get(
   })
 );
 
-export const fetchPaymentSources = user_id => get(
-  `/api/payment/${user_id}`,
+export const fetchPaymentSources = () => get(
+  '/api/payment',
   'PAYMENTSOURCES',
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
     receivedAt: Date.now()
   })
-)
+);
 
-export const createPaymentSource = (user_id, payment_data, payment_source) => post(
-  `/api/payment/${user_id}`,
-  'CREATE_PAYMENT',
+export const createPaymentSource = (payment_data, payment_source) => post(
+  '/api/payment',
+  'CREATE_PAYMENTSOURCE',
   {'payment_data': payment_data, 'payment_source': payment_source},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
+    receivedAt: Date.now()
+  })
+);
+
+export const deletePaymentSource = (paymentsource_id) => del(
+  `/api/payment/${paymentsource_id}`,
+  'DELETE_PAYMENTSOURCE',
+  (type) => ({
+    type: `${type}_SUCCESS`,
+    response: paymentsource_id,
     receivedAt: Date.now()
   })
 );
