@@ -8,7 +8,8 @@ import {
   fetchInvoices,
   createInvoice,
   fetchInvoice,
-  createPaymentSource
+  createPaymentSource,
+  fetchPaymentSources
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -24,7 +25,8 @@ const mapDispatchToProps = dispatch => ({
   fetchInvoices: (cart_id) => dispatch(fetchInvoices(cart_id)),
   createInvoice: (cart_id, invoice_type) => dispatch(createInvoice(cart_id, invoice_type)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
-  createPaymentSource: (user_id, payment_data, payment_source) => dispatch(createPaymentSource(user_id, payment_data, payment_source))
+  createPaymentSource: (user_id, payment_data, payment_source) => dispatch(createPaymentSource(user_id, payment_data, payment_source)),
+  fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id))
 });
 
 

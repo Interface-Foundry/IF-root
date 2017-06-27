@@ -37,16 +37,18 @@ class PaymentSource {
 
   static async GetForUserId (userId) {
     const paymentSources = await db.PaymentSources.find({user: userId, deleted: false})
-    return paymentSources.map(source => {
+    const sourcesArray = paymentSources.map(source => {
       if (source.payment_vendor === 'stripe') {
         return {
           id: source.id,
-          last4: source.sources.data[0].last4,
-          exp_month: source.sources.data[0].exp_month,
-          exp_year: source.sources.data[0].exp_year
+          last4: source.data.sources.data[0].last4,
+          brand: source.data.sources.data[0].brand,
+          exp_month: source.data.sources.data[0].exp_month,
+          exp_year: source.data.sources.data[0].exp_year
         }
       }
     })
+    return sourcesArray
   }
 
   // //this is #fakenews -- for testing

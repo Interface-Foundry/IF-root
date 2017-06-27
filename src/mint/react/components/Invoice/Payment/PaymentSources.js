@@ -3,27 +3,35 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-export default class Stripe extends Component {
-
+export default class PaymentSources extends Component {
   static propTypes = {
     invoice: PropTypes.object,
     user: PropTypes.object,
     fetchPaymentSources: PropTypes.func
   }
 
-  render() {
+  state = {
+    sources: []
+  }
+
+  componentWillMount () {
     const { user, fetchPaymentSources } = this.props
-    paymentSources = fetchPaymentSources(user.id)
+    const sources = fetchPaymentSources(user.id);
+    this.setState({ sources });
+  }
+
+render() {
+  debugger;
+  const { sources } = this.props.state
     return (
-      <ul>
-       {paymentSources.map((payment, i) => (
-            <div className='circle'/>
-            <div className='text'>
-              <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
-              <p>{payment.exp_month} {payment.exp_year}</p>
-            </div>
-    ))}
-    </ul>
+      <div>
+        {sources.map( payment => (
+          <div>
+            <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
+            <p>{payment.exp_month} {payment.exp_year}</p>
+          </div>
+        ))}
+      </div>
     )
   }
 }
