@@ -1,4 +1,4 @@
-// react/utils/formating.js
+// react/utils/formatting.js
 
 // import striptags from 'striptags';
 import { isValidEmail } from '.';

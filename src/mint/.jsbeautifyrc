@@ -44,7 +44,7 @@
     "wrap_attributes": "auto",
     "wrap_attributes_indent_size": 0,
     "wrap_line_length": 0,
-    "operator_position": "after-newline",
-    "e4x": true
+    "e4x": true,
+    "operator_position": "after-newline"
   }
 }

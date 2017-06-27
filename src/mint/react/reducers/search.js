@@ -9,8 +9,7 @@ const initialState = {
   page: 0,
   query: '',
   loading: false,
-  lazyLoading: false,
-  loaded: false
+  lazyLoading: false
 };
 
 export default (state = initialState, action) => {
@@ -27,8 +26,7 @@ export default (state = initialState, action) => {
     return {
       ...state,
       ...action.response,
-      loading: false,
-      loaded: true
+      loading: false
     };
   case 'UPDATE_ITEM_SUCCESS':
     return {
@@ -69,8 +67,7 @@ export default (state = initialState, action) => {
   case 'SEARCH_LOADING':
     return {
       ...state,
-      loading: true,
-      loaded: false
+      loading: true
     };
   case 'LAZY_SEARCH_SUCCESS':
     return {

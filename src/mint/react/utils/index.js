@@ -31,7 +31,7 @@ export {
   getStoreName,
   splitOptionsByType
 }
-from './formating';
+from './formatting';
 
 export {
   fakeStore

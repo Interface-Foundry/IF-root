@@ -17,7 +17,7 @@ const initialState = {
   privacy: 'public',
   locked: false,
   ok: true,
-  editId: null 
+  editId: null
 };
 
 export default function cart(state = initialState, action) {
@@ -64,7 +64,7 @@ export default function cart(state = initialState, action) {
     return {
       ...state,
       items: state.items.reduce((acc, item, i) => {
-        item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item, added_by: item.added_by}) : acc.push(item);
+        item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item, added_by: item.added_by }) : acc.push(item);
         return acc;
       }, [])
     };

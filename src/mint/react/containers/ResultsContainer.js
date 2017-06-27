@@ -18,8 +18,7 @@ const mapStateToProps = (state, ownProps) => ({
   results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user),
   loading: state.search.loading,
   lazyLoading: state.search.lazyLoading,
-  lastUpdatedId: state.search.lastUpdatedId,
-  loaded: state.search.loaded
+  lastUpdatedId: state.search.lastUpdatedId
 });
 
 const mapDispatchToProps = dispatch => ({

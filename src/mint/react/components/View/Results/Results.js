@@ -22,47 +22,72 @@ export default class Results extends Component {
     page: PropTypes.number,
     loading: PropTypes.bool,
     lazyLoading: PropTypes.bool,
-    lastUpdatedId: PropTypes.string,
-    loaded: PropTypes.bool
+    lastUpdatedId: PropTypes.string
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (nextProps.lastUpdatedId !== this.props.lastUpdatedId || nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
-      nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id || nextProps.lazyLoading !== this.props.lazyLoading || nextProps.loading !== this.props.loading);
+  state = {
+    myItems: []
   }
 
-  componentWillReceiveProps = ({ results, replace, loaded }) => {
-    if (results.length === 0 && loaded && this.props.loaded !== loaded) {
-      replace(`${location.pathname}${location.search}&toast=No Results Found!&status=warn`)
+  shouldComponentUpdate = (nextProps, nextState) =>
+    nextProps.lastUpdatedId !== this.props.lastUpdatedId
+    || nextProps.user.id !== this.props.user.id
+    || numberOfItems(nextProps.results) !== numberOfItems(this.props.results)
+    || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items)
+    || nextProps.selectedItemId !== this.props.selectedItemId
+    || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id
+
+  componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
+    if (results.length === 0 && !loading && this.props.loading !== loading) {
+      console.log({ msg: 'REDIRECTING!!!!', results, loading })
+
+      // replace(`${location.pathname}${location.search}&toast=No Results Found!&status=warn`)
+    }
+
+    if ((items && numberOfItems(items) !== numberOfItems(this.props.cart.items)) || (items && !this.state.myItems.length)) {
+      // do only when the number of items in the cart changes, instead of on rerender
+      const myItems = items.reduce((acc, i) => i.added_by === id ? [...acc, i.asin] : acc, []);
+      this.setState({ myItems })
     }
   }
 
   render() {
     // Needs refactor, too many loop-di-loops here.
     let arrow, selected;
-    const { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading } = this.props,
-      lazyRes = loading ? (new Array(10)).fill().map((_, i) => ({ loading: true, id: null })) : lazyLoading ? [...results, ...(new Array(10)).fill().map((_, i) => ({ loading: true, id: null }))] : results,
-      cartAsins = cart.items.map((item, i) => `${item.asin}-${item.added_by}`),
-      partitionResults = lazyRes.reduce((acc, result, i) => {
-        if (i % size === 0) acc.push([]);
-        acc[acc.length - 1].push(result);
+    const {
+      props: { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading },
+      state: { myItems }
+    } = this;
 
-        if (result.id === selectedItemId || result.oldId === selectedItemId) {
-          selected = {
-            row: acc.length,
-            result,
-            index: i,
-            options: splitOptionsByType(result.options)
-          };
-          arrow = acc[acc.length - 1].length - 1;
-        }
+    if (!results.length && !loading) return <EmptyContainer />; // don't bother with the loops if there aren't results
 
-        return acc;
-      }, []);
+    const displayedResults = (loading || lazyLoading) // best: O(1) worst: O(2n)
+      ? [...results, ...(new Array(10)).fill().map((_, i) => ({ loading: true }))]
+      : results;
 
-    if (selected) partitionResults.splice(selected.row, 0, [{...selected.result, selected: true, index: selected.index, options: selected.options }]);
+    // O(n*m) where m is myItems.length
+    const partitionResults = displayedResults.reduce((acc, result, i) => {
+      if (i % size === 0) acc.push([]);
 
-    if (!results.length && !loading) return <EmptyContainer />;
+      acc[acc.length - 1].push({
+        ...result,
+        inCart: (result.asin && myItems.includes(result.asin))
+      });
+
+      if (result.id && (result.id === selectedItemId || result.oldId === selectedItemId)) {
+        selected = {
+          row: acc.length,
+          result,
+          index: i,
+          options: splitOptionsByType(result.options)
+        };
+        arrow = acc[acc.length - 1].length - 1;
+      }
+
+      return acc;
+    }, []);
+
+    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
 
     return (
       <table className='results'>
@@ -82,32 +107,32 @@ export default class Results extends Component {
             partitionResults.map((itemrow, i) => (
             <tr key={i} >
                 {
-                  itemrow.map((item, i) => {
-                    return item.loading
-                    ? <LoadingTile key={i}/>
+                  itemrow.map((item, i) => 
+                    item.loading
+                      ? <LoadingTile key={i}/>
                       : item.selected
-                      ? (<Selected
-                        key={item.id}
-                        cartAsins={cartAsins}
-                        arrow={arrow}
-                        item={item}
-                        numResults={results.length}
-                        {...this.props}/>
-                      ) : (
-                        <Default
+                        ? <Selected
                           key={item.id}
+                          inCart={item.inCart}
+                          arrow={arrow}
                           item={item}
-                          cartAsins={cartAsins}
-                          {...this.props}/>
-                      );
-                  })
+                          numResults={results.length}
+                          {...this.props}
+                        /> 
+                        : <Default
+                            key={item.id}
+                            item={item}
+                            inCart={item.inCart}
+                            {...this.props}
+                          />
+                  )
                 }
               </tr>
           ))
 
           }
         </tbody>
-        <div className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></div>
+        <td className='load'><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
       </table>
     );
   }
