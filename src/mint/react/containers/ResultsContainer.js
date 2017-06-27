@@ -1,6 +1,7 @@
 // react/containers/SettingsContainer.js
 
 import { connect } from 'react-redux';
+import { replace } from 'react-router-redux';
 import { Results } from '../components';
 import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart } from '../utils';
@@ -17,7 +18,8 @@ const mapStateToProps = (state, ownProps) => ({
   results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user),
   loading: state.search.loading,
   lazyLoading: state.search.lazyLoading,
-  lastUpdatedId: state.search.lastUpdatedId
+  lastUpdatedId: state.search.lastUpdatedId,
+  loaded: state.search.loaded
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -46,7 +48,8 @@ const mapDispatchToProps = dispatch => ({
   navigateLeftResults: () => dispatch(navigateLeftResults()),
   fetchSearchItem: (item_id) => dispatch(fetchSearchItem(item_id)),
   fetchItemVariation: (option_asin, store, locale) => dispatch(fetchItemVariation(option_asin, store, locale)),
-  getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page))
+  getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page)),
+    replace: (loc) => dispatch(replace(loc))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Results);

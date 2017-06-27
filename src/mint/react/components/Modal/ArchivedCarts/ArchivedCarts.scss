@@ -22,19 +22,19 @@
     }
 
     .image-container {
+      border-radius: 10px;
+      box-shadow: $card-box-shadow;
       display: flex;
       flex-wrap: wrap;
-      width: 130px;
       height: 130px;
       margin: 0 ($padding * 2) 0 0;
-      box-shadow: $card-box-shadow;
-      border-radius: 10px;
+      width: 130px;
 
       .image {
+        background-size: cover;
+        flex-basis: 50%;
         flex-grow: 1;
         flex-shrink: 0;
-        flex-basis: 50%;
-        background-size: cover;
       }
     }
   }

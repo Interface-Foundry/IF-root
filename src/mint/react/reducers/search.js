@@ -9,7 +9,8 @@ const initialState = {
   page: 0,
   query: '',
   loading: false,
-  lazyLoading: false
+  lazyLoading: false,
+  loaded: false
 };
 
 export default (state = initialState, action) => {
@@ -26,7 +27,8 @@ export default (state = initialState, action) => {
     return {
       ...state,
       ...action.response,
-      loading: false
+      loading: false,
+      loaded: true
     };
   case 'UPDATE_ITEM_SUCCESS':
     return {
@@ -67,7 +69,8 @@ export default (state = initialState, action) => {
   case 'SEARCH_LOADING':
     return {
       ...state,
-      loading: true
+      loading: true,
+      loaded: false
     };
   case 'LAZY_SEARCH_SUCCESS':
     return {
@@ -83,7 +86,7 @@ export default (state = initialState, action) => {
       ...state,
       lastUpdatedId: action.response.item.id,
       results: state.results.reduce((acc, item, i) => {
-        item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item}) : acc.push(item);
+        item.id === action.response.item.id ? acc.push({...item, ...action.response.item }) : acc.push(item);
         return acc;
       }, [])
     }
@@ -93,7 +96,7 @@ export default (state = initialState, action) => {
       lastUpdatedId: action.response.item.id,
       selectedItemId: action.response.item.id,
       results: state.results.reduce((acc, item, i) => {
-        item.id === state.selectedItemId ? acc.push({ ...item, ...action.response.item}) : acc.push(item);
+        item.id === state.selectedItemId ? acc.push({...item, ...action.response.item }) : acc.push(item);
         return acc;
       }, [])
     }

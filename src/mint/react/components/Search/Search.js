@@ -15,7 +15,8 @@ export default class Input extends Component {
     query: PropTypes.string,
     submitQuery: PropTypes.func,
     updateQuery: PropTypes.func,
-    history: PropTypes.bool
+    showHistory: PropTypes.bool,
+    history: PropTypes.object
   }
 
   state = {
@@ -47,7 +48,7 @@ export default class Input extends Component {
       case 13:
         e.preventDefault();
         if (selectedQuery > -1) {
-          if(combined[selectedQuery].machineName) {
+          if (combined[selectedQuery].machineName) {
             updateQuery(combined[selectedQuery].humanName);
             this._handleSubmit(combined[selectedQuery].machineName);
           } else {
@@ -63,7 +64,7 @@ export default class Input extends Component {
   }
 
   render() {
-    const { history, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
+    const { showHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
     return (
       <form onSubmit={::this._handleSubmit} className='search'>
         <button type='submit' className='submit'>
@@ -73,7 +74,7 @@ export default class Input extends Component {
         <button className='cancel' type='button' disabled={!query} onClick={(e) => updateQuery('')}>
             <Delete />
         </button>
-        { history ? <History {...this.props} selectedQuery={selectedQuery} /> : null }
+        { showHistory ? <History {...this.props} selectedQuery={selectedQuery} /> : null }
       </form>
     );
   }

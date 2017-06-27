@@ -11,7 +11,7 @@ const mapStateToProps = (state, ownProps) => ({
   cart: state.cart.present,
   query: state.search.query,
   results: state.search.results,
-  history: state.search.history,
+  showHistory: state.search.history,
   categories: state.search.categories
 });
 

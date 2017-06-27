@@ -21,12 +21,20 @@ export default class Results extends Component {
     getMoreSearchResults: PropTypes.func,
     page: PropTypes.number,
     loading: PropTypes.bool,
-    lazyLoading: PropTypes.bool
+    lazyLoading: PropTypes.bool,
+    lastUpdatedId: PropTypes.string,
+    loaded: PropTypes.bool
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return (nextProps.lastUpdatedId !== this.props.lastUpdatedId || nextProps.user.id !== this.props.user.id || numberOfItems(nextProps.results) !== numberOfItems(this.props.results) ||
       nextProps.selectedItemId !== this.props.selectedItemId || numberOfItems(nextProps.cart.items) !== numberOfItems(this.props.cart.items) || nextProps.results[0] && nextProps.results[0].id !== this.props.results[0].id || nextProps.lazyLoading !== this.props.lazyLoading || nextProps.loading !== this.props.loading);
+  }
+
+  componentWillReceiveProps = ({ results, replace, loaded }) => {
+    if (results.length === 0 && loaded && this.props.loaded !== loaded) {
+      replace(`${location.pathname}${location.search}&toast=No Results Found!&status=warn`)
+    }
   }
 
   render() {
@@ -52,7 +60,7 @@ export default class Results extends Component {
         return acc;
       }, []);
 
-    if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
+    if (selected) partitionResults.splice(selected.row, 0, [{...selected.result, selected: true, index: selected.index, options: selected.options }]);
 
     if (!results.length && !loading) return <EmptyContainer />;
 
