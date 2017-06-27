@@ -12,11 +12,13 @@ import {
   fetchPaymentSources
 } from '../actions';
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = (state, ownProps) => {
+  return {
   selectedAccordion: state.app.selectedAccordion,
   cart: state.cart.present,
-  user: state.user
-});
+  user: state.user,
+  paymentSources: state.payments.paymentSources
+}};
 
 // Just an example for mapping functions to the component.
 // What this does it connect the functions to redux, so that the results of those functions get passed to our redux store.

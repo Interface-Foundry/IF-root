@@ -76,18 +76,6 @@ export default class Payment extends Component {
               <h4>Your credit and debit cards</h4>
             </nav>
             <ul>
-              {
-                  paymentDummy.map((payment, i) => (
-                      <li key={i} className={selectedCardIndex === i ? 'selected' : ''} onClick={() => this.setState({selectedCardIndex: i})}>
-                          <div className='circle'/>
-                          <div className='text'>
-                            <h4>{payment.type} <span>ending in {payment.lastFour}</span></h4>
-                            <p>{payment.name}</p>
-                            <p>{moment(payment.expire).format('MM/YYYY')}</p>
-                          </div>
-                      </li>
-                  ))
-              }
               <PaymentSources {...this.props}/>
               <Stripe {...this.props}/>
             </ul>

@@ -2,36 +2,39 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 
 export default class PaymentSources extends Component {
   static propTypes = {
     invoice: PropTypes.object,
     user: PropTypes.object,
-    fetchPaymentSources: PropTypes.func
+    paymentSources: PropTypes.array
   }
 
   state = {
-    sources: []
+    selectedTypeIndex: null,
+    selectedCardIndex: null
   }
 
-  componentWillMount () {
-    const { user, fetchPaymentSources } = this.props
-    const sources = fetchPaymentSources(user.id);
-    this.setState({ sources });
-  }
+  render() {
 
-render() {
-  debugger;
-  const { sources } = this.props.state
-    return (
-      <div>
-        {sources.map( payment => (
-          <div>
-            <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
-            <p>{payment.exp_month} {payment.exp_year}</p>
-          </div>
-        ))}
-      </div>
-    )
-  }
+    const { paymentSources } = this.props,
+          { selectedCardIndex } = this.state;
+
+      return (
+        <div>
+          {
+            paymentSources.map((payment, i) => (
+              <li key={i} className={selectedCardIndex === i ? 'selected' : ''} onClick={() => this.setState({selectedCardIndex: i})}>
+                <div className='circle'/>
+                <div className='text'>
+                    <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
+                    <p>Exp: {moment().month(payment.exp_month).year(payment.exp_year).format('MM/YYYY')}</p>
+                </div>
+              </li>
+            ))
+          }
+        </div>
+      )
+    }
 }

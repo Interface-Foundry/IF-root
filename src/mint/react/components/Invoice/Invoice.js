@@ -16,10 +16,12 @@ export default class Invoice extends Component {
     fetchPaymentSources: PropTypes.func
   }
 
-  componentWillMount() {
-    const { fetchInvoices, cart, user } = this.props;
+componentWillMount() {
+    const { fetchPaymentSources, fetchInvoices, cart, user } = this.props;
     fetchInvoices(cart.id);
+    fetchPaymentSources(user.id);
   }
+
 
   render() {
     const { selectedAccordion } = this.props;

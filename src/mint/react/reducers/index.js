@@ -10,6 +10,7 @@ import stores from './stores';
 import session from './session';
 import search from './search';
 import user from './user';
+import payments from './payments';
 
 export default combineReducers({
   app,
@@ -21,7 +22,8 @@ export default combineReducers({
   session,
   search,
   user,
-  routing
+  routing,
+  payments
 });
 
 // export selectors
