@@ -56,11 +56,16 @@ export default class Results extends Component {
       props: { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading },
       state: { myItems }
     } = this;
+    console.log({ query });
+    const isUrl = query.match(/(https?:\/\/(www)?)?.*(\.com|\.org|\.co\.uk)\//); //lol wat 
+    // (for cheaters: https://regex101.com/r/MYJG7J/1)
 
     if (!results.length && !(loading || lazyLoading)) return <EmptyContainer />; // don't bother with the loops if there aren't results
 
     const displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
-      ? [...results, ...(new Array(10)).fill({ loading: true })]
+      ? isUrl
+      ? [{ loading: true }]
+      : [...results, ...(new Array(10)).fill({ loading: true })]
       : results;
 
     // best: O(n), worst O(n*m) where m is myItems.length
@@ -96,7 +101,7 @@ export default class Results extends Component {
                 {
                   loading
                   ? 'Loading...'
-                  : <p> About {results.length} results for <span className='price'>"{query}"</span> from {getStoreName(cart.store, cart.store_locale)} </p>
+                  : <p> About {results.length} results for <span className='price'>&ldquo;{query}&rdquo;</span> from {getStoreName(cart.store, cart.store_locale)} </p>
                 }
               </nav>
             </th>

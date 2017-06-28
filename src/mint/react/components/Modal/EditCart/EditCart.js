@@ -114,7 +114,7 @@ class EditCart extends Component {
             <tr>
               <td>
                 <h2>Delete Cart</h2>
-                <p>This will permanently delete your cart, there's no going back from here!</p>
+                <p>This will permanently delete your cart, there&lsquo;s no going back from here!</p>
               </td>
               <td>
                 <button onClick={()=> deleteCart(cart_id)}>Delete Cart</button>
