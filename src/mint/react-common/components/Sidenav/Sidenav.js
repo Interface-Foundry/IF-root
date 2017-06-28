@@ -78,7 +78,7 @@ export default class Sidenav extends Component {
                 return ( 
                   <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} >
                     <div className={'image'} style={{
-                      backgroundImage: `url(${c.thumbnail_url})`
+                      backgroundImage: `url(${c.thumbnail_url || '//storage.googleapis.com/kip-random/head_smaller.png'})`
                     }}/>
                     <SideNavLink to={`/cart/${c.id}`}>
                       <p>
