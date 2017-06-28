@@ -15,7 +15,7 @@ export default class Invoice extends Component {
     fetchPaymentSources: PropTypes.func
   }
 
-componentWillMount() {
+  componentWillMount() {
     const { fetchPaymentSources, fetchInvoices, cart } = this.props;
     fetchInvoices(cart.id);
     fetchPaymentSources();

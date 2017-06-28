@@ -26,6 +26,12 @@ export default class Selected extends Component {
     numResults: PropTypes.number
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { fetchSearchItem, item } = this.props;
+    if(nextProps.item.id !== item.id) fetchSearchItem(nextProps.item.id)
+  }
+
+
   render() {
     const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation } = this.props,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
@@ -73,8 +79,9 @@ export default class Selected extends Component {
               item.options ? ( 
                 <div className='options'>
                   {
-                    Object.keys(item.options).map((key, index) => (
-                      <select key={key} value={key} onChange={(e) => fetchItemVariation(e.currentTarget.value, cart.store, cart.store_locale)}>
+                    Object.keys(item.options).map((key, index) => {
+                      const selected = item.options[key].selected || key
+                      return <select key={key} value={selected} onChange={(e) => fetchItemVariation(e.currentTarget.value, cart.store, cart.store_locale)}>
                         <option key={key} value={key} disabled={true}>{key}</option>
                         {
                           item.options[key].map((option) => (
@@ -82,7 +89,7 @@ export default class Selected extends Component {
                           ))
                         }
                       </select>
-                    ))
+                    })
                   }
                 </div>
               ) : null
