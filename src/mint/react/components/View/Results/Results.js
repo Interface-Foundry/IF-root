@@ -134,14 +134,17 @@ export default class Results extends Component {
                 }
               </tr>
           ))
-
           }
         </tbody>
-        <tfoot>
-          <tr>
-            <td className='load' colSpan="100%"><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
-          </tr>
-        </tfoot>
+        {
+          (results.length > 1)
+          ? (<tfoot>
+              <tr>
+                <td className='load' colSpan="100%"><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
+              </tr>
+            </tfoot>)
+          : null
+        }
       </table>
     );
   }

@@ -25,20 +25,19 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .action {
-    padding: $padding*1.5 0 8;
+    padding: ($padding * 1.5) 0 8;
     text-align: right;
 
     button {
       border: 0;
       background: white;
       border: 0;
-      padding: 0 $padding*1.5;
+      padding: 0 ($padding * 1.5);
       height: 25px;
       line-height: 25px;
       color: #333;
       font-size: 14px;
       opacity: 0.6;
-      
       border-right: 1px solid #a7a7a7;
 
       &:last-of-type {
@@ -99,7 +98,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       ul {
         border-radius: 5px;
         padding: $padding 0;
-        margin: ($padding) auto 0;
+        margin: $padding auto 0;
       }
 
       li {
@@ -121,7 +120,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           display: inline-block;
         }
 
-        .extra {          
+        .extra {
           .iframe {
             position: relative;
             overflow: hidden;
@@ -138,6 +137,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               }
             }
           }
+
           .text__expanded {
             display: inline-block;
             padding: $padding 0 0;
@@ -177,6 +177,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
               &:last-of-type {
                 margin-right: $padding;
+              }
+
+              &:disabled {
+                background: mix(grey, white, 20%);
+                cursor: not-allowed;
               }
             }
 
