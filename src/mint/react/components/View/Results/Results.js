@@ -40,14 +40,12 @@ export default class Results extends Component {
     || (numberOfItems(results) > 0 && numberOfItems(this.props.results) > 0) && (results[0] !== this.props.results[0])
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
-    if (results.length === 0 && !loading && this.props.loading !== loading) {
-      replace(`${location.pathname}${location.search}&toast=No Results Found! 😥&status=warn`)
-    }
+    if (results.length === 0 && !loading && this.props.loading !== loading) replace(`${location.pathname}${location.search}&toast=No Results Found! 😥&status=warn`);
 
     if ((items && numberOfItems(items) !== numberOfItems(this.props.cart.items)) || (items && !this.state.myItems.length)) {
       // do only when the number of items in the cart changes, instead of on rerender
       const myItems = items.reduce((acc, i) => i.added_by === id ? [...acc, i.asin] : acc, []);
-      this.setState({ myItems })
+      this.setState({ myItems });
     }
   }
 

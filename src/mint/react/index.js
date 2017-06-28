@@ -53,10 +53,10 @@ store.dispatch(checkSession()).then(() => {
   if (cart_id && cart_id[1]) {
     store.dispatch(fetchCart(cart_id[1]))
       .then((res) => {
-        store.dispatch(fetchCategories(cart_id[1]))
+        store.dispatch(fetchCategories(cart_id[1]));
         if (search && search[1]) {
           store.dispatch(updateQuery(decodeURIComponent(search[1])));
-          store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale))
+          store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale));
         }
       }).then(() => {
         store.dispatch(fetchMetrics(cart_id[1]));

@@ -56,6 +56,6 @@ class CartPreview extends Component {
       <div className='image-container'>
         {images.map((img, i)=><div className='quarter image' key={i} style={{backgroundImage: `url(${img})`}}/>)}
       </div>
-    )
+    );
   }
 }

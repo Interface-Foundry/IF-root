@@ -91,7 +91,7 @@ export default (state = initialState, action) => {
         item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item }) : acc.push(item);
         return acc;
       }, [])
-    }
+    };
   case 'ITEM_OPTION_SUCCESS':
     return {
       ...state,
@@ -101,7 +101,7 @@ export default (state = initialState, action) => {
         item.id === state.selectedItemId ? acc.push({ ...item, ...action.response.item }) : acc.push(item);
         return acc;
       }, [])
-    }
+    };
   default:
     return state;
   }

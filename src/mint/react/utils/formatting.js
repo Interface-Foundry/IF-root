@@ -50,19 +50,6 @@ const formatLinkForApp = (app, link) => {
   }
 };
 
-const formatPrivacy = (lvl) => {
-  switch (Number(lvl)) {
-  case privacyLevels.PUBLIC:
-    return 'public';
-  case privacyLevels.PRIVATE:
-    return 'private';
-  case privacyLevels.DISPLAY:
-    return 'display';
-  default:
-    throw `${lvl} is not a valid privacy level`;
-  }
-};
-
 export const calculateItemTotal = (items) => {
   return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 };
@@ -90,11 +77,11 @@ export const splitAndMergeSearchWithCart = (items, results, user) => results.red
 
 export const splitOptionsByType = (options = []) => {
   return options.reduce((acc, option) => {
-    if(!acc[option.type]) acc[option.type] = [{id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name}]
-    else acc[option.type].push({id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name})
+    if (!acc[option.type]) acc[option.type] = [{ id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name }];
+    else acc[option.type].push({ id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name });
     return acc;
-  }, {})
-}
+  }, {});
+};
 
 export const removeDangerousCharactersFromString = (string) => {
   // const allowedTags = ['h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
@@ -106,17 +93,17 @@ export const removeDangerousCharactersFromString = (string) => {
 
 export const getStoreName = (store, store_locale) => {
   if (store === 'YPO') {
-    return 'YPO.co.uk'
+    return 'YPO.co.uk';
   } else if (store === 'Amazon') {
     switch (store_locale) {
-      case 'GB':
-        return 'Amazon.co.uk'
-      case 'CA':
-        return 'Amazon.ca'
-      default:
-        return 'Amazon.com'
+    case 'GB':
+      return 'Amazon.co.uk';
+    case 'CA':
+      return 'Amazon.ca';
+    default:
+      return 'Amazon.com';
     }
   } else {
-    return ''
+    return '';
   }
-}
+};

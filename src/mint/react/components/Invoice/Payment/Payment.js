@@ -3,8 +3,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
-import Stripe from './Stripe'
-import PaymentSources from './PaymentSources'
+import Stripe from './Stripe';
+import PaymentSources from './PaymentSources';
 
 const paymentTypes = [
   'Pay For All',

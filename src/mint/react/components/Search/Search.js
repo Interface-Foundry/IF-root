@@ -16,7 +16,8 @@ export default class Input extends Component {
     submitQuery: PropTypes.func,
     updateQuery: PropTypes.func,
     showHistory: PropTypes.bool,
-    history: PropTypes.object
+    history: PropTypes.object,
+    categories: PropTypes.array
   }
 
   state = {

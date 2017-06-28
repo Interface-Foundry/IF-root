@@ -20,7 +20,7 @@ export default class Default extends Component {
     const { user, cart, item, inCart, selectItem, addItem, togglePopup, fetchSearchItem } = this.props;
     return (
       <td>
-        <div className={`card ${inCart ? 'incart' : ''}`} onClick={() => { if (!inCart) { selectItem(item.id); fetchSearchItem(item.id) }}}>
+        <div className={`card ${inCart ? 'incart' : ''}`} onClick={() => { if (!inCart) { selectItem(item.id); fetchSearchItem(item.id); }}}>
           {
             inCart ? <span className='incart'> In Cart </span> : null
           }
@@ -32,7 +32,7 @@ export default class Default extends Component {
             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
           </div> 
           <div className='action'>
-            { !inCart ? <button className='more' onClick={() => { selectItem(item.id); fetchSearchItem(item.id) }}>More info</button> : null }
+            { !inCart ? <button className='more' onClick={() => { selectItem(item.id); fetchSearchItem(item.id); }}>More info</button> : null }
             { !user.id  ? <button onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !inCart ? <button onClick={(e) => {e.stopPropagation(); addItem(cart.id, item.id);}}>✔ Save to Cart</button> : null }

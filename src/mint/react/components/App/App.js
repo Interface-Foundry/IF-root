@@ -5,7 +5,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
@@ -44,23 +43,19 @@ export default class App extends Component {
 
   componentDidMount() {
     const { _handleScroll, _logPageView } = this;
-
     _logPageView();
-
-    ReactDOM.findDOMNode(this.scroll)
-      .addEventListener('scroll', _handleScroll);
+    this.scroll.addEventListener('scroll', _handleScroll);
   }
 
   componentWillUnmount() {
     const { _handleScroll } = this;
-    ReactDOM.findDOMNode(this.scroll)
-      .removeEventListener('scroll', _handleScroll);
+    this.scroll.removeEventListener('scroll', _handleScroll);
   }
 
-  _handeKeyPress(e) {
+  _handeKeyPress({ keyCode }) {
     const { selectedItemId, navigateRightResults, navigateLeftResults } = this.props;
     if (selectedItemId) {
-      switch (e.keyCode) {
+      switch (keyCode) {
       case 39:
         navigateRightResults();
         break;
@@ -79,27 +74,27 @@ export default class App extends Component {
     });
   }
 
-  _handleScroll(e) {
+  _handleScroll() {
     const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
     if (search) {
-      const scrollTop = ReactDOM.findDOMNode(this.scroll).scrollTop,
-        containerHeight = ReactDOM.findDOMNode(this.scroll).scrollHeight,
-        windowHeight = ReactDOM.findDOMNode(this.scroll).clientHeight;
+      const scrollTop = this.scroll.scrollTop,
+        containerHeight = this.scroll.scrollHeight,
+        windowHeight = this.scroll.clientHeight;
 
       // animate scroll, needs height of the container, and its distance from the top
       if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
-        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1)
+        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
       }
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname } }) {
     const {
       _logPageView,
       props: { fetchCart, fetchMetrics, location: { pathname }, user: { id } }
-    } = this, { user: { id: nextId }, location: { pathname: nextPathname } } = nextProps;
+    } = this;
     const cartId = pathname.match(/cart\/(\w*)\/?/),
       nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
     if ((cartId && nextCartId && cartId[1] !== nextCartId[1]) || (!cartId && nextCartId)) {

@@ -14,8 +14,8 @@ export default class Stripe extends Component {
   }
 
   render() {
-    const { invoice, user, createPaymentSource } = this.props
-    const self = this
+    const { invoice, user, createPaymentSource } = this.props;
+    const self = this;
     return (
       <StripeCheckout
         token={(stripe_data) => createPaymentSource(stripe_data, 'stripe')}
@@ -29,6 +29,6 @@ export default class Stripe extends Component {
       >
         <button>+ add card with stripe</button>
       </StripeCheckout>
-    )
+    );
   }
 }

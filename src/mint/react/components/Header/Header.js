@@ -22,7 +22,7 @@ export default class Header extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { numCarts: nextNumCarts } = nextProps, { numCarts } = this.props;
-    this.setState({ showAlert: !!(numCarts && nextNumCarts > numCarts) })
+    this.setState({ showAlert: !!(numCarts && nextNumCarts > numCarts) });
   }
 
   render = () => (

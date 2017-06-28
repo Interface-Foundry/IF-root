@@ -34,10 +34,10 @@ export default class Selected extends Component {
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
           <div className='navigation'>
-            <button className='left' onClick={() => { navigateLeftResults() }}>
+            <button className='left' onClick={() => { navigateLeftResults(); }}>
               <Icon icon='LeftChevron'/>
             </button>
-            <button className='right' onClick={() => { navigateRightResults() }}>
+            <button className='right' onClick={() => { navigateRightResults(); }}>
               <Icon icon='RightChevron'/>
             </button>
           </div>

@@ -10,7 +10,8 @@ export default class Default extends Component {
     push: PropTypes.func,
     cart: PropTypes.object,
     reorderCart: PropTypes.func,
-    updateCart: PropTypes.func
+    updateCart: PropTypes.func,
+    user: PropTypes.object
   }
 
   _handleShare = () => {
@@ -44,7 +45,7 @@ export default class Default extends Component {
         {
           cart.locked ? <span>
             <button className='yellow sub' onClick={() => reorderCart(cart.id)}> Re-Order {displayCost(total, cart.store_locale)} </button>
-            { cart.leader.id == user.id || cart.leader == user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button> : null }
+            { cart.leader.id === user.id || cart.leader === user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button> : null }
           </span> : <span>
             {
               cart.items.length === 0 ? 

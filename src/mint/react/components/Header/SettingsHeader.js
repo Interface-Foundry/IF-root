@@ -2,7 +2,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { Icon } from '../../../react-common/components';
 
 export default class SettingsHeader extends Component {
@@ -29,7 +28,7 @@ export default class SettingsHeader extends Component {
     return (
       <span className='settings'>
         <div className='header__left'>
-          <a href='#' className='navbar__icon__close' onClick={(e)=> {e.preventDefault(); goBack()}}>
+          <a href='#' className='navbar__icon__close' onClick={(e)=> {e.preventDefault(); goBack();}}>
             <Icon icon='Left'/>
           </a>
           <h3 className='navbar__modal__head'>

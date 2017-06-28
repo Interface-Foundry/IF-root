@@ -24,10 +24,10 @@ export default class Feedback extends Component {
   }
 
   _handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const { postFeedback, cart_id } = this.props;
 
-    postFeedback(this.state, cart_id ? cart_id : 'no_cart')
+    postFeedback(this.state, cart_id ? cart_id : 'no_cart');
   }
 
   _setRating = (value) => {

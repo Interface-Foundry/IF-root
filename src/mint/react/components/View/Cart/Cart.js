@@ -74,7 +74,7 @@ export default class Cart extends Component {
                             ) : null
                           }
                           <CartButtons {...this.props} item={item}/>
-                        </li>
+                        </li>;
                       })
                     }
                   </ul>

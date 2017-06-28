@@ -37,6 +37,6 @@ export default class PaymentSources extends Component {
           ))
         }
       </div>
-    )
+    );
   }
 }

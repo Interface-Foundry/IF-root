@@ -28,7 +28,7 @@ export const navigateAffilateUrl = item_id => get(
     response: json,
     receivedAt: Date.now()
   })
-)
+);
 
 export const addItem = (cart_id, item_id) => post(
   `/api/cart/${cart_id}/item`,
@@ -74,7 +74,7 @@ export const fetchItemVariation = (option_asin, store, locale) => get(
     },
     receivedAt: Date.now()
   })
-)
+);
 
 export const copyItem = (cart_id, item_id) => post(
   `/api/item/${item_id}/clone/${cart_id}`,

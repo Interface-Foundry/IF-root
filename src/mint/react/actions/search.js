@@ -40,7 +40,7 @@ export const getMoreSearchResults = (query, store, locale, page) => get(
         tab: 'search'
       },
       receivedAt: Date.now()
-    }
+    };
   }
 );
 
