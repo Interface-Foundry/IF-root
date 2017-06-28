@@ -33,7 +33,7 @@ export default class Default extends Component {
           </div> 
           <div className='action'>
             { !inCart ? <button className='more' onClick={() => { selectItem(item.id); fetchSearchItem(item.id); }}>More info</button> : null }
-            { !user.id  ? <button onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
+            { !user.id  ? <button onClick={() => togglePopup()}>Login to Save</button> : null }
             { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
             { !cart.locked && user.id && !inCart ? <button onClick={(e) => {e.stopPropagation(); addItem(cart.id, item.id);}}>✔ Save to Cart</button> : null }
             { !cart.locked && user.id && inCart ? <button disabled={true}>In Cart</button> : null }

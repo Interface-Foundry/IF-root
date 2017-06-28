@@ -30,7 +30,7 @@ export default class Default extends Component {
         <div className='header__left'>
           <Link to={`/cart/${cart.id}`}>
             <div className={'image'} style={{
-              backgroundImage: `url(${cart.thumbnail_url ? cart.thumbnail_url : '//storage.googleapis.com/kip-random/kip_head_whitebg.png'})`
+              backgroundImage: 'url(//storage.googleapis.com/kip-random/kip_head_whitebg.png)'
             }}/>
             <h3>
               Kip
