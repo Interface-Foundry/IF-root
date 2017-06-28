@@ -51,6 +51,7 @@
       text-align: center;
       cursor: pointer;
       position: relative;
+
       svg {
         height: 100%;
         vertical-align: top !important;
@@ -59,10 +60,9 @@
 
     .image {
       display: inline-block;
-      margin: $padding ($padding / 2) $padding ($padding * 2);
-      height: $nav-height - $padding * 2;
-      width: $nav-height - $padding * 2;
-      border-radius: 100%;
+      margin: 10px 0;
+      height: 35px;
+      width: 90px;
       background-size: cover !important;
       background-repeat: no-repeat;
       background-position: center;
