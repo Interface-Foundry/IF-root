@@ -22,11 +22,15 @@ export default (state = initialState, action) => {
       ...action.response
     };
   case 'SEARCH_SUCCESS':
-  case 'CATEGORIES_SUCCESS':
     return {
       ...state,
       ...action.response,
       loading: false
+    };
+  case 'CATEGORIES_SUCCESS':
+    return {
+      ...state,
+      ...action.response
     };
   case 'UPDATE_ITEM_SUCCESS':
     return {

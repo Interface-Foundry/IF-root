@@ -13,7 +13,7 @@ export default class Toast extends Component {
   }
 
   redirect = null
-  
+
   state = {
     showToast: false
   }
@@ -42,14 +42,16 @@ export default class Toast extends Component {
       this.setState({ toast: null, status: null, showToast: false });
       ::this._clearParams();
     }, 3000);
-
   }
 
   _clearParams() {
     const { replace, loc } = this.props;
     clearTimeout(this.redirect);
     this.setState({ showToast: false });
-    replace(loc.pathname);
+    let cleanSearch = loc.search
+      .replace(/toast=.*?&status=.*?($|&)/, '')
+      .replace(/(&*|\?*)$/, ''); // remove toast stuff from the url
+    replace(loc.pathname + cleanSearch);
   }
 
   render() {
