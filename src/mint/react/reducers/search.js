@@ -91,21 +91,21 @@ export default (state = initialState, action) => {
         item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item }) : acc.push(item);
         return acc;
       }, [])
-    }
+    };
   case 'ITEM_OPTION_SUCCESS':
     return {
       ...state,
       lastUpdatedId: action.response.item.id,
       selectedItemId: action.response.item.id,
-      results: state.results.reduce((acc, item, i) => {
-        item.id === state.selectedItemId ? acc.push({ ...item, ...action.response.item, options: item.options.map((option) => {
-            if(option.asin === action.response.item.asin) console.log({ ...option, selected: true }) 
-            return option.asin === action.response.item.asin ? { ...option, selected: true } : { ...option, selected: false } 
-          }) 
-        }) : acc.push(item)
-        return acc;
-      }, [])
-    }
+      results: state.results.reduce((acc, item, i) =>
+        item.id === state.selectedItemId
+        ? [...acc, {
+          ...item,
+          ...action.response.item,
+          options: item.options.map(option => ({ ...option, selected: option.asin === action.response.item.asin }))
+        }, ...acc]
+        : [...acc, item], [])
+    };
   default:
     return state;
   }

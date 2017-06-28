@@ -56,7 +56,7 @@ export default class Results extends Component {
       props: { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading },
       state: { myItems }
     } = this;
-    console.log({ query });
+
     const isUrl = query.match(/(https?:\/\/(www)?)?.*(\.com|\.org|\.co\.uk)\//); //lol wat 
     // (for cheaters: https://regex101.com/r/MYJG7J/1)
 

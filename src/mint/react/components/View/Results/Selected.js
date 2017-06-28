@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { displayCost, getStoreName } from '../../../utils';
-
 import { Delete } from '../../../../react-common/kipsvg';
-
 import { Icon } from '../../../../react-common/components';
 
 export default class Selected extends Component {
@@ -23,14 +21,14 @@ export default class Selected extends Component {
     navigateLeftResults: PropTypes.func,
     navigateRightResults: PropTypes.func,
     fetchItemVariation: PropTypes.func,
-    numResults: PropTypes.number
+    numResults: PropTypes.number,
+    fetchSearchItem: PropTypes.func
   }
 
   componentWillReceiveProps(nextProps) {
     const { fetchSearchItem, item } = this.props;
-    if(nextProps.item.id !== item.id) fetchSearchItem(nextProps.item.id)
+    if (nextProps.item.id !== item.id) fetchSearchItem(nextProps.item.id);
   }
-
 
   render() {
     const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation } = this.props,
@@ -80,7 +78,7 @@ export default class Selected extends Component {
                 <div className='options'>
                   {
                     Object.keys(item.options).map((key, index) => {
-                      const selected = item.options[key].selected || key
+                      const selected = item.options[key].selected || key;
                       return <select key={key} value={selected} onChange={(e) => fetchItemVariation(e.currentTarget.value, cart.store, cart.store_locale)}>
                         <option key={key} value={key} disabled={true}>{key}</option>
                         {
@@ -88,7 +86,7 @@ export default class Selected extends Component {
                             <option key={option.id} value={option.asin}>{option.name}</option>
                           ))
                         }
-                      </select>
+                      </select>;
                     })
                   }
                 </div>
