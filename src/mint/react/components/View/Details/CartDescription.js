@@ -62,7 +62,7 @@ export default class CartDescription extends Component {
                 <input 
                   type='text' 
                   onChange={(e)=>_updateDescription(e)} 
-                  placeholder='Enter a short description for your cart' 
+                  placeholder='Enter a short description' 
                   value={editedDescrip} 
                   autoFocus
                 />
@@ -78,14 +78,16 @@ export default class CartDescription extends Component {
                </form>
               )
             : (
-               <p className={`cart-description__text ${isAdmin ? 'is-admin' : ''}`}>
-                  {
-                    description 
-                    ? description
-                    : <i>Edit Description</i> 
-                  }
-                { isAdmin ? <Icon icon='Edit'/> : null}
-              </p>
+               <div className={`cart-description__text ${isAdmin ? 'is-admin' : ''}`}>
+                 <p>
+                    {
+                      description 
+                      ? description
+                      : <i>Edit Description</i> 
+                    }
+                </p>
+              { isAdmin ? <span><Icon icon='Edit'/>Edit</span> : null}
+              </div>
             )
         }
       </div>

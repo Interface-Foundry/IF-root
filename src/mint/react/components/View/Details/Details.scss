@@ -47,16 +47,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       .cover {
         padding: $padding;
+        display: flex;
       }
 
       .left {
-        display: inline-block;
-        width: 65%;
-
-        @media only screen and (max-width: 600px) {
-          display: block;
-          width: 100%;
-        }
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 270px;
 
         .image {
           height: $nav-height;
@@ -68,13 +65,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         .text {
           display: inline-block;
           padding: 0 $padding;
-          width: calc(100% - #{$nav-height});
 
           .cart-description {
             align-items: center;
             display: flex;
             flex: 1 1 auto;
-            height: 40px;
+            min-height: 50px;
             padding: 5px 0;
 
             form {
@@ -128,12 +124,25 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
             .cart-description__text {
               color: rgba(#333, 0.5);
-              height: unset;
-              line-height: unset;
-              opacity: 1;
               padding: 0 10px;
-              font-size: 14px;
-              font-weight: 100;
+              display: flex;
+              align-items: center;
+
+              span {
+                display: flex;
+                font-size: 12px;
+                font-weight: 100;
+                align-self: bottom;
+              }
+
+              p {
+                flex: 1 1 auto;
+                font-size: 14px;
+                font-weight: 100;
+                height: unset;
+                line-height: unset;
+                opacity: 1;
+              }
 
               &.is-admin {
                 cursor: pointer;
@@ -228,8 +237,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       .right {
-        display: inline-block;
-        width: 35%;
         text-align: right;
 
         .buttons {
