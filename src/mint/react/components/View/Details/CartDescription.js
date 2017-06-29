@@ -44,10 +44,8 @@ export default class CartDescription extends Component {
         cart: { description = '', leader: { id: leaderId } },
         user: { id: userId }
       }
-    } = this, altLeaderId = this.props.cart.leader, // for when the backend gives a string for some reason
-      isAdmin = userId === leaderId || userId === altLeaderId;
-
-    console.log({ description, editedDescrip });
+    } = this,
+    isAdmin = userId === leaderId;
     return (
       <div className='cart-description' onClick={()=>this.setState({editing: true})} onBlur={()=>this.setState({editing: false})}>
         <Icon icon='Chatbubble'/> 
