@@ -2,6 +2,21 @@ const co = require('co')
 const _ = require('lodash')
 const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
+
+var passport = require('passport')
+var FacebookStrategy = require('passport-facebook').Strategy
+
+passport.use(new FacebookStrategy({
+  clientID: 855809247908300,
+  clientSecret: '9d0d946d5096bde7395d7e6256399a4c',
+  callbackURL: 'https://8983319f.ngrok.io/api/auth/facebook/callback',
+  profileFields: ['name', 'email']
+}, function (accessToken, refreshToken, profile, done) {
+  logging.info('PROFILE:', profile)
+  var email = profile.emails[0].value
+  done()
+}))
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -142,6 +157,37 @@ module.exports = function (router) {
       })
     }
   }))
+
+  /**
+   * @api {get} /api/auth/facebook
+   * @apiGroup Users
+   * @apiDescription - courtesy of http://passportjs.org/docs/facebook
+   * Redirect the user to Facebook for authentication.  When complete,
+   * Facebook will redirect the user back to the application
+   */
+
+  router.get('/auth/facebook', passport.authenticate('facebook', {
+    scope: ['email'],
+    successRedirect: '/',
+    failureRedirect: '/'
+  }))
+
+  /**
+   * @api {get} /api/facebook/auth/callback
+   * @apiGroup Users
+   * @apiDescription - from http://passportjs.org/docs/facebook
+   * Facebook will redirect the user to this URL after approval.  Finish the
+   * authentication process by attempting to obtain an access token.  If
+   * access was granted, the user will be logged in.  Otherwise,
+   * authentication has failed.
+   */
+  router.get('/auth/facebook/callback',
+    passport.authenticate('facebook', {
+      successRedirect: '/',
+      failureRedirect: '/',
+      scope: ['email']
+    })
+  )
 
   /**
    * @api {get} /api/identify?email=:email&cart_id=:cart_id Identify
@@ -407,7 +453,7 @@ module.exports = function (router) {
       throw new Error('Unauthorized')
     }
     var currentUser = req.UserSession.user_account
-  
+
     // Find the user in the database
     var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
 
