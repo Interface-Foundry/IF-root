@@ -571,6 +571,8 @@ module.exports = function (router) {
     cart.dirty = true
     yield cart.save()
 
+    cart = yield db.Carts.findOne({id: cart.id}).populate('leader')
+
     res.send(cart)
   }))
 

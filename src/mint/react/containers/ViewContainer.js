@@ -16,7 +16,8 @@ import {
   selectTab,
   updateQuery,
   submitQuery,
-  fetchCarts
+  fetchCarts,
+  updateCart
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -59,7 +60,8 @@ const mapDispatchToProps = dispatch => ({
   submitQuery: (query, store, locale) => {
     dispatch(updateQuery(query));
     dispatch(submitQuery(encodeURIComponent(query), store, locale));
-  }
+  },
+  updateCart: cart => dispatch(updateCart(cart))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(View);

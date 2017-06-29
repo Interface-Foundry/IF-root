@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Icon } from '../../../../react-common/components';
 import { timeFromDate, numberOfItems, getStoreName } from '../../../utils';
 import { ButtonsContainer } from '../../../containers';
+import CartDescription from './CartDescription';
 
 export default class Details extends Component {
 
@@ -72,6 +73,7 @@ export default class Details extends Component {
                           </Link>
                         }
                       </h1>
+                      <CartDescription {...this.props} />
                       <h4>{getStoreName(store, store_locale)}</h4>
                       <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>
                     </div>
