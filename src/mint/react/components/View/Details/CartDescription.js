@@ -47,15 +47,34 @@ export default class CartDescription extends Component {
     } = this,
     isAdmin = userId === leaderId;
     return (
-      <div className='cart-description' onClick={()=>this.setState({editing: true})} onBlur={()=>this.setState({editing: false})}>
+      <div 
+        className='cart-description' 
+        onClick={() => isAdmin ? this.setState({editing: true}) : null} 
+        onBlur={()=>this.setState({editing: false})}
+      >
         <Icon icon='Chatbubble'/> 
         {
           editing 
             ? (
-               <form onSubmit={(e)=> isAdmin ? _saveDescription(e) : null}>               
-                <input type='text'  onChange={(e)=>_updateDescription(e)} placeholder='Enter a short description for your cart' value={editedDescrip} autoFocus/>
-                <input type='submit' disabled={editedDescrip.length > 140} onMouseDown={(e)=> editedDescrip.length <= 140 ? _saveDescription(e) : null} value='Save'/>
-                <p className={editedDescrip.length < 110 ? '' : editedDescrip.length > 140 ? 'red' : 'yellow' }>{editedDescrip.length}/140</p>
+               <form 
+                onSubmit={(e)=> isAdmin ? _saveDescription(e) : null}
+              >               
+                <input 
+                  type='text' 
+                  onChange={(e)=>_updateDescription(e)} 
+                  placeholder='Enter a short description for your cart' 
+                  value={editedDescrip} 
+                  autoFocus
+                />
+                <input 
+                  type='submit'
+                  disabled={editedDescrip.length > 140} 
+                  onMouseDown={(e)=> editedDescrip.length <= 140 ? _saveDescription(e) : null} 
+                  value='Save'
+                />
+                <p className={editedDescrip.length < 110 ? '' : editedDescrip.length > 140 ? 'red' : 'yellow' }>
+                  {editedDescrip.length}/140
+                </p>
                </form>
               )
             : (
