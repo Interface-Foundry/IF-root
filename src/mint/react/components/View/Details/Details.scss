@@ -261,29 +261,37 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         font-weight: 800;
         height: 40px;
         justify-content: center;
-        margin: auto;
+        left: 25%;
+        margin: auto 0;
+        position: fixed; // temporary until we find something better
+        right: 25%;
         text-align: center;
-        width: 100%;
+        top: 90px;
+        width: 50%;
+        z-index: 5;
+
 
         p {
           display: table-cell;
-          margin-top: 25%;
-          margin-bottom: 25%;
           flex: 1 1 auto;
+          margin-bottom: 25%;
+          margin-top: 25%;
         }
 
-        &:after {
+        &::after {
           @include animation(progressBar linear 10s);
 
-          position: relative;
-          content: '';
-          display: block;
-          height: 2px;
-          width: 100%;
           background: linear-gradient(to right, red 0%, red 45%, transparent 50%);
           background-size: 200% 2px;
           bottom: 0;
-          margin: 0 ($padding / 2);
+          content: '';
+          display: block;
+          height: 3px;
+          position: absolute; //chrome is the worst
+          left: 0;
+          right: 0;
+          border-radius: 0 0 5px 5px;
+          width: 100%;
         }
 
         button {
