@@ -51,7 +51,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       .left {
         display: inline-block;
-        width: 50%;
+        width: 65%;
 
         @media only screen and (max-width: 600px) {
           display: block;
@@ -69,6 +69,90 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           display: inline-block;
           padding: 0 $padding;
           width: calc(100% - #{$nav-height});
+
+          .cart-description {
+            align-items: center;
+            display: flex;
+            flex: 1 1 auto;
+            height: 40px;
+            padding: 5px 0;
+
+            form {
+              display: flex;
+              flex-wrap: wrap;
+              margin: 0 0 0 10px;
+              position: relative;
+              width: 100%;
+
+              input {
+                border: 2px solid $secondaryColor;
+                padding: 0;
+                height: 25px;
+
+                &:first-of-type {
+                  border-radius: 4px 0 0 4px;
+                  flex: 1 1 auto;
+                  padding: 2px 4px;
+                }
+
+                &:last-of-type {
+                  background: $secondaryColor;
+                  border-radius: 0 4px 4px 0;
+                  color: white;
+                  cursor: pointer;
+                  width: 50px;
+
+                  &:disabled {
+                    opacity: 0.5;
+                  }
+                }
+              }
+
+              p {
+                flex: 1 1 100%;
+                text-align: right;
+                padding: 2px 0;
+                font-size: 12px;
+
+                &.red {
+                  color: $warningColor;
+                  opacity: 1;
+                }
+
+                &.yellow {
+                  color: $fifthColor;
+                  opacity: 1;
+                }
+              }
+            }
+
+            .cart-description__text {
+              color: rgba(#333, 0.5);
+              height: unset;
+              line-height: unset;
+              opacity: 1;
+              padding: 0 10px;
+              font-size: 14px;
+              font-weight: 100;
+
+              &.is-admin {
+                cursor: pointer;
+
+                &:hover {
+                  color: $warningColor;
+                }
+              }
+
+              i {
+                font-weight: 100;
+                font-size: 14px;
+              }
+
+              svg {
+                margin: 0 5px;
+              }
+            }
+          }
 
           h1 {
             font-size: 18px;
@@ -145,7 +229,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       .right {
         display: inline-block;
-        width: 50%;
+        width: 35%;
         text-align: right;
 
         .buttons {
@@ -269,7 +353,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         top: 90px;
         width: 50%;
         z-index: 5;
-
 
         p {
           display: table-cell;

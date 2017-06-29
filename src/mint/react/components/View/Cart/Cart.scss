@@ -159,28 +159,30 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           width: calc(100% - #{$nav-height * 2});
 
           .update {
-            padding: $padding 0;
+            display: flex;
+            height: $nav-height / 1.5;
+            justify-content: flex-start;
+            align-items: stretch;
 
             * {
-              display: inline-block;
               text-align: center;
             }
 
             button {
+              display: flex;
+              align-items: center;
+              justify-items: center;
               margin: 0;
-              height: $nav-height / 2;
               border-radius: 5px;
               border: 0;
               padding: 0 $padding;
               background: white;
               border: 1px solid $border-color-light;
-
-              &:last-of-type {
-                margin-right: $padding;
-              }
+              font-size: 20px;
 
               &:disabled {
                 background: mix(grey, white, 20%);
+                opacity: 0.4;
                 cursor: not-allowed;
               }
             }
@@ -188,9 +190,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             p {
               margin: 0;
               padding: 0 $padding;
-              height: $nav-height / 2;
-              line-height: $nav-height / 2;
-              font-size: 13px;
+              font-size: 16px;
+              display: flex;
+              align-items: center;
             }
           }
 

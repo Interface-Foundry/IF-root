@@ -3,36 +3,37 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  IoEmail,
-  IoNaviconRound,
-  IoClose,
-  IoChevronUp,
-  IoEdit,
-  IoPricetag,
-  IoCamera,
-  IoLocked,
-  IoCheckmark,
-  IoSearch,
   IoAndroidCart,
-  IoPlus,
-  IoAndroidPersonAdd,
-  IoAndroidPerson,
   IoAndroidFavorite,
-  IoGearA,
-  IoChevronDown,
+  IoAndroidPerson,
+  IoAndroidPersonAdd,
   IoArrowLeftC,
+  IoCamera,
+  IoChatbubbleWorking,
+  IoCheckmark,
+  IoChevronDown,
+  IoChevronLeft,
+  IoChevronRight,
+  IoChevronUp,
+  IoClose,
+  IoEdit,
+  IoEmail,
+  IoEye,
+  IoGearA,
+  IoHappy,
+  IoIosBox,
+  IoLocked,
+  IoLogIn,
   IoLogOut,
+  IoLoop,
+  IoNaviconRound,
+  IoOutlet,
+  IoPlus,
+  IoPlusRound,
+  IoPricetag,
   IoRefresh,
   IoSad,
-  IoHappy,
-  IoOutlet,
-  IoPlusRound,
-  IoChevronRight,
-  IoChevronLeft,
-  IoLogIn,
-  IoIosBox,
-  IoLoop,
-  IoEye
+  IoSearch
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -131,6 +132,8 @@ export default class Icon extends Component {
       return <IoLogIn/>;
     case 'Share':
       return <Share/>;
+    case 'Chatbubble':
+      return <IoChatbubbleWorking/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }
