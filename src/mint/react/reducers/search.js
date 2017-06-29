@@ -103,7 +103,7 @@ export default (state = initialState, action) => {
           ...item,
           ...action.response.item,
           options: item.options.map(option => ({ ...option, selected: option.asin === action.response.item.asin }))
-        }, ...acc]
+        }]
         : [...acc, item], [])
     };
   default:

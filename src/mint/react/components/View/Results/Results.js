@@ -53,7 +53,7 @@ export default class Results extends Component {
     // Needs refactor, too many loop-di-loops here.
     let arrow, selected;
     const {
-      props: { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading },
+      props: { cart, query, page, results, selectedItemId, getMoreSearchResults, loading, lazyLoading, fetchSearchItem },
       state: { myItems }
     } = this;
 
@@ -91,6 +91,8 @@ export default class Results extends Component {
     }, []);
 
     if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
+
+    if (results.length === 1 && !results[0].options) fetchSearchItem(results[0].id); // get options if its a url
 
     return (
       <table className='results'>
@@ -132,14 +134,17 @@ export default class Results extends Component {
                 }
               </tr>
           ))
-
           }
         </tbody>
-        <tfoot>
-          <tr>
-            <td className='load' colSpan="100%"><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
-          </tr>
-        </tfoot>
+        {
+          (results.length > 1)
+          ? (<tfoot>
+              <tr>
+                <td className='load' colSpan="100%"><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>
+              </tr>
+            </tfoot>)
+          : null
+        }
       </table>
     );
   }
