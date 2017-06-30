@@ -965,8 +965,8 @@ module.exports = function (router) {
 
     var fullCart = yield Cart.GetById(cart.id)
 
-    // yield cartUtils.checkout(cart, req, res)
-    yield fullCart.checkout(req, res)
+    yield cartUtils.checkout(cart, req, res)
+    //yield fullCart.checkout(req, res)
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
