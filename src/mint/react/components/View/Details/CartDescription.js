@@ -56,26 +56,28 @@ export default class CartDescription extends Component {
         {
           editing 
             ? (
-               <form 
-                onSubmit={(e)=> isAdmin ? _saveDescription(e) : null}
-              >               
-                <input 
-                  type='text' 
-                  onChange={(e)=>_updateDescription(e)} 
-                  placeholder='Enter a short description' 
-                  value={editedDescrip} 
-                  autoFocus
-                />
-                <input 
-                  type='submit'
-                  disabled={editedDescrip.length > 140} 
-                  onMouseDown={(e)=> editedDescrip.length <= 140 ? _saveDescription(e) : null} 
-                  value='Save'
-                />
-                <p className={editedDescrip.length < 110 ? '' : editedDescrip.length > 140 ? 'red' : 'yellow' }>
-                  {editedDescrip.length}/140
-                </p>
-               </form>
+               <div className='cart-description__edit-wrapper'>
+                 <form 
+                  onSubmit={(e)=> isAdmin ? _saveDescription(e) : null}
+                 >
+                  <input
+                    type='text'
+                    onChange={(e)=>_updateDescription(e)}
+                    placeholder='Enter a short description'
+                    value={editedDescrip} 
+                    autoFocus
+                  />
+                  <input 
+                    type='submit'
+                    disabled={editedDescrip.length > 140} 
+                    onMouseDown={(e)=> editedDescrip.length <= 140 ? _saveDescription(e) : null}
+                    value='Save'
+                  />
+                 </form>
+                 <p className={editedDescrip.length < 110 ? '' : editedDescrip.length > 140 ? 'red' : 'yellow' }>
+                    {editedDescrip.length}/140
+                 </p>
+               </div>
               )
             : (
                <div className={`cart-description__text ${isAdmin ? 'is-admin' : ''}`}>

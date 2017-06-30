@@ -46,8 +46,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       .cover {
-        padding: $padding;
         display: flex;
+        padding: $padding;
       }
 
       .left {
@@ -56,15 +56,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         min-width: 270px;
 
         .image {
+          border-radius: 5px;
+          display: inline-block;
           height: $nav-height;
           width: $nav-height;
-          display: inline-block;
-          border-radius: 5px;
         }
 
         .text {
           display: inline-block;
           padding: 0 $padding;
+          flex: 1 1 auto;
 
           .cart-description {
             align-items: center;
@@ -73,42 +74,45 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             min-height: 50px;
             padding: 5px 0;
 
-            form {
-              display: flex;
+            .cart-description__edit-wrapper {
               flex-wrap: wrap;
               margin: 0 0 0 10px;
               position: relative;
-              width: 100%;
+              flex: 1 1 auto;
 
-              input {
-                border: 2px solid $secondaryColor;
-                padding: 0;
-                height: 25px;
+              form {
+                width: 100%;
+                display: flex;
 
-                &:first-of-type {
-                  border-radius: 4px 0 0 4px;
-                  flex: 1 1 auto;
-                  padding: 2px 4px;
-                }
+                input {
+                  border: 2px solid $secondaryColor;
+                  padding: 0;
 
-                &:last-of-type {
-                  background: $secondaryColor;
-                  border-radius: 0 4px 4px 0;
-                  color: white;
-                  cursor: pointer;
-                  width: 50px;
+                  &:first-of-type {
+                    border-radius: 4px 0 0 4px;
+                    flex: 1 1 auto;
+                    padding: 2px 4px;
+                  }
 
-                  &:disabled {
-                    opacity: 0.5;
+                  &:last-of-type {
+                    background: $secondaryColor;
+                    border-radius: 0 4px 4px 0;
+                    color: $color-white;
+                    cursor: pointer;
+                    width: 50px;
+
+                    &:disabled {
+                      opacity: 0.5;
+                    }
                   }
                 }
               }
 
               p {
                 flex: 1 1 100%;
-                text-align: right;
-                padding: 2px 0;
                 font-size: 12px;
+                padding: 2px 0;
+                text-align: right;
 
                 &.red {
                   color: $warningColor;
@@ -148,7 +152,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
                 cursor: pointer;
 
                 &:hover {
-                  color: $warningColor;
+                  span {
+                    color: $warningColor;
+                  }
                 }
               }
 
