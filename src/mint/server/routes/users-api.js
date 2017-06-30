@@ -3,6 +3,10 @@ const _ = require('lodash')
 const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
 
+var db
+const dbReady = require('../../db')
+dbReady.then((models) => { db = models; })
+
 var passport = require('passport')
 var FacebookStrategy = require('passport-facebook').Strategy
 
@@ -11,16 +15,29 @@ passport.use(new FacebookStrategy({
   clientSecret: '9d0d946d5096bde7395d7e6256399a4c',
   callbackURL: 'https://8983319f.ngrok.io/api/auth/facebook/callback',
   profileFields: ['name', 'email']
-}, function (accessToken, refreshToken, profile, done) {
+}, async function (accessToken, refreshToken, profile, done) {
   logging.info('PROFILE:', profile)
+  //create user account if one does not exist
   var email = profile.emails[0].value
-  done()
+  var name = profile.name.givenName + ' ' + profile.name.familyName
+  logging.info('email', email)
+  var account = await db.UserAccounts.findOne({email_address: email})
+  if (!account) {
+    logging.info('creating new user account for ' + email)
+    await db.UserAccounts.create({
+      email_address: email,
+      name: name
+    })
+  }
+  done(null, profile)
 }))
 
-var db
-const dbReady = require('../../db')
-dbReady.then((models) => { db = models; })
+passport.serializeUser(async function (user, done) {
+  logging.info('serialize called')
+  done(null, user)
+})
 
+passport.deserializeUser((id, done) => done(null, id))
 
 /**
  * turn email into user name - into a function so that it could be used
@@ -183,11 +200,29 @@ module.exports = function (router) {
    */
   router.get('/auth/facebook/callback',
     passport.authenticate('facebook', {
-      successRedirect: '/',
-      failureRedirect: '/',
+      successRedirect: '/api/facebook/login',
+      failureRedirect: '/failure',
       scope: ['email']
     })
   )
+
+  router.get('/facebook/login', (req, res) => co(function * () {
+    logging.info('UserSession', req.UserSession)
+    logging.info('session', req.session)
+
+    var emails = _.get(req, 'user.emails')
+    if (!emails) throw new Error('no email address associated with this user')
+    var email = emails[0].value
+    logging.info(email)
+    // query for user id based on passport session info
+    var user = yield db.UserAccounts.findOne({email_address: email})
+    // add it to the UserSession
+    var dbSession = yield db.Sessions.findOne({id: req.session.id})
+    dbSession.user_account = user.id
+    yield dbSession.save()
+    // we're done; redirect to somewhere
+    res.redirect('/newcart')
+  }))
 
   /**
    * @api {get} /api/identify?email=:email&cart_id=:cart_id Identify
