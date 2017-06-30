@@ -16,7 +16,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleHistory: () => dispatch(toggleHistory()),
+  toggleHistory: (show) => dispatch(toggleHistory(show)),
   updateQuery: (query) => dispatch(updateQuery(query)),
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);

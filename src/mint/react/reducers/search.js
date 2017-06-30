@@ -61,7 +61,7 @@ export default (state = initialState, action) => {
   case 'TOGGLE_HISTORY':
     return {
       ...state,
-      history: !state.history
+      history: action.history !== undefined ? action.history : !state.history
     };
   case 'LAZY_SEARCH_LOADING':
     return {

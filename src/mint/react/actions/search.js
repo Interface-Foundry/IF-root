@@ -15,8 +15,9 @@ export const navigateLeftResults = () => ({
   type: 'SELECT_ITEM_LEFT'
 });
 
-export const toggleHistory = () => ({
-  type: 'TOGGLE_HISTORY'
+export const toggleHistory = show => ({
+  type: 'TOGGLE_HISTORY',
+  history: show
 });
 
 export const updateQuery = query => ({

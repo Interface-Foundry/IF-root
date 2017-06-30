@@ -22,14 +22,15 @@ export default class Results extends Component {
     page: PropTypes.number,
     loading: PropTypes.bool,
     lazyLoading: PropTypes.bool,
-    lastUpdatedId: PropTypes.string
+    lastUpdatedId: PropTypes.string,
+    fetchSearchItem: PropTypes.func
   }
 
   state = {
     myItems: []
   }
 
-  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading, user: { id }, results = [], cart: { items = [] } }) =>
+  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading,query, user: { id }, results = [], cart: { items = [] } }) =>
     lastUpdatedId !== this.props.lastUpdatedId
     || id !== this.props.user.id
     || numberOfItems(results) !== numberOfItems(this.props.results)
@@ -38,6 +39,7 @@ export default class Results extends Component {
     || loading !== this.props.loading
     || lazyLoading !== this.props.lazyLoading
     || (numberOfItems(results) > 0 && numberOfItems(this.props.results) > 0) && (results[0] !== this.props.results[0])
+    || query !== this.props.query
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
     if (results.length === 0 && !loading && this.props.loading !== loading) replace(`${location.pathname}${location.search}&toast=No Results Found! 😥&status=warn`);
@@ -137,7 +139,7 @@ export default class Results extends Component {
           }
         </tbody>
         {
-          (results.length > 1)
+          (results.length > 1 && query.length)
           ? (<tfoot>
               <tr>
                 <td className='load' colSpan="100%"><span onClick={() => getMoreSearchResults(query, cart.store, cart.store_locale, page+1)}>Load more results</span></td>

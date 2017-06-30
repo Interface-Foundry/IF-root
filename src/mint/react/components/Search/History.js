@@ -18,8 +18,8 @@ export default class History extends Component {
   render() {
     const { props: { query, categories, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
     history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
-    suggestedCategories = history.length > 0 ? categories.slice(0, 5) : [];
-
+      suggestedCategories =  categories.slice(0, 5);
+    console.log({ history, suggestedCategories })
 
     return (
       <span className='history'>
@@ -43,7 +43,7 @@ export default class History extends Component {
           }
         </ul>
         <ul className='categories'>
-          { history.length > 0 ? <span>Suggested --</span> : null }
+          { suggestedCategories.length > 0 ? <span>Suggested --</span> : null }
           {
             suggestedCategories.map((category, i) => {
               return (
