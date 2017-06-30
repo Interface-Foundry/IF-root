@@ -16,8 +16,7 @@ passport.use(new FacebookStrategy({
   callbackURL: 'https://8983319f.ngrok.io/api/auth/facebook/callback',
   profileFields: ['name', 'email']
 }, async function (accessToken, refreshToken, profile, done) {
-  logging.info('PROFILE:', profile)
-  //create user account if one does not exist
+  //create an account for our facebook user if one does not already exist
   var email = profile.emails[0].value
   var name = profile.name.givenName + ' ' + profile.name.familyName
   logging.info('email', email)
@@ -32,11 +31,7 @@ passport.use(new FacebookStrategy({
   done(null, profile)
 }))
 
-passport.serializeUser(async function (user, done) {
-  logging.info('serialize called')
-  done(null, user)
-})
-
+passport.serializeUser((user, done) => done(null, user))
 passport.deserializeUser((id, done) => done(null, id))
 
 /**
@@ -206,6 +201,9 @@ module.exports = function (router) {
     })
   )
 
+  /**
+   *
+   */
   router.get('/facebook/login', (req, res) => co(function * () {
     logging.info('UserSession', req.UserSession)
     logging.info('session', req.session)
