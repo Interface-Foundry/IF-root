@@ -72,7 +72,7 @@ export default class Input extends Component {
             <Icon icon='Search'/>
         </button>
         <input placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : ''} value={query} onChange={(e) => updateQuery(e.currentTarget.value)} autoComplete="off" spellCheck='true' onKeyDown={::this._handeKeyPress}/>
-        <button className='cancel' type='button' disabled={!query} onClick={(e) => updateQuery('')}>
+        <button className='cancel' type='button' disabled={!query.length} onClick={(e) => updateQuery('')}>
             <Delete />
         </button>
         { showHistory ? <History {...this.props} selectedQuery={selectedQuery} /> : null }

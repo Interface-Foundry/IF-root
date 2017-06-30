@@ -60,9 +60,7 @@ store.dispatch(getSiteState(window.location.pathname))
       document.getElementById('root')
     );
     store.dispatch(get('/api/session', 'SESSION'));
-  })
-  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('/api/blog/posts', 'POSTS'))]))
-  .then(() => {
+  }).then(() => {
     const sessionId = store.getState()
       .auth.id;
     if (sessionId && process.env.GA) {
@@ -77,4 +75,5 @@ store.dispatch(getSiteState(window.location.pathname))
           .siteState.siteVersion
       });
     }
-  });
+  })
+  .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('/api/blog/posts', 'POSTS'))]));

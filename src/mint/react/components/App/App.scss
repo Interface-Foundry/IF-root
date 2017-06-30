@@ -1,6 +1,7 @@
 // react/components/App/App.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
+
 body, html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
@@ -10,20 +11,23 @@ body, html {
   background: $kip-primary-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+  text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
   font-family: $main-font;
+
   * {
     outline: none;
     box-sizing: border-box;
     vertical-align: top;
   }
+
   a {
     text-decoration: none;
     color: inherit;
   }
-  button {
-    cursor: pointer;
-  }
+}
+
+button {
+  cursor: pointer;
 }
 
 body {
@@ -33,10 +37,14 @@ body {
 @media only screen and (max-width: 600px) {
   table {
     overflow-x: auto;
+
     // display: block;
+
     td {
       width: 100%;
+
       // display: block;
+   
     }
   }
 }
@@ -63,13 +71,16 @@ body {
   text-align: left;
   -webkit-overflow-scrolling: touch;
   height: calc(100% - #{$nav-height * 1.5});
+
   @media only screen and (max-width: 600px) {
     height: calc(100% - #{$nav-height * 1.5});
   }
+
   @media only screen and (min-width: 600px) {
     display: inline-block;
     overflow-y: auto;
     height: calc(100% - #{$nav-height * 1.5});
+
     &.squeeze {
       width: calc(100% - 250px);
     }
@@ -119,4 +130,3 @@ input, select:focus, textarea {
 body::-webkit-scrollbar {
   display: none;
 }
-

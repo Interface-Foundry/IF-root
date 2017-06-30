@@ -36,15 +36,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-top: 3px solid $secondaryColor;
       padding: 0;
 
-      &.locked {
-        border-top: 3px solid #555;
-
-        .cover {
-          background: #555;
-          color: white !important;
-        }
-      }
-
       .cover {
         display: flex;
         padding: $padding;
@@ -329,6 +320,23 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               font-weight: 100;
               font-size: 12px;
               color: rgba(#333, 0.6);
+            }
+          }
+        }
+      }
+
+      &.locked {
+        border-top: 3px solid #555;
+
+        .cover {
+          background: #555;
+          color: white;
+        }
+
+        .text {
+          .cart-description {
+            .cart-description__text {
+              color: white; // :shrug:
             }
           }
         }

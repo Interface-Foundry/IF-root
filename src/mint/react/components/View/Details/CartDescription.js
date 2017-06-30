@@ -24,7 +24,7 @@ export default class CartDescription extends Component {
     || editing !== this.state.editing
     || editedDescrip !== this.state.editedDescrip
 
-  componentWillReceiveProps = ({ cart: { description } }) => this.setState({ editedDescrip: description })
+  componentWillReceiveProps = ({ cart: { description = '' } }) => this.setState({ editedDescrip: description })
 
   _saveDescription = (e) => {
     const { props: { updateCart, cart }, state: { editedDescrip } } = this;

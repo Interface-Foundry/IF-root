@@ -24,13 +24,16 @@
     }
   }
 
+  span {
+    display: flex;
+  }
+
   .header__left {
-    display: inline-block;
+    flex: 1 1 auto;
     position: relative;
     height: 100%;
     white-space: nowrap;
-    padding: 0 ($padding * 3);
-    width: 75%;
+    display: flex;
 
     @media only screen and (max-width: 600px) {
       padding: 0 0 0 $padding;
@@ -38,6 +41,10 @@
 
     a {
       display: inline-block;
+
+      &:first-of-type {
+        padding-left: 20px;
+      }
 
       @media only screen and (max-width: 600px) {
         display: none;
@@ -98,6 +105,8 @@
     }
 
     .navbar__modal__head {
+      flex: 1 1 auto;
+
       &.settings {
         padding: 0 ($padding * 2) 0 0;
 
@@ -108,14 +117,14 @@
             }
           }
         }
+      }
 
-        svg {
-          font-size: 20px;
-          vertical-align: top !important;
-          line-height: $nav-height;
-          height: $nav-height;
-          margin-right: $padding / 2;
-        }
+      svg {
+        font-size: 20px;
+        vertical-align: top !important;
+        line-height: $nav-height;
+        height: $nav-height;
+        margin-right: $padding / 2;
       }
 
       span {
@@ -129,12 +138,9 @@
   }
 
   .header__right {
-    display: inline-block;
-    position: relative;
     height: $nav-height;
     text-align: right;
     padding: 0 ($padding * 3);
-    width: 25%;
 
     p {
       display: inline-block;
@@ -174,7 +180,6 @@
   }
 
   .settings {
-    display: block;
     background: white;
 
     .header__left {
@@ -209,6 +214,7 @@
     cursor: pointer;
     height: $nav-height;
     width: $nav-height;
+    align-self: flex-start;
 
     svg {
       height: 100%;
