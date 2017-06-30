@@ -46,73 +46,73 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       .cover {
+        display: flex;
         padding: $padding;
       }
 
       .left {
-        display: inline-block;
-        width: 65%;
-
-        @media only screen and (max-width: 600px) {
-          display: block;
-          width: 100%;
-        }
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 270px;
 
         .image {
+          border-radius: 5px;
+          display: inline-block;
           height: $nav-height;
           width: $nav-height;
-          display: inline-block;
-          border-radius: 5px;
         }
 
         .text {
           display: inline-block;
           padding: 0 $padding;
-          width: calc(100% - #{$nav-height});
+          flex: 1 1 auto;
 
           .cart-description {
             align-items: center;
             display: flex;
             flex: 1 1 auto;
-            height: 40px;
+            min-height: 50px;
             padding: 5px 0;
 
-            form {
-              display: flex;
+            .cart-description__edit-wrapper {
               flex-wrap: wrap;
               margin: 0 0 0 10px;
               position: relative;
-              width: 100%;
+              flex: 1 1 auto;
 
-              input {
-                border: 2px solid $secondaryColor;
-                padding: 0;
-                height: 25px;
+              form {
+                width: 100%;
+                display: flex;
 
-                &:first-of-type {
-                  border-radius: 4px 0 0 4px;
-                  flex: 1 1 auto;
-                  padding: 2px 4px;
-                }
+                input {
+                  border: 2px solid $secondaryColor;
+                  padding: 0;
 
-                &:last-of-type {
-                  background: $secondaryColor;
-                  border-radius: 0 4px 4px 0;
-                  color: white;
-                  cursor: pointer;
-                  width: 50px;
+                  &:first-of-type {
+                    border-radius: 4px 0 0 4px;
+                    flex: 1 1 auto;
+                    padding: 2px 4px;
+                  }
 
-                  &:disabled {
-                    opacity: 0.5;
+                  &:last-of-type {
+                    background: $secondaryColor;
+                    border-radius: 0 4px 4px 0;
+                    color: $color-white;
+                    cursor: pointer;
+                    width: 50px;
+
+                    &:disabled {
+                      opacity: 0.5;
+                    }
                   }
                 }
               }
 
               p {
                 flex: 1 1 100%;
-                text-align: right;
-                padding: 2px 0;
                 font-size: 12px;
+                padding: 2px 0;
+                text-align: right;
 
                 &.red {
                   color: $warningColor;
@@ -128,18 +128,33 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
             .cart-description__text {
               color: rgba(#333, 0.5);
-              height: unset;
-              line-height: unset;
-              opacity: 1;
               padding: 0 10px;
-              font-size: 14px;
-              font-weight: 100;
+              display: flex;
+              align-items: center;
+
+              span {
+                display: flex;
+                font-size: 12px;
+                font-weight: 100;
+                align-self: bottom;
+              }
+
+              p {
+                flex: 1 1 auto;
+                font-size: 14px;
+                font-weight: 100;
+                height: unset;
+                line-height: unset;
+                opacity: 1;
+              }
 
               &.is-admin {
                 cursor: pointer;
 
                 &:hover {
-                  color: $warningColor;
+                  span {
+                    color: $warningColor;
+                  }
                 }
               }
 
@@ -228,8 +243,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       .right {
-        display: inline-block;
-        width: 35%;
         text-align: right;
 
         .buttons {
