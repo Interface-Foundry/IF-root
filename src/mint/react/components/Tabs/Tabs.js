@@ -29,9 +29,6 @@ export default class Tabs extends Component {
       tab: 'search',
       url: `/cart/${id}?q=${query}`,
       display: 'Search'
-    }, {
-      tab: 'invoice',
-      display: 'Invoice'
     }];
     this.setState({ tabs });
   }
@@ -42,15 +39,11 @@ export default class Tabs extends Component {
       tabs = [{
         tab: 'cart',
         url: `/cart/${id}`,
-        display: `Cart (${numberOfItems(items)})`,
-        showBubble: itemsChanged
+        display: `Cart (${numberOfItems(items)})`
       }, {
         tab: 'search',
         url: `/cart/${id}?q=${query}`,
         display: 'Search'
-      }, {
-        tab: 'invoice',
-        display: 'Invoice'
       }];
     this.setState({ tabs });
   }
