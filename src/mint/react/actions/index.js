@@ -30,6 +30,7 @@ export {
 from './session';
 
 export {
+  fetchLatestInvoiceForCart,
   fetchInvoice,
   fetchInvoices,
   createInvoice,

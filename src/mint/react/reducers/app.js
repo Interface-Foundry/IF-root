@@ -2,7 +2,7 @@ const initialState = {
   loading: false,
   sidenav: false,
   popup: false,
-  selectedAccordion: 'shipping',
+  selectedAccordion: 'invoiceinfo',
   viewTab: 'cart'
 };
 

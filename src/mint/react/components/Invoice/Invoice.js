@@ -7,18 +7,11 @@ import Payment from './Payment';
 import Shipping from './Shipping';
 import CartReview from './CartReview';
 import Forms from './Forms';
+import InvoiceInfo from './InvoiceInfo';
 
 export default class Invoice extends Component {
   static propTypes = {
-    cart: PropTypes.object,
-    fetchInvoices: PropTypes.func,
-    fetchPaymentSources: PropTypes.func
-  }
-
-  componentWillMount() {
-    const { fetchPaymentSources, fetchInvoices, cart } = this.props;
-    fetchInvoices(cart.id);
-    fetchPaymentSources();
+    cart: PropTypes.object
   }
 
 
@@ -27,6 +20,7 @@ export default class Invoice extends Component {
     return (
       <div className='invoice'>
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
+        <InvoiceInfo {...this.props}/>
         <Shipping {...this.props}/>
         <Payment {...this.props}/>
         <CartReview {...this.props}/>

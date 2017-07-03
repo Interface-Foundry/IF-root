@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const moment = require('moment');
 
 const Invoice = require('../payments/Invoice.js')
 const Cart = require('../cart/Cart.js')
@@ -230,16 +229,15 @@ module.exports = function (router) {
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    const invoices = await Invoice.GetByCartId(req.params.cart_id)
-    if (invoices.length === 0) {
-      const invoiceData = {
-        cart: req.params.cart_id,
-        split: 'split_equal'
-      }
-      const invoice = Invoice.Create('mint', invoiceData)
-      const newInvoice = await invoice.createInvoice()
-      return res.send(newInvoice)
+    let invoices = await Invoice.GetByCartId(req.params.cart_id)
+    logging.info('got these invoices', invoices)
+    if (invoices.length > 1) {
+      invoices = invoices[invoices.length - 1]
     }
+    if (invoices.length === 0) {
+      invoices = {}
+    }
+    logging.info('sending invoices', invoices)
 
     res.send(invoices)
   })
@@ -287,16 +285,16 @@ module.exports = function (router) {
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
+    logging.info('req.body', req.body)
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
-      split_type: _.get(req, 'body.split_type', 'split_equal')
+      split_type: _.get(req, 'body.split_type')
     }, _.isUndefined)
 
     logging.info('invoice data', invoiceData)
-
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
-    logging.info('invoice', invoice)
     const newInvoice = await invoice.createInvoice()
+    logging.info('created new invoice: ', invoiceData)
     return res.send(newInvoice)
   })
 }

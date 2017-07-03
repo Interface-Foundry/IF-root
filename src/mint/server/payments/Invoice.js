@@ -80,6 +80,11 @@ class Invoice {
     return new invoiceHandlers[invoiceType](invoiceData)
   }
 
+  static async CreateByCartId (cartId) {
+    const cart = await db.Carts.findOne({id: cartId})
+    return new invoiceHandlers['mint'](cart)
+  }
+
 
   optionUpdate(option, optionData) {
     Object.assign(this, {[option]: optionData})
