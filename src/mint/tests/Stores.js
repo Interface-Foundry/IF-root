@@ -75,7 +75,7 @@ var stores = [{
         text: 'notebooks',
       },
       check(results) {
-        results.length.should.equal(10)
+        results.length.should.equal(4)
       }
     },{
       options: {
