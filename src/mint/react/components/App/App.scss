@@ -61,6 +61,12 @@ body {
   background: $kip-secondary-color;
   background-image: url('//storage.googleapis.com/kip-random/website/kip_scribble_pattern.png');
   background-size: 400px;
+
+  & > .tabs {
+    @media only screen and (max-width: 600px) {
+      display: none;
+    }
+  }
 }
 
 .app__view {

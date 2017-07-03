@@ -9,8 +9,29 @@
 	padding: 0 0 $padding*2;
 
 	@media only screen and (max-width: 600px) {
-		padding: 0 0 $padding*5;
+		padding: 0 0 $padding*7.5;
 	}
+
+  & > .tabs {
+    position: fixed;
+    bottom: 0;
+    height: 50px;
+    background: white;
+
+    h1 {
+      height: 50px;
+      line-height: 50px;
+      color: #8D8D8D;
+
+      &.selected {
+        color: $secondaryColor;
+      }
+
+      span {
+        border-bottom: 4px solid transparent !important;
+      }
+    }
+  }
 
 	* {
 	    max-width: 1066px;
@@ -27,7 +48,7 @@
 	& > .buttons {
 		position: fixed;
 		width: 100%;
-		bottom: 0;
+		bottom: $nav-height;
 		left: 0;
 		padding: 0;
 		height: 40px;
@@ -40,11 +61,13 @@
 
 		button {
 			margin: 0 0;
-			width: 50%;
+			width: 100%;
 			border-radius: 0;
 			padding: 0 $padding;
 			
-			&.blue,
+			&.blue {
+        display: none;
+      }
 			&.locked {
 				background: $secondaryColor;
 				color: white;

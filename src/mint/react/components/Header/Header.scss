@@ -47,7 +47,23 @@
       }
 
       @media only screen and (max-width: 600px) {
-        display: none;
+        &:first-of-type {
+          padding-left: 0;
+        }
+      }
+      .desktop {
+        @media only screen and (max-width: 600px) {
+          display: none;
+        }
+      }
+      .mobile {
+        width: 30px;
+        margin: 0;
+        height: 30px;
+        margin: $padding $padding 0 0;
+        @media only screen and (min-width: 600px) {
+          display: none;
+        }
       }
     }
 
@@ -141,6 +157,12 @@
     height: $nav-height;
     text-align: right;
     padding: 0 ($padding * 3);
+
+    @media only screen and (max-width: 600px) {
+      width: $nav-height;
+      text-align: center;
+      padding: 0;
+    }
 
     p {
       display: inline-block;

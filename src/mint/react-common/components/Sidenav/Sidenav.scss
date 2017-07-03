@@ -66,6 +66,9 @@
       }
 
       &.sidenav__list__header {
+        position: absolute;
+        top: 0;
+        width: 100%;
         height: $nav-height;
         padding: 0;
         display: flex;

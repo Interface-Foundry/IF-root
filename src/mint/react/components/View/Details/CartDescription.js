@@ -53,7 +53,6 @@ export default class CartDescription extends Component {
         onClick={() => isAdmin ? this.setState({editing: true}) : null} 
         onBlur={()=>this.setState({editing: false})}
       >
-        { description || isAdmin ? <Icon icon='Chatbubble'/> : null }
         {
           editing 
             ? (
@@ -83,14 +82,14 @@ export default class CartDescription extends Component {
             : (
                 description || isAdmin ? (
                   <div className={`cart-description__text ${isAdmin ? 'is-admin' : ''}`}>
-                     <p>
+                     <p>  
+                        { description || isAdmin ? <Icon icon='Chatbubble'/> : null }
                         {
                           description 
                           ? description
                           : <i>Edit Description</i> 
                         }
                     </p>  
-                  { isAdmin ? <span><Icon icon='Edit'/>Edit</span> : null}
                   </div>
                 ) : null
             )

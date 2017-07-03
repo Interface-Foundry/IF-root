@@ -25,7 +25,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .action {
-    padding: ($padding * 1.5) 0 8;
+    padding: ($padding * 1.5) 0;
     text-align: right;
 
     button {
@@ -38,7 +38,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       color: #333;
       font-size: 14px;
       opacity: 0.6;
-      border-right: 1px solid #a7a7a7;
 
       &:last-of-type {
         border-right: 1px solid transparent;
