@@ -9,6 +9,7 @@
   height: $nav-height / 1.7;
   padding: 0 $padding;
   width: 100%;
+  z-index: 100;
 
   h1 {
     color: $color-white;
@@ -18,14 +19,20 @@
     padding: 0 ($padding * 2);
     position: relative;
 
+    svg {
+      display: inline-block;
+      margin-right: $padding/2;
+      padding: 0 0 $padding/4;
+    }
+
     span {
-      display: block;
+      display: inline-block;
     }
 
     &.selected {
       span {
         border-bottom: 4px solid $color-white;
-        height: 24px;
+        height: 28px;
       }
     }
   }

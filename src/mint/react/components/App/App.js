@@ -84,7 +84,7 @@ export default class App extends Component {
         windowHeight = this.scroll.clientHeight;
 
       // animate scroll, needs height of the container, and its distance from the top
-      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
+      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading && query) {
         getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
       }
     }

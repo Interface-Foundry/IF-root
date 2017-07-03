@@ -33,7 +33,8 @@ import {
   IoPricetag,
   IoRefresh,
   IoSad,
-  IoSearch
+  IoSearch,
+  IoHome
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -60,6 +61,8 @@ export default class Icon extends Component {
       return <IoAndroidFavorite/>;
     case 'Loop':
       return <IoLoop/>;
+    case 'Home':
+      return <IoHome/>;
     case 'PriceTag':
       return <IoPricetag/>;
     case 'Hamburger':

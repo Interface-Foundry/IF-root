@@ -160,8 +160,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           .update {
             display: flex;
             height: $nav-height / 1.5;
+            line-height: $nav-height / 1.5;
             justify-content: flex-start;
             align-items: stretch;
+            margin: $padding/2 0 0 0;
 
             * {
               text-align: center;

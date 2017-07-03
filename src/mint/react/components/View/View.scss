@@ -15,13 +15,26 @@
   & > .tabs {
     position: fixed;
     bottom: 0;
-    height: 50px;
+    height: 40px;
     background: white;
+    padding: 0;
+    @media only screen and (min-width: 600px) {
+      display: none;
+    }
 
     h1 {
-      height: 50px;
-      line-height: 50px;
+      height: 40px;
+      line-height: 40px;
       color: #8D8D8D;
+      width: calc(100%/3);
+      padding: 0;
+      text-align: center;
+
+      svg {
+        display: block;
+        height: 20px;
+        margin: 5px auto 0;
+      }
 
       &.selected {
         color: $secondaryColor;
@@ -29,6 +42,10 @@
 
       span {
         border-bottom: 4px solid transparent !important;
+        height: 20px;
+        display: block;
+        font-size: 12px;
+        line-height: 10px;
       }
     }
   }
@@ -48,7 +65,7 @@
 	& > .buttons {
 		position: fixed;
 		width: 100%;
-		bottom: $nav-height;
+		bottom: 40px;
 		left: 0;
 		padding: 0;
 		height: 40px;
