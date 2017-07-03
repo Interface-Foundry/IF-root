@@ -10,7 +10,7 @@ import PaymentTypes from './PaymentTypes';
 export default class Payment extends Component {
 
   render() {
-  	const { selectedAccordion, selectAccordion } = this.props;
+  	const { selectedAccordion, updateInvoice, invoice, selectAccordion, createPayments } = this.props;
 
     return (
       <div className='payment accordion'>
@@ -19,7 +19,24 @@ export default class Payment extends Component {
         </nav>
         {
           selectedAccordion.includes('payment') ? <div>
-            <PaymentTypes {...this.props}/>
+            <nav>
+              <h3> create payment objects </h3>
+            </nav>
+              <div>
+                <button onClick={()=> createPayments(invoice.id)}>create payments for users</button>
+              </div>
+            <nav>
+              <h3>update the invoice</h3>
+            </nav>
+              <div>
+                <button onClick={()=> updateInvoice(invoice.id, 'split_type', 'split_single')}>single payer</button>
+              </div>
+              <div>
+                <button onClick={()=> updateInvoice(invoice.id, 'split_type', 'split_equal')}>split equally</button>
+              </div>
+              <div>
+                <button onClick={()=> updateInvoice(invoice.id, 'split_type', 'split_by_item')}>split by item</button>
+              </div>
             <nav>
               <h4>Your credit and debit cards</h4>
             </nav>

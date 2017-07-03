@@ -9,6 +9,7 @@ import { splitCartById } from '../../../reducers';
 import { Icon } from '../../../../react-common/components';
 import { EmptyContainer } from '../../../containers';
 import CartButtons from './CartButtons';
+import ItemPaidButton from './ItemPaidButton';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -43,6 +44,7 @@ export default class Cart extends Component {
                     Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
                   </z>
                   </h4>
+                  <ItemPaidButton {...this.props}/>
                   <ul>
                     {
                       myCart.map((item) => {

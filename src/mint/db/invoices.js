@@ -60,7 +60,8 @@ const invoiceCollection = Waterline.Collection.extend({
 
     /** total of order */
     total: {
-      type: 'float'
+      type: 'float',
+      defaultsTo: 10000 //just doing this b/c i dont want to fix cart sync stuff atm. use 100.00 USD as baseline for testing
     },
 
     /**
@@ -71,12 +72,13 @@ const invoiceCollection = Waterline.Collection.extend({
      */
     split_type: {
       type: 'string',
-      enum: ['split_single', 'split_equal', 'split_by_item']
+      enum: ['split_single', 'split_equal', 'split_by_item'],
+      defaultsTo: 'split_single'
     },
 
     /** everything that would be a order in old db.payments*/
     cafe_order: {
-      type: 'json',
+      type: 'json'
     }
   }
 })

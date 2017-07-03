@@ -32,7 +32,13 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id - id of invoice
    */
     .get(async (req, res) => {
-      const invoice = await Invoice.GetById(req.params.invoice_id)
+      let invoice
+      try {
+        invoice = await Invoice.GetById(req.params.invoice_id)
+      } catch (err) {
+        logging.info('error getting invoice, possibly not available', err)
+        return res.send(500)
+      }
       return res.send(invoice)
     })
 
@@ -62,9 +68,11 @@ module.exports = function (router) {
      * @apiParam {object} option_data - the options to change stuff to
      */
     .put(async (req, res) => {
-      const invoice = await Invoice.GetById(req.params.invoice_id)
-      if (_.get(req, 'body.option_chage')) {
-        await invoice.optionUpdate(req.body.option_change, req.body.option_data)
+      logging.info('got req to update or action', req.body)
+      let invoice
+      if (_.get(req, 'body.option_change')) {
+        logging.info(`updating option for invoice ${req.params.invoice_id}: ${req.body.option_change} with ${req.body.option_data}`)
+        invoice = await Invoice.optionUpdate(req.params.invoice_id, req.body.option_change, req.body.option_data)
       }
 
       return res.send(invoice)
@@ -98,7 +106,31 @@ module.exports = function (router) {
 
 
     /**
-     * @api {post} /invoice/payment/:invoice_idpost payment source to invoice
+     * @api {post} /invoice/payment/:invoice_id
+     * @apiDescription create the payment objects to be used with paymentsources for an invoice
+     * @apiGroup Payments
+     *
+     * @apiParam {string} :invoice_id - invoice id
+     */
+    .post(async (req, res) => {
+      logging.info('creating initial payment objects for all users on an invoice', req.body)
+      let paymentObjects
+
+      // see if they are already created
+      // TODO: either cold storage old ones or edit old ones to fit current invoice
+      paymentObjects = await PaymentSource.GetByInvoiceId(req.params.invoice_id)
+      if (paymentObjects.length > 0) {
+        logging.info('paymentObjects already created', paymentObjects)
+        return res.send(paymentObjects)
+      }
+
+      const invoice = await Invoice.GetById(req.params.invoice_id)
+      paymentObjects = await PaymentSource.CreateInitialDocuments(invoice)
+      return paymentObjects
+    })
+
+    /**
+     * @api {put} /invoice/payment/:invoice_id post payment source to invoice
      * @apiDescription post a payment to an invoice
      * @apiGroup Payments
      *
@@ -106,7 +138,7 @@ module.exports = function (router) {
      * @apiParam {string} payment_source - id of payment source we are using
      * @apiParam {number} payment_amount - amount of invoice to pay
      */
-    .post(async (req, res) => {
+    .put(async (req, res) => {
       logging.info('posted to payment route')
       if (!_.get(req, 'body.payment_source')) {
         throw new Error('Need invoice id to post payment to')
@@ -285,7 +317,12 @@ module.exports = function (router) {
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-    logging.info('req.body', req.body)
+    const oldInvoice = await Invoice.GetByCartId(req.params.cart_id)
+    if (oldInvoice) {
+      logging.info('invoice already exists for this cart_id, not creating new invoice', oldInvoice.id)
+      return res.send(oldInvoice)
+    }
+
     const invoiceData = _.omitBy({
       cart: req.params.cart_id,
       split_type: _.get(req, 'body.split_type')

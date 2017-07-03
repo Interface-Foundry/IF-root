@@ -11,7 +11,14 @@ import InvoiceInfo from './InvoiceInfo';
 
 export default class Invoice extends Component {
   static propTypes = {
-    cart: PropTypes.object
+    cart: PropTypes.object,
+    createInvoice: PropTypes.func,
+    selectedAccordion: PropTypes.string
+  }
+
+  componentWillMount() {
+    const { createInvoice, cart } = this.props;
+    createInvoice(cart.id, 'mint', 'split_by_item');
   }
 
 

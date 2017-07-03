@@ -31,6 +31,27 @@ class PaymentSource {
     return new paymentSourceHandlers[paymentSource.payment_vendor](paymentSource)
   }
 
+  static async GetByInvoiceId (invoiceId) {
+    const payments = await db.Payments.find({invoice: invoiceId})
+    return payments
+  }
+
+  static async CreateForInvoice(invoice) {
+    logging.info('would create invoice for members', invoice.members)
+    logging.info('using cart', invoice.cart)
+    return
+    // await invoice.members.map(async (member) => {
+
+    // })
+    // const payment = await db.Payments.create({
+    //   invoice: invoice.id,
+    //   user: this.user,
+    //   payment_source: this.id,
+    //   amount: amount,
+    //   data: stripeResponse
+    // })
+  }
+
   static async Create (source, sourceData) {
     return new paymentSourceHandlers[source](sourceData)
   }

@@ -8,11 +8,11 @@ import {
   fetchInvoice,
   fetchInvoices,
   createInvoice,
-  fetchLatestInvoiceForCart,
+  updateInvoice,
+  createPayments,
   fetchPaymentSources,
   createPaymentSource,
-  deletePaymentSource,
-  updateInvoiceOptions
+  deletePaymentSource
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -29,13 +29,13 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   fetchInvoices: (invoice_id) => dispatch(fetchInvoices(invoice_id)),
-  fetchLatestInvoiceForCart: (cart_id) => dispatch(fetchLatestInvoiceForCart(cart_id)),
-  createInvoice: (cart_id, invoice_type) => dispatch(createInvoice(cart_id, invoice_type)),
+  createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
+  createPayments: (invoice_id) => dispatch(createPayments(invoice_id)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
   createPaymentSource: (payment_data, payment_source) => dispatch(createPaymentSource(payment_data, payment_source)),
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),
   deletePaymentSource: (paymentsource_id) => dispatch(deletePaymentSource(paymentsource_id)),
-  updateInvoiceOptions: (invoice_id, option, data) => dispatch(updateInvoiceOptions(invoice_id, option, data))
+  updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data))
 });
 
 

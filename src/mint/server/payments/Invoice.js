@@ -1,4 +1,5 @@
 var moment = require('moment')
+const _ = require('lodash')
 const Cart = require('../cart/Cart')
 
 const email_utils = require('../utilities/email_utils')
@@ -64,7 +65,7 @@ class Invoice {
    * @return     {Promise}  the invoices
    */
   static async GetByCartId (cartId) {
-    const invoice = await db.Invoices.find({cart: cartId}).populate('leader').populate('cart').populate('members')
+    const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart').populate('members')
     return invoice
   }
 
@@ -86,8 +87,27 @@ class Invoice {
   }
 
 
-  optionUpdate(option, optionData) {
-    Object.assign(this, {[option]: optionData})
+  /**
+   * Update a field or object in the db with new data
+   *
+   * @param      {invoiceId}   invoiceId   The invoice identifier
+   * @param      {option}   option      The option to change
+   * @param      {optionData}   optionData  The option data
+   * @return     {Promise}  the updated invoice
+   */
+  static async optionUpdate(invoiceId, option, optionData) {
+    let invoice
+    try {
+      invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+    } catch (err) {
+      logging.error('error updating invoice, invoice does not exist probably', err)
+      return
+    }
+    invoice[option] = optionData
+    await invoice.save()
+
+    const updatedInvoice = await this.GetById(invoice.id)
+    return updatedInvoice
   }
 
 
@@ -109,12 +129,14 @@ class Invoice {
     let cart = await Cart.GetById(this.cart)
     await cart.sync()
 
+    logging.info('DOES CART HAVE SUBTOTAL?', cart.subtotal)
+
     var newInvoice = await db.Invoices.create({
       leader: cart.leader,
       invoice_type: this.invoice,
       cart: cart.id,
       paid: false,
-      total: cart.subtotal,
+      total: _.get(cart, 'subtotal', 10000), // FIX TOTAL LATER
       split_type: this.split_type
     })
 
@@ -123,7 +145,7 @@ class Invoice {
     })
 
     await newInvoice.save()
-    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
+    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader').populate('members')
 
     return invoice
   }
@@ -285,7 +307,7 @@ class MintInvoice extends Invoice {
   }
 
   async checkPrevInvoice () {
-    const invoice = await db.Invoices.findOne({cart: this.cart})
+    const invoice = await db.Invoices.findOne({cart: this.cart}).populate('leader')
     if (invoice) {
       return invoice
     }
@@ -305,7 +327,7 @@ class MintInvoice extends Invoice {
 
 
 const invoiceHandlers = {
-  [MintInvoice.name]: MintInvoice,
+  [MintInvoice.name]: MintInvoice
 }
 
 
