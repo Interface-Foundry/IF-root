@@ -48,7 +48,7 @@ const mapDispatchToProps = dispatch => ({
   fetchSearchItem: (item_id) => dispatch(fetchSearchItem(item_id)),
   fetchItemVariation: (option_asin, store, locale) => dispatch(fetchItemVariation(option_asin, store, locale)),
   getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page)),
-    replace: (loc) => dispatch(replace(loc))
+  replace: (loc) => dispatch(replace(loc))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Results);

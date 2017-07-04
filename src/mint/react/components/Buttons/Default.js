@@ -39,7 +39,7 @@ export default class Default extends Component {
       updateCart
     } = this.props,
       total = calculateItemTotal(cart.items);
-
+    
     return (
       <div className='default'>
         {
@@ -50,7 +50,7 @@ export default class Default extends Component {
             {
               cart.items.length === 0 ? 
                 <button className='yellow sub' disabled={true} > Checkout <span>{displayCost(total, cart.store_locale)} </span></button> : 
-                <button className='yellow sub' onClick={() => updateCart({ ...cart, locked: true })}> <a href={`/api/cart/${cart.id}/checkout`} target="_blank"> <Icon icon='Cart'/> <div className='text'>Checkout <span> {displayCost(total, cart.store_locale)} </span></div></a> </button> 
+                <button className='yellow sub' onClick={() => user.id === cart.leader.id ? updateCart({ ...cart, locked: true }) : null}> <a href={`/api/cart/${cart.id}/checkout`} target="_blank"> <Icon icon='Cart'/> <div className='text'><span> {displayCost(total, cart.store_locale)} </span> <p>Checkout</p> </div><Icon icon='RightChevron'/></a> </button> 
               }
             <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button>
           </span>
