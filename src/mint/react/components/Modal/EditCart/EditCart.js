@@ -88,47 +88,6 @@ class EditCart extends Component {
               <Icon icon='Edit'/> <span className='editText'>Edit</span>
             </div>
         }
-        {
-          editingDescrip 
-            ? (
-               <div className='cart-description__edit-wrapper'>
-                 <form 
-                  onSubmit={(e)=> _saveDescription(e) }
-                 >
-                  <input
-                    type='text'
-                    onChange={(e)=>_updateDescription(e)}
-                    placeholder='Enter a short description'
-                    value={editedDescrip} 
-                    autoFocus
-                  />
-                  <input 
-                    type='submit'
-                    disabled={editedDescrip.length > 140} 
-                    onMouseDown={(e)=> editedDescrip.length <= 140 ? _saveDescription(e) : null}
-                    value='Save'
-                  />
-                 </form>
-                 <p className={editedDescrip.length < 110 ? '' : editedDescrip.length > 140 ? 'red' : 'yellow' }>
-                    {editedDescrip.length}/140
-                 </p>
-               </div>
-              )
-            : (
-                cart.description || isAdmin ? (
-                  <div className={`cart-description__text is-admin`}>
-                     <p>  
-                        { cart.description || isAdmin ? <Icon icon='Chatbubble'/> : null }
-                        {
-                          cart.description 
-                          ? cart.description
-                          : <i>Edit Description</i> 
-                        }
-                    </p>  
-                  </div>
-                ) : null
-            )
-        }
         <div className='privacy'>
           <label> Privacy: </label>
           <select onChange={_updatePrivacy} value={cart.privacy}>

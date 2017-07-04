@@ -413,6 +413,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         width: 50%;
         z-index: 5;
 
+        @media only screen and (max-width: 600px) {
+          width: 100%;
+          left: 0;
+          top: 50px;
+        }
+
         p {
           display: table-cell;
           flex: 1 1 auto;
