@@ -42,8 +42,6 @@ export default class App extends Component {
       <div className='view'>
         { tab === 'cart' ? <Details {...props} /> : null }
         { Component ? <Component /> : null }
-        { tab === 'cart' ? <ButtonsContainer /> : null }
-        <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
       </div>
     );
   }

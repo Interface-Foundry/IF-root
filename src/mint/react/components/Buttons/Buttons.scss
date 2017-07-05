@@ -76,6 +76,11 @@
         display: block;
       }
 
+      svg {
+        height: $nav-height/2;
+        margin-bottom: 5px;
+      }
+
       span {
         line-height: $nav-height - $padding;
         font-weight: 600;

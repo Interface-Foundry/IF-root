@@ -24,6 +24,7 @@ const mapStateToProps = (state, ownProps) => {
     loading: state.app.loading,
     cart: state.cart.present,
     user: state.user,
+    tab: state.app.viewTab,
     cart_id: state.cart.present.id,
     sidenav: state.app.sidenav,
     query: state.search.query,
