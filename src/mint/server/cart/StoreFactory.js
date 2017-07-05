@@ -1,5 +1,6 @@
 const AmazonStore = require('./AmazonStore')
 const YPOStore = require('./YPOStore')
+const UrlStore = require('./UrlStore')
 
 // create all the amazon stores
 const stores = {};
@@ -9,6 +10,9 @@ const stores = {};
 
 // add the YPO store
 stores['YPO_GB'] = new YPOStore()
+
+// add our first test URL store
+stores['Muji_JP'] = new UrlStore()
 
 /**
  * [description]
