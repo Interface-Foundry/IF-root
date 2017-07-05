@@ -24,7 +24,6 @@
     @media only screen and (max-width: 600px) {
       font-size: 14px;
       white-space: inherit;
-      border-top: 1px solid #fff;
     }
 
     svg {
@@ -72,21 +71,31 @@
     &.yellow {
       background: $mainColor;
       line-height: $nav-height - $padding;
-
-      @media only screen and (max-width: 600px) {
-        line-height: ($nav-height - $padding) / 2;
-      }
-
+      padding: 0 $padding;
       a {
         display: block;
       }
 
+      svg {
+        height: $nav-height/2;
+        margin-bottom: 5px;
+      }
+
       span {
         line-height: $nav-height - $padding;
+        font-weight: 600;
+        
+      }
 
-        @media only screen and (max-width: 600px) {
-          display: block;
-          line-height: ($nav-height - $padding) / 3;
+      p {
+        display: inline-block;
+        margin-left: 25px;
+        font-size: 18px;
+      }
+
+      svg {
+        &:last-of-type {
+          display: none;
         }
       }
 

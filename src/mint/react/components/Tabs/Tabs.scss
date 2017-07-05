@@ -4,28 +4,37 @@
 @import '../../../react-common/styles/Animations';
 
 .tabs {
-  background: $color-blue;
+  background: white;
   border-bottom: 1px solid $border-color-light;
-  height: $nav-height / 1.7;
+  height: $nav-height - $padding;
   padding: 0 $padding;
   width: 100%;
+  z-index: 99;
 
   h1 {
-    color: $color-white;
+    color: #333;
     cursor: pointer;
     display: inline-block;
     font-size: 15px;
     padding: 0 ($padding * 2);
     position: relative;
+    height: $nav-height - $padding;
+    line-height: $nav-height - $padding;
+
+    svg {
+      display: inline-block;
+      margin-right: $padding/2;
+      padding: 0 0 $padding/4;
+    }
 
     span {
-      display: block;
+      display: inline-block;
     }
 
     &.selected {
       span {
-        border-bottom: 4px solid $color-white;
-        height: 24px;
+        border-bottom: 4px solid $secondaryColor;
+        height: $nav-height - $padding - 1px;
       }
     }
   }

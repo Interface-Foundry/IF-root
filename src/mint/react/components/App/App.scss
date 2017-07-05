@@ -1,6 +1,7 @@
 // react/components/App/App.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
+
 body, html {
   margin: 0;
   overflow: hidden; // Create a defined space in the window, if you want to scroll any elements you must explicitly declare in the css
@@ -10,20 +11,29 @@ body, html {
   background: $kip-primary-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+  text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
   font-family: $main-font;
+
+  @media only screen and (max-width: 600px) {
+    position: relative;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
   * {
     outline: none;
     box-sizing: border-box;
     vertical-align: top;
   }
+
   a {
     text-decoration: none;
     color: inherit;
   }
-  button {
-    cursor: pointer;
-  }
+}
+
+button {
+  cursor: pointer;
 }
 
 body {
@@ -33,26 +43,167 @@ body {
 @media only screen and (max-width: 600px) {
   table {
     overflow-x: auto;
+
     // display: block;
+
     td {
       width: 100%;
+
       // display: block;
+   
     }
   }
 }
 
 .app, #root {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: hidden;
+  position: relative;
   margin: auto;
   text-align: center;
   background: $kip-secondary-color;
   background-image: url('//storage.googleapis.com/kip-random/website/kip_scribble_pattern.png');
   background-size: 400px;
+
+  & > .tabs {
+    @media only screen and (max-width: 600px) {
+      display: none;
+    }
+  }
+
+  .noJudder {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+
+    & > .tabs {
+      position: fixed;
+      bottom: 0;
+      height: 40px;
+      background: white;
+      padding: 0;
+      -webkit-transform: translate3d(0, 0, 0);
+      transform : translate3d(0, 0, 0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background-color: rgb(249, 249, 249);
+      background-image: linear-gradient(rgb(179, 179, 179), rgb(179, 179, 179) 49%, transparent 51%);
+      background-position: center top;
+      background-size: 100% 0.1rem;
+      background-repeat: no-repeat;
+      @media only screen and (min-width: 600px) {
+        display: none;
+      }
+
+      h1 {
+        height: 40px;
+        line-height: 40px;
+        color: #8D8D8D;
+        width: calc(100%/3);
+        padding: 0;
+        text-align: center;
+
+        svg {
+          display: block;
+          height: 20px;
+          width: 40px;
+          margin: 5px auto 0;
+        }
+
+        &.selected {
+          color: $secondaryColor;
+        }
+
+        span {
+          border-bottom: 4px solid transparent !important;
+          height: 20px;
+          display: block;
+          font-size: 10px;
+          line-height: 10px;
+        }
+      }
+    }
+    
+    & > .buttons {
+      position: fixed;
+      width: 100%;
+      bottom: 40px;
+      left: 0;
+      padding: 0;
+      height: 40px;
+      z-index: 10;
+      -webkit-transform: translate3d(0, 0, 0);
+      transform : translate3d(0, 0, 0);
+      -webkit-overflow-scrolling: touch;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      @media only screen and (min-width: 600px) {
+        display: none;
+      }
+
+
+      button {
+        margin: 0 0;
+        width: 100%;
+        border-radius: 0;
+        padding: 0 $padding;
+
+        @media only screen and (max-width: 600px) {
+          &.sub {
+
+            a {
+              text-align: left;
+              height: 40px;
+              line-height: 40px;
+            }
+
+            svg {
+              height: 30px;
+              width: 30px;
+              margin-bottom: 5px;
+
+              &:last-of-type {
+                height: 20px;
+                width: 20px;
+                margin-left: 10px;
+                display: inline-block;
+              }
+            }
+
+            .text {
+              height: 40px;
+              width: 75%;
+              span {
+                display: inline-block;
+                height: 40px;
+                line-height: 40px;
+                font-weight: 200;
+                font-size: 16px;
+              }
+              p {
+                display: inline-block;
+                height: 40px;
+                line-height: 40px;
+                float: right;
+                font-size: 17px;
+                font-weight: 800;
+              }
+            }
+          }
+        }
+        
+        &.blue {
+          display: none;
+        }
+        &.locked {
+          background: $secondaryColor;
+          color: white;
+
+          svg {
+            fill: white;
+          }
+        }
+      }
+    }
+  }
 }
 
 .app__view {
@@ -60,16 +211,21 @@ body {
   width: 100%;
   overflow: hidden;
   overflow-y: scroll;
-  text-align: left;
   -webkit-overflow-scrolling: touch;
-  height: calc(100% - #{$nav-height * 1.5});
+  text-align: left;
+  height: calc(100% - 90px);
+
   @media only screen and (max-width: 600px) {
-    height: calc(100% - #{$nav-height * 1.5});
+    height: 100%;
+    overflow: initial;
+    -webkit-overflow-scrolling: none;
   }
+
   @media only screen and (min-width: 600px) {
     display: inline-block;
     overflow-y: auto;
-    height: calc(100% - #{$nav-height * 1.5});
+    height: calc(100% - 75px);
+
     &.squeeze {
       width: calc(100% - 250px);
     }
@@ -119,4 +275,3 @@ input, select:focus, textarea {
 body::-webkit-scrollbar {
   display: none;
 }
-

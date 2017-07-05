@@ -216,6 +216,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
     &.selected {
       padding: $padding ($padding / 2) ($padding / 3);
+      z-index: 1000;
 
       @media only screen and (max-width: 865px) {
         position: fixed;
@@ -225,7 +226,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: 0;
         margin: 0 !important;
         overflow-y: auto;
-        z-index: 100;
+        z-index: 1000;
       }
 
       .card {
@@ -240,8 +241,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           top: 0;
           left: 0;
           right: 0;
-          height: $nav-height / 2;
-          line-height: $nav-height / 2;
+          height: $nav-height - $padding;
+          line-height: $nav-height - $padding;
           background: $secondaryColor;
           color: white;
           text-align: center;
@@ -262,10 +263,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
         .close {
           position: absolute;
-          top: 5px;
-          left: 5px;
-          height: $nav-height / 3;
-          width: $nav-height / 3;
+          top: 10px;
+          left: 10px;
+          height: 20px;
+          width: 20px;
           padding: 0;
           border: 0;
           background: transparent;

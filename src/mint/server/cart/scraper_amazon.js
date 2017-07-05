@@ -184,7 +184,7 @@ var res2Item = function (res) {
     // create a new item
     try {
       var item = yield db.Items.create({
-        store: 'amazon',
+        store: 'Amazon',
         name: i.ItemAttributes.Title,
         asin: i.ASIN,
         description: getDescription(i),

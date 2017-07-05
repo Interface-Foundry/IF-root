@@ -47,7 +47,8 @@ export default class Details extends Component {
         icon: 'Like',
         value: likes.length
       }],
-      likedList = likes.map((user) => user.id);
+      likedList = likes.map((user) => user.id),
+      isAdmin = user.id === leader.id;
 
     return (
       <table className='details'>
@@ -66,21 +67,25 @@ export default class Details extends Component {
                           locked ? <div className='locked'>
                             <Icon icon='Locked'/>
                             {name}
-                          </div> : <Link to={`/cart/${id}/m/edit`}>
-                            {name}
-                            <Icon icon='Edit'/>
-                            <span>Edit</span>
-                          </Link>
+                          </div> : ( isAdmin ? <Link to={`/cart/${id}/m/edit`}>
+                              {name}
+                              <Icon icon='Edit'/>
+                            </Link> : <div className='locked'>
+                              {name}
+                            </div>
+                          )
                         }
                       </h1>
                       <CartDescription {...this.props} />
-                      <h4>{getStoreName(store, store_locale)}</h4>
-                      <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>
                     </div>
                   </div>
                   <div className='right'>
                     <ButtonsContainer/>
                   </div>
+                </div>
+                <div className='info'>
+                  <h4><span>{getStoreName(store, store_locale)}</span></h4>
+                  <h5>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></h5>     
                 </div>
                 <div className='metrics'>
                   {
@@ -114,7 +119,7 @@ export default class Details extends Component {
                   ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo.</button></p></div>
                   : null
                 }
-                <p>{numberOfItems(items)} items in cart <span className='updated'>❄ Updated {timeFromDate(updatedAt)}</span></p>
+                <p>{numberOfItems(items)} items in cart <span className='updated'>• Updated {timeFromDate(updatedAt)}</span></p>
               </nav>
             </td>
           </tr>

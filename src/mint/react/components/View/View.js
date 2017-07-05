@@ -2,8 +2,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { Route } from 'react-router';
 import Details from './Details';
-import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer } from '../../containers';
+import { ResultsContainer, ButtonsContainer, CartContainer, InvoiceContainer, TabsContainer } from '../../containers';
 
 export default class App extends Component {
 
@@ -41,7 +42,6 @@ export default class App extends Component {
       <div className='view'>
         { tab === 'cart' ? <Details {...props} /> : null }
         { Component ? <Component /> : null }
-        { tab === 'cart' ? <ButtonsContainer /> : null }
       </div>
     );
   }

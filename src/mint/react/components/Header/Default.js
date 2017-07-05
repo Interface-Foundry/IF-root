@@ -29,8 +29,11 @@ export default class Default extends Component {
       <span className='default'>
         <div className='header__left'>
           <Link to={`/cart/${cart.id}`}>
-            <div className={'image'} style={{
+            <div className={'image desktop'} style={{
               backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
+            }}/>
+            <div className={'image mobile'} style={{
+              backgroundImage: 'url(//storage.googleapis.com/kip-random/headtrans.png)'
             }}/>
           </Link>
           <SearchContainer />

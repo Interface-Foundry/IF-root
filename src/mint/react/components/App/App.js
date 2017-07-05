@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
-import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
+import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
 import { ErrorPage, Modal, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
@@ -29,6 +29,7 @@ export default class App extends Component {
     page: PropTypes.number,
     lazyLoading: PropTypes.bool,
     user: PropTypes.object,
+    tab: PropTypes.string,
     location: PropTypes.object,
     togglePopup: PropTypes.func,
     fetchMetrics: PropTypes.func,
@@ -84,7 +85,7 @@ export default class App extends Component {
         windowHeight = this.scroll.clientHeight;
 
       // animate scroll, needs height of the container, and its distance from the top
-      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
+      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading && query) {
         getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
       }
     }
@@ -113,10 +114,10 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate = (nextProps, nextState) => nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+  shouldComponentUpdate = (nextProps, nextState) => nextProps.tab !== this.props.tab || nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
-    const { sidenav, popup, togglePopup, match, toast, status, loading, history: { replace } } = this.props;
+    const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace } } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
@@ -130,8 +131,19 @@ export default class App extends Component {
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
           <Route path={'/m/*'} exact component={Modal} />
           <Route path={'/404'} exact component={ErrorPage} />
+
+
         </div>
         { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
+
+        {
+          // no jittery fix for mobile
+        }
+        <div className='noJudder'>
+          { tab === 'cart' ? <ButtonsContainer /> : null }
+          <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+        </div>
+        
       </section>
     );
   }

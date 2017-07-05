@@ -36,12 +36,33 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-top: 3px solid $secondaryColor;
       padding: 0;
 
-      &.locked {
-        border-top: 3px solid #555;
 
-        .cover {
-          background: #555;
-          color: white !important;
+      .info {
+        border-top: 2px solid #E4F1FD;
+        padding: $padding;
+        h4, h5 {
+          display: inline-block;
+          line-height: $nav-height/2;
+          margin: 0;
+          width: 50%;
+          b {
+            display: inline-block !important;
+          }
+          @media only screen and (max-width: 600px) {
+            font-size: 10px;
+          }
+        }
+        h5 {
+          text-align: right;
+          opacity: 0.3;
+          font-weight: 100;
+        }
+        h4 {
+          position: relative;
+          span {
+            border-bottom: 3px solid #4A9FF1;
+            display: initial;
+          }
         }
       }
 
@@ -58,8 +79,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         .image {
           border-radius: 5px;
           display: inline-block;
-          height: $nav-height;
-          width: $nav-height;
+          height: $nav-height*2;
+          width: $nav-height*2;
+
+          @media only screen and (max-width: 600px) {
+            height: $nav-height*2;
+            width: $nav-height*2;
+          }
         }
 
         .text {
@@ -67,15 +93,20 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           padding: 0 $padding;
           flex: 1 1 auto;
 
+          @media only screen and (max-width: 600px) {
+            width: calc(100% - #{$nav-height*2});
+          }
+
           .cart-description {
-            align-items: center;
-            display: flex;
-            flex: 1 1 auto;
+            display: block;
             min-height: 50px;
             padding: 5px 0;
+            max-width: 400px;
+            svg {
+              display: inline-block;
+            }
 
             .cart-description__edit-wrapper {
-              flex-wrap: wrap;
               margin: 0 0 0 10px;
               position: relative;
               flex: 1 1 auto;
@@ -128,9 +159,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
             .cart-description__text {
               color: rgba(#333, 0.5);
-              padding: 0 10px;
-              display: flex;
-              align-items: center;
+              padding: 0;
 
               span {
                 display: flex;
@@ -164,7 +193,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               }
 
               svg {
-                margin: 0 5px;
+                margin: 0 5px 0 0;
               }
             }
           }
@@ -333,6 +362,23 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           }
         }
       }
+
+      &.locked {
+        border-top: 3px solid #555;
+
+        .cover {
+          background: #555;
+          color: white;
+        }
+
+        .text {
+          .cart-description {
+            .cart-description__text {
+              color: white; // :shrug:
+            }
+          }
+        }
+      }
     }
   }
 
@@ -366,6 +412,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         top: 90px;
         width: 50%;
         z-index: 5;
+
+        @media only screen and (max-width: 600px) {
+          width: 100%;
+          left: 0;
+          top: 50px;
+        }
 
         p {
           display: table-cell;

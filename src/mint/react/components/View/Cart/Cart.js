@@ -36,7 +36,7 @@ export default class Cart extends Component {
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                   <h1 className='date'> <span>  </span> </h1>
                   <h4>
-                    <span className='grey'>{numberOfItems(myCart)} items ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>
+                    <span className='grey'>{numberOfItems(myCart)} items • Updated {timeFromDate(myCart[0].updatedAt)}</span>
                   </h4>
                   <h4>
                   <z>
@@ -93,7 +93,7 @@ export default class Cart extends Component {
                     <h1 className='date'> <span> </span> </h1>
                     <h4>
                       <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
-                      <span className='grey'>({numberOfItems(userCart.items)} items) ❄ Updated {timeFromDate(userCart.updatedAt)}</span>
+                      <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
                     </h4>
                     <ul>
                       {

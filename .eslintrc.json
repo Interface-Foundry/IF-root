@@ -21,7 +21,8 @@
   "globals": {
     "kip": true,
     "db": true,
-    "React": true
+    "React": true,
+    "logging": true
   },
   "rules": {
     "no-debugger": 1,

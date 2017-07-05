@@ -14,6 +14,7 @@ import Reducers from './reducers';
 import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
 import { AppContainer } from './containers';
 
+console.log(module.hot)
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }

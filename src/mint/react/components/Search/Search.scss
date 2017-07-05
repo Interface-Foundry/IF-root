@@ -1,18 +1,22 @@
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
+
 .search {
   position: relative;
   display: inline-block;
   width: 100%;
   max-width: 600px;
   margin: 10px 0 10px 30px;
-  height: 34px;
-  * {
+  height: 30px;
+
+  & > * {
     height: 100%;
   }
+
   &:focus {
     background-color: #000;
   }
+
   input {
     width: calc(100% - #{$nav-height});
     border: 0;
@@ -21,52 +25,65 @@
     -webkit-appearance: none;
     border-radius: 0;
   }
+
   button {
     background: white;
-    width: $nav-height/2;
+    width: $nav-height / 2;
     border: 0;
     border-radius: 5px 0 0 5px;
-    padding: 0 0 0 $padding/2;
+    padding: 0 0 0 ($padding / 2);
+
     svg {
       width: 100%;
+      height: 100%;
       fill: $secondaryColor;
     }
+
     &.cancel {
       color: $secondaryColor;
       border-radius: 0 5px 5px 0;
       padding: 0 $padding 0 0;
     }
+
     &:disabled {
       svg {
         fill: white !important;
       }
     }
   }
+
   .history {
     position: absolute;
     overflow: auto;
     height: auto;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     left: 0;
     top: 27px;
     z-index: 100;
     box-shadow: $card-box-shadow;
+
     ul {
       max-height: 200px;
       overflow: auto;
+      background: white;
+      line-height: 1em;
+
       &.categories {
+        background: darken(white, 2%);
+
         & > span {
           display: block;
-          background: darken(white, 2%);;
           font-size: 10px;
           color: #333;
           padding: 0 $padding;
           border-top: 1px solid $border-color-light;
-          height: $padding*2;
-          line-height: $padding*2;
+          height: $padding * 2;
         }
+
         .history__term {
           background: darken(white, 2%);
         }
@@ -74,33 +91,37 @@
 
       .history__term {
         border-top: 0;
-        background: white;
-        line-height: 30px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
         color: black;
         cursor: pointer;
+        height: 30px;
+        * {
+          overflow-y: hidden;
+        }
         &.selected, &:hover {
           background: darken(white, 10%);
         }
+
         .history__term-icon {
           display: inline-block;
           width: $nav-height;
-          line-height: 30px;
           padding: 0 $padding;
         }
+
         .history__term-query {
           display: inline-block;
           width: calc(100% - #{$nav-height});
           text-align: left;
           padding: 0;
-          line-height: 30px;
+
           p {
             font-size: 13px;
-            line-height: 30px;
+            overflow: hidden;
           }
         }
       }
     }
   }
 }
-
-
