@@ -90,7 +90,7 @@ class Cart {
     if (quantity === undefined) {
       quantity = 1
     }
-    item = await this.store.addItem(item, )
+    item = await this.store.addItem(item, quantity)
     return item;
   }
 
