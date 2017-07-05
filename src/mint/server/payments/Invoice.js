@@ -21,7 +21,7 @@ class Invoice {
    * @return     {Promise}  The invoice db object into class object
    */
   static async GetById (invoiceId) {
-    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
     if (!invoice) {
       throw new Error('no invoice found')
     }
@@ -38,7 +38,7 @@ class Invoice {
    * @return     {Promise}  the invoices
    */
   static async GetByCartId (cartId) {
-    const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart').populate('members')
+    const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
     return invoice
   }
 
@@ -71,7 +71,7 @@ class Invoice {
   static async optionUpdate(invoiceId, option, optionData) {
     let invoice
     try {
-      invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+      invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
     } catch (err) {
       logging.error('error updating invoice, invoice does not exist probably', err)
       return
@@ -113,12 +113,8 @@ class Invoice {
       split_type: this.split_type
     })
 
-    cart.members.map(function (m) {
-      newInvoice.members.add(m.id)
-    })
-
     await newInvoice.save()
-    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader').populate('members')
+    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
 
     return invoice
   }

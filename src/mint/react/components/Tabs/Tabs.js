@@ -5,6 +5,15 @@ import React, { Component } from 'react';
 import { numberOfItems } from '../../utils';
 import { AlertBubble } from '../../../react-common/components';
 
+function addInvoiceTab(tabs) {
+  if (process.env.NODE_ENV === 'development') {
+    tabs.push({
+      tab: 'invoice',
+      display: 'Invoice'
+    });
+  }
+}
+
 export default class Tabs extends Component {
 
   static propTypes = {
@@ -29,10 +38,8 @@ export default class Tabs extends Component {
       tab: 'search',
       url: `/cart/${id}?q=${query}`,
       display: 'Search'
-    }, {
-      tab: 'invoice',
-      display: 'Invoice'
     }];
+    addInvoiceTab(tabs);
     this.setState({ tabs });
   }
 
@@ -48,10 +55,8 @@ export default class Tabs extends Component {
         tab: 'search',
         url: `/cart/${id}?q=${query}`,
         display: 'Search'
-      }, {
-        tab: 'invoice',
-        display: 'Invoice'
       }];
+    addInvoiceTab(tabs);
     this.setState({ tabs });
   }
 
@@ -66,31 +71,10 @@ export default class Tabs extends Component {
               {t.showBubble ? <AlertBubble  right={4} top={-6} /> : null}
               <span>{t.display}</span>
             </h1>
-            
+
           ))
         }
       </div>
     );
   }
 }
-
-// const tabs = kip_pay_allowed ? [{
-//   tab: 'cart',
-//   url: `/cart/${id}`,
-//   display: `Cart (${numberOfItems(items)})`
-// }, {
-//   tab: 'search',
-//   url: `/cart/${id}?q=${query}`,
-//   display: 'Search'
-// }, {
-//   tab: 'invoice',
-//   display: 'Invoice'
-// }] : [{
-//   tab: 'cart',
-//   url: `/cart/${id}`,
-//   display: `Cart (${numberOfItems(items)})`
-// }, {
-//   tab: 'search',
-//   url: `/cart/${id}?q=${query}`,
-//   display: 'Search'
-// }];

@@ -47,14 +47,13 @@ class PaymentSource {
    * @return     {Promise}  { description_of_the_return_value }
    */
   static async GetPaymentStatus(userId, invoiceId) {
-    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
     const paymentsOnThisInvoice = await db.Payments.findOne({user: userId, invoice: invoice.id})
 
     // object to return
     const paymentStatus = {
       paid: false,
-      amount: 0,
-      items: []
+      amount: 0
     }
 
     // check if user has already paid
@@ -64,9 +63,6 @@ class PaymentSource {
       return paymentStatus
     }
 
-    // ~~~~ NEED TO FIX invoice.members to be right
-    //
-    // const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members')
     const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
     logging.info('got debts', debts)
     paymentStatus.amount = debts[userId]

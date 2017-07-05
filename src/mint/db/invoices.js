@@ -47,11 +47,6 @@ const invoiceCollection = Waterline.Collection.extend({
     // cart: Waterline.isA('cart'),
     cart: Waterline.isA('carts'),
 
-    /**
-     * which members are part of the cart
-     */
-    members: Waterline.isMany('user_accounts'),
-
     /** Many-to-one relation with user accounts, so multiple users could pay */
     // payments: Waterline.isMany('payments'),
 
@@ -60,8 +55,7 @@ const invoiceCollection = Waterline.Collection.extend({
 
     /** total of order */
     total: {
-      type: 'float',
-      defaultsTo: 10000 //just doing this b/c i dont want to fix cart sync stuff atm. use 100.00 USD as baseline for testing
+      type: 'float'
     },
 
     /**
