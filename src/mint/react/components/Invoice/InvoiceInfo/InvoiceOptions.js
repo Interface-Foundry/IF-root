@@ -2,6 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+// import PaymentTypes from './PaymentTypes';
 
 const addressDummy = [
     {
@@ -30,34 +31,46 @@ const addressDummy = [
     }
 ];
 
-export default class Shipping extends Component {
+const paymentTypes = [{
+  type: 'split_single',
+  text: 'admin pay for all'
+}, {
+  type: 'split_equal',
+  text: 'split equally amongst the people of kip!'
+}, {
+  type: 'split_by_item',
+  text: 'split by item'
+}];
+
+export default class InvoiceOptions extends Component {
 
     state = {
-        selectedIndex: null
+        selectedIndex: null,
+        selectedType: null
     }
 
     render() {
-      	const { selectedAccordion, selectAccordion } = this.props,
-                { selectedIndex } = this.state;
+        const { selectedAccordion, selectAccordion, invoice, updateInvoice } = this.props,
+                { selectedIndex, selectedType } = this.state;
 
         return (
-        	<div className='shipping accordion'>
-        		<nav onClick={() => selectAccordion('shipping')}>
-        			<h3>1. Shipping address</h3>
+          <div className='shipping accordion'>
+            <nav onClick={() => selectAccordion('shipping')}>
+              <h3>Edit Info for Order</h3>
                 {
-                  selectedIndex !== null && !selectedAccordion.includes('shipping') ? <div className='text'> 
+                  selectedIndex !== null && !selectedAccordion.includes('shipping') ? <div className='text'>
                       <p>{addressDummy[selectedIndex].name}</p>
                       <p>{addressDummy[selectedIndex].streetAddress}</p>
                       <p>{addressDummy[selectedIndex].city}, {addressDummy[selectedIndex].state}, {addressDummy[selectedIndex].zip}</p>
                       <span>change</span>
                   </div> : null
                 }
-        		</nav>
-        		{
-        			selectedAccordion.includes('shipping') ? <div> 
-        				<nav>
-        					<h4>Your addresses</h4>
-        				</nav>
+            </nav>
+            {
+              selectedAccordion.includes('shipping') ? <div>
+                <nav>
+                  <h4>select/edit/remove your address</h4>
+                </nav>
                   <ul>
                       {
                           addressDummy.map((address, i) => (
@@ -67,15 +80,37 @@ export default class Shipping extends Component {
                                       <h4>{address.name}</h4>
                                       <p>{address.streetAddress}, {address.city}, {address.state}, {address.zip}, {address.country}</p>
                                       <span>edit</span>
+                                      <span>delete</span>
                                   </div>
                               </li>
                           ))
                       }
                   </ul>
                   <button onClick={() => selectAccordion('shipping form')}>+ add address</button>
-    	    		</div> : null
-        		}
-        	</div>
-        );
+
+                  <div>
+      <nav>
+        <h4>Payment Type</h4>
+      </nav>
+      <ul>
+        {
+          paymentTypes.map((paymentType, i) => (
+            <li key={i} className={selectedType === i ? 'selected' : ''} onClick={() => {
+              this.setState({selectedType: i});
+              updateInvoice(invoice.id, 'split_type', paymentType.type);
+            }}>
+            <div className='circle'/>
+            <div className='text'>
+              <h4>{paymentType.text}</h4>
+            </div>
+            </li>
+          ))
+        }
+      </ul>
+      </div>
+     </div> : null
     }
+    </div>
+    );
+  }
 }

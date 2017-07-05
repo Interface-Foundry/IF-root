@@ -4,10 +4,9 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Payment from './Payment';
-import Shipping from './Shipping';
+import InvoiceInfo from './InvoiceInfo';
 import CartReview from './CartReview';
 import Forms from './Forms';
-import InvoiceInfo from './InvoiceInfo';
 
 export default class Invoice extends Component {
   static propTypes = {
@@ -28,7 +27,6 @@ export default class Invoice extends Component {
       <div className='invoice'>
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
         <InvoiceInfo {...this.props}/>
-        <Shipping {...this.props}/>
         <Payment {...this.props}/>
         <CartReview {...this.props}/>
       </div>

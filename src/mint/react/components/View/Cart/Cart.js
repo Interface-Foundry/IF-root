@@ -44,7 +44,7 @@ export default class Cart extends Component {
                     Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
                   </z>
                   </h4>
-                  <ItemPaidButton {...this.props}/>
+                  { isLeader ? <ItemPaidButton {...this.props}/> : null }
                   <ul>
                     {
                       myCart.map((item) => {
@@ -97,6 +97,7 @@ export default class Cart extends Component {
                       <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
                       <span className='grey'>({numberOfItems(userCart.items)} items) ❄ Updated {timeFromDate(userCart.updatedAt)}</span>
                     </h4>
+                    { !isLeader ? <ItemPaidButton {...this.props}/> : null }
                     <ul>
                       {
                         userCart.items.map((item) => (

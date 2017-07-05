@@ -4,8 +4,19 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Stripe from './Stripe';
 import PaymentSources from './PaymentSources';
-import PaymentTypes from './PaymentTypes';
 
+
+// deciding a split type seems almost political/philosophical
+const splitTypes = [{
+  type: 'split_single',
+  text: 'single payer'
+}, {
+  type: 'split_equal',
+  text: 'split equally amongst the people of kip!'
+}, {
+  type: 'split_by_item',
+  text: 'split by item'
+}]
 
 export default class Payment extends Component {
 
@@ -19,24 +30,6 @@ export default class Payment extends Component {
         </nav>
         {
           selectedAccordion.includes('payment') ? <div>
-            <nav>
-              <h3> create payment objects </h3>
-            </nav>
-              <div>
-                <button onClick={()=> createPayments(invoice.id)}>create payments for users</button>
-              </div>
-            <nav>
-              <h3>update the invoice</h3>
-            </nav>
-              <div>
-                <button onClick={()=> updateInvoice(invoice.id, 'split_type', 'split_single')}>single payer</button>
-              </div>
-              <div>
-                <button onClick={()=> updateInvoice(invoice.id, 'split_type', 'split_equal')}>split equally</button>
-              </div>
-              <div>
-                <button onClick={()=> updateInvoice(invoice.id, 'split_type', 'split_by_item')}>split by item</button>
-              </div>
             <nav>
               <h4>Your credit and debit cards</h4>
             </nav>

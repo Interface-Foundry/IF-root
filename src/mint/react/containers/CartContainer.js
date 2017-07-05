@@ -4,7 +4,19 @@ import { connect } from 'react-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Cart } from '../components';
-import { submitQuery, editItem, removeItem, copyItem, updateItem, togglePopup, fetchItem, selectCartItem } from '../actions';
+import {
+  submitQuery,
+  editItem,
+  removeItem,
+  copyItem,
+  updateItem,
+  togglePopup,
+  fetchItem,
+  selectCartItem,
+  selectTab,
+  selectAccordion
+} from '../actions';
+
 import { isUrl, addSearchHistory } from '../utils';
 
 const ONE_SECOND = 1000;
@@ -19,6 +31,8 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+  selectTab: (tab) => dispatch(selectTab(tab)),
+  selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   selectCartItem: item_id => dispatch(selectCartItem(item_id)),
   editItem: item_id => dispatch(editItem(item_id)),
   removeItem: (cart_id, item_id) => {
@@ -33,6 +47,7 @@ const mapDispatchToProps = dispatch => ({
   },
   copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id)),
   fetchItem: (item_id) => dispatch(fetchItem(item_id)),
+
   updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues))
 });
 
