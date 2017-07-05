@@ -14,7 +14,7 @@ var FacebookStrategy = require('passport-facebook').Strategy
 passport.use(new FacebookStrategy({
   clientID: 855809247908300,
   clientSecret: '9d0d946d5096bde7395d7e6256399a4c',
-  callbackURL: 'https://8983319f.ngrok.io/api/auth/facebook/callback',
+  callbackURL: (process.env.NODE_ENV === 'production' ? 'http://kipthis.com' : 'https://8983319f.ngrok.io') + '/api/auth/facebook/callback',
   profileFields: ['name', 'email']
 }, async function (accessToken, refreshToken, profile, done) {
   //create an account for our facebook user if one does not already exist
@@ -209,9 +209,6 @@ module.exports = function (router) {
    * have been authenticated by facebook
    */
   router.get('/facebook/login', (req, res) => co(function * () {
-    logging.info('UserSession', req.UserSession)
-    logging.info('session', req.session)
-
     var emails = _.get(req, 'user.emails')
     if (!emails) throw new Error('no email address associated with this user')
     var email = emails[0].value

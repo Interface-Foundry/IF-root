@@ -392,7 +392,6 @@ class AmazonStore extends Store {
     if (cart.items.length === 0 || !cart.items[0].asin) {
       throw new Error('can only sync carts that have amazon items, and items must be populated')
     }
-
     // to sync with amazon, we create a totally new cart
     const cartAddAmazonParams = createAmazonCartWithItems(cart.items);
     cartAddAmazonParams.AssociateTag = this.credentials.assocId
@@ -427,8 +426,10 @@ class AmazonStore extends Store {
       return res.redirect(cart.affiliate_checkout_url)
     } else {
       // make sure the amazon cart is in sync with the cart in our database
-      var amazonCart = await this.sync(cart)
+      const amazonCart = await this.sync(cart)
+      await this.updateCart(cart.id, amazonCart)
       // redirect to the cart url
+      cart = await db.Carts.findOne({id: cart.id})
       return res.redirect(cart.affiliate_checkout_url)
     }
   }
