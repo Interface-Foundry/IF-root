@@ -11,6 +11,7 @@ const fs = require('fs'),
   _ = require('lodash'),
   co = require('co'),
   auth = require('basic-auth');
+  passport = require('passport')
 
 // start any jobs
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
@@ -77,7 +78,6 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-
 /**
  * Creates a cookie-based session for the client
  */
@@ -125,8 +125,13 @@ if (process.env.LOGGING_MODE === 'database') {
 
     next()
   })
-
 }
+
+/**
+ * Initialize passport.js
+ */
+app.use(passport.initialize())
+app.use(passport.session())
 
 //
 // Back end routes

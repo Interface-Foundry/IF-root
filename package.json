@@ -71,6 +71,8 @@
     "nodemailer-sendgrid-transport": "^0.2.0",
     "parse-address": "0.0.6",
     "parse-reply": "0.0.4",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.1",
     "phone": "^1.0.8",
     "prerender-node": "^2.1.0",
     "promisify-global": "^1.0.0",

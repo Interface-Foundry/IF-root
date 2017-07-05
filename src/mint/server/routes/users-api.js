@@ -2,10 +2,38 @@ const co = require('co')
 const _ = require('lodash')
 const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
+const fbConstants = require('../facebookConstants')
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+var passport = require('passport')
+var FacebookStrategy = require('passport-facebook').Strategy
+
+passport.use(new FacebookStrategy({
+  clientID: fbConstants.clientID,
+  clientSecret: fbConstants.clientSecret,
+  callbackURL: fbConstants.baseUrl + '/api/auth/facebook/callback',
+  profileFields: ['name', 'email']
+}, async function (accessToken, refreshToken, profile, done) {
+  //create an account for our facebook user if one does not already exist
+  var email = profile.emails[0].value
+  var name = profile.name.givenName + ' ' + profile.name.familyName
+  logging.info('email', email)
+  var account = await db.UserAccounts.findOne({email_address: email})
+  if (!account) {
+    logging.info('creating new user account for ' + email)
+    await db.UserAccounts.create({
+      email_address: email,
+      name: name
+    })
+  }
+  done(null, profile)
+}))
+
+passport.serializeUser((user, done) => done(null, user))
+passport.deserializeUser((id, done) => done(null, id))
 
 /**
  * turn email into user name - into a function so that it could be used
@@ -141,6 +169,59 @@ module.exports = function (router) {
         status: 'Sent authentication link to ' + email
       })
     }
+  }))
+
+  /**
+   * @api {get} /api/auth/facebook
+   * @apiGroup Users
+   * @apiDescription - courtesy of http://passportjs.org/docs/facebook
+   * Redirect the user to Facebook for authentication.  When complete,
+   * Facebook will redirect the user back to the application
+   */
+
+  router.get('/auth/facebook', passport.authenticate('facebook', {
+    scope: ['email'],
+    successRedirect: '/',
+    failureRedirect: '/'
+  }))
+
+  /**
+   * @api {get} /api/facebook/auth/callback
+   * @apiGroup Users
+   * @apiDescription - from http://passportjs.org/docs/facebook
+   * Facebook will redirect the user to this URL after approval.  Finish the
+   * authentication process by attempting to obtain an access token.  If
+   * access was granted, the user will be logged in.  Otherwise,
+   * authentication has failed.
+   */
+  router.get('/auth/facebook/callback',
+    passport.authenticate('facebook', {
+      successRedirect: '/api/facebook/login',
+      failureRedirect: '/failure',
+      scope: ['email']
+    })
+  )
+
+  /**
+   * @api {get} /api/facebook/login
+   * @apiGroup Users
+   * @apiDescription - logs the user in via the session, once they
+   * have been authenticated by facebook
+   */
+  router.get('/facebook/login', (req, res) => co(function * () {
+    var emails = _.get(req, 'user.emails')
+    if (!emails) throw new Error('no email address associated with this user')
+    var email = emails[0].value
+    logging.info(email)
+    // query for user id based on passport session info
+    var user = yield db.UserAccounts.findOne({email_address: email})
+    // add it to the UserSession
+    var dbSession = yield db.Sessions.findOne({id: req.session.id})
+    dbSession.user_account = user.id
+    yield dbSession.save()
+    req.UserSession = yield db.Sessions.findOne({id: req.session.id}).populate('user_account')
+    // we're done; redirect to somewhere
+    res.redirect('/newcart')
   }))
 
   /**
@@ -407,7 +488,7 @@ module.exports = function (router) {
       throw new Error('Unauthorized')
     }
     var currentUser = req.UserSession.user_account
-  
+
     // Find the user in the database
     var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
 
