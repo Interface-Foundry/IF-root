@@ -2,6 +2,7 @@ const co = require('co')
 const _ = require('lodash')
 const randomstring = require('randomstring')
 const dealsDb = require('../deals/deals')
+const fbConstants = require('../facebookConstants')
 
 var db
 const dbReady = require('../../db')
@@ -202,7 +203,10 @@ module.exports = function (router) {
   )
 
   /**
-   *
+   * @api {get} /api/facebook/login
+   * @apiGroup Users
+   * @apiDescription - logs the user in via the session, once they
+   * have been authenticated by facebook
    */
   router.get('/facebook/login', (req, res) => co(function * () {
     logging.info('UserSession', req.UserSession)
@@ -218,6 +222,7 @@ module.exports = function (router) {
     var dbSession = yield db.Sessions.findOne({id: req.session.id})
     dbSession.user_account = user.id
     yield dbSession.save()
+    req.UserSession = yield db.Sessions.findOne({id: req.session.id}).populate('user_account')
     // we're done; redirect to somewhere
     res.redirect('/newcart')
   }))
