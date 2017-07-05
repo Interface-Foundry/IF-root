@@ -15,8 +15,11 @@
   z-index: 100;
 
 
-  @media (min-width: 900px) {
+  @media (max-width: 600px) {
     padding: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
   }
 
   .search {

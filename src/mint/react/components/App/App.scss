@@ -14,6 +14,12 @@ body, html {
   text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
   font-family: $main-font;
 
+  @media only screen and (max-width: 600px) {
+    position: relative;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
   * {
     outline: none;
     box-sizing: border-box;
@@ -50,12 +56,7 @@ body {
 }
 
 .app, #root {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: hidden;
+  position: relative;
   margin: auto;
   text-align: center;
   background: $kip-secondary-color;
@@ -69,6 +70,9 @@ body {
   }
 
   .noJudder {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 
     & > .tabs {
       position: fixed;
@@ -207,12 +211,14 @@ body {
   width: 100%;
   overflow: hidden;
   overflow-y: scroll;
-  text-align: left;
   -webkit-overflow-scrolling: touch;
+  text-align: left;
   height: calc(100% - 90px);
 
   @media only screen and (max-width: 600px) {
-    height: calc(100% - 90px);
+    height: 100%;
+    overflow: initial;
+    -webkit-overflow-scrolling: none;
   }
 
   @media only screen and (min-width: 600px) {

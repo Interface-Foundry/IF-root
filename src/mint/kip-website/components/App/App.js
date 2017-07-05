@@ -18,13 +18,13 @@ export default class App extends Component {
 
   componentDidMount() {
     const { _handleScroll } = this;
-    ReactDOM.findDOMNode(this.scroll)
+    window
       .addEventListener('scroll', _handleScroll);
   }
 
   componentWillUnmount() {
     const { _handleScroll } = this;
-    ReactDOM.findDOMNode(this.scroll)
+    window
       .removeEventListener('scroll', _handleScroll);
   }
 
@@ -42,7 +42,7 @@ export default class App extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.scrollTo !== this.props.scrollTo) {
-      ReactDOM.findDOMNode(this.scroll)
+      window
         .scrollTop = nextProps.scrollTo;
     }
   }
@@ -52,6 +52,7 @@ export default class App extends Component {
       .scrollTop,
       { fixed, animationState, animationOffset, containerHeight, handleScroll } = this.props;
 
+    console.log('inside scroll')
     // animate scroll, needs height of the container, and its distance from the top
     handleScroll(containerHeight, animationOffset, scrollTop, animationState, fixed);
   }
