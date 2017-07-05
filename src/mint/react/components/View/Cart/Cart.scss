@@ -29,8 +29,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     text-align: right;
 
     button {
-      border: 0;
-      background: white;
+      background: #e3e3e3;
+      border-radius: 5px;
       border: 0;
       padding: 0 ($padding * 1.5);
       height: 25px;
@@ -38,13 +38,17 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       color: #333;
       font-size: 14px;
       opacity: 0.6;
+      margin-right: 10px;
 
       &:last-of-type {
         border-right: 1px solid transparent;
+        margin-right: 0;
+
       }
 
       &.info {
-        color: $secondaryColor;
+        background: $secondaryColor;
+        color: white;
         font-weight: bold;
         opacity: 1;
       }
@@ -104,9 +108,19 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         position: relative;
         padding: $padding ($padding * 2);
         background: white;
+        &:first-of-type {
+          @media only screen and (max-width: 600px) {
+            padding: 0;
+          }
+        }
+
+        &:last-of-type {
+          border-bottom: 0;
+        }
 
         @media only screen and (max-width: 600px) {
-          padding: ($padding / 2) 0;
+          padding: $padding*2 0 0;
+          border-bottom: 2px solid #E4F1FD;
         }
 
         &.edit {
@@ -117,6 +131,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           width: $nav-height * 2;
           height: $nav-height * 2;
           display: inline-block;
+          @media only screen and (max-width: 600px) {
+            width: 50%;
+            min-height: 150px;
+          }
         }
 
         .extra {
@@ -148,14 +166,32 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               color: $secondaryColor;
               padding: $padding 0;
               font-size: 12px;
+              @media only screen and (max-width: 600px) {
+                display: none;
+              }
             }
           }
         }
 
         .text {
           display: inline-block;
-          padding: 0 $padding;
+          padding: 0 0 0 $padding;
           width: calc(100% - #{$nav-height * 2});
+          @media only screen and (max-width: 600px) {
+            width: 50%;
+          }
+
+          & > span {
+            display: none;
+            @media only screen and (max-width: 600px) {
+              color: $secondaryColor;
+              padding: 0;
+              height: 10px;
+              line-height: 10px;
+              display: block;
+              font-size: 10px;
+            }
+          }
 
           .update {
             display: flex;
@@ -164,6 +200,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             justify-content: flex-start;
             align-items: stretch;
             margin: $padding/2 0 0 0;
+
+            @media only screen and (max-width: 600px) {
+              height: 30px;
+              line-height: 30px;
+            }
 
             * {
               text-align: center;
@@ -203,6 +244,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             font-size: 14px;
             line-height: 20px;
             height: 45px;
+
+            @media only screen and (max-width: 600px) {
+              height: 80px;
+            }
 
             &:after {
               content: '';
