@@ -45,12 +45,12 @@ export default class App extends Component {
   componentDidMount() {
     const { _handleScroll, _logPageView } = this;
     _logPageView();
-    this.scroll.addEventListener('scroll', _handleScroll);
+    document.body.addEventListener('scroll', _handleScroll);
   }
 
   componentWillUnmount() {
     const { _handleScroll } = this;
-    this.scroll.removeEventListener('scroll', _handleScroll);
+    document.body.removeEventListener('scroll', _handleScroll);
   }
 
   _handeKeyPress({ keyCode }) {
@@ -78,6 +78,7 @@ export default class App extends Component {
   _handleScroll() {
     const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
+    console.log('scroll');
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
     if (search) {
       const scrollTop = this.scroll.scrollTop,

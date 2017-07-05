@@ -66,6 +66,11 @@ export function getSiteState(loc = '') {
   };
 }
 
+export const checkSession = () => get(
+  '/api/session',
+  'SESSION'
+);
+
 export function validateCode(email, code) {
   return async dispatch => {
     try {
