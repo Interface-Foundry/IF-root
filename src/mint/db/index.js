@@ -38,6 +38,7 @@ waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./payments'))
 waterline.loadCollection(require('./payment_sources'))
+waterline.loadCollection(require('./raw_html'))
 waterline.loadCollection(require('./reactions'))
 waterline.loadCollection(require('./sessions'))
 waterline.loadCollection(require('./user_accounts'))
@@ -81,6 +82,7 @@ var initialize = new Promise((resolve, reject) => {
       Items: ontology.collections.items,
       Payments: ontology.collections.payments,
       PaymentSources: ontology.collections.payment_sources,
+      RawHtml: ontology.collections.raw_html,
       Reactions: ontology.collections.reactions,
       Sessions: ontology.collections.sessions,
       UserAccounts: ontology.collections.user_accounts,
