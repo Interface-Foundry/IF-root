@@ -8,7 +8,9 @@ body, html {
   height: 100%;
   position: fixed;
   width: 100%;
-  background: $kip-primary-color;
+  background: $kip-secondary-color;
+  background-image: url('//storage.googleapis.com/kip-random/website/kip_scribble_pattern.png');
+  background-size: 400px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
@@ -16,7 +18,7 @@ body, html {
 
   @media only screen and (max-width: 600px) {
     position: relative;
-    overflow-y: scroll;
+    overflow: visible;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -34,10 +36,6 @@ body, html {
 
 button {
   cursor: pointer;
-}
-
-body {
-  background: $kip-secondary-color;
 }
 
 @media only screen and (max-width: 600px) {
@@ -59,9 +57,7 @@ body {
   position: relative;
   margin: auto;
   text-align: center;
-  background: $kip-secondary-color;
-  background-image: url('//storage.googleapis.com/kip-random/website/kip_scribble_pattern.png');
-  background-size: 400px;
+  height: 100%;
 
   & > .tabs {
     @media only screen and (max-width: 600px) {
@@ -219,12 +215,12 @@ body {
     height: 100%;
     overflow: initial;
     -webkit-overflow-scrolling: none;
+    padding: $nav-height 0 80px;
   }
 
   @media only screen and (min-width: 600px) {
     display: inline-block;
     overflow-y: auto;
-    height: calc(100% - 75px);
 
     &.squeeze {
       width: calc(100% - 250px);

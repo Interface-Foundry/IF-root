@@ -39,7 +39,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       background: $secondaryColor;
       padding: ($padding / 2) $padding;
       border-radius: $padding / 2;
-      margin-top: -13px;
+      margin-top: -15px;
+      margin-bottom: 10px;
+      @media only screen and (max-width: 600px) {
+        right: 10px;
+      }
     }
   }
 

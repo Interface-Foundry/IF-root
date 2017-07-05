@@ -66,7 +66,7 @@ export default class Input extends Component {
 
   render() {
     const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
-    console.log(showHistory);
+    
     return (
       <form onSubmit={::this._handleSubmit} className='search'>
         <button type='submit' className='submit'>

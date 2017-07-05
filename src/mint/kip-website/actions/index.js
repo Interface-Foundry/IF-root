@@ -13,6 +13,7 @@ export {
   get,
   logout,
   getSiteState,
-  scrollToPosition
+  scrollToPosition,
+  checkSession
 }
 from './async';

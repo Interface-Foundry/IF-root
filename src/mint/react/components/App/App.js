@@ -42,15 +42,30 @@ export default class App extends Component {
     getMoreSearchResults: PropTypes.func
   }
 
+  _logPageView(path, userId) {
+    ReactGA.set({ userId });
+    ReactGA.event({
+      category: 'User',
+      action: 'Initial Load'
+    });
+  }
+
   componentDidMount() {
     const { _handleScroll, _logPageView } = this;
     _logPageView();
-    this.scroll.addEventListener('scroll', _handleScroll);
+
+    if(document.body.clientWidth > 600 ) {
+      console.log('componentDidMount 1')
+      this.scroll.addEventListener('scroll', _handleScroll);
+    } 
   }
 
   componentWillUnmount() {
     const { _handleScroll } = this;
-    this.scroll.removeEventListener('scroll', _handleScroll);
+
+    if(document.body.clientWidth > 600 ) {
+      this.scroll.removeEventListener('scroll', _handleScroll);
+    }
   }
 
   _handeKeyPress({ keyCode }) {
@@ -67,16 +82,10 @@ export default class App extends Component {
     }
   }
 
-  _logPageView(path, userId) {
-    ReactGA.set({ userId });
-    ReactGA.event({
-      category: 'User',
-      action: 'Initial Load'
-    });
-  }
-
   _handleScroll() {
     const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
+
+    console.log('inside scroll')
 
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
     if (search) {
