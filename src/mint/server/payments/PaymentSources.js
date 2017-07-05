@@ -18,6 +18,8 @@ const stripeSecret = (process.env.NODE_ENV !== 'production') ? stripeConstants.t
 
 const _ = require('lodash')
 const stripe = require('stripe')(stripeSecret)
+const userPaymentAmountHandler = require('./InvoiceUtils').userPaymentAmountHandler
+
 
 class PaymentSource {
   constructor(paymentSource, args = {}) {
@@ -36,20 +38,39 @@ class PaymentSource {
     return payments
   }
 
-  static async CreateForInvoice(invoice) {
-    logging.info('would create invoice for members', invoice.members)
-    logging.info('using cart', invoice.cart)
-    return
-    // await invoice.members.map(async (member) => {
 
-    // })
-    // const payment = await db.Payments.create({
-    //   invoice: invoice.id,
-    //   user: this.user,
-    //   payment_source: this.id,
-    //   amount: amount,
-    //   data: stripeResponse
-    // })
+  /**
+   * create the payment objects that we update once a user has submitted payment/cancelled etc.
+   *
+   * @class      CreateInitialPayments (name)
+   * @param      {invoice}   invoice  The invoice
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  static async GetPaymentStatus(userId, invoiceId) {
+    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+    const paymentsOnThisInvoice = await db.Payments.findOne({user: userId, invoice: invoice.id})
+
+    // object to return
+    const paymentStatus = {
+      paid: false,
+      amount: 0,
+      items: []
+    }
+
+    // check if user has already paid
+    if (_.get(paymentsOnThisInvoice, 'status') === 'success') {
+      paymentStatus.paid = true
+      paymentStatus.amount = paymentsOnThisInvoice.amount
+      return paymentStatus
+    }
+
+    // ~~~~ NEED TO FIX invoice.members to be right
+    //
+    // const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members')
+    const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
+    logging.info('got debts', debts)
+    paymentStatus.amount = debts[userId]
+    return paymentStatus
   }
 
   static async Create (source, sourceData) {
@@ -82,20 +103,6 @@ class PaymentSource {
     await paymentSource.archive()
   }
 
-  // //this is #fakenews -- for testing
-  // async pay (invoice, amount) {
-  //   logging.info('pay called')
-  //   //create payments
-  //   // logging.info('this', this)
-  //   var payment = await db.Payments.create({
-  //     invoice: invoice.id,
-  //     user: this.user,
-  //     payment_source: this.id,
-  //     amount: amount
-  //   })
-  //   logging.info('got the payment')
-  //   return payment;
-  // }
 }
 
 
@@ -145,7 +152,6 @@ class StripePaymentSource extends PaymentSource {
     return payment
   }
 }
-
 
 const paymentSourceHandlers = {
   [StripePaymentSource.name]: StripePaymentSource

@@ -17,6 +17,13 @@ export default class ItemPaidButton extends Component {
     fetchItem: PropTypes.func,
     selectCartItem: PropTypes.func
   }
+  componentWillMount() {
+    // const { invoice, fetchPaymentStatus } = this.props;
+    // if (invoice) {
+    //   fetchPaymentStatus(invoice.id)
+    // }
+  }
+        // { testI.items.includes(item.id) && testI.paid === false ? <button onClick={()=> {testI.paid = true;}}>Pay For this</button> : <p> already paid </p>}
 
   render() {
     const { cart, user, editId, item, removeItem, copyItem, fetchItem, selectCartItem } = this.props;

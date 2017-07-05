@@ -114,19 +114,12 @@ module.exports = function (router) {
      */
     .post(async (req, res) => {
       logging.info('creating initial payment objects for all users on an invoice', req.body)
-      let paymentObjects
-
-      // see if they are already created
-      // TODO: either cold storage old ones or edit old ones to fit current invoice
-      paymentObjects = await PaymentSource.GetByInvoiceId(req.params.invoice_id)
-      if (paymentObjects.length > 0) {
-        logging.info('paymentObjects already created', paymentObjects)
-        return res.send(paymentObjects)
-      }
-
-      const invoice = await Invoice.GetById(req.params.invoice_id)
-      paymentObjects = await PaymentSource.CreateInitialDocuments(invoice)
-      return paymentObjects
+      logging.info('req.user', req.UserSession.user_account.id)
+      const userId = req.UserSession.user_account.id
+      const invoiceId = req.params.invoice_id
+      const paymentObject = await PaymentSource.GetPaymentStatus(userId, invoiceId)
+      logging.info('paymentsObject for user:', paymentObject)
+      return res.send(200)
     })
 
     /**

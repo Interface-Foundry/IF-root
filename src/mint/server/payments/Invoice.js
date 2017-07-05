@@ -1,39 +1,12 @@
 var moment = require('moment')
 const _ = require('lodash')
 const Cart = require('../cart/Cart')
-
-const email_utils = require('../utilities/email_utils')
+const userPaymentAmountHandler = require('./InvoiceUtils').userPaymentAmountHandler
 
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-const userPaymentAmountHandler = {
-  'split_equal': function (invoice) {
-    logging.info('even split')
-    var debts = {}
-    var perUser = invoice.total / (1.0 * invoice.members.length)
-    invoice.members.map(function (user) {
-      debts[user.id] = perUser
-    })
-    return debts
-  },
-  'split_single': function (invoice) {
-    logging.info('single payer split')
-    var debts = {}
-    debts[invoice.leader.id] = invoice.total
-    return debts
-  },
-  'split_by_item': async function (invoice) {
-    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items')
-    var debts = {}
-    cart.items.map(function (item) {
-      if (debts[item.added_by]) debts[item.added_by] += item.price
-      else debts[item.added_by] = item.price
-    })
-    return debts
-  }
-}
 
 class Invoice {
   constructor(invoiceType) {
