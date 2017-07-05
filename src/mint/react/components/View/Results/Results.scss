@@ -18,10 +18,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     }
   }
 
-  @media only screen and (max-width: 600px) {
-    margin-bottom: $nav-height * 1.5;
-  }
-
   .price {
     color: $price-color;
     display: inline-block;
