@@ -36,9 +36,9 @@ export {
   createInvoice,
   updateInvoice,
   // payments
+  fetchPaymentStatus,
   fetchPayments,
-  createPayments,
-  postPayment,
+  createPayment,
   sendPaymentCollectionEmails,
   // payment sources
   fetchPaymentSources,

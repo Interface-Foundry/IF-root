@@ -81,39 +81,19 @@ module.exports = function (router) {
   /**
    * invoice routes related to payments for an invoice (collecting/getting payments,)
    */
+
+
+
   router.route('/invoice/payment/:invoice_id')
-    /**
-     * @api {get} /invoice/payment/:invoice_id get/collect payments for invoice
-     * @apiDescription collect payments for an invoice, either via email, alert, etc
-     * @apiGroup Payments
-     *
-     * @apiParam {string} :invoice_id - invoice id
-     * @apiParam {string} collection_metho (optional) - preference for how to bother users
-     */
+  /**
+  * @api {post} /invoice/payment/:invoice_id
+  * @apiDescription create the payment objects to be used with paymentsources for an invoice
+  * @apiGroup Payments
+  *
+  * @apiParam {string} :invoice_id - invoice id
+  */
     .get(async (req, res) => {
-      logging.info('get payment called')
-      const collectionType = _.get(req, 'query.collection_method', 'email')
-      const invoice = await Invoice.GetById(req.params.invoice_id)
-      const paymentComplete = await invoice.paidInFull()
-      if (paymentComplete) {
-        return res.send(paymentComplete)
-      }
-
-      // ping users
-      const paymentStatus = await invoice.collectPayments(collectionType)
-      return res.send(paymentStatus)
-    })
-
-
-    /**
-     * @api {post} /invoice/payment/:invoice_id
-     * @apiDescription create the payment objects to be used with paymentsources for an invoice
-     * @apiGroup Payments
-     *
-     * @apiParam {string} :invoice_id - invoice id
-     */
-    .post(async (req, res) => {
-      logging.info('creating initial payment objects for all users on an invoice', req.body)
+      logging.info('getting user payment status')
       logging.info('req.user', req.UserSession.user_account.id)
       const userId = req.UserSession.user_account.id
       const invoiceId = req.params.invoice_id
@@ -122,16 +102,16 @@ module.exports = function (router) {
       return res.send(200)
     })
 
-    /**
-     * @api {put} /invoice/payment/:invoice_id post payment source to invoice
-     * @apiDescription post a payment to an invoice
-     * @apiGroup Payments
-     *
-     * @apiParam {string} :invoice_id - id of invoice to post payment to
-     * @apiParam {string} payment_source - id of payment source we are using
-     * @apiParam {number} payment_amount - amount of invoice to pay
-     */
-    .put(async (req, res) => {
+  /**
+  * @api {put} /invoice/payment/:invoice_id post payment source to invoice
+  * @apiDescription post a payment to an invoice
+  * @apiGroup Payments
+  *
+  * @apiParam {string} :invoice_id - id of invoice to post payment to
+  * @apiParam {string} payment_source - id of payment source we are using
+  * @apiParam {number} payment_amount - amount of invoice to pay
+  */
+    .post(async (req, res) => {
       logging.info('posted to payment route')
       if (!_.get(req, 'body.payment_source')) {
         throw new Error('Need invoice id to post payment to')
@@ -152,6 +132,28 @@ module.exports = function (router) {
       }
 
       return res.send(payment)
+    })
+
+  /**
+  * @api {put} /invoice/payment/:invoice_id get/collect payments for invoice
+  * @apiDescription collect payments for an invoice, either via email, alert, etc
+  * @apiGroup Payments
+  *
+  * @apiParam {string} :invoice_id - invoice id
+  * @apiParam {string} collection_metho (optional) - preference for how to bother users
+  */
+    .put(async (req, res) => {
+      logging.info('get payment called')
+      const collectionType = _.get(req, 'query.collection_method', 'email')
+      const invoice = await Invoice.GetById(req.params.invoice_id)
+      const paymentComplete = await invoice.paidInFull()
+      if (paymentComplete) {
+        return res.send(paymentComplete)
+      }
+
+      // ping users
+      const paymentStatus = await invoice.collectPayments(collectionType)
+      return res.send(paymentStatus)
     })
 
   /**

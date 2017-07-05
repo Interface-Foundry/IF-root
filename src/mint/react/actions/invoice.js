@@ -41,7 +41,17 @@ export const fetchPaymentSources = () => get(
   })
 );
 
-export const createPayments = invoice_id => post(
+export const fetchPaymentStatus = invoice_id => get(
+  `/api/invoice/payment/${invoice_id}`,
+  'FETCH_PAYMENT_STATUS',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
+export const createPayment = invoice_id => post(
   `/api/invoice/payment/${invoice_id}`,
   'CREATE_PAYMENTS',
   {},
@@ -73,15 +83,6 @@ export const deletePaymentSource = (paymentsource_id) => del(
   })
 );
 
-export const postPayment = (invoice_id, paymentsource_id) => post(
-  `/api/invoice/payment/${invoice_id}`,
-  'ADD_PAYMENT', { paymentsource_id },
-  (type, json) => ({
-    type: `${type}_SUCCESS`,
-    response: json,
-    receivedAt: Date.now()
-  })
-);
 
 export const sendPaymentCollectionEmails = invoice_id => post(
   `/api/invoice/${invoice_id}`,

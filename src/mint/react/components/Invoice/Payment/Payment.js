@@ -2,26 +2,22 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Stripe from './Stripe';
 import PaymentSources from './PaymentSources';
+import Stripe from './Stripe';
 
-
-// deciding a split type seems almost political/philosophical
-const splitTypes = [{
-  type: 'split_single',
-  text: 'single payer'
-}, {
-  type: 'split_equal',
-  text: 'split equally amongst the people of kip!'
-}, {
-  type: 'split_by_item',
-  text: 'split by item'
-}]
 
 export default class Payment extends Component {
 
+  static propTypes = {
+    invoice: PropTypes.object,
+    createPayment: PropTypes.func,
+    updateInvoice: PropTypes.func,
+    selectAccordion: PropTypes.func,
+    selectedAccordion: PropTypes.string
+  }
+
   render() {
-  	const { selectedAccordion, updateInvoice, invoice, selectAccordion, createPayments } = this.props;
+  	const { invoice, createPayment, updateInvoice, selectAccordion, selectedAccordion } = this.props;
 
     return (
       <div className='payment accordion'>

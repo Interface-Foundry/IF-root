@@ -9,7 +9,7 @@ import {
   fetchInvoices,
   createInvoice,
   updateInvoice,
-  createPayments,
+  createPayment,
   fetchPaymentSources,
   createPaymentSource,
   deletePaymentSource
@@ -30,7 +30,7 @@ const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   fetchInvoices: (invoice_id) => dispatch(fetchInvoices(invoice_id)),
   createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
-  createPayments: (invoice_id) => dispatch(createPayments(invoice_id)),
+  createPayment: (invoice_id) => dispatch(createPayment(invoice_id)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
   createPaymentSource: (payment_data, payment_source) => dispatch(createPaymentSource(payment_data, payment_source)),
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),
