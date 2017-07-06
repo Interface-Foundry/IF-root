@@ -48,6 +48,9 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} item name or whatever we present maybe */
     name: 'string',
 
+    /** @type {translation} name in original language we translated out of */
+    original_name: Waterline.isA('translations'),
+
     /** @type {string} asin the amazon asin **/
     asin: 'string',
 
@@ -57,8 +60,14 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} item description */
     description: 'string',
 
+    /** @type {translation} description in original language we translated out of */
+    original_description: Waterline.isA('translations'),
+
     /** @type {number} item price per unit */
     price: 'float',
+
+    /** @type {conversion} currency conversion details */
+    original_price: Waterline.isA('conversions'),
 
     /** @type {string} small image */
     thumbnail_url: 'string',

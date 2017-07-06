@@ -1054,6 +1054,8 @@ module.exports = function (router) {
       longitude: geo.ll[1]
     }
 
+    logging.info('user coordinates:', userCoords)
+
     // assemble list of stores
     var stores = [];
 

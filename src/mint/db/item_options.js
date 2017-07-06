@@ -27,8 +27,14 @@ var itemOptionsCollection = Waterline.Collection.extend({
     /** @type {string} name of the option */
     name: 'string',
 
+    /** @type {translation} option name in original language */
+    original_name: Waterline.isA('translations'),
+
     /** @type {string} option description */
     description: 'string',
+
+    /** @type {translation} option description in original language */
+    original_description: Waterline.isA('translations'),
 
     /** @type {string} the url that links to this option, if it exists */
     url: 'string',

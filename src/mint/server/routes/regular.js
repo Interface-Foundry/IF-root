@@ -188,11 +188,11 @@ router.get('/auth/:id', (req, res) => co(function * () {
  */
 router.get('/newcart/:store', (req, res) => co(function * () {
   //check to make sure the user is logged in
-  // const user_id = _.get(req, 'UserSession.user_account.id')
+  const user_id = _.get(req, 'UserSession.user_account.id')
   //FOR TESTING
-  const user_id = '0f3cebf3-602b-4dc4-9f7f-6df88ab413fd'
-  if (!user_id) throw new Error('must be logged in to create a cart')
-  req.UserSession.user_account = yield db.UserAccounts.findOne({id: user_id})
+  // const user_id = '0f3cebf3-602b-4dc4-9f7f-6df88ab413fd'
+  // if (!user_id) throw new Error('must be logged in to create a cart')
+  // req.UserSession.user_account = yield db.UserAccounts.findOne({id: user_id})
 
   // cart body, used in db.Carts.create(cart) later
   var cart = {}
