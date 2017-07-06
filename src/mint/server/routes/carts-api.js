@@ -923,7 +923,6 @@ module.exports = function (router) {
     searchOpts.user_locale = (req.locale.length > 5 ? req.locale.slice(0, 5): req.locale)
     var geo = geolocation(req.ip) || geolocation.default
     searchOpts.user_country = geo.country
-    logging.info('SEARCH OPTS', searchOpts)
     // search de rol de rol rol rol
     var results = await storeInstance.search(searchOpts)
     res.send(results)

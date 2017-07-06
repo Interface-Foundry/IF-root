@@ -23,6 +23,7 @@ class UrlStore extends Store {
   }
 
   async urlSearch (options) {
+    logging.info('optionsss', options)
     const uri = options.text
     // make sure this is a url from the right merchant
     if (!uri || !uri.match(new RegExp(this.domain))) {
@@ -31,9 +32,7 @@ class UrlStore extends Store {
 
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
-    logging.info('uri', uri)
-    logging.info()
-    var itemData = await UrlScraper(uri, 'US', 'en_US', this.country, this.domain)
+    var itemData = await UrlScraper(uri, options.user_country, options.user_locale, this.country, this.domain)
 
     logging.info('performed "scraping"')
     // logging.info(itemData)
