@@ -33,10 +33,10 @@ class UrlStore extends Store {
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await UrlScraper(uri, options.user_country, options.user_locale, this.country, this.domain)
+    return await this.processSearchItems(itemData)
+  }
 
-    logging.info('performed "scraping"')
-    // logging.info(itemData)
-
+  async processSearchItems (itemData) {
     // create options
     // because apparently async/await doesn't work with HoF
     var options = []
@@ -98,11 +98,6 @@ class UrlStore extends Store {
 
     // return item
     return item;
-  }
-
-  async processSearchItems (items) {
-    //TODO, I assume -- or, the front-end can just call update
-    return await items
   }
 }
 
