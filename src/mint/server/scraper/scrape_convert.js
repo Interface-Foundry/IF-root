@@ -5,9 +5,9 @@ var _ = require('lodash')
 var request = require('request-promise')
 var fx = require("money")
 const Translate = require('@google-cloud/translate')
+var currency = require('currency-code-map')
 
-var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-var dailyRates
+//var dailyRates //we should be doing this seperately once a day so we dont get throttled
 
 
 
@@ -33,124 +33,139 @@ var dailyRates
 //       });
 // }
 
-var options = {
-	url: url,
-	// proxy: proxyUrl,
-	headers: {
-	  'User-Agent': fakeUserAgent(),
-	  'Accept': 'text/html,application/xhtml+xml',
-	  'Accept-Language':'en-US,en;q=0.8',
-	  'Cache-Control':'max-age=0',
-	  'Connection':'keep-alive'
-	},
-	// timeout: timeoutMs,
+//come here and get localized
+var getDomain = function * (url,user_country,user_locale){
+
+	var s = {
+		original_link: url,
+		domain: {
+			hostname: []
+		},
+		user: {
+			country: user_country,
+			locale: user_locale,
+			currency: currency[user_country]
+		}
+	}
+
+	switch(true){
+		case url.indexOf('muji.net') > -1 || url.indexOf('muji.com/jp') > -1:
+			s.domain.hostname.push('muji.net')
+			s.domain.hostname.push('muji.com/jp')
+			s.domain.name = 'muji_jp'
+			s.domain.description = 'Muji Japan'
+			s.domain.country = 'JP'
+			s.domain.locale = 'ja'
+			s.domain.currency = currency[s.domain.country]
+			return s
+		break	
+		default:
+			return s
+	}
 }
 
-function scrapeURL(){
+var scrapeURL = function * (){
+	var options = {
+		url: url,
+		// proxy: proxyUrl,
+		headers: {
+		  'User-Agent': fakeUserAgent(),
+		  'Accept': 'text/html,application/xhtml+xml',
+		  'Accept-Language':'en-US,en;q=0.8',
+		  'Cache-Control':'max-age=0',
+		  'Connection':'keep-alive'
+		},
+		// timeout: timeoutMs,
+	}
 	request(options, function (error, response, html) {
 	  if (!error && response.statusCode == 200) {
-	    var $ = cheerio.load(html)
-
-
-		// //do a thing
-		// co(function *(){
-		// 	var price = yield foreignExchange('USD','KRW',1,0.03)
-		// 	console.log('price ',price)
-		// }).catch(onerror)
-
-		var ogImage
-		var keywords
-		var description
-		var price
-
-		//co routine
-	    getMeta()
-	    getItem()
-
-	    function getMeta(){
-		 	var meta = $('meta')
-			var keys = Object.keys(meta)
-
-			//abstracted function, get properties from page
-			//return as much as possible to fill defined schema
-			//RETURN THE NON TRANSLATED STUFF TOO, so user can view both
-			//these filled up suggestion will pre-populate the add item input form
-
-
-
-			keys.forEach(function(key){
-			if (meta[key].attribs && meta[key].attribs.property) {
-				if(meta[key].attribs.property === 'og:image'){
-					ogImage = meta[key].attribs.content
-				} 
-			}
-			});
-
-			keys.forEach(function(key){
-				if (meta[key].attribs && meta[key].attribs.name) {
-				   	if (meta[key].attribs.name === 'keywords'){
-				   		keywords = meta[key].attribs.content
-				   	}else if (meta[key].attribs.name === 'description') {
-				   		description = meta[key].attribs.content
-				   	}
-				}
-			});
-			console.log('image ',ogImage)
-			console.log('keywords ',keywords)
-			console.log('description ',description)   	
-	    }
-
-
-	    function getItem(){
-
-			$('.productName').each(function(i, elm) {
-			    console.log('product name: ',$(this).text().trim()) // for testing do text() 
-			})
-
-			$('.desc').each(function(i, elm) {
-			    console.log('DESCRIPTION ',$(this).text().trim()) // for testing do text() 
-			})
-
-			$('.price').each(function(i, elm) {
-				if ($(this).text()){
-					console.log('PRICE ',$(this).text().trim()) // for testing do text() 
-				}
-			})
-
-			$('#size').find('dd').each(function(i, elm) {
-				console.log('SIZE: ',$(this).text().trim())
-			})
-
-			$('#color').find('dd').each(function(i, elm) {
-				console.log('COLOR: ',$(this).text().trim())
-			})
-
-
-			var price = yield foreignExchange('USD','KRW',1,0.03)
-			console.log('price ',price)
-			var translated = translateText('hello how are you','fr')
-
-
-
-			// $('#size').each(function(i, elm) {
-			// 	console.log(i)
-			//    // console.log('SIZES ',$(this).text()) // for testing do text() 
-
-			//     //class = available
-			//     // class = current (check if nested inside)
-			// })
-
-			// $('dl #color').each(function(i, elm) {
-			//     console.log('COLORS ',$(this).text()) // for testing do text() 
-			// })
-
-	    }
-
-
+	    return cheerio.load(html)
 	  }else {
 	  	console.log('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
 	  }
 	})	
+}
+
+var ogImage
+var keywords
+var description
+var price
+
+var tryMeta = function * (){
+ 	var meta = $('meta')
+	var keys = Object.keys(meta)
+
+	//abstracted function, get properties from page
+	//return as much as possible to fill defined schema
+	//RETURN THE NON TRANSLATED STUFF TOO, so user can view both
+	//these filled up suggestion will pre-populate the add item input form
+
+	keys.forEach(function(key){
+	if (meta[key].attribs && meta[key].attribs.property) {
+		if(meta[key].attribs.property === 'og:image'){
+			ogImage = meta[key].attribs.content
+		} 
+	}
+	});
+
+	keys.forEach(function(key){
+		if (meta[key].attribs && meta[key].attribs.name) {
+		   	if (meta[key].attribs.name === 'keywords'){
+		   		keywords = meta[key].attribs.content
+		   	}else if (meta[key].attribs.name === 'description') {
+		   		description = meta[key].attribs.content
+		   	}
+		}
+	});
+	console.log('image ',ogImage)
+	console.log('keywords ',keywords)
+	console.log('description ',description)   	
+}
+
+
+var tryProps = function * (){
+
+	$('.productName').each(function(i, elm) {
+	    console.log('product name: ',$(this).text().trim()) // for testing do text() 
+	})
+
+	$('.desc').each(function(i, elm) {
+	    console.log('DESCRIPTION ',$(this).text().trim()) // for testing do text() 
+	})
+
+	$('.price').each(function(i, elm) {
+		if ($(this).text()){
+			console.log('PRICE ',$(this).text().trim()) // for testing do text() 
+		}
+	})
+
+	$('#size').find('dd').each(function(i, elm) {
+		console.log('SIZE: ',$(this).text().trim())
+	})
+
+	$('#color').find('dd').each(function(i, elm) {
+		console.log('COLOR: ',$(this).text().trim())
+	})
+
+
+	var price = yield foreignExchange('USD','KRW',1,0.03)
+	console.log('price ',price)
+	var translated = translateText('hello how are you','fr')
+
+
+
+	// $('#size').each(function(i, elm) {
+	// 	console.log(i)
+	//    // console.log('SIZES ',$(this).text()) // for testing do text() 
+
+	//     //class = available
+	//     // class = current (check if nested inside)
+	// })
+
+	// $('dl #color').each(function(i, elm) {
+	//     console.log('COLORS ',$(this).text()) // for testing do text() 
+	// })
+
 }
 
 
@@ -237,8 +252,34 @@ function translateText (text, target) {
 
 //do a thing
 co(function *(){
-	getRates()
-	var data = yield scrapeURL()
+
+	//incoming country / locale 
+	var user_country = 'US'
+	var user_locale = 'en-US'
+
+	var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+
+	var s = yield getDomain(url,user_country,user_locale) //get domain 
+
+	if(!s.domain.name){
+		console.log('ERROR CANT FIND VALID STORE URL')
+		return
+	}
+
+	console.log('SSSSS ',s)
+	
+	// //getRates() //this should be checking once a day, but not now 
+
+	// var $ = yield scrapeURL(url)
+
+	// //co routine
+ //    s = yield tryMeta($,s)
+ //    s = yield tryProps($,s)	
+
+	// var price = yield foreignExchange('USD','KRW',1,0.03)
+
+    //save RAW HTML here
+
 }).catch(onerror)
 
 

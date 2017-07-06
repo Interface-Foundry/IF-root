@@ -1,4 +1,4 @@
-{
+{ 
   /** @type {string} original link posted */
   original_link: 'string',
 
@@ -17,11 +17,21 @@
   },
 
   domain: {
-    name: ['string'], //muji.net && muji.com/jp/ <-- domain pseudonyms
-    descripton: 'string', //Muji Japan Store
+    hostname: ['string'], //muji.net && muji.com/jp/ <-- domain pseudonyms
+    name: 'string', //muji_jp
+    description: 'string', //Muji Japan Store
     thumbnail_url: 'string', //brand logo 
-    main_image_url: 'string' //brand logo large 
+    main_image_url: 'string', //brand logo large 
+    country: 'string', // domain country
+    currency: 'string', // domain currency 
+    locale: 'string' //domain locale (default on page visit)
   }, 
+
+  user: {
+    country: 'string', //US
+    locale: 'string', //en-US
+    currency: 'string' //USD
+  }
   
   /** generalized ASIN-style unique ID for the product**/
   product_id: 'string', //i.e. muji: 4549738522515
@@ -50,7 +60,8 @@
     fx_rate:'float', // foreign exchange rate
     fx_rate_src:'string', //fx rate source, i.e. fixer.io
     fx_on:'date', //date of conversion
-    fx_to:'string' //i.e. converted to USD
+    fx_to:'string', //i.e. converted to USD
+    fx_spread:'float' //spread added on top
   },
 
   /** @type {string} product small image */
