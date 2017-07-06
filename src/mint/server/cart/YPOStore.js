@@ -124,7 +124,7 @@ class YPOStore extends Store {
         ${itemsXML}
       </items>
       <orderedBy>
-          <username>${leaer.name}</username>
+          <username>${leader.name}</username>
           <email>${leader.email}</email>
           <orderedAt>${new Date().toISOString()}</orderedAt>
       </orderedBy>
@@ -166,7 +166,7 @@ class YPOStore extends Store {
           }
 
           console.log(result)
-          ressolve({
+          resolve({
             ok: true,
             message: 'Order submitted successfully'
           })

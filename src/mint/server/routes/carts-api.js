@@ -954,14 +954,22 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function* () {
-    var cart = yield db.Carts.findById(req.params.cart_id)
+    var cart = yield db.Carts.findOneById(req.params.cart_id)
+      .populate('items')
+      .populate('leader')
+
     var checkoutResponse = yield cart.checkout()
-    res.send(checkoutResponse)
+    
+    if (checkoutResponse.redirect) {
+      res.redirect(checkoutResponse.redirect)
+    } else {
+      res.send(checkoutResponse)
+    }
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
       cart: cart.id,
-      user: user_id
+      user: req.UserSession.user_account.id
     })
   }))
 
