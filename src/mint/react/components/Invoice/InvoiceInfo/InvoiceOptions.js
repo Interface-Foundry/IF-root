@@ -50,7 +50,7 @@ export default class InvoiceOptions extends Component {
     }
 
     render() {
-        const { selectedAccordion, selectAccordion, invoice, updateInvoice } = this.props,
+        const { selectedAccordion, selectAccordion, invoice, fetchPaymentStatus, updateInvoice } = this.props,
                 { selectedIndex, selectedType } = this.state;
 
         return (
@@ -106,6 +106,10 @@ export default class InvoiceOptions extends Component {
             </li>
           ))
         }
+
+        <div>
+        <button onClick={()=> fetchPaymentStatus(invoice.id)}>fetch payments for users</button>
+        </div>
       </ul>
       </div>
      </div> : null

@@ -10,6 +10,7 @@ import {
   createInvoice,
   updateInvoice,
   createPayment,
+  fetchPaymentStatus,
   fetchPaymentSources,
   createPaymentSource,
   deletePaymentSource
@@ -35,7 +36,8 @@ const mapDispatchToProps = dispatch => ({
   createPaymentSource: (payment_data, payment_source) => dispatch(createPaymentSource(payment_data, payment_source)),
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),
   deletePaymentSource: (paymentsource_id) => dispatch(deletePaymentSource(paymentsource_id)),
-  updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data))
+  updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data)),
+  fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id))
 });
 
 
