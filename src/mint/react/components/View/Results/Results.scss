@@ -155,6 +155,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
       }
 
+      &.yellow {
+        padding: 0 $padding;
+      }
+
       &:disabled {
         background: rgba(#333, 0.1);
         cursor: auto;
