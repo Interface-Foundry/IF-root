@@ -48,7 +48,7 @@ export default class Header extends Component {
         }
       />
       <Route path={'/m/archive'} exact component={() => 
-          <SettingsHeader text='My Archived Carts' icon='Locked' {...this.props}/>
+          <SettingsHeader text='My Locked Carts' icon='Locked' {...this.props}/>
         }
       />
       <Route path={'/m/feedback'} exact component={() => 
