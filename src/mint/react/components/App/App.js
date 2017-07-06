@@ -9,7 +9,7 @@ import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
 import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
-import { ErrorPage, Modal, Toast, Loading } from '..';
+import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
 export default class App extends Component {
@@ -129,12 +129,12 @@ export default class App extends Component {
         { loading ? <Loading/> : null}
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'modalOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
+        <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
-          <Route path={'/cart/:cart_id/m/*'} component={Modal} />
+          <Route path={'/cart/:cart_id/m/*'} component={Display} />
           <Route path={'/newcart'} exact component={StoresContainer} />
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
-          <Route path={'/m/*'} exact component={Modal} />
+          <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
 
 
