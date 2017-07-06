@@ -12,9 +12,9 @@ dbReady.then((models) => {
  * we have not integrated with, but are just scraping URLs for
  */
 class UrlStore extends Store {
-  constructor(name, domain, locale) {
+  constructor(name, domain, country) {
     super(name)
-    this.locale = locale
+    this.country = country
     this.domain = domain
   }
 
@@ -23,24 +23,26 @@ class UrlStore extends Store {
   }
 
   async urlSearch (options) {
-    logging.info('UrlStore urlSearch called')
     const uri = options.text
     // make sure this is a url from the right merchant
     if (!uri || !uri.match(new RegExp(this.domain))) {
       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
     }
 
-    //TODO check to see if we've already scraped, verified, and stored this item
-
     // get tentative item data from the scraper
-    const itemData = await UrlScraper(uri)
+    // uri, user country, user locale, store country, domain
+    logging.info('uri', uri)
+    logging.info()
+    var itemData = await UrlScraper(uri, 'US', 'en_US', this.country, this.domain)
 
     logging.info('performed "scraping"')
-    logging.info(itemData)
+    // logging.info(itemData)
 
     // create options
     // because apparently async/await doesn't work with HoF
+    var options = []
     for (var i = 0; i < itemData.options.length; i++) {
+      logging.info('new option')
       var option = itemData.options[i]
       // create translations
       var original_name = await db.Translations.create(option.original_name)
@@ -60,10 +62,10 @@ class UrlStore extends Store {
       opt.original_name = original_name.id
       opt.original_description = original_description.id
       await opt.save()
-      return opt
+      options.push(opt)
     }
+    logging.info('options:', options)
 
-    logging.info('OPTIONS:', options)
     delete itemData.options
 
     // create the item translations
@@ -71,43 +73,50 @@ class UrlStore extends Store {
     itemName.translated_value = itemData.name
     await itemName.save()
     delete itemData.original_name
+    logging.info('item name done')
 
     var itemDescription  = await db.Translations.create(itemData.original_description)
     itemDescription.translated_value = itemData.description
     await itemDescription.save()
     delete itemData.original_description
+    logging.info('item description done')
 
     // create conversion
     var originalPrice = await db.Conversions.create(itemData.original_price)
-    originalPrice.converted_value = itemData.price
+    originalPrice.converted_value = itemData.price * 1.0
     await originalPrice.save()
     delete itemData.original_price
+    logging.info('original price done')
 
     //create item & associate it w details objects
     var item = await db.Items.create(itemData)
     item.original_name = itemName.id
     item.original_description = itemDescription.id
     item.original_price = originalPrice.id
+    logging.info('about to save item')
     await item.save()
+    logging.info('saved item')
 
     // return item
-    return []
+    return item;
   }
 
-  async processSearchItems () {
+  async processSearchItems (items) {
     //TODO, I assume -- or, the front-end can just call update
+    return await items
   }
 }
 
 module.exports = UrlStore
 
 //dummy url scraper for testing
-async function UrlScraper (url, options) {
-  return {
+async function UrlScraper (url, user_country, user_locale, store_country, domain) {
+  logging.info('scraping ' + url + ' for someone in ' + user_country + ' / ' + user_locale)
+  return await {
   /** @type {string} original link posted */
   original_link: 'string',
 
-  raw_html_id: 'string', //relational DB id for the saved raw html
+  // raw_html: 'string', //relational DB id for the saved raw html
 
   //translated product name into user language
   name: 'string',
@@ -117,7 +126,7 @@ async function UrlScraper (url, options) {
     type:'string', //language locale, i.e. ko_KR
     value:'string', //original text in ko_KR
     translate_src:'string', // source of translation (i.e. GC Translation API)
-    translate_on:'date', //date of translation
+    translate_on: new Date(), //date of translation
     translate_to:'string' //i.e. translated to en-us locale
   },
 
@@ -134,20 +143,20 @@ async function UrlScraper (url, options) {
     type:'string', //language locale, i.e. ko_KR
     value:'string', //original text in ko_KR
     translate_src:'string', // source of translation (i.e. GC Translation API)
-    translate_on:'date', //date of translation
+    translate_on: new Date(), //date of translation
     translate_to:'string' //i.e. translated to en-us locale
   },
 
   //currency converted price into user currency
-  price: 'float',
+  price: 6.66,
 
   //non-currency converted price from original site
   original_price: {
     type:'string', //currency type, i.e. SKW
-    value:'float', //original value in SKW
-    fx_rate:'float', // foreign exchange rate
+    value: 1.11, //original value in SKW
+    fx_rate: 1.11, // foreign exchange rate
     fx_rate_src:'string', //fx rate source, i.e. fixer.io
-    fx_on:'date', //date of conversion
+    fx_on: new Date(), //date of conversion
     fx_to:'string' //i.e. converted to USD
   },
 

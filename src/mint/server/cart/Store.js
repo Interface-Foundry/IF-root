@@ -75,7 +75,6 @@ class Store {
         })
         return items
       })
-
   }
 
   /**

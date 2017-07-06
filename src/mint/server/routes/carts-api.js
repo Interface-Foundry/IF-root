@@ -731,6 +731,11 @@ module.exports = function (router) {
     var item = yield db.Items.findOne({ id: req.params.item_id })
       .populate('options')
       .populate('added_by', selectMembersWithoutEmail)
+    logging.info('ITEM', item)
+    if (!item || !item.length) {
+      // throw new Error('get me out of here')
+      return res.sendStatus(500)
+    }
     res.send(item)
   }))
 
@@ -903,7 +908,7 @@ module.exports = function (router) {
     if (!q) {
       throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
     }
-    const searchOpts = _.omitBy({
+    var searchOpts = _.omitBy({
       text: q,
       category: _.get(req, 'query.category'),
       page: _.get(req, 'query.page')
@@ -914,9 +919,13 @@ module.exports = function (router) {
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
     console.log('store instance', (storeInstance || {})
       .name)
+    // get user locale & country and add to search options
+    searchOpts.user_locale = (req.locale.length > 5 ? req.locale.slice(0, 5): req.locale)
+    var geo = geolocation(req.ip) || geolocation.default
+    searchOpts.user_country = geo.country
+    logging.info('SEARCH OPTS', searchOpts)
+    // search de rol de rol rol rol
     var results = await storeInstance.search(searchOpts)
-    //for testing
-    // results = await
     res.send(results)
   })())
 

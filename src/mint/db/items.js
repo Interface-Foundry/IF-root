@@ -69,6 +69,8 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {conversion} currency conversion details */
     original_price: Waterline.isA('conversions'),
 
+    /** */
+
     /** @type {string} small image */
     thumbnail_url: 'string',
 
