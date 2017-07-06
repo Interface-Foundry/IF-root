@@ -30,7 +30,7 @@ export default class Results extends Component {
     myItems: []
   }
 
-  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading,query, user: { id }, results = [], cart: { items = [] } }) =>
+  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading, query, user: { id }, results = [], cart: { items = [] } }) =>
     lastUpdatedId !== this.props.lastUpdatedId
     || id !== this.props.user.id
     || numberOfItems(results) !== numberOfItems(this.props.results)
@@ -59,8 +59,8 @@ export default class Results extends Component {
       state: { myItems }
     } = this;
 
-    const isUrl = query.match(/(https?:\/\/(www)?)?.*(\.com|\.org|\.co\.uk)\//); //lol wat 
-    // (for cheaters: https://regex101.com/r/MYJG7J/1)
+    const isUrl = query.match(/(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig);
+    // (for cheaters: https://stackoverflow.com/a/8943487)
 
     if (!results.length && !(loading || lazyLoading)) return <EmptyContainer />; // don't bother with the loops if there aren't results
 
@@ -105,7 +105,7 @@ export default class Results extends Component {
                 {
                   loading
                   ? 'Loading...'
-                  : <p> About {results.length} results for <span className='price'>&ldquo;{query}&rdquo;</span> from {getStoreName(cart.store, cart.store_locale)} </p>
+                  : <p> Showing {results.length} results from {getStoreName(cart.store, cart.store_locale)} </p>
                 }
               </nav>
             </th>

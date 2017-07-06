@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { replace } from 'react-router-redux';
 import { Results } from '../components';
 import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation } from '../actions';
-import { isUrl, addSearchHistory, splitAndMergeSearchWithCart } from '../utils';
+import { isUrl, addSearchHistory, splitAndMergeSearchWithCart, sleep } from '../utils';
 import ReactGA from 'react-ga';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -22,7 +22,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleHistory: () => dispatch(toggleHistory()),
+  toggleHistory: () => sleep(100).then(() => dispatch(toggleHistory())),
   togglePopup: () => dispatch(togglePopup()),
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);

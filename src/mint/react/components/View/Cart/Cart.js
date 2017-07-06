@@ -51,6 +51,7 @@ export default class Cart extends Component {
                             backgroundImage: `url(${item.main_image_url})`
                           }}/>
                           <div className='text'>
+                            <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
                             <h1>{item.name}</h1>
                             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                             {
@@ -103,6 +104,7 @@ export default class Cart extends Component {
                               backgroundImage: `url(${item.main_image_url})`
                             }}/>
                             <div className='text'>
+                              <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
                               <h1>{item.name}</h1>
                               <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                               {
@@ -117,7 +119,7 @@ export default class Cart extends Component {
                               editId === item.id ? (
                                 <div className='extra'>
                                   <div className='text__expanded'>
-                                    <span><a href={item.original_link} target="_blank">View on Amazon.com</a></span>
+                                    <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
                                     <div>
                                       {item.description}
                                     </div>

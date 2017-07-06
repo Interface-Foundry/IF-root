@@ -54,16 +54,14 @@ export default class App extends Component {
     const { _handleScroll, _logPageView } = this;
     _logPageView();
 
-    if(document.body.clientWidth > 600 ) {
-      console.log('componentDidMount 1')
-      this.scroll.addEventListener('scroll', _handleScroll);
-    } 
+    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', _handleScroll);
+
   }
 
   componentWillUnmount() {
     const { _handleScroll } = this;
 
-    if(document.body.clientWidth > 600 ) {
+    if (document.body.clientWidth > 600) {
       this.scroll.removeEventListener('scroll', _handleScroll);
     }
   }
@@ -84,8 +82,6 @@ export default class App extends Component {
 
   _handleScroll() {
     const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
-
-    console.log('inside scroll')
 
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
     if (search) {

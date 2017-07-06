@@ -5,7 +5,7 @@ import { push } from 'react-router-redux';
 
 import { Search } from '../components';
 import { updateQuery, toggleHistory, submitQuery } from '../actions';
-import { isUrl, addSearchHistory } from '../utils';
+import { isUrl, addSearchHistory, sleep } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
   cart: state.cart.present,
@@ -16,7 +16,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  toggleHistory: (show) => dispatch(toggleHistory(show)),
+toggleHistory: (show) => sleep(100).then(()=>dispatch(toggleHistory(show))),
   updateQuery: (query) => dispatch(updateQuery(query)),
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);
