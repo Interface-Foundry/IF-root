@@ -19,8 +19,6 @@ export default class History extends Component {
     const { props: { query, categories, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
     history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
       suggestedCategories =  categories.slice(0, 5);
-    console.log({ history, suggestedCategories })
-
     return (
       <span className='history'>
         <ul className='previous'>
@@ -31,7 +29,7 @@ export default class History extends Component {
                   <div className='history__term-icon'>
                     <Icon icon='Search'/>
                   </div>
-                  <div className='history__term-query' onClick={(e) => {
+                  <div className='history__term-query' onMouseDown={(e) => {
                     updateQuery(previousSearch);
                     submitQuery(previousSearch, store, store_locale);
                   }}>
@@ -51,7 +49,8 @@ export default class History extends Component {
                   <div className='history__term-icon'>
                     <Icon icon='Eye'/>
                   </div>
-                  <div className='history__term-query' onClick={(e) => {
+                  <div className='history__term-query' onMouseDown={(e) => {
+                    console.log(e);
                     updateQuery(category.humanName);
                     submitQuery(category.machineName, store, store_locale);
                   }}>

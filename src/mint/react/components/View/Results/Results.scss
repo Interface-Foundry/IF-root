@@ -41,6 +41,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-radius: $padding / 2;
       margin-top: -15px;
       margin-bottom: 10px;
+
       @media only screen and (max-width: 600px) {
         right: 10px;
       }
@@ -120,6 +121,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   .action {
     padding: $padding 0 0;
     text-align: right;
+
     @media only screen and (max-width: 600px) {
       border-top: 2px solid #E4F1FD;
     }
@@ -253,7 +255,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           }
 
           &.vertical {
-            left: 60px;
+            left: 100px;
             height: 100%;
             width: 10px;
           }
@@ -263,23 +265,85 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             width: 100%;
             bottom: 0;
 
-            &.text {
-              height: 40px;
-              width: calc(100% - 70px);
+            &.empty-text {
+              height: 50px;
+              width: calc(100% - 110px);
               right: 0;
             }
           }
 
-          &.mid {
-            width: calc(100% - 70px);
-            right: 0;
-            top: 25px;
-            height: 5px;
+          &.photo-bottom {
+            bottom: 0;
+            height: calc(100% - 100px);
+            left: 0;
+            width: 100px;
+          }
 
-            &.right {
-              height: 50px;
-              width: 25px;
+          &.mid {
+            width: calc(100% - 100px);
+            height: 5px;
+            left: 100px;
+            top: 60px;
+          }
+
+          &.right {
+            height: 100%;
+            right: 0;
+            width: 20px;
+          }
+
+          &.price-right {
+            height: 30px;
+            width: calc(100% - 190px);
+            right: 0;
+            bottom: 45px;
+          }
+        }
+
+        @media only screen and (max-width: 600px) {
+          height: 366px;
+
+          .overlay {
+            background: white;
+            position: absolute;
+
+            &.mid {
+              width: 100%;
+              top: 225px;
+              left: 0;
               right: 0;
+            }
+
+            &.vertical {
+              height: 25px;
+              top: 255px;
+              right: 0;
+              left: unset;
+              width: 150px;
+            }
+
+            &.right, &.photo-bottom {
+              width: 10px;
+              height: calc(100% - 225px);
+              bottom: 0;
+            }
+
+            &.bottom {
+              height: 60px;
+
+              &.empty-text {
+                height: 5px;
+                width: 100%;
+                left: 0;
+                right: 0;
+                top: 280px;
+              }
+            }
+
+            &.price-right {
+              width: calc(100% - 80px);
+              bottom: 60px;
+              height: 25px;
             }
           }
         }
@@ -352,7 +416,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           height: 65px;
 
           @media only screen and (max-width: 600px) {
-            padding: $padding 0 $padding/2;
+            padding: $padding 0 ($padding / 2);
             font-size: 12px;
             height: 55px;
           }

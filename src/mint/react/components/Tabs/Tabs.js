@@ -85,7 +85,6 @@ export default class Tabs extends Component {
               <Icon icon={t.icon}/>
               <span>{t.display}</span>
             </h1>
-            
           ))
         }
       </div>
