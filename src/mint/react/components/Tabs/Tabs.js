@@ -34,7 +34,7 @@ export default class Tabs extends Component {
       icon: 'Search',
       url: `/cart/${id}?q=${query}`,
       display: 'Save'
-    },{
+    }, {
       id: 3,
       tab: 'cart',
       icon: 'Person',
@@ -44,6 +44,8 @@ export default class Tabs extends Component {
     this.setState({ tabs });
   }
 
+  clearHightlight = null
+
   componentWillReceiveProps(nextProps) {
     const { cart: { items, id }, search: { query } } = nextProps,
     itemsChanged = items.length > this.props.cart.items.length,
@@ -52,21 +54,24 @@ export default class Tabs extends Component {
         tab: 'cart',
         icon: 'Home',
         url: `/cart/${id}`,
-        display: `Cart (${numberOfItems(items)})`
+        display: `Cart (${numberOfItems(items)})`,
+        highlight: itemsChanged
       }, {
         id: 2,
         tab: 'search',
         icon: 'Search',
         url: `/cart/${id}?q=${query}`,
         display: 'Save'
-      },{
+      }, {
         id: 3,
         tab: 'cart',
         icon: 'Person',
         url: `${id}/m/share`,
         display: 'Share'
       }];
+    clearTimeout(this.clearHightlight);
     this.setState({ tabs });
+    this.clearHightlight = setTimeout(() => this.setState({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) }), 3000);
   }
 
   render() {
@@ -76,8 +81,7 @@ export default class Tabs extends Component {
       <div className='tabs'>
         {
           tabs.map((t) => (
-            <h1 key={t.id} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab && t.id !== 3 ? 'selected' : ''}`}>
-              {t.showBubble ? <AlertBubble  right={4} top={-6} /> : null}
+            <h1 key={t.id} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab && t.id !== 3 ? 'selected' : ''} ${t.highlight ? 'highlight' : ''}`}>
               <Icon icon={t.icon}/>
               <span>{t.display}</span>
             </h1>

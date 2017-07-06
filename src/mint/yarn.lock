@@ -8003,13 +8003,13 @@ redux-thunk@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.2.0.tgz#e615a16e16b47a19a515766133d1e3e99b7852e5"
 
-redux-undo@^0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/redux-undo/-/redux-undo-0.6.1.tgz#ff407749b8f468bead636e413819e92c0982eeca"
+redux-undo@beta:
+  version "1.0.0-beta9-9-3"
+  resolved "https://registry.yarnpkg.com/redux-undo/-/redux-undo-1.0.0-beta9-9-3.tgz#35ac85c90fd2f95d83e5e9794e5b826862e50e08"
   dependencies:
-    redux "^3.0.2"
+    redux "^3.5.2"
 
-redux@^3.0.2, redux@^3.7.0:
+redux@^3.5.2, redux@^3.7.0:
   version "3.7.1"
   resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.1.tgz#bfc535c757d3849562ead0af18ac52122cd7268e"
   dependencies:

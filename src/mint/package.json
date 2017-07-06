@@ -76,7 +76,7 @@
     "redux": "^3.7.0",
     "redux-form": "^6.8.0",
     "redux-thunk": "^2.2.0",
-    "redux-undo": "^0.6.1",
+    "redux-undo": "beta",
     "sails-mongo": "^0.12.3",
     "soap": "^0.19.2",
     "sockjs-client": "^1.1.2",
