@@ -105,7 +105,7 @@ export default class Results extends Component {
                 {
                   loading
                   ? 'Loading...'
-                  : <p> About {results.length} results for <span className='price'>&ldquo;{query}&rdquo;</span> from {getStoreName(cart.store, cart.store_locale)} </p>
+                  : <p> Showing {results.length} results from {getStoreName(cart.store, cart.store_locale)} </p>
                 }
               </nav>
             </th>

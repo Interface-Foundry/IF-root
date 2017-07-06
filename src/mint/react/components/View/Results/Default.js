@@ -1,7 +1,7 @@
 // mint/react/components/View/Results/Default.js
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { displayCost } from '../../../utils';
+import { displayCost, getStoreName } from '../../../utils';
 import { Icon } from '../../../../react-common/components';
 
 export default class Default extends Component {
@@ -24,12 +24,13 @@ export default class Default extends Component {
           {
             inCart ? <span className='incart'> In Cart </span> : null
           }
+          <span className='link'><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
           <div className={'image'} style={{
             backgroundImage: `url(${item.main_image_url})`
           }}/>
           <div className='text'> 
             <h1>{item.name}</h1>
-            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+            <h4> <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
           </div> 
           <div className='action'>
             { !inCart ? <button className='more' onClick={() => { selectItem(item.id); fetchSearchItem(item.id); }}>More info</button> : null }
