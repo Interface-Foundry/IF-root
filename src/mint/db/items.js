@@ -94,6 +94,12 @@ var itemsCollection = Waterline.Collection.extend({
     /** the user that addded the item */
     added_by: Waterline.isA('user_accounts'),
 
+    /***/
+    verified: {
+      type: 'boolean',
+      defaultsTo: true
+    },
+
     /** @type {string} current status of the item's payment process */
     payment_status: {
       type: 'string',

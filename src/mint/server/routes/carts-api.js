@@ -731,12 +731,12 @@ module.exports = function (router) {
     var item = yield db.Items.findOne({ id: req.params.item_id })
       .populate('options')
       .populate('added_by', selectMembersWithoutEmail)
-    logging.info('ITEM', item)
-    if (!item || !item.length) {
-      // throw new Error('get me out of here')
+    logging.info('ITEM.options', item.options, '/ITEM')
+    if (!item) {
+      logging.error('item does not exist')
       return res.sendStatus(500)
     }
-    res.send(item)
+    return res.send(item)
   }))
 
   /**

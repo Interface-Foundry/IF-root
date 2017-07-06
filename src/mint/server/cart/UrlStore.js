@@ -33,13 +33,19 @@ class UrlStore extends Store {
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await UrlScraper(uri, options.user_country, options.user_locale, this.country, this.domain)
+    logging.info('got item data')
     return await this.processSearchItems(itemData)
   }
 
   async processSearchItems (itemData) {
+    logging.info('process search items called')
     // create options
-    // because apparently async/await doesn't work with HoF
     var options = []
+
+    // flag this item as unverified, so the front-end will display a form
+    itemData.verified = false;
+
+    // because apparently async/await doesn't work with HoF
     for (var i = 0; i < itemData.options.length; i++) {
       logging.info('new option')
       var option = itemData.options[i]
@@ -158,7 +164,7 @@ async function UrlScraper (url, user_country, user_locale, store_country, domain
   thumbnail_url: 'string',
 
   /** @type {string} product larger image */
-  main_image_url: 'string',
+  main_image_url: 'hi, I am an image',
 
   options: [{
     type:'string', //color, size, etc.
