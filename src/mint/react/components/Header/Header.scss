@@ -14,6 +14,27 @@
   width: 100%;
   z-index: 100;
 
+  & > .beta {
+    position: absolute;
+    background: white;
+    width: 45px;
+    left: 20px;
+    top: 45px;
+    font-size: 13px;
+    height: 25px;
+    line-height: 25px;
+    border-radius: 5px;
+    text-align: center;
+    color: $secondaryColor;
+    padding: 0 $padding/2;
+    box-shadow: $card-box-shadow;
+    display: block;
+
+    @media (max-width: 600px) {
+      left: 2.5px;
+    }
+  }
+
 
   @media (max-width: 600px) {
     padding: 0;
@@ -175,7 +196,7 @@
     p {
       display: inline-block;
       padding: 0;
-      line-height: 50px;
+      line-height: 47px;
       font-weight: bold;
       margin-right: $padding;
       cursor: pointer;

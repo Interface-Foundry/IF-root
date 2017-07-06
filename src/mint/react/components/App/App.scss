@@ -212,6 +212,11 @@ button {
   text-align: left;
   height: calc(100% - 90px);
 
+  &.modalOpen {
+    height: calc(100% - 50px);
+    padding: 0;
+  }
+
   @media only screen and (max-width: 600px) {
     height: 100%;
     overflow: initial;

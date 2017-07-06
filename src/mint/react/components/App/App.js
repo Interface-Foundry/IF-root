@@ -122,14 +122,14 @@ export default class App extends Component {
   shouldComponentUpdate = (nextProps, nextState) => nextProps.tab !== this.props.tab || nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
 
   render() {
-    const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace } } = this.props;
+    const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
     return (
       <section className='app' onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        <div className={`app__view ${sidenav ? 'squeeze' : ''}`} ref={(scroll) => this.scroll = scroll}>
+        <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'modalOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Modal} />
           <Route path={'/newcart'} exact component={StoresContainer} />

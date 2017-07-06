@@ -21,10 +21,10 @@ export default class EmptySearch extends Component {
       <div className='empty results'>
         <div className='text'>
           <h2>
-            Hi! 😊&nbsp;&nbsp;Want to see wht we have on offer? <br/> 
+            <b>Hi! 😊&nbsp;Not sure what your looking for? </b>
           </h2>
           <p>
-            Want to get Started? <br/> Choose a suggested category
+            Search above or tap one of our suggested categories below to get started
           </p>
           <span>
             Learn More

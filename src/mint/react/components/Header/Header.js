@@ -55,6 +55,9 @@ export default class Header extends Component {
           <SettingsHeader text='Feedback' icon="Email" {...this.props}/>
         }
       />
+      <span className='beta'>
+        beta
+      </span>
     </nav>);
 
 }
