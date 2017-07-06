@@ -49,6 +49,7 @@ class Store {
     // call out to the appropriate search function to perform the actual search
     return this[searchType](options)
       .then(items => {
+        logging.info('items')
         if (!items) {
           return []
         } else if (!(items instanceof Array)) {
@@ -58,11 +59,13 @@ class Store {
         }
       })
       .then(items => {
+        logging.info('items', items)
         // catch the common mistake where developers return an array of promises\
         return Promise.all(items)
       })
       .then(this.processSearchItems.bind(this)) // and some optional post-processing
       .then(items => {
+        logging.info('items', items)
         // do some post-search analytics logging
         console.log('analytics', {
           search_options: options,

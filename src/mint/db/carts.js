@@ -73,7 +73,8 @@ var cartsCollection = Waterline.Collection.extend({
       type: 'string',
       enum: [
         'Amazon',
-        'YPO'
+        'YPO',
+        'Muji'
       ],
       defaultsTo: 'amazon',
       required: true
@@ -95,7 +96,8 @@ var cartsCollection = Waterline.Collection.extend({
       enum: [
         'US',
         'GB',
-        'CA'
+        'CA',
+        'JP'
       ],
       required: true
     },

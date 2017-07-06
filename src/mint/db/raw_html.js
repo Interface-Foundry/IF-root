@@ -13,7 +13,7 @@ var rawHtmlCollection = Waterline.Collection.extend({
     },
 
     /** original url we scraped from */
-    original_url: {
+    original_link: {
       type: 'string',
       required: true
     },

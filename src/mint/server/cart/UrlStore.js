@@ -22,7 +22,8 @@ class UrlStore extends Store {
     return 'urlSearch'
   }
 
-  async urlSearch () {
+  async urlSearch (options) {
+    logging.info('UrlStore urlSearch called')
     const uri = options.text
     // make sure this is a url from the right merchant
     if (!uri || !uri.match(new RegExp(this.domain))) {
@@ -34,24 +35,47 @@ class UrlStore extends Store {
     // get tentative item data from the scraper
     const itemData = await UrlScraper(uri)
 
+    logging.info('performed "scraping"')
+    logging.info(itemData)
+
+    //TODO: create options; delete off data
+    //TODO: create item
+    //TODO: associate item with options
+    //TODO: associate HTML with item [should already work the other way?]
+
     //create an item in the db and return it
-    return await db.Items.create(itemData)
+    // const item = await db.Items.create(itemData)
+    return
   }
 
   async processSearchItems () {
-    //TODO, I assume
+    //TODO, I assume -- or, the front-end can just call update
   }
 }
 
 module.exports = UrlStore
 
 //dummy url scraper for testing
-async function UrlScraper (url) {
+//options: { // hard-coded for now; literally dw about it
+//  user_country: 'US',
+//  user_locale: 'US'
+//}
+async function UrlScraper (url, options) {
   return {
     store: 'Muji',
     original_link: 'www.google.com',
     quantity: 1,
     description: 'small toy cement mixer for children ages 6-10',
-    price: 6
+    price: 6,
+    options: [{
+      name: 'option one',
+      available: true
+    }, {
+      name: 'option two',
+      available: false
+    }],
+    raw_html: '787998idnumber342342'
   }
 }
+
+module.exports = UrlStore

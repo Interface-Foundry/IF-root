@@ -910,6 +910,7 @@ module.exports = function (router) {
     }, _.isUndefined)
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
+    logging.info('store, locale:', store, locale)
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
     console.log('store instance', (storeInstance || {})
       .name)
@@ -1119,6 +1120,9 @@ module.exports = function (router) {
     case 'YPO':
       var arrayCategories = yield category_utils.getYpoCategories()
       res.send(arrayCategories)
+      break;
+    case 'Muji':
+      res.send([])
       break;
     default:
       throw new Error('Cannot fetch categories for unhandled cart type: ' + cart.store)

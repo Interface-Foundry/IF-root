@@ -187,6 +187,13 @@ router.get('/auth/:id', (req, res) => co(function * () {
  * @apiParam {string} :store one of amazon_US, amazon_UK, amazon_CA, ypo (all defined in cart/cart_types.js)
  */
 router.get('/newcart/:store', (req, res) => co(function * () {
+  //check to make sure the user is logged in
+  // const user_id = _.get(req, 'UserSession.user_account.id')
+  //FOR TESTING
+  const user_id = '0f3cebf3-602b-4dc4-9f7f-6df88ab413fd'
+  if (!user_id) throw new Error('must be logged in to create a cart')
+  req.UserSession.user_account = yield db.UserAccounts.findOne({id: user_id})
+
   // cart body, used in db.Carts.create(cart) later
   var cart = {}
 
@@ -201,6 +208,9 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   } else if (req.params.store.includes('Amazon')) {
     cart.store = 'Amazon'
     cart.store_locale = req.params.store.split('_')[1]
+  } else if (req.params.store === 'Muji') {
+    cart.store = 'Muji'
+    cart.store_locale = 'JP'
   } else {
     throw new Error('Cannot create new cart for store ' + req.params.store)
   }
@@ -216,10 +226,10 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   ].filter(Boolean).length > 0
 
   // Add the cart leader if they are logged in
-  const user_id = _.get(req, 'UserSession.user_account.id')
-  if (user_id) {
+  // const user_id = _.get(req, 'UserSession.user_account.id')
+  // if (user_id) {
     cart.leader = user_id
-  }
+  // }
 
   var date = new Date()
   if (cart.store_locale === 'US') {

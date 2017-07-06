@@ -77,6 +77,9 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {number} number of reviews */
     number_reviews: 'integer',
 
+    /** @type {raw_html} raw html we scraped this item from */
+    raw_html: Waterline.isA('raw_html'),
+
     /** the user that addded the item */
     added_by: Waterline.isA('user_accounts'),
 
