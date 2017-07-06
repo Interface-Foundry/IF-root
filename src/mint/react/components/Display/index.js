@@ -1,7 +1,7 @@
-// react/components/Modal/index.js
+// react/components/Display/index.js
 
-import './Modal.scss';
-import Modal from './Modal';
+import './Display.scss';
+import Display from './Display';
 
 export ArchivedCarts from './ArchivedCarts';
 export EditCart from './EditCart';
@@ -9,4 +9,4 @@ export Feedback from './Feedback';
 export Settings from './Settings';
 export Share from './Share';
 
-export default Modal;
+export default Display;

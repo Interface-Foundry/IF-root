@@ -49,13 +49,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             display: inline-block !important;
           }
           @media only screen and (max-width: 600px) {
-            font-size: 10px;
+            font-size: 12px;
           }
         }
         h5 {
           text-align: right;
-          opacity: 0.3;
-          font-weight: 100;
+          opacity: 0.8;
+          font-weight: 500;
         }
         h4 {
           position: relative;

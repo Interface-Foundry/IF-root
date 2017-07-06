@@ -23,6 +23,7 @@ import {
   IoHappy,
   IoIosBox,
   IoLocked,
+  IoUnlocked,
   IoLogIn,
   IoLogOut,
   IoLoop,
@@ -91,6 +92,8 @@ export default class Icon extends Component {
       return <IoCamera/>;
     case 'Locked':
       return <IoLocked/>;
+    case 'Unlocked':
+      return <IoUnlocked/>;
     case 'Check':
       return <IoCheckmark/>;
     case 'Search':

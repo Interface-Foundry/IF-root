@@ -3,13 +3,9 @@
 @import '../../../react-common/styles/Animations';
 
 .view {
-	position: relative;
-	max-width: 1066px;
-	margin: 0 auto;
-	padding: 0 0 $padding*2;
-
+  height: 100%;
 	@media only screen and (max-width: 600px) {
-		padding: 0 0 $padding*9;
+		padding: 0 0;
 	}
 
 	* {
