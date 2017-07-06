@@ -8,6 +8,7 @@ const LRU = require('lru-cache')
 // get the waterline mint database
 var db
 const dbReady = require('../../db')
+console.log(dbReady) 
 dbReady.then((models) => {
   db = models
 })
@@ -420,17 +421,24 @@ class AmazonStore extends Store {
     await cart.save()
   }
 
-  async checkout (cart, req, res) {
-    if (!cart.dirty) {
-      // yay cart is locked so we're pretty sure it hasn't meen messed with
-      return res.redirect(cart.affiliate_checkout_url)
+  async checkout (cart) {
+    if (!cart.dirty && cart.affiliate_checkout_url) {
+      // yay cart is not dirty so we're pretty sure it hasn't meen messed with
+      return {
+        ok: true,
+        redirect: cart.affiliate_checkout_url
+      }
     } else {
       // make sure the amazon cart is in sync with the cart in our database
       const amazonCart = await this.sync(cart)
       await this.updateCart(cart.id, amazonCart)
-      // redirect to the cart url
-      cart = await db.Carts.findOne({id: cart.id})
-      return res.redirect(cart.affiliate_checkout_url)
+
+      // if everything worked, do the normal things like send emails
+      await super.checkout(cart)
+      return {
+        ok: true,
+        redirect: cart.affiliate_checkout_url
+      }
     }
   }
 }

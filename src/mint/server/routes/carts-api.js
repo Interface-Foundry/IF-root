@@ -954,38 +954,15 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function* () {
-    // go to prototype
-    // return res.redirect('/prototype/checkout')
-    // get the cart
-    console.log('cart_id:', req.params.cart_id)
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
-    // checkout removes the items from the cart object, so we have to make a copy
-    var items = cart.items.slice()
-    var user_id = _.get(req, 'UserSession.user_account.id')
-
-    var fullCart = yield Cart.GetById(cart.id)
-
-    yield cartUtils.checkout(cart, req, res)
-    //yield fullCart.checkout(req, res)
+    var cart = yield db.Carts.findById(req.params.cart_id)
+    var checkoutResponse = yield cart.checkout()
+    res.send(checkoutResponse)
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
       cart: cart.id,
       user: user_id
     })
-
-    // and attach it to the cart and the user
-    var user = yield db.UserAccounts.findOne({id: user_id}).populate('checkouts')
-    user.checkouts.add(event)
-    cart.checkouts.add(event)
-    yield user.save()
-
-    cart.items = items;
-    cart.locked = true;
-    // this is redundant w the emails invoices will send out
-    // leaving it in for now bc those aren't fully here yet
-    yield cart.save()
-    yield fullCart.sendCartSummary(req)
   }))
 
   /**
