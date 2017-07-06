@@ -19,16 +19,27 @@ export default class EmptySearch extends Component {
 
     return (
       <div className='empty results'>
-        <Down/>
-        <h4><span>Hi there!</span><br></br> Search above or tap one of our suggested categories below to get started 😊</h4>
-        {
-          categories.map((c, i) => (
-            <h5 key={i} onClick={() => {
-              updateQuery(c.humanName);
-              submitQuery(c.machineName, cart.store, cart.store_locale);
-            }}>{c.humanName}</h5>
-          ))
-        }
+        <div className='text'>
+          <h2>
+            Hi! 😊&nbsp;&nbsp;Want to see wht we have on offer? <br/> 
+          </h2>
+          <p>
+            Want to get Started? <br/> Choose a suggested category
+          </p>
+          <span>
+            Learn More
+          </span>
+        </div>
+         <div className='suggested'>
+            {
+              categories.map((c, i) => (
+                <h5 key={i} onClick={() => {
+                  updateQuery(c.humanName);
+                  submitQuery(c.machineName, cart.store, cart.store_locale);
+                }}>{c.humanName}</h5>
+              ))
+            }
+          </div>
       </div>
     );
   }

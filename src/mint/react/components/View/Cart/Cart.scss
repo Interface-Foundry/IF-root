@@ -12,6 +12,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   margin: 0 auto;
   border-collapse: collapse;
 
+  &:last-of-type {
+    @media only screen and (max-width: 600px) {
+      margin: 0 0 100px;
+    }
+  }
+
   @media only screen and (max-width: 600px) {
     border-spacing: 0;
   }
