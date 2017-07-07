@@ -34,11 +34,16 @@ class UrlStore extends Store {
     // uri, user country, user locale, store country, domain
     var itemData = await UrlScraper(uri, options.user_country, options.user_locale, this.country, this.domain)
     logging.info('got item data')
-    return await this.processSearchItems(itemData)
+    return itemData
   }
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
+    logging.info('itemdata', itemData)
+
+    //we're getting an array from the generic search and will never process more than one item
+    var itemData = itemData[0]
+
     // create options
     var options = []
 
@@ -103,7 +108,7 @@ class UrlStore extends Store {
     logging.info('saved item')
 
     // return item
-    return item;
+    return [item];
   }
 }
 

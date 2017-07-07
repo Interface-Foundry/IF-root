@@ -731,7 +731,7 @@ module.exports = function (router) {
     var item = yield db.Items.findOne({ id: req.params.item_id })
       .populate('options')
       .populate('added_by', selectMembersWithoutEmail)
-    logging.info('ITEM.options', item.options, '/ITEM')
+    logging.info('ITEM', item, '/ITEM')
     if (!item) {
       logging.error('item does not exist')
       return res.sendStatus(500)
@@ -902,11 +902,11 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => (async function () {
-    // parse the incoming text to extract either an asin, url, or search query
+    // parse the incoming text to extract either an asin, a url, or a search query
     const q = (req.query.q || '')
       .trim()
     if (!q) {
-      throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
+      throw new Error('must supply  a query string parameter  "q" which can be an asin, url, or search text')
     }
     var searchOpts = _.omitBy({
       text: q,
@@ -925,6 +925,7 @@ module.exports = function (router) {
     searchOpts.user_country = geo.country
     // search de rol de rol rol rol
     var results = await storeInstance.search(searchOpts)
+    logging.info('SEARCH RESULTS: ' + results)
     res.send(results)
   })())
 
@@ -968,7 +969,7 @@ module.exports = function (router) {
       .populate('leader')
 
     var checkoutResponse = yield cart.checkout()
-    
+
     if (checkoutResponse.redirect) {
       res.redirect(checkoutResponse.redirect)
     } else {
