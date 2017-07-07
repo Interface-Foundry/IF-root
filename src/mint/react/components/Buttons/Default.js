@@ -57,7 +57,7 @@ export default class Default extends Component {
           cart.locked 
           ? <span>
               <button 
-                className='yellow sub' 
+                className='yellow sub lock' 
                 onClick={_orderCart}
                 > 
                   Re-Order {displayCost(total, cart.store_locale)}

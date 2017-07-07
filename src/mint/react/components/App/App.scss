@@ -190,9 +190,14 @@ button {
         &.blue {
           display: none;
         }
+        &.lock {
+          width: 75%;
+        }
         &.locked {
           background: $secondaryColor;
           color: white;
+          width: 25%;
+          float: left;
 
           svg {
             fill: white;
