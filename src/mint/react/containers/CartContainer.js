@@ -28,7 +28,8 @@ const mapStateToProps = (state, ownProps) => ({
   oldCart: state.cart.past[0],
   query: state.search.query,
   user: state.user,
-  invoice: state.payments.invoice
+  invoice: state.payments.invoice,
+  paymentStatus: state.payments.status
 });
 
 const mapDispatchToProps = dispatch => ({

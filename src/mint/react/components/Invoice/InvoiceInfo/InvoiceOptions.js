@@ -54,11 +54,11 @@ export default class InvoiceOptions extends Component {
                 { selectedIndex, selectedType } = this.state;
 
         return (
-          <div className='shipping accordion'>
-            <nav onClick={() => selectAccordion('shipping')}>
+          <div className='invoice accordion'>
+            <nav onClick={() => selectAccordion('changeinvoice')}>
               <h3>Edit Info for Order</h3>
                 {
-                  selectedIndex !== null && !selectedAccordion.includes('shipping') ? <div className='text'>
+                  selectedIndex !== null && !selectedAccordion.includes('changeinvoice') ? <div className='text'>
                       <p>{addressDummy[selectedIndex].name}</p>
                       <p>{addressDummy[selectedIndex].streetAddress}</p>
                       <p>{addressDummy[selectedIndex].city}, {addressDummy[selectedIndex].state}, {addressDummy[selectedIndex].zip}</p>
@@ -67,7 +67,7 @@ export default class InvoiceOptions extends Component {
                 }
             </nav>
             {
-              selectedAccordion.includes('shipping') ? <div>
+              selectedAccordion.includes('changeinvoice') ? <div>
                 <nav>
                   <h4>select/edit/remove your address</h4>
                 </nav>

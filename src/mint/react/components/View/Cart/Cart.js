@@ -34,7 +34,8 @@ export default class Cart extends Component {
               {
                 myCart.length
                 ? <div className='card'>
-                  { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
+                  { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1>}
+                  <ItemPaidButton {...this.props}/>
                   <h1 className='date'> <span>  </span> </h1>
                   <h4>
                     <span className='grey'>{numberOfItems(myCart)} items ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>
@@ -44,7 +45,6 @@ export default class Cart extends Component {
                     Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
                   </z>
                   </h4>
-                  <ItemPaidButton {...this.props}/>
                   <ul>
                     {
                       myCart.map((item) => {

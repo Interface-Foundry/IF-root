@@ -38,9 +38,7 @@ class Invoice {
    * @return     {Promise}  the invoices
    */
   static async GetByCartId (cartId) {
-    logging.info('trying to get invoice by id ', cartId)
     const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
-    logging.info('got cart by id', invoice)
     return invoice
   }
 
@@ -103,22 +101,22 @@ class Invoice {
   async createInvoice () {
     let cart = await Cart.GetById(this.cart)
     await cart.sync()
+    logging.info('cart syned', cart.subtotal)
 
-    logging.info('DOES CART HAVE SUBTOTAL?', cart.subtotal)
+    // var newInvoice = await db.Invoices.create({
+    //   leader: cart.leader,
+    //   invoice_type: this.invoice,
+    //   cart: cart.id,
+    //   paid: false,
+    //   total: _.get(cart, 'subtotal', 10000), // FIX TOTAL LATER
+    //   split_type: this.split_type
+    // })
 
-    var newInvoice = await db.Invoices.create({
-      leader: cart.leader,
-      invoice_type: this.invoice,
-      cart: cart.id,
-      paid: false,
-      total: _.get(cart, 'subtotal', 10000), // FIX TOTAL LATER
-      split_type: this.split_type
-    })
+    // await newInvoice.save()
+    // var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
 
-    await newInvoice.save()
-    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
-
-    return invoice
+    // return invoice
+    return
   }
 
   /**
@@ -285,15 +283,6 @@ class MintInvoice extends Invoice {
     return null
   }
 
-  /**
-   * we dont need to actually create a charge but after a user checks out an
-   * amazon cart we should note what items or whatever were in the cart at this point
-   */
-  get sync() {
-
-  }
-
-  // methods
 }
 
 

@@ -22,7 +22,6 @@ export default class ItemPaidButton extends Component {
     const { selectTab, selectAccordion } = this.props;
     return (
       <div>
-        <h3>NOT PAID</h3>
         <button onClick={()=> {selectTab('invoice'); selectAccordion('payments');}}> click here to pay </button>
       </div>
     );

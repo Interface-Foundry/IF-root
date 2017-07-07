@@ -99,7 +99,7 @@ module.exports = function (router) {
       const invoiceId = req.params.invoice_id
       const paymentObject = await PaymentSource.GetPaymentStatus(userId, invoiceId)
       logging.info('paymentsObject for user:', paymentObject)
-      return res.send(200)
+      return res.send(paymentObject)
     })
 
   /**
@@ -256,9 +256,7 @@ module.exports = function (router) {
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    console.log('in this route!!!!', req.params.cart_id)
     const invoice = await Invoice.GetByCartId(req.params.cart_id)
-    logging.info('sending invoices', invoice)
     return res.send(invoice)
   })
 
@@ -290,7 +288,6 @@ module.exports = function (router) {
 
   //TESTING ROUTE to be deleted
   router.get('/remainingpayments/:invoice_id', async (req, res) => {
-    logging.info('this route was hit')
     var invoice = await Invoice.GetById(req.params.invoice_id)
     var paymentsLeft = await invoice.userPaymentAmounts()
     res.send(paymentsLeft)

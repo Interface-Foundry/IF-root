@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 
-export default class ShippingForm extends Component {
+export default class ChangeInvoice extends Component {
 
   render() {
     return (
