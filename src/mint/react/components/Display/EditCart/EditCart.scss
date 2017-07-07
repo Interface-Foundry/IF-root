@@ -2,10 +2,10 @@
 @import '../../../../react-common/styles/Constants';
 
 .editCart {
-  overflow: scroll;
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 
   .name {
     padding: $padding * 2;
