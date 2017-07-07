@@ -38,8 +38,7 @@ export default class App extends Component {
     status: PropTypes.string,
     history: PropTypes.object,
     selectedItemId: PropTypes.string,
-    getMoreSearchResults: PropTypes.func,
-    fetchInvoiceByCart: PropTypes.func
+    getMoreSearchResults: PropTypes.func
   }
 
   componentDidMount() {

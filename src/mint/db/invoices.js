@@ -1,6 +1,7 @@
 const Waterline = require('waterline')
 const uuid = require('uuid')
 
+var archive = require('./cold_storage')
 const constants = require('../server/constants.js')
 
 /**
@@ -70,10 +71,14 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: 'split_single'
     },
 
+    /** function to archive this object */
+    archive: archive,
+
     /** everything that would be a order in old db.payments*/
     cafe_order: {
       type: 'json'
     }
+
   }
 })
 

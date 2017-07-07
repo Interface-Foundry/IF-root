@@ -14,7 +14,8 @@ import {
 const mapStateToProps = (state, props) => {
   return {
     cart: state.cart.present,
-    user: state.user
+    user: state.user,
+    invoice: state.payments.invoice
   };
 };
 

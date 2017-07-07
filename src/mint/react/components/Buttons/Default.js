@@ -43,6 +43,11 @@ export default class Default extends Component {
     selectTab('invoice');
   }
 
+  _handleUnlockCart = () => {
+    const { updateCart, cart, invoice } = this.props;
+    updateCart({ ...cart, locked: false });
+  }
+
   render() {
     const {
       cart,
@@ -58,7 +63,7 @@ export default class Default extends Component {
         {
           cart.locked ? <span>
             <button className='yellow sub' onClick={() => reorderCart(cart.id)}> Re-Order {displayCost(total, cart.store_locale)} </button>
-            { cart.leader.id === user.id || cart.leader === user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Locked'/> Unlock </button> : null }
+            { cart.leader.id === user.id || cart.leader === user.id ? <button className='locked' onClick={::this._handleUnlockCart}> <Icon icon='Locked'/> Unlock </button> : null }
           </span> : <span>
             {
               cart.items.length === 0 ?

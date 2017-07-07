@@ -30,8 +30,8 @@ export default class Tabs extends Component {
   }
 
   componentWillMount() {
-    const { fetchInvoiceByCart, cart: { items, id  }, search: { query } } = this.props;
-    fetchInvoiceByCart(id);
+    const { cart: { items, id  }, search: { query } } = this.props;
+    // fetchInvoiceByCart(id);
     const tabs = [{
       tab: 'cart',
       url: `/cart/${id}`,
@@ -44,6 +44,9 @@ export default class Tabs extends Component {
 
     addInvoiceTab(tabs, true);
     this.setState({ tabs });
+  }
+  componentDidMount() {
+    const { cart } = this.props;
   }
 
   componentWillReceiveProps(nextProps) {

@@ -305,10 +305,14 @@ module.exports = function (router) {
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
+
+    // check for old invoice.  deal with this later tbh
     const oldInvoice = await Invoice.GetByCartId(req.params.cart_id)
     if (oldInvoice) {
-      logging.info('invoice already exists for this cart_id, not creating new invoice', oldInvoice.id)
-      return res.send(oldInvoice)
+      // logging.info('invoice already exists for this cart_id, not creating new invoice', oldInvoice.id)
+      // return res.send(oldInvoice)
+      logging.info('deleteing old invoice for time being')
+      await oldInvoice.archive()
     }
 
     const invoiceData = _.omitBy({

@@ -289,7 +289,7 @@ class MintInvoice extends Invoice {
    * we dont need to actually create a charge but after a user checks out an
    * amazon cart we should note what items or whatever were in the cart at this point
    */
-  get createAmazonCharge() {
+  get sync() {
 
   }
 
