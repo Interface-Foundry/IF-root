@@ -1,4 +1,4 @@
-// react/components/modal/Feedback/index.js
+// react/components/Display/Feedback/index.js
 
 import Feedback from './Feedback';
 import './Feedback.scss';

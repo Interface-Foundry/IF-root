@@ -1,4 +1,4 @@
-// react/components/Modal/ArchivedCarts/ArchivedCarts.js
+// react/components/Display/ArchivedCarts/ArchivedCarts.js
 
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';

@@ -5,7 +5,8 @@ import { push } from 'react-router-redux';
 import {
   togglePopup,
   updateCart,
-  reorderCart
+  reorderCart,
+  toggleYpoCheckout
 } from '../actions';
 
 const mapStateToProps = (state, props) => {
@@ -19,7 +20,8 @@ const mapDispatchToProps = dispatch => ({
   _toggleLoginScreen: () => dispatch(togglePopup()),
   reorderCart: (id) => dispatch(reorderCart(id)),
   push: (url) => dispatch(push(url)),
-  updateCart: (cart) => dispatch(updateCart(cart))
+  updateCart: (cart) => dispatch(updateCart(cart)),
+  toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);

@@ -1,4 +1,4 @@
-// react/components/Modal/ArchivedCarts/index.js
+// react/components/Display/ArchivedCarts/index.js
 
 import ArchivedCarts from './ArchivedCarts';
 import './ArchivedCarts.scss';

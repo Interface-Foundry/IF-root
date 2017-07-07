@@ -1,4 +1,4 @@
-// react/components/modal/EditCart/EditCart.js
+// react/components/Display/EditCart/EditCart.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';

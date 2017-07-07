@@ -1,7 +1,8 @@
-// react/components/Modal/Modal.scss
+// react/components/Display/Display.scss
+
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
-.modal {
+.display {
   position: absolute;
   background: white;
   height: 100%;
@@ -28,7 +29,7 @@
     box-shadow: $card-box-shadow;
     height: 99%;
   }
-  .modal__form {
+  .display__form {
     padding: $padding $padding*2 $padding*2 $padding*2;
     &>div {
       position: relative;
@@ -42,7 +43,7 @@
     span {
       display: none;
     }
-    .form__modal__input {
+    .form__display__input {
       display: flex;
       flex-direction: row;
       height: $nav-height;
@@ -70,13 +71,13 @@
         width: 100%;
         padding: $padding;
       }
-      .form__modal__input__submit {
+      .form__display__input__submit {
         @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
         cursor: pointer;
         color: white;
         margin: 5px;
         height: 75%;
-        .form__modal__input__submit__description {
+        .form__display__input__submit__description {
           font-weight: 600;
           font-size: 20px;
           background: $color-blue;
@@ -94,7 +95,7 @@
       }
     }
   }
-  .modal__drag {
+  .display__drag {
     position: absolute;
     bottom: 0;
     left: 0;

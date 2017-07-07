@@ -2,11 +2,12 @@
 
 export App from './App';
 export Buttons from './Buttons';
+export Display from './Display';
 export ErrorPage from './ErrorPage';
 export Header from './Header';
 export Invoice from './Invoice';
 export Loading from './Loading';
-export Display from './Display';
+export Modal from './Modal/';
 export Search from './Search';
 export Stores from './Stores';
 export Tabs from './Tabs';
@@ -14,3 +15,4 @@ export Toast from './Toast';
 export View from './View';
 export { Feedback, Settings, Share, EditCart, ArchivedCarts } from './Display';
 export { Results, Cart, Empty } from './View';
+export { YPOCheckout } from './Modal';

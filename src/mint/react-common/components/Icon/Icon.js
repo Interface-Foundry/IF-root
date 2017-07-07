@@ -35,7 +35,9 @@ import {
   IoRefresh,
   IoSad,
   IoSearch,
-  IoHome
+  IoHome,
+  IoPound,
+  IoQrScanner
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -140,6 +142,10 @@ export default class Icon extends Component {
       return <Share/>;
     case 'Chatbubble':
       return <IoChatbubbleWorking/>;
+    case 'Hash':
+      return <IoPound/>;
+    case 'QR':
+      return <IoQrScanner/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }
