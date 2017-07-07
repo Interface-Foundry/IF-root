@@ -16,6 +16,11 @@ class Store {
    * @return {Promise([Items])}         promise for an array of items
    */
   search(options) {
+
+    // create a pointer to this, bc arrow functions can't be
+    // used as / with generators
+    const that = this;
+
     console.log('Store search options', options)
     // set the page
     options.page = options.page || 0
@@ -62,11 +67,12 @@ class Store {
         // catch the common mistake where developers return an array of promises\
         return Promise.all(items)
       })
-      .then(items => {
-        this.processSearchItems.bind(this)
-        return items
+      .then(async function (items) {
+        // await this.processSearchItems.bind(this)
+        return await that.processSearchItems(items)
       }) // and some optional post-processing
       .then(items => {
+        logging.info('items****&', items)
         // do some post-search analytics logging
         console.log('analytics', {
           search_options: options,
@@ -85,6 +91,7 @@ class Store {
    * @return {Promise}       [description]
    */
   async processSearchItems(items) {
+    logging.info('main process search items called')
     return items
   }
 

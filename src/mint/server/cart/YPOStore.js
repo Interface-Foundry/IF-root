@@ -97,6 +97,7 @@ class YPOStore extends Store {
   */
   async processSearchItems(amazonItems) {
     const items = await Promise.all(amazonItems.map(createYpoItem))
+    logging.info('ITEMS YPO POST PROCESS', items)
     return items
   }
 
