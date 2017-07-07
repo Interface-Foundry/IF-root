@@ -139,6 +139,15 @@ var cartsCollection = Waterline.Collection.extend({
 
     invoice: Waterline.isA('invoices'),
 
+
+    //
+    // YPO only
+    //
+    order_number: 'string',
+    account_number: 'string',
+    delivery_message: 'string',
+    voucher_code: 'string',
+
     //
     // Instance Methods
     //
