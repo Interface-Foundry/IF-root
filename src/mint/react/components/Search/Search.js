@@ -1,4 +1,4 @@
-// react/components/modal/Search/Search.js
+// react/components/Search/Search.js
 
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
@@ -17,7 +17,8 @@ export default class Input extends Component {
     updateQuery: PropTypes.func,
     showHistory: PropTypes.bool,
     history: PropTypes.object,
-    categories: PropTypes.array
+    categories: PropTypes.array,
+    toggleHistory: PropTypes.func
   }
 
   state = {
@@ -66,7 +67,7 @@ export default class Input extends Component {
 
   render() {
     const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
-    
+
     return (
       <form onSubmit={::this._handleSubmit} className='search'>
         <button type='submit' className='submit'>
@@ -81,8 +82,9 @@ export default class Input extends Component {
           autoComplete="off" 
           spellCheck='true' 
           onKeyDown={::this._handeKeyPress}
+          ref={(searchInput) => this.searchInput = searchInput}
           />
-        <button className='cancel' type='button' disabled={!query.length} onClick={(e) => updateQuery('')}>
+        <button className='cancel' type='button' disabled={!query.length} onClick={(e) => {updateQuery(''); this.searchInput.focus();}}>
             <Delete />
         </button>
         { showHistory ? <History {...this.props} selectedQuery={selectedQuery} /> : null }
