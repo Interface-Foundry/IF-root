@@ -1,7 +1,7 @@
-var Waterline = require('waterline');
-var uuid = require('uuid');
-var constants = require('../server/constants.js');
-var archive = require('./cold_storage')
+const Waterline = require('waterline');
+const uuid = require('uuid');
+const constants = require('../server/constants.js');
+const archive = require('./cold_storage');
 
 /**
  * Session collection is the database side of the node-client-session cookie
@@ -144,6 +144,15 @@ var cartsCollection = Waterline.Collection.extend({
     //
     // Instance Methods
     //
+
+    /**
+     * gets the store for the current cart and checks it out
+     * @return {Store}
+     */
+    async checkout() {
+      const StoreFactory = require('../server/cart/StoreFactory');
+      return await StoreFactory.GetStore(this).checkout(this)
+    },
 
     /**
      * Removes a user from the order. Doesn't do anything with invoices.

@@ -84,6 +84,16 @@ class Store {
   }
 
   /**
+   * Does the basic checkout stuff like logging metrics and sending emails
+   * @param  {[type]}  cart [description]
+   * @return {Promise}      [description]
+   */
+  async checkout(cart) {
+    cart.locked = true;
+    await cart.save()
+  }
+
+  /**
    * The default processSearchItems function does nothing, you should override
    * in your class if you need to do something for all searches. Like AmazonStore
    * uses processSearchItems to convert amazon's item schema to db item schema.

@@ -8,6 +8,7 @@ const LRU = require('lru-cache')
 // get the waterline mint database
 var db
 const dbReady = require('../../db')
+console.log(dbReady)
 dbReady.then((models) => {
   db = models
 })
@@ -382,55 +383,73 @@ class AmazonStore extends Store {
 
 
   /**
-   * sync cart to amazon api, gets subtotal and checkout link for cart with items
+   * creates an amazon cart
    *
    * @param      {object}   cart    the cart we are syncing
    * @return     {Promise}  { description_of_the_return_value }
    */
-  async sync(cart) {
-    // if there are no amazon items in the cart then you can't sync it
+  async createAmazonCart(cart) {
+    // if there are no amazon items in the cart then amazan can't handle it
     if (cart.items.length === 0 || !cart.items[0].asin) {
       throw new Error('can only sync carts that have amazon items, and items must be populated')
     }
-    // to sync with amazon, we create a totally new cart
-    const cartAddAmazonParams = createAmazonCartWithItems(cart.items);
-    cartAddAmazonParams.AssociateTag = this.credentials.assocId
-    const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
 
+    // Create a mapping of asin -> quantity
+    var asins = cart.items.reduce((asins, item) => {
+      if (asins[item.asin]) {
+        asins[item.asin] += item.quantity
+      } else {
+        asins[item.asin] = item.quantity
+      }
+      return asins
+    }, {})
+
+    // add each asin and quantity to the request params
+    const amazonParams = {}
+    var i = 1;
+    for (var asin in asins) {
+      amazonParams[`Item.${i}.ASIN`] = asin;
+      amazonParams[`Item.${i}.Quantity`] = asins[asin] // the value in the map is quantity
+      i++
+    }
+
+    // create a totally new cart
+    amazonParams.AssociateTag = this.credentials.assocId
+    const results = await this.opHelper.execute('CartCreate', amazonParams);
     const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
     const amazonCart = results.result.CartCreateResponse.Cart
+    cart.subtotal = amazonCart.SubTotal.Amount / 100.00
+    cart.amazon_cartid = amazonCart.CartId
+    cart.amazon_hmac = amazonCart.HMAC
+    cart.amazon_purchase_url = amazonCart.PurchaseURL
+    cart.affiliate_checkout_url = await googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(amazonCart.PurchaseURL)}/id/mint/pid/shoppingcart`)
+    cart.dirty = false
+    await cart.save()
     return amazonCart
   }
 
   /**
-   * updateCart document in database with new cart properties specific to store
-   *
-   * @param      {<type>}   oldCartId  The old cartesian identifier
-   * @param      {<type>}   newCart    The new cartesian
-   * @return     {Promise}  { description_of_the_return_value }
+   * Returns a response with a redirect url for the affiliate-linked cart
+   * @param  {[type]}  cart [description]
+   * @return {Promise}      [description]
    */
-  async updateCart(oldCartId, newCart) {
-    const cart = await db.Carts.findOne({id: oldCartId})
-    cart.subtotal = newCart.SubTotal.Amount / 100.00
-    cart.amazon_cartid = newCart.CartId
-    cart.amazon_hmac = newCart.HMAC
-    cart.amazon_purchase_url = newCart.PurchaseURL
-    cart.affiliate_checkout_url = await googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(newCart.PurchaseURL)}/id/mint/pid/shoppingcart`)
-    cart.dirty = false
-    await cart.save()
-  }
-
-  async checkout (cart, req, res) {
-    if (!cart.dirty) {
-      // yay cart is locked so we're pretty sure it hasn't meen messed with
-      return res.redirect(cart.affiliate_checkout_url)
+  async checkout (cart) {
+    if (!cart.dirty && cart.affiliate_checkout_url) {
+      // yay cart is not dirty so we're pretty sure it hasn't meen messed with
+      return {
+        ok: true,
+        redirect: cart.affiliate_checkout_url
+      }
     } else {
       // make sure the amazon cart is in sync with the cart in our database
-      const amazonCart = await this.sync(cart)
-      await this.updateCart(cart.id, amazonCart)
-      // redirect to the cart url
-      cart = await db.Carts.findOne({id: cart.id})
-      return res.redirect(cart.affiliate_checkout_url)
+      const amazonCart = await this.createAmazonCart(cart)
+
+      // if everything worked, do the normal things like send emails
+      await super.checkout(cart)
+      return {
+        ok: true,
+        redirect: cart.affiliate_checkout_url
+      }
     }
   }
 }
@@ -445,6 +464,7 @@ class AmazonStore extends Store {
  *                 what happened if not (TODO)
  */
 function getErrorsFromAmazonCartCreate (res) {
+  console.log('error check', res)
   if (!res.Request.Errors) {
     console.log('no errors from creating cart, phew')
     return null
@@ -472,59 +492,6 @@ function getErrorsFromAmazonCartCreate (res) {
     }
   })
 }
-
-
-/**
- * condense items from multiple users/same user with same asin to conform amazon
- * format.
- *
- * @param      {array}  items   array of items from cart
- * @return     {array}  same as above but if asin was already there just reduced into same object
- */
-function condenseItems(items) {
-  var seenAsins = []
-  return items.reduce((prev, curr) => {
-    if (seenAsins.includes(curr.asin)) {
-      prev.find(x => x.asin === curr.asin).quantity += curr.quantity
-    } else {
-      seenAsins.push(curr.asin)
-      prev.push({
-        asin: curr.asin,
-        quantity: curr.quantity
-      })
-    }
-  return prev
-  }, [])
-}
-
-
-/**
- * create an amazon cart instead of worrying about updating cart and removing etc
- *
- * @param {array} items - array of items that would include:
- *                        ASIN - asin from amazon (TODO: allow for OfferListingId)
- *                        Quantity - quantity
- */
-function createAmazonCartWithItems (items) {
-  const useAsin = true
-  if (!items instanceof Array) {
-    items = [items]
-  }
-
-  // ability to use offerlistingid or asin later, just using asin rn
-
-  var amazonParams = {}
-
-  var condendesedItems = condenseItems(items)
-  var k = 1
-  for (i of condendesedItems) {
-    amazonParams[`Item.${k}.ASIN`] = i.asin
-    amazonParams[`Item.${k}.Quantity`] = i.quantity
-    k++
-  }
-  return amazonParams
-}
-
 
 /**
  * format cents to nice price.  amazon returns amount in cents
