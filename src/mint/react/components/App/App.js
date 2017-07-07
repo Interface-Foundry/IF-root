@@ -124,7 +124,7 @@ export default class App extends Component {
   render() {
     const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
     return (
-      <section className='app' onKeyDown={::this._handeKeyPress}>
+      <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
         <ModalContainer />

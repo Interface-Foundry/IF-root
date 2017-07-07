@@ -59,6 +59,12 @@ button {
   text-align: center;
   height: 100%;
 
+  &.sidenavOpen {
+    @media only screen and (max-width: 600px) {
+      overflow: hidden;
+    }
+  }
+
   & > .tabs {
     @media only screen and (max-width: 600px) {
       display: none;
