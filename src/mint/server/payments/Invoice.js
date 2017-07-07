@@ -1,7 +1,7 @@
 var moment = require('moment')
 const _ = require('lodash')
 const Cart = require('../cart/Cart')
-const userPaymentAmountHandler = require('./InvoiceUtils').userPaymentAmountHandler
+const userPaymentAmountHandler = require('../utilities/InvoiceUtils').userPaymentAmountHandler
 
 var db
 const dbReady = require('../../db')
@@ -38,7 +38,9 @@ class Invoice {
    * @return     {Promise}  the invoices
    */
   static async GetByCartId (cartId) {
+    logging.info('trying to get invoice by id ', cartId)
     const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
+    logging.info('got cart by id', invoice)
     return invoice
   }
 

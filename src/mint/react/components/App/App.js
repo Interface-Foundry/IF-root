@@ -1,6 +1,6 @@
 // mint/react/components/App/App.js
 
-// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component. 
+// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component.
 // If change needed here please add the addition shouldComponentUpdate
 
 import PropTypes from 'prop-types';
@@ -38,11 +38,12 @@ export default class App extends Component {
     status: PropTypes.string,
     history: PropTypes.object,
     selectedItemId: PropTypes.string,
-    getMoreSearchResults: PropTypes.func
+    getMoreSearchResults: PropTypes.func,
+    fetchInvoiceByCart: PropTypes.func
   }
 
   componentDidMount() {
-    const { _handleScroll, _logPageView } = this;
+    const { _handleScroll, _logPageView  } = this;
     _logPageView();
     this.scroll.addEventListener('scroll', _handleScroll);
   }
@@ -131,7 +132,7 @@ export default class App extends Component {
           <Route path={'/m/*'} exact component={Modal} />
           <Route path={'/404'} exact component={ErrorPage} />
         </div>
-        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
+        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }
       </section>
     );
   }

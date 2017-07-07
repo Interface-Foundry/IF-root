@@ -3,7 +3,7 @@ const _ = require('lodash')
 const Invoice = require('../payments/Invoice.js')
 const Cart = require('../cart/Cart.js')
 const PaymentSource = require('../payments/PaymentSources.js')
-const utils = require('../utilities/invoice_utils.js')
+const utils = require('../utilities/invoiceUtils.js')
 
 var db
 const dbReady = require('../../db')
@@ -250,23 +250,16 @@ module.exports = function (router) {
 
   /**
    * @api {get} /invoice/cart/:cart_id
-   * @apiDescription get all invoices related to a cart, if no invoices create one.
+   * @apiDescription get an invoice related to a cart, if no invoices create one.
    * @apiGroup Invoice
    *
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    let invoices = await Invoice.GetByCartId(req.params.cart_id)
-    logging.info('got these invoices', invoices)
-    if (invoices.length > 1) {
-      invoices = invoices[invoices.length - 1]
-    }
-    if (invoices.length === 0) {
-      invoices = {}
-    }
-    logging.info('sending invoices', invoices)
-
-    res.send(invoices)
+    console.log('in this route!!!!', req.params.cart_id)
+    const invoice = await Invoice.GetByCartId(req.params.cart_id)
+    logging.info('sending invoices', invoice)
+    return res.send(invoice)
   })
 
   /**

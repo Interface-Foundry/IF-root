@@ -5,8 +5,8 @@ import React, { Component } from 'react';
 import { numberOfItems } from '../../utils';
 import { AlertBubble } from '../../../react-common/components';
 
-function addInvoiceTab(tabs) {
-  if (process.env.NODE_ENV === 'development') {
+function addInvoiceTab(tabs, invoice) {
+  if (invoice && process.env.NODE_ENV === 'development') {
     tabs.push({
       tab: 'invoice',
       display: 'Invoice'
@@ -18,6 +18,7 @@ export default class Tabs extends Component {
 
   static propTypes = {
     selectTab: PropTypes.func,
+    fetchInvoiceByCart: PropTypes.func,
     cart: PropTypes.object,
     search: PropTypes.object,
     tab: PropTypes.string,
@@ -28,8 +29,9 @@ export default class Tabs extends Component {
     tabs: []
   }
 
-  componentDidMount() {
-    const { cart: { items, id }, search: { query } } = this.props;
+  componentWillMount() {
+    const { fetchInvoiceByCart, cart: { items, id  }, search: { query } } = this.props;
+    fetchInvoiceByCart(id);
     const tabs = [{
       tab: 'cart',
       url: `/cart/${id}`,
@@ -39,12 +41,13 @@ export default class Tabs extends Component {
       url: `/cart/${id}?q=${query}`,
       display: 'Search'
     }];
-    addInvoiceTab(tabs);
+
+    addInvoiceTab(tabs, true);
     this.setState({ tabs });
   }
 
   componentWillReceiveProps(nextProps) {
-    const { cart: { items, id }, search: { query } } = nextProps,
+    const { invoice, cart: { items, id }, search: { query } } = nextProps,
     itemsChanged = items.length > this.props.cart.items.length,
       tabs = [{
         tab: 'cart',
@@ -56,7 +59,7 @@ export default class Tabs extends Component {
         url: `/cart/${id}?q=${query}`,
         display: 'Search'
       }];
-    addInvoiceTab(tabs);
+    addInvoiceTab(tabs, invoice);
     this.setState({ tabs });
   }
 

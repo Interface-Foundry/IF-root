@@ -14,7 +14,8 @@ import {
   fetchItem,
   selectCartItem,
   selectTab,
-  selectAccordion
+  selectAccordion,
+  fetchPaymentStatus
 } from '../actions';
 
 import { isUrl, addSearchHistory } from '../utils';
@@ -48,7 +49,8 @@ const mapDispatchToProps = dispatch => ({
   copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id)),
   fetchItem: (item_id) => dispatch(fetchItem(item_id)),
 
-  updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues))
+  updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues)),
+  fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Cart);

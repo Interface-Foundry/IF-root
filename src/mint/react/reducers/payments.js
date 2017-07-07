@@ -50,6 +50,11 @@ export default function payments(state = initialState, action) {
       ...state,
       payments: action.response
     };
+  case 'INVOICE_BY_CART_SUCCESS':
+    return {
+      ...state,
+      invoice: action.response
+    };
   default:
     return state;
   }

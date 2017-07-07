@@ -10,7 +10,8 @@ import {
   fetchMetrics,
   navigateRightResults,
   navigateLeftResults,
-  getMoreSearchResults
+  getMoreSearchResults,
+  fetchInvoiceByCart
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -30,7 +31,8 @@ const mapStateToProps = (state, ownProps) => {
     page: state.search.page,
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup,
-    lazyLoading: state.search.lazyLoading
+    lazyLoading: state.search.lazyLoading,
+    invoice: state.payments.invoice
   };
 };
 
@@ -39,6 +41,7 @@ const mapDispatchToProps = dispatch => ({
   toggleSidenav: () => dispatch(toggleSidenav()),
   fetchCart: (id) => dispatch(fetchCart(id)),
   fetchMetrics: (id) => dispatch(fetchMetrics(id)),
+  fetchInvoiceByCart: (id) => dispatch(fetchInvoiceByCart(id)),
   navigateRightResults: () => dispatch(navigateRightResults()),
   navigateLeftResults: () => dispatch(navigateLeftResults()),
   getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page))

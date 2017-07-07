@@ -32,7 +32,7 @@ from './session';
 export {
   // invoices
   fetchInvoice,
-  fetchInvoices,
+  fetchInvoiceByCart,
   createInvoice,
   updateInvoice,
   // payments

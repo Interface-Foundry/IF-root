@@ -21,9 +21,9 @@ export const fetchInvoice = invoice_id => get(
   })
 );
 
-export const fetchInvoices = cart_id => get(
+export const fetchInvoiceByCart = cart_id => get(
   `/api/invoice/cart/${cart_id}`,
-  'INVOICES',
+  'INVOICE_BY_CART',
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

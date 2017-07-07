@@ -6,8 +6,6 @@ import { Invoice } from '../components';
 import {
   selectAccordion,
   fetchInvoice,
-  fetchInvoices,
-  createInvoice,
   updateInvoice,
   createPayment,
   fetchPaymentStatus,
@@ -29,8 +27,6 @@ const mapStateToProps = (state, ownProps) => {
 // What this does it connect the functions to redux, so that the results of those functions get passed to our redux store.
 const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
-  fetchInvoices: (invoice_id) => dispatch(fetchInvoices(invoice_id)),
-  createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
   createPayment: (invoice_id) => dispatch(createPayment(invoice_id)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
   createPaymentSource: (payment_data, payment_source) => dispatch(createPaymentSource(payment_data, payment_source)),
