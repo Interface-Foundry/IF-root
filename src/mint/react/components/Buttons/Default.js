@@ -11,7 +11,8 @@ export default class Default extends Component {
     cart: PropTypes.object,
     reorderCart: PropTypes.func,
     updateCart: PropTypes.func,
-    user: PropTypes.object
+    user: PropTypes.object,
+    toggleYpoCheckout: PropTypes.func
   }
 
   _handleShare = () => {
@@ -31,31 +32,66 @@ export default class Default extends Component {
     }
   }
 
+  _orderCart = (e) => {
+    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart } = this.props;
+    store === 'YPO'
+      ? toggleYpoCheckout(true)
+      : locked
+      ? reorderCart(id)
+      : leader.id === user.id
+      ? updateCart({ cart_id: id, locked: true })
+      : null;
+    store !== 'YPO' ? window.open(`/api/cart/${id}/checkout`) : null;
+  }
+
   render() {
     const {
-      cart,
-      user,
-      reorderCart,
-      updateCart,
-      toggleYpoCheckout
-    } = this.props,
-      total = calculateItemTotal(cart.items);
+      props: { cart, user, updateCart },
+      _orderCart
+    } = this,
+    total = calculateItemTotal(cart.items);
 
     return (
       <div className='default'>
         {
-          cart.locked ? <span>
-            <button className='yellow sub' onClick={() => cart.store==='YPO' ? toggleYpoCheckout(true) : reorderCart(cart.id)}> Re-Order {displayCost(total, cart.store_locale)} </button>
-            { cart.leader.id === user.id || cart.leader === user.id ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}> <Icon icon='Unlocked'/> Unlock Cart </button> : null }
-          </span> : <span>
-            {
-              cart.items.length === 0 ? 
-                <button className='yellow sub' disabled={true} > Checkout <span>{displayCost(total, cart.store_locale)} </span></button> : 
-                <button className='yellow sub' onClick={() => user.id === cart.leader.id ? cart.store==='YPO' ? toggleYpoCheckout(true) : updateCart({ ...cart, locked: true }) : null}> <a href={`/api/cart/${cart.id}/checkout`} target="_blank"> <Icon icon='Cart'/> <div className='text'><span> {displayCost(total, cart.store_locale)} </span> <p>Checkout</p> </div><Icon icon='RightChevron'/></a> </button> 
-              }
-            <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button>
-          </span>
-        }
+          cart.locked 
+          ? <span>
+              <button 
+                className='yellow sub' 
+                onClick={_orderCart}
+                > 
+                  Re-Order {displayCost(total, cart.store_locale)}
+                </button>
+                  { 
+                    cart.leader.id === user.id || cart.leader === user.id 
+                    ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
+                        <Icon icon='Unlocked'/> Unlock Cart 
+                      </button> 
+                    : null 
+                  }
+              </span> 
+            : <span>
+              {
+                cart.items.length === 0 
+                ? 
+                  <button className='yellow sub' disabled={true}>
+                    Checkout <span>{displayCost(total, cart.store_locale)} </span>
+                  </button> 
+                : 
+                  <button className='yellow sub' onClick={_orderCart}>
+                    <a href={`/api/cart/${cart.id}/checkout`} target="_blank">
+                      <Icon icon='Cart'/>
+                      <div className='text'>
+                        <span> {displayCost(total, cart.store_locale)} </span>
+                        <p>Checkout</p>
+                      </div>
+                      <Icon icon='RightChevron'/>
+                    </a>
+                  </button> 
+                }
+              <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button>
+            </span>
+          }
       </div>
     );
   }

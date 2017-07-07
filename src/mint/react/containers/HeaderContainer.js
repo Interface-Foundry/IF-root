@@ -12,7 +12,7 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = dispatch => ({
   _toggleLoginScreen: () => dispatch(togglePopup()),
-  _toggleSidenav: () => dispatch(toggleSidenav()),
+  _toggleSidenav: () => dispatch(toggleSidenav())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

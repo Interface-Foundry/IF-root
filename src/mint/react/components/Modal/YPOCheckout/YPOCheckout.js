@@ -6,7 +6,7 @@ import { displayCost } from '../../../utils';
 
 export default class YPOCheckout extends Component {
   static propTypes = {
-    total: PropTypes.string,
+    total: PropTypes.number,
     locale: PropTypes.string,
     orderNumber: PropTypes.string,
     accountNumber: PropTypes.string,
