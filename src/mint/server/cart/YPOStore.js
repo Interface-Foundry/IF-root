@@ -128,7 +128,7 @@ class YPOStore extends Store {
           <email>${leader.email}</email>
           <orderedAt>${new Date().toISOString()}</orderedAt>
       </orderedBy>
-      <order_number>${cart.ypo_order_number}</order_number>
+      <order_number>${cart.order_number}</order_number>
       <delivery_details>
           <account_number>${cart.account_number}</account_number>
           <delivery_message>${cart.delivery_message}</delivery_message>
