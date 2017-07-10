@@ -88,7 +88,7 @@ export default (state = initialState, action) => {
       ...state,
       lastUpdatedId: action.response.item.id,
       results: state.results.reduce((acc, item, i) => {
-        item.id === action.response.item.id ? acc.push({ ...item, ...action.response.item }) : acc.push(item);
+        item.asin === action.response.item.asin || item.id === action.respone.item.id ? acc.push({ ...item, ...action.response.item, id: item.id }) : acc.push(item);
         return acc;
       }, [])
     };

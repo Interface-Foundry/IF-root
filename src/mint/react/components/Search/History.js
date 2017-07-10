@@ -50,7 +50,6 @@ export default class History extends Component {
                     <Icon icon='Eye'/>
                   </div>
                   <div className='history__term-query' onMouseDown={(e) => {
-                    console.log(e);
                     updateQuery(category.humanName);
                     submitQuery(category.machineName, store, store_locale);
                   }}>
