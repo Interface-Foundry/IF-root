@@ -2,7 +2,7 @@
   /** @type {string} original link posted */
   original_link: 'string',
 
-  raw_html_id: 'string', //relational DB id for the saved raw html
+  raw_html: 'string', //relational DB id for the saved raw html
 
   //translated product name into user language
   name: 'string',
@@ -17,8 +17,7 @@
   },
 
   domain: {
-    hostname: ['string'], //muji.net && muji.com/jp/ <-- domain pseudonyms
-    name: 'string', //muji_jp
+    name: 'string', //muji.net
     description: 'string', //Muji Japan Store
     thumbnail_url: 'string', //brand logo 
     main_image_url: 'string', //brand logo large 
