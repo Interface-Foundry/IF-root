@@ -336,6 +336,7 @@ module.exports = function (router) {
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
 
+    var items = yield db.Items.findOne({id: item.id}).populate('options')
     return res.send(item)
   }));
 
@@ -728,6 +729,8 @@ module.exports = function (router) {
       cart.dirty = true
       yield cart.save()
     }
+
+    var item = yield db.Items.findOne({id: item.id}).populate('options')
 
     res.send(item)
   }))
