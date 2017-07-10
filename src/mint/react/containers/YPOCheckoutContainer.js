@@ -18,11 +18,8 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = dispatch => ({
   toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show)),
-  submitYpoData: ({ cartId, orderNumber, accountNumber, voucherCode, deliveryMessage }) => {
-
-    dispatch(updateCart({ id: cartId, order_number: orderNumber, account_number: accountNumber, voucher_code: voucherCode, delivery_message: deliveryMessage, locked: true }));
-    dispatch(toggleYpoCheckout(false));
-  }
+  submitYpoData: ({ cartId, orderNumber, accountNumber, voucherCode, deliveryMessage }) =>
+    dispatch(updateCart({ id: cartId, order_number: orderNumber, account_number: accountNumber, voucher_code: voucherCode, delivery_message: deliveryMessage, locked: true })).then(() => dispatch(toggleYpoCheckout(false)))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(YPOCheckout);
