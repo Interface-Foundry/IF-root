@@ -7,6 +7,11 @@ var fx = require("money")
 const Translate = require('@google-cloud/translate')
 var currency = require('currency-code-map')
 
+//encoding stuff
+var charset = require('charset'),
+    jschardet = require('jschardet'),
+    Iconv = require('iconv').Iconv
+
 
 //come here and get localized
 var getLocale = function * (url,user_country,user_locale,store_country,domain){
@@ -59,6 +64,7 @@ var getLocale = function * (url,user_country,user_locale,store_country,domain){
 var scrapeURL = function * (url){
 	var options = {
 		url: url,
+		encoding: null,
 		// proxy: proxyUrl,
 		headers: {
 		  'User-Agent': fakeUserAgent(),
@@ -69,18 +75,90 @@ var scrapeURL = function * (url){
 		},
 		// timeout: timeoutMs,
 	}
-	return yield request(options, function (error, response, html) {
-	  if (!error && response.statusCode == 200) {
-	    return html
+	var convert
+	yield request(options, function (error, res, html) {
+	  if (!error && res.statusCode == 200) {
+
+	  	//detect char encoding 
+	  	var enc = charset(res.headers, html) || jschardet.detect(html).encoding.toLowerCase()
+
+	  	//if not utf-8
+	    if(enc !== 'utf8') {
+	        var iconv = new Iconv(enc, 'UTF-8//TRANSLIT//IGNORE') //setup
+   			convert = iconv.convert(new Buffer(html)).toString('utf8') //do convert
+	    }else {
+	    	convert = html
+	    }
+
 	  }else {
 	  	console.log('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
 	  }
+
 	})
+	return convert
 }
 
 //try to get data from html 
 var tryHtml = function * (s,$) {
+
 	switch(s.domain.name){
+
+		case 'store.punyus.jp':
+			//get product id
+			s.product_id = yield urlValue(s.original_link,'detail',1)
+			s.parent_id = s.product_id 
+
+			//get meta tags
+		 	var meta = $('meta')
+			var keys = Object.keys(meta)
+
+			//get images
+			keys.forEach(function(key){
+				if (meta[key].attribs && meta[key].attribs.property) {
+					if(meta[key].attribs.property === 'og:image'){
+						//ogImage = meta[key].attribs.content
+						s.thumbnail_url = meta[key].attribs.content
+						s.main_image_url = meta[key].attribs.content
+					}
+				}
+			})
+
+			console.log('SCRAPER NAME ????? ',$('.itemInfo').find('[itemprop=name]').text().trim())
+
+
+
+			s.original_name.value = $('.itemInfo').find('[itemprop=name]').text().trim()
+
+			s.original_description.value = $('.itemInfo').find('[itemprop=description]').text().trim()
+
+			var p = $('.price').text().trim().replace(/[^0-9.]/g, "")
+			s.original_price.value = parseFloat(p)
+
+			$('.sku_colorList').each(function(i, elm) {
+
+				// //item not available
+				// var available
+				// if($(this).attr('class') == 'out'){
+				// 	available = false
+				// }else {
+				// 	available = true
+				// }
+
+				s.options.push({
+					type: 'color',
+					original_name: {
+						value: $('.sku_title',this).text().trim()
+					}
+				})
+
+				$('.axis_sku',this).each(function(i, elm) {
+					console.log('SIZE?? ',$(this).text().trim())
+				})
+			})
+
+			return s
+		break
+
 		case 'muji.net':
 
 			//get product id
@@ -239,7 +317,7 @@ var getRates = function * (){
  * @param {string} Target language
  * @returns {object} A list of currencies with corresponding rates
  */
-var translateText = function * (text, target) {
+var translate = function * (text, target) {
   // Instantiates a client
   const translate = Translate()
   var translations
@@ -267,7 +345,7 @@ var urlValue = function * (url,find,pointer){
 	return split[0]
 }
 
-var translate = function * (s){
+var translateText = function * (s){
 
 	var c = []
 
@@ -301,7 +379,7 @@ var translate = function * (s){
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
-	var tc_map = yield translateText(tc.translate,s.user.locale)
+	var tc_map = yield translate(tc.translate,s.user.locale)
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -326,15 +404,17 @@ co(function *(){
 	var user_country = 'US'
 	var user_locale = 'en'
 	var store_country = 'JP'
-	var domain = 'muji.net'
-	var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+	//var domain = 'muji.net'
+	var domain = 'store.punyus.jp'
+	//var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+	var url = 'https://store.punyus.jp/detail/PN17T-014/'
 
 	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
 	var html = yield scrapeURL(url)
 	var $ = cheerio.load(html)
 	s = yield tryHtml(s,$)
  	s = yield foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
- 	s = yield translate(s)
+ 	s = yield translateText(s)
  	
 
 	console.log('res: ',s)
