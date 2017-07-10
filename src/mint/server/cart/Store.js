@@ -80,7 +80,7 @@ class Store {
    * @return {Promise}      [description]
    */
   async checkout(cart) {
-    cart.locked = true;
+    // cart.locked = true;
     await cart.save()
   }
 
