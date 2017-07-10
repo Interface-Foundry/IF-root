@@ -39,7 +39,7 @@ export default class App extends Component {
       Component = containers[tab];
 
     return (
-      <div className='view'>
+      <div className={`view view_${tab}`}>
         { tab === 'cart' ? <Details {...props} /> : null }
         { Component ? <Component /> : null }
       </div>
