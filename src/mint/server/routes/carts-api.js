@@ -305,9 +305,11 @@ module.exports = function (router) {
       if (existingCart && existingCart.id !== cart.id) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
+      logging.info('GETTING PREVIEWED ITEM FROM DB')
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
+      logging.info('CREATING ITEM FROM URL')
       // Create an item from the url
       item = yield cartUtils.addItem(req.body, cart, 1)
     }
@@ -324,7 +326,7 @@ module.exports = function (router) {
 
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
-
+    var item = yield db.Items.findOne({id: item.id}).populate('options')
     return res.send(item)
   }));
 
@@ -718,6 +720,7 @@ module.exports = function (router) {
       yield cart.save()
     }
 
+    var item = yield db.Items.findOne({id: item.id}).populate('options')
     res.send(item)
   }))
 
@@ -1067,7 +1070,7 @@ module.exports = function (router) {
         return s.store_type != 'YPO'
       });
     }
-    
+
     res.send(stores)
   }))
 
