@@ -299,6 +299,7 @@ module.exports = function (router) {
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
     var item
+    logging.info('ITEM ID &&&', req.query.item_id, req.body.item_id)
     if (req.query.item_id && !req.body.item_id) req.body.item_id = req.query.item_id
     if (req.body.item_id) {
       // make sure it's not in a cart already
@@ -309,9 +310,18 @@ module.exports = function (router) {
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
+      logging.info('are we creating an item from the url')
       // Create an item from the url
-      item = yield cartUtils.addItem(req.body, cart, 1)
+      logging.info('cart.store', cart.store)
+
+      if (cart.store.includes('amazon') || cart.store.includes('YPO')) {
+        item = yield cartUtils.addItem(req.body, cart, 1)
+      }
+      else throw new Error('item does not exist')
     }
+
+    logging.info('ostensibly added the item to the cart')
+    logging.info('ITEM ID UUUGH', item.id)
 
     // join the two database documents
     cart.items.add(item.id)

@@ -79,6 +79,7 @@ class Store {
           store_name: this.name,
           number_results: items.length
         })
+        logging.info('real live item', items[0].id)
         return items
       })
   }
