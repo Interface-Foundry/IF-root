@@ -3,22 +3,19 @@
 @import '../../../react-common/styles/Animations';
 
 .buttons {
-  position: relative;
   height: $nav-height;
   padding: 0 ($padding * 2);
+  position: relative;
 
   button {
-    position: relative;
-    margin: ($padding / 2) $padding;
-    height: 100%;
-    line-height: $nav-height - $padding;
-    height: $nav-height - $padding;
-    padding: 0 ($padding * 3);
+    border: 0;
+    border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
-    border-radius: 5px;
-    border: 0;
-    line-height: $nav-height - $padding;
+    height: $nav-height - $padding;
+    margin: ($padding / 2) $padding;
+    padding: 0 ($padding * 3);
+    position: relative;
     white-space: nowrap;
 
     @media only screen and (max-width: 600px) {
@@ -28,8 +25,8 @@
 
     svg {
       display: inline-block;
-      width: $nav-height - $padding * 1.5;
       height: $nav-height - $padding * 1.5;
+      width: $nav-height - $padding * 1.5;
     }
 
     div {
@@ -37,12 +34,9 @@
     }
 
     &.sub {
-      line-height: $nav-height - $padding * 2.5;
-
       span {
-        height: $padding;
-        line-height: $padding;
         bottom: 0;
+        height: $padding;
       }
     }
 
@@ -53,7 +47,6 @@
       svg {
         fill: $color-blue;
         padding: $padding / 2;
-        vertical-align: top !important;
       }
     }
 
@@ -64,57 +57,59 @@
       svg {
         fill: white;
         padding: $padding;
-        vertical-align: top !important;
+      }
+
+      p {
+        display: inline-block;
       }
     }
 
     &.yellow {
       background: $mainColor;
-      line-height: $nav-height - $padding;
       padding: 0 $padding;
+
       a {
-        display: block;
-      }
+        align-items: center;
+        display: flex;
 
-      svg {
-        height: $nav-height/2;
-        margin-bottom: 5px;
-      }
-
-      span {
-        line-height: $nav-height - $padding;
-        font-weight: 600;
-        
-      }
-
-      p {
-        display: inline-block;
-        margin-left: 25px;
-        font-size: 18px;
-      }
-
-      svg {
-        &:last-of-type {
-          display: none;
+        svg {
+          height: $nav-height / 2;
         }
-      }
 
-      .text {
-        display: inline-block;
-        width: calc(100% - #{$nav-height - $padding});
-        height: 100%;
-
-        @media only screen and (max-width: 600px) {
-          width: auto;
+        svg {
+          &:last-of-type {
+            display: none;
+          }
         }
-      }
 
-      &:disabled {
-        background: lighten(#333, 70);
-        color: #333;
+        p {
+          display: inline;
+          font-size: 16px;
+          font-weight: 600;
+          padding: ($padding / 2) $padding;
 
-        & span {
-          display: none; // we don't need the price I guess???? this is a mess
+          &:first-of-type {
+            border-right: 2px solid darken($mainColor, 20%);
+            font-weight: 400;
+
+            @media only screen and (max-width: 600px) {
+              flex: 1 1 auto;
+            }
+          }
+
+          @media only screen and (max-width: 600px) {
+            padding: 0 10px;
+          }
+        }
+
+        &:disabled {
+          background: lighten(#333, 70);
+          color: #333;
+
+          & span {
+            display: none; // we don't need the price I guess???? this is a mess
+         
+          }
         }
       }
     }
