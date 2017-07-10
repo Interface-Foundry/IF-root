@@ -9,7 +9,7 @@
   width: 100%;
   z-index: 1;
   @media only screen and (max-width: 600px) {
-    padding: $padding*7.5 $padding*3 0;
+    padding: $padding*7.5 $padding*2.5 0;
   }
   .hero__main {
     position: relative;
@@ -41,6 +41,7 @@
         font-size: 30px;
         color: darken($bgColor, 15);
         line-height: 40px;
+        white-space: nowrap;
         b {
           font-weight: 800;
           color: $primaryColor;
@@ -147,7 +148,7 @@
               background: $warningColor;
               color: white;
               @media only screen and (max-width: 600px) {
-                margin: 0 0 $padding*2;
+                margin: 0 0 $padding;
                 padding: $padding $padding*2;
               }
             }
@@ -227,6 +228,10 @@
     }
     @media only screen and (max-width: 600px) {
       margin-top: -6%;
+      height: auto;
+    }
+    @media only screen and (max-width: 350px) {
+      margin-top: 0;
     }
   }
 }
