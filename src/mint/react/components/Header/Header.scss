@@ -3,38 +3,37 @@
 @import '../../../react-common/styles/Animations';
 
 .navbar {
-  position: relative;
-  display: block;
-  height: $nav-height;
-  line-height: $nav-height;
-  font-family: 'Raleway';
-  text-align: left;
   background: $secondaryColor;
-  color: white;
+  color: $color-white;
+  display: block;
+  font-family: 'Raleway';
+  height: $nav-height;
+  position: relative;
+  text-align: left;
   width: 100%;
   z-index: 100;
 
   & > .beta {
-    position: absolute;
-    background: white;
-    width: 45px;
-    left: 20px;
-    top: 45px;
-    font-size: 13px;
-    height: 25px;
-    line-height: 25px;
-    border-radius: 5px;
-    text-align: center;
+    background: $color-white;
+    border: 1px solid $secondaryColor;
+    border-radius: 3px;
     color: $secondaryColor;
-    padding: 0 $padding/2;
-    box-shadow: $card-box-shadow;
     display: block;
+    font-size: 8px;
+    font-weight: 900;
+    left: 26px;
+    padding: 0 3px;
+    position: absolute;
+    text-align: center;
+    text-transform: uppercase;
+    top: 37px;
 
     @media (max-width: 600px) {
-      left: 2.5px;
+      left: 11px;
+      top: 35px;
+      // transform: rotate(-25deg);
     }
   }
-
 
   @media (max-width: 600px) {
     padding: 0;
@@ -46,10 +45,10 @@
   .search {
     background: white;
     border-radius: 5px;
+
     @media only screen and (max-width: 600px) {
       // display: none;
       margin: 10px 0;
-
     }
   }
 
@@ -80,16 +79,19 @@
           padding-left: 0;
         }
       }
+
       .desktop {
         @media only screen and (max-width: 600px) {
           display: none;
         }
       }
+
       .mobile {
         width: 30px;
         margin: 0;
         height: 30px;
         margin: $padding $padding 0 0;
+
         @media only screen and (min-width: 600px) {
           display: none;
         }
