@@ -122,10 +122,10 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__actions'>
             {
               archivedCarts.length
-              ? <SideNavLink className='lock' to={'/m/archive'}><Icon icon='Locked'/><h4>Locked Carts</h4></SideNavLink>
+              ? <SideNavLink className='lock' to={'/m/archive'}><Icon icon='Locked'/><h4>Archives</h4></SideNavLink>
               : null
             }
-            {user_account.name ? <SideNavLink className='settings' to={'/m/settings'}><Icon  icon='Settings'/><h4>My Settings</h4></SideNavLink> : null }
+            {user_account.name ? <SideNavLink className='settings' to={'/m/settings'}><Icon  icon='Settings'/><h4>Settings</h4></SideNavLink> : null }
             <SideNavLink className='mail' to={'/m/feedback'}><Icon  icon='Email'/><h4>Feedback</h4></SideNavLink>
           </li>
           <footer className='sidenav__footer'>

@@ -1,4 +1,4 @@
-// react/components/modal/Feedback/Feedback.js
+// react/components/Display/Feedback/Feedback.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -43,7 +43,7 @@ export default class Feedback extends Component {
     const { _setRating, _setReview, _handleSubmit } = this;
 
     return (
-      <form onSubmit={_handleSubmit} className="modal__form">
+      <form onSubmit={_handleSubmit} className="display__form">
           <div>
             {
               !rating ? <RatingField 

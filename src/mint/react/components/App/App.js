@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
-import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
+import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginScreenContainer, SidenavContainer, StoresContainer, ModalContainer } from '../../containers';
 import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
@@ -124,9 +124,10 @@ export default class App extends Component {
   render() {
     const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
     return (
-      <section className='app' onKeyDown={::this._handeKeyPress}>
+      <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
+        <ModalContainer />
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>

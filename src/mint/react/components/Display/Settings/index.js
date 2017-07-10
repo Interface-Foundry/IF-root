@@ -1,4 +1,4 @@
-// react/components/modal/Settings/index.js
+// react/components/Display/Settings/index.js
 
 import Settings from './Settings';
 import './Settings.scss';

@@ -1,0 +1,36 @@
+// react/components/Modal/Modal.scss
+
+@import '../../../react-common/styles/Constants';
+@import '../../../react-common/styles/Animations';
+
+.modal-overlay {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  overflow: auto;
+  position: absolute;
+  right: 0;
+  top: $nav-height;
+  z-index: 100;
+  font-family: $secondary-font;
+
+  .modal-box {
+    background: $color-white;
+    border-radius: $padding / 2;
+    box-shadow: $card-box-shadow;
+    width: 350px;
+
+    .modal-box__head {
+      border-radius: ($padding / 2) ($padding / 2) 0 0;
+      border-top: 8px solid $secondaryColor;
+      width: 100%;
+    }
+
+    .modal-box__content {
+      // padding: $padding * 2;
+    }
+  }
+}

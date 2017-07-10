@@ -1,4 +1,4 @@
-// react/components/modal/Settings/Settings.js
+// react/components/Display/Settings/Settings.js
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';

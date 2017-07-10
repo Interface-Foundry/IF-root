@@ -59,6 +59,12 @@ button {
   text-align: center;
   height: 100%;
 
+  &.sidenavOpen {
+    @media only screen and (max-width: 600px) {
+      overflow: hidden;
+    }
+  }
+
   & > .tabs {
     @media only screen and (max-width: 600px) {
       display: none;
@@ -190,9 +196,14 @@ button {
         &.blue {
           display: none;
         }
+        &.lock {
+          width: 75%;
+        }
         &.locked {
           background: $secondaryColor;
           color: white;
+          width: 25%;
+          float: left;
 
           svg {
             fill: white;

@@ -1,8 +1,7 @@
 // react/index.js
-
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
 import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
@@ -13,7 +12,6 @@ import ReactGA from 'react-ga';
 import Reducers from './reducers';
 import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
 import { AppContainer } from './containers';
-
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
@@ -36,11 +34,9 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   });
   middleware = [...middleware, loggerMiddleware];
 }
-
-const store = createStore(
-  Reducers,
-  applyMiddleware(...middleware)
-);
+//apparently we should use in production? there's a bunch of posts
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 
 // Basically our initialization sequence
 // Check session

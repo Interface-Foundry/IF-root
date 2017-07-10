@@ -1,11 +1,12 @@
-// react/components/modal/EditCart/EditCart.scss
+// react/components/Display/EditCart/EditCart.scss
 @import '../../../../react-common/styles/Constants';
 
 .editCart {
-  overflow: scroll;
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   .name {
     padding: $padding * 2;

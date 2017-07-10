@@ -3,7 +3,8 @@ const initialState = {
   sidenav: false,
   popup: false,
   selectedAccordion: 'shipping',
-  viewTab: 'cart'
+  viewTab: 'cart',
+  showYpoCheckout: false
 };
 
 export default (state = initialState, action = {}) => {
@@ -42,6 +43,11 @@ export default (state = initialState, action = {}) => {
         ...state,
         popup: !state.popup
       };
+    case 'TOGGLE_YPO_CHECKOUT': 
+    return {
+      ...state,
+      showYpoCheckout: action.show !== undefined ? action.show : !state.show
+    };
     case 'SEARCH_SUCCESS':
     case 'SELECT_VIEW_TAB':
       return {
