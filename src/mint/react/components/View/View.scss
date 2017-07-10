@@ -3,7 +3,7 @@
 @import '../../../react-common/styles/Animations';
 
 .view {
-  height: 100%;
+  padding: 0 0 25px;
 
 	@media only screen and (max-width: 600px) {
     height: auto;
