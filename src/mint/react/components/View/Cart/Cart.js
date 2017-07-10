@@ -19,13 +19,17 @@ export default class Cart extends Component {
     updateItem: PropTypes.func
   }
 
+  constructor(props) {
+    super(props)
+    this._toggleCart = ::this._toggleCart;
+  }
+
   state = {
     openCarts: []
   }
 
   _toggleCart(id) {
     const { openCarts } = this.state;
-    debugger
 
     if(openCarts.includes(id)) {
       const index = openCarts.indexOf(id);
@@ -50,7 +54,7 @@ export default class Cart extends Component {
             <th colSpan='100%'>
               {
                 myCart.length
-                ? <div className={`card ${openCarts.includes(user.id) ? 'open' : ''}`}>
+                ? <div className={`card`}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                   <h1 className='date' onClick={() => _toggleCart(user.id)}> 
                     <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
@@ -63,7 +67,7 @@ export default class Cart extends Component {
                     Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
                   </z>
                   </h4>
-                  <ul>
+                  { openCarts.includes(user.id) ? <ul>
                     {
                       myCart.map((item) => {
                         return <li key={item.id} className={editId === item.id ? 'edit' : ''}>
@@ -98,7 +102,7 @@ export default class Cart extends Component {
                         </li>;
                       })
                     }
-                  </ul>
+                  </ul> : null }
                 </div> : null
               }
             </th>
@@ -109,7 +113,7 @@ export default class Cart extends Component {
             userCarts.others.map((userCart, i) => (
               <tr key={userCart.id}>
                 <td colSpan='100%'>
-                  <div className={`card ${openCarts.includes(userCart.id) ? 'open' : ''}`}>
+                  <div className={`card`}>
                     { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
                     <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
                       <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
@@ -118,42 +122,45 @@ export default class Cart extends Component {
                       <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
                       <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
                     </h4>
-                    <ul>
-                      {
-                        userCart.items.map((item) => (
-                          <li key={item.id} className={editId === item.id ? 'edit' : ''}>
-                            <div className={'image'} style={{
-                              backgroundImage: `url(${item.main_image_url})`
-                            }}/>
-                            <div className='text'>
-                              <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
-                              <h1>{item.name}</h1>
-                              <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+
+                    { 
+                      openCarts.includes(userCart.id) ? <ul>
+                        {
+                          userCart.items.map((item) => (
+                            <li key={item.id} className={editId === item.id ? 'edit' : ''}>
+                              <div className={'image'} style={{
+                                backgroundImage: `url(${item.main_image_url})`
+                              }}/>
+                              <div className='text'>
+                                <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                                <h1>{item.name}</h1>
+                                <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+                                {
+                                  !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
+                                    <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                                    <p>{ item.quantity }</p>
+                                    <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
+                                  </div> : null
+                                }
+                              </div>
                               {
-                                !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
-                                  <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
-                                  <p>{ item.quantity }</p>
-                                  <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                                </div> : null
-                              }
-                            </div>
-                            {
-                              editId === item.id ? (
-                                <div className='extra'>
-                                  <div className='text__expanded'>
-                                    <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
-                                    <div>
-                                      {item.description}
+                                editId === item.id ? (
+                                  <div className='extra'>
+                                    <div className='text__expanded'>
+                                      <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                                      <div>
+                                        {item.description}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ) : null
-                            }
-                            <CartButtons {...this.props} item={item}/>
-                          </li>
-                        ))
-                      }
-                    </ul>
+                                ) : null
+                              }
+                              <CartButtons {...this.props} item={item}/>
+                            </li>
+                          ))
+                        }
+                      </ul> : null 
+                    }
                   </div>
                 </td>
               </tr>
