@@ -70,51 +70,52 @@
 
     &.yellow {
       background: $mainColor;
-      line-height: $nav-height - $padding;
       padding: 0 $padding;
+
       a {
-        display: block;
-      }
+        align-items: center;
+        display: flex;
+        line-height: unset;
 
-      svg {
-        height: $nav-height/2;
-        margin-bottom: 5px;
-      }
-
-      span {
-        line-height: $nav-height - $padding;
-        font-weight: 600;
-        
-      }
-
-      p {
-        display: inline-block;
-        margin-left: 25px;
-        font-size: 18px;
-      }
-
-      svg {
-        &:last-of-type {
-          display: none;
+        svg {
+          height: $nav-height / 2;
         }
-      }
 
-      .text {
-        display: inline-block;
-        width: calc(100% - #{$nav-height - $padding});
-        height: 100%;
-
-        @media only screen and (max-width: 600px) {
-          width: auto;
+        svg {
+          &:last-of-type {
+            display: none;
+          }
         }
-      }
 
-      &:disabled {
-        background: lighten(#333, 70);
-        color: #333;
+        p {
+          display: inline;
+          font-size: 16px;
+          font-weight: 600;
+          padding: 5px;
 
-        & span {
-          display: none; // we don't need the price I guess???? this is a mess
+          &:first-of-type {
+            border-right: 2px solid darken($mainColor, 20%);
+            font-weight: 400;
+
+            @media only screen and (max-width: 600px) {
+              flex: 1 1 auto;
+              
+            }
+          }
+
+          @media only screen and (max-width: 600px) {
+            padding: 0 10px;
+          }
+        }
+
+        &:disabled {
+          background: lighten(#333, 70);
+          color: #333;
+
+          & span {
+            display: none; // we don't need the price I guess???? this is a mess
+         
+          }
         }
       }
     }

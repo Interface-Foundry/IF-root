@@ -81,10 +81,8 @@ export default class Default extends Component {
                   <button className='yellow sub' onClick={_orderCart}>
                     <a href={`/api/cart/${cart.id}/checkout`} target="_blank">
                       <Icon icon='Cart'/>
-                      <div className='text'>
-                        <span> {displayCost(total, cart.store_locale)} </span>
-                        <p>Checkout</p>
-                      </div>
+                      <p>{displayCost(total, cart.store_locale)}</p>
+                      <p>Checkout</p>
                       <Icon icon='RightChevron'/>
                     </a>
                   </button> 
