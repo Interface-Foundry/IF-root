@@ -115,7 +115,6 @@ var tryHtml = function * (s,$) {
 
 			//get price
 			$('.price').each(function(i, elm) {
-
 				if ($(this).text()){
 					var p = $(this).text().trim().replace(/[^0-9.]/g, "") //locate price, remove other text
 					s.original_price.value = parseFloat(p)
@@ -263,7 +262,9 @@ var urlValue = function * (url,find,pointer){
 	//locate value in URL, pass URL to split and move up/down the array to find value
 	//i.e. get number in: /detail/4549738521792 
 	var split = url.split('/')
-	return split[split.indexOf(find) + pointer]
+	split = split[split.indexOf(find) + pointer]
+	split = split.split('?')
+	return split[0]
 }
 
 var translate = function * (s){
@@ -326,7 +327,7 @@ co(function *(){
 	var user_locale = 'en'
 	var store_country = 'JP'
 	var domain = 'muji.net'
-	var url = 'https://www.muji.net/store/cmdty/detail/4549738531043'
+	var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
 
 	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
 	var html = yield scrapeURL(url)
@@ -336,7 +337,7 @@ co(function *(){
  	s = yield translate(s)
  	
 
-	console.log('ZXZXZXZXZX ',s)
+	console.log('res: ',s)
 
     //save RAW HTML here
 
