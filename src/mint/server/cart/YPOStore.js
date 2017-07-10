@@ -106,10 +106,14 @@ class YPOStore extends Store {
   }
 
   async checkout(cart) {
-    const leader = await db.UserAccounts.findOne({id: cart.leader})
+    if (typeof cart.leader === 'object') {
+      var leader = cart.leader
+    } else if (typeof cart.leader === 'string') {
+      leader = await db.UserAccounts.findOne({id: cart.leader})
+    }
     const address = await db.Addresses.findOne({user_account: leader.id})
 
-    const itemsXML = cart.items.map(i => {
+    const itemsXML = cart.items.map(item => {
         return `<item>
             <store>YPO</store>
             <code>${item.code}</code>
