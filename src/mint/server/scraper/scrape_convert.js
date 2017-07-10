@@ -167,11 +167,14 @@ var tryHtml = function * (s,$) {
 				}else {
 					selected = false
 				}
+
 				s.options.push({
 					type: 'color',
 					original_name: {
-						value: $(this).text().trim()
+						value: $('img',this).attr('title') //get value inside img title in this
 					},
+					thumbnail_url: $('img',this).attr('src'),
+					main_image_url: $('img',this).attr('src'),
 					selected: selected
 				})
 			})
@@ -321,7 +324,7 @@ co(function *(){
 	var user_locale = 'en'
 	var store_country = 'JP'
 	var domain = 'muji.net'
-	var url = 'https://www.muji.net/store/cmdty/detail/4549738522577'
+	var url = 'https://www.muji.net/store/cmdty/detail/4549738531043'
 
 	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
 	
@@ -334,8 +337,9 @@ co(function *(){
  	var tc = yield translate(s)
  	var tc_map = yield translateText(tc.translate,s.user.locale)
 
+ 	console.log('TCTCTCTC ',tc_map)
+
 	for (var i = 0; i < tc.context.length; i++) {
-		console.log(tc.context.length)
 		if(tc.context[i].type == 'name'){
 			s.name = tc_map[i]
 			// c.push({
@@ -349,7 +353,16 @@ co(function *(){
 			// 	value: s.original_description.value
 			// })
 		}else if(tc.context[i].type == 'option'){
-			console.log('FIRING OPTION')
+			console.log('FIRING OPTION ', tc.context.length - i)
+
+			for (var z = 0; z < tc.context.length - i; z++) {
+
+				console.log('FIRING ',z)
+
+				s.options[z].name = tc_map[z + i]
+			}
+
+			break
 			// s.options.forEach(function(o){
 			// 	if(o.original_name){
 			// 		c.push({
