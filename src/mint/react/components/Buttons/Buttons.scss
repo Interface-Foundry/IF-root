@@ -77,8 +77,11 @@
         }
 
         svg {
+          order: 1;
+
           &:last-of-type {
             display: none;
+            order: 4;
           }
         }
 
@@ -89,16 +92,23 @@
           padding: ($padding / 2) $padding;
 
           &:first-of-type {
-            border-right: 2px solid darken($mainColor, 20%);
+            order: 0;
             font-weight: 400;
 
             @media only screen and (max-width: 600px) {
               flex: 1 1 auto;
+              order: 1;
             }
+          }
+
+          &:last-of-type {
+            order: 2;
+            border-left: 2px solid darken($mainColor, 20%);
           }
 
           @media only screen and (max-width: 600px) {
             padding: 0 10px;
+
           }
         }
 
