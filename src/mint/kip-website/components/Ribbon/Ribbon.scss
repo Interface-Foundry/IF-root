@@ -58,6 +58,7 @@
     pointer-events: auto;
     display: inline-block;
     border: none;
+    margin: 0;
     .image {
       display: inline-block;
       background-size: contain;
@@ -159,6 +160,7 @@
         button {
           background: $warningColor;
           color: white;
+          white-space: nowrap;
         }
       }
     }
@@ -169,8 +171,9 @@
     flex: 1 1 auto;
     align-items: center;
     justify-items: flex-start;
+    z-index: 500;
     .right, .row, .ribbon, .action {
-      height: unset;
+      height: auto;
       a {
         display: flex;
         flex-direction: column;
@@ -183,16 +186,20 @@
       flex: 1 0 0;
     }
   }
+  .head {
+    width: 110px;
+    height: 60px;
+  }
   .cart {
-    display: flex;
-    justify-content: flex-end;
+    display: inline-block;
+    text-align: right;
+    width: auto;
     @media only screen and (max-width: 690px) {
-      flex: 1 1 auto;
       min-width: 280px;
+      width: calc(100% - 110px);
     }
     @media only screen and (max-width: 500px) {
-      min-width: unset;
-      flex: 1 1 auto;
+      min-width: auto;
     }
   }
 }

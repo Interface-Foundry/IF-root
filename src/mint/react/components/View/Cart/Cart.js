@@ -19,8 +19,26 @@ export default class Cart extends Component {
     updateItem: PropTypes.func
   }
 
+  state = {
+    openCarts: []
+  }
+
+  _toggleCart(id) {
+    const { openCarts } = this.state;
+    debugger
+
+    if(openCarts.includes(id)) {
+      const index = openCarts.indexOf(id);
+      this.setState({openCarts: [...openCarts.slice(0, index), ...openCarts.slice(index + 1)]});
+    } else {
+      this.setState({openCarts: [...openCarts, id]});
+    }
+  }
+
   render() {
     const { cart, user, editId, updateItem } = this.props,
+      { openCarts } = this.state,
+      { _toggleCart } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id;
@@ -32,9 +50,11 @@ export default class Cart extends Component {
             <th colSpan='100%'>
               {
                 myCart.length
-                ? <div className='card'>
+                ? <div className={`card ${openCarts.includes(user.id) ? 'open' : ''}`}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
-                  <h1 className='date'> <span>  </span> </h1>
+                  <h1 className='date' onClick={() => _toggleCart(user.id)}> 
+                    <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
+                  </h1>
                   <h4>
                     <span className='grey'>{numberOfItems(myCart)} items • Updated {timeFromDate(myCart[0].updatedAt)}</span>
                   </h4>
@@ -89,9 +109,11 @@ export default class Cart extends Component {
             userCarts.others.map((userCart, i) => (
               <tr key={userCart.id}>
                 <td colSpan='100%'>
-                  <div className='card'>
+                  <div className={`card ${openCarts.includes(userCart.id) ? 'open' : ''}`}>
                     { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
-                    <h1 className='date'> <span> </span> </h1>
+                    <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
+                      <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
+                    </h1>
                     <h4>
                       <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
                       <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
