@@ -959,7 +959,7 @@ module.exports = function (router) {
       .populate('leader')
 
     var checkoutResponse = yield cart.checkout()
-    
+
     if (checkoutResponse.redirect) {
       res.redirect(checkoutResponse.redirect)
     } else {
@@ -1061,15 +1061,13 @@ module.exports = function (router) {
       else return 0;
     })
 
-    // if we're in production, don't show YPO
-    if (process.env.YPO_ENABLED !== undefined || process.env.YPO_ENABLED === false) {
-      logging.info('hiding ypo on production')
+    // YPO can be hidden by setting YPO_ENABLED: false in production-ecosystem.json etc
+    if (process.env.YPO_ENABLED === 'false') {
       stores = stores.filter(function (s) {
         return s.store_type != 'YPO'
       });
     }
-
-    // logging.info('stores', stores)
+    
     res.send(stores)
   }))
 
