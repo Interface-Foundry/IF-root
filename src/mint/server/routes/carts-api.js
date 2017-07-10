@@ -914,9 +914,16 @@ module.exports = function (router) {
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
-    console.log('store instance', (storeInstance || {})
-      .name)
-    var results = await storeInstance.search(searchOpts)
+    console.log('store instance', (storeInstance || {}).name)
+
+    try {
+      var results = await storeInstance.search(searchOpts)
+    } catch (e) {
+      return res.send({
+        ok: false,
+        message: e.message
+      })
+    }
     //for testing
     // results = await
     res.send(results)
