@@ -1,4 +1,6 @@
 const Store = require('./Store')
+const scrape = require('../scraper/scrape_convert')
+logging.info('scrape', typeof(scrape))
 
 // get the waterline mint database
 var db
@@ -23,7 +25,6 @@ class UrlStore extends Store {
   }
 
   async urlSearch (options) {
-    logging.info('optionsss', options)
     const uri = options.text
     // make sure this is a url from the right merchant
     if (!uri || !uri.match(new RegExp(this.domain))) {
@@ -32,7 +33,11 @@ class UrlStore extends Store {
 
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
-    var itemData = await UrlScraper(uri, options.user_country, options.user_locale, this.country, this.domain)
+    // var itemData = await UrlScraper(uri, options.user_country, options.user_locale, this.country, this.domain)
+    logging.info('scrape', typeof(scrape))
+    logging.info(JSON.stringify(scrape))
+    var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
+    logging.info('itemData', itemData)
     logging.info('got item data')
     return itemData
   }

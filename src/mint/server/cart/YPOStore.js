@@ -107,10 +107,22 @@ class YPOStore extends Store {
   }
 
   async checkout(cart) {
-    const leader = await db.UserAccounts.findOne({id: cart.leader})
+    if (cart.locked) {
+      return {
+        ok: false,
+        redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+        message: 'Order already submitted'
+      }
+    }
+
+    if (typeof cart.leader === 'object') {
+      var leader = cart.leader
+    } else if (typeof cart.leader === 'string') {
+      leader = await db.UserAccounts.findOne({id: cart.leader})
+    }
     const address = await db.Addresses.findOne({user_account: leader.id})
 
-    const itemsXML = cart.items.map(i => {
+    const itemsXML = cart.items.map(item => {
         return `<item>
             <store>YPO</store>
             <code>${item.code}</code>
@@ -129,7 +141,7 @@ class YPOStore extends Store {
           <email>${leader.email}</email>
           <orderedAt>${new Date().toISOString()}</orderedAt>
       </orderedBy>
-      <order_number>${cart.ypo_order_number}</order_number>
+      <order_number>${cart.order_number}</order_number>
       <delivery_details>
           <account_number>${cart.account_number}</account_number>
           <delivery_message>${cart.delivery_message}</delivery_message>
@@ -175,8 +187,11 @@ class YPOStore extends Store {
       })
     });
 
+    await super.checkout(cart)
+
     return {
       ok: true,
+      redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
       message: 'Order submitted successfully'
     }
   }

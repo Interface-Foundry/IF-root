@@ -307,10 +307,11 @@ module.exports = function (router) {
       if (existingCart && existingCart.id !== cart.id) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
+      logging.info('GETTING PREVIEWED ITEM FROM DB')
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
-      logging.info('are we creating an item from the url')
+      logging.info('CREATING ITEM FROM URL')
       // Create an item from the url
       logging.info('cart.store', cart.store)
 
@@ -336,7 +337,7 @@ module.exports = function (router) {
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
 
-    var items = yield db.Items.findOne({id: item.id}).populate('options')
+    var item = yield db.Items.findOne({id: item.id}).populate('options')
     return res.send(item)
   }));
 
@@ -748,7 +749,7 @@ module.exports = function (router) {
       .populate('added_by', selectMembersWithoutEmail)
     //for debugging
     if (!item.options) item.options = []
-    logging.info('ITEM', item)
+    // logging.info('ITEM', item)
     if (!item) {
       logging.error('item does not exist')
       return res.sendStatus(500)
@@ -1090,15 +1091,13 @@ module.exports = function (router) {
       else return 0;
     })
 
-    // if we're in production, don't show YPO
-    if (process.env.YPO_ENABLED !== undefined || process.env.YPO_ENABLED === false) {
-      logging.info('hiding ypo on production')
+    // YPO can be hidden by setting YPO_ENABLED: false in production-ecosystem.json etc
+    if (process.env.YPO_ENABLED === 'false') {
       stores = stores.filter(function (s) {
         return s.store_type != 'YPO'
       });
     }
 
-    // logging.info('stores', stores)
     res.send(stores)
   }))
 
