@@ -265,6 +265,7 @@ module.exports = function (router) {
    */
   router.post('/cart/:cart_id/item', (req, res) => co(function* () {
     // only available for logged-in Users
+    logging.info('add to cart route called')
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
@@ -728,15 +729,19 @@ module.exports = function (router) {
    * @apiParam {String} :item_id
    */
   router.get('/item/:item_id', (req, res) => co(function* () {
+
     var item = yield db.Items.findOne({ id: req.params.item_id })
       .populate('options')
       .populate('added_by', selectMembersWithoutEmail)
-    logging.info('ITEM', item, '/ITEM')
+    //for debugging
+    if (!item.options) item.options = []
+    logging.info('ITEM', item)
     if (!item) {
       logging.error('item does not exist')
       return res.sendStatus(500)
     }
     return res.send(item)
+    // return res.sendStatus(500)
   }))
 
   /**
@@ -925,7 +930,6 @@ module.exports = function (router) {
     searchOpts.user_country = geo.country
     // search de rol de rol rol rol
     var results = await storeInstance.search(searchOpts)
-    logging.info('SEARCH RESULTS: ' + results)
     res.send(results)
   })())
 

@@ -67,12 +67,12 @@ class Store {
         // catch the common mistake where developers return an array of promises\
         return Promise.all(items)
       })
-      .then(async function (items) {
-        // await this.processSearchItems.bind(this)
-        return await that.processSearchItems(items)
+      .then(function (items) {
+        // this.processSearchItems.bind(this)
+        return that.processSearchItems(items)
       }) // and some optional post-processing
       .then(items => {
-        logging.info('items****&', items)
+        // logging.info('items****&', items)
         // do some post-search analytics logging
         console.log('analytics', {
           search_options: options,
