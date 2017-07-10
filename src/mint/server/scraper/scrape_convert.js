@@ -78,10 +78,7 @@ var scrapeURL = function * (url){
 	})
 }
 
-
-
-
-
+//try to get data from html 
 var tryHtml = function * (s,$) {
 	switch(s.domain.name){
 		case 'muji.net':
@@ -116,26 +113,12 @@ var tryHtml = function * (s,$) {
 				}
 			})
 
-			// //alt method product name
-			// $('.productName').each(function(i, elm) {
-			//     console.log('product name: ',$(this).text().trim()) // for testing do text() 
-			// })
-			// //alt method description
-			// $('.desc').each(function(i, elm) {
-			//     console.log('DESCRIPTION ',$(this).text().trim()) // for testing do text() 
-			// })
-
 			//get price
 			$('.price').each(function(i, elm) {
 
 				if ($(this).text()){
-
 					var p = $(this).text().trim().replace(/[^0-9.]/g, "") //locate price, remove other text
-
-					console.log('pre float: ',p)
-
 					s.original_price.value = parseFloat(p)
-					
 					return false
 				}
 			})
@@ -168,6 +151,14 @@ var tryHtml = function * (s,$) {
 					selected = false
 				}
 
+				//item not available
+				var available
+				if($(this).attr('class') == 'out'){
+					available = false
+				}else {
+					available = true
+				}
+
 				s.options.push({
 					type: 'color',
 					original_name: {
@@ -175,17 +166,10 @@ var tryHtml = function * (s,$) {
 					},
 					thumbnail_url: $('img',this).attr('src'),
 					main_image_url: $('img',this).attr('src'),
-					selected: selected
+					selected: selected,
+					available: available
 				})
 			})
-
-				// $(this).each(function(i, elm) {
-				// 	console.log('attribs: ',$(this).attr('class'))
-				// })
-
-
-				// var $fruits = $('#fruits li');
-				// console.log($fruits.filter('.orange'));
 
 			return s
 		break
@@ -286,6 +270,7 @@ var translate = function * (s){
 
 	var c = []
 
+	//collect text to translate into a single arr for google translate API
 	if(s.original_name.value){
 		c.push({
 			type:'name',
@@ -310,10 +295,27 @@ var translate = function * (s){
 				console.log('no name found for option!')
 			}
 	    })
-	}
-
+	}	
+	//keep context of text mapping (need to double check the logic here....)
 	var t = _.map(c, 'value')
-	return {translate:t,context:c}
+	var tc = {translate:t,context:c}
+	//send to google for translate
+	var tc_map = yield translateText(tc.translate,s.user.locale)
+
+	//piece translations back into the original obj
+	for (var i = 0; i < tc.context.length; i++) {
+		if(tc.context[i].type == 'name'){
+			s.name = tc_map[i]
+		}else if(tc.context[i].type == 'description'){
+			s.description = tc_map[i]
+		}else if(tc.context[i].type == 'option'){
+			for (var z = 0; z < tc.context.length - i; z++) {
+				s.options[z].name = tc_map[z + i]
+			}
+			break
+		}
+	}
+	return s
 }
 
 //do a thing
@@ -327,81 +329,14 @@ co(function *(){
 	var url = 'https://www.muji.net/store/cmdty/detail/4549738531043'
 
 	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
-	
 	var html = yield scrapeURL(url)
 	var $ = cheerio.load(html)
 	s = yield tryHtml(s,$)
-
  	s = yield foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
-
- 	var tc = yield translate(s)
- 	var tc_map = yield translateText(tc.translate,s.user.locale)
-
- 	console.log('TCTCTCTC ',tc_map)
-
-	for (var i = 0; i < tc.context.length; i++) {
-		if(tc.context[i].type == 'name'){
-			s.name = tc_map[i]
-			// c.push({
-			// 	type:'name',
-			// 	value: s.original_name.value
-			// })
-		}else if(tc.context[i].type == 'description'){
-			s.description = tc_map[i]
-			// c.push({
-			// 	type:'description',
-			// 	value: s.original_description.value
-			// })
-		}else if(tc.context[i].type == 'option'){
-			console.log('FIRING OPTION ', tc.context.length - i)
-
-			for (var z = 0; z < tc.context.length - i; z++) {
-
-				console.log('FIRING ',z)
-
-				s.options[z].name = tc_map[z + i]
-			}
-
-			break
-			// s.options.forEach(function(o){
-			// 	if(o.original_name){
-			// 		c.push({
-			// 			type:'option',
-			// 			value: o.original_name.value
-			// 		})
-			// 	}
-			// 	else {
-			// 		console.log('no name found for option!')
-			// 	}
-		 //    })
-		}
-	    //Do something
-	}
+ 	s = yield translate(s)
+ 	
 
 	console.log('ZXZXZXZXZX ',s)
-
-
-
- 	// s.name = yield translateText(s.original_name.value,s.user.locale)
- 	// s.description = yield translateText(s.original_description.value,s.user.locale)
-
- 	// if(s.options.length > 0){
- 	// 	s.options = yield translateText(s.options,s.user.locale)
- 	// }
-
-	//console.log('ssssss ',s)
-
-
-	// console.log('price ',price)
-
-
-
-	// //getRates() //this should be checking once a day, but not now 
-
-
-    //s = yield tryProps($,s)	
-
-	// var price = yield foreignExchange('USD','KRW',1,0.03)
 
     //save RAW HTML here
 
