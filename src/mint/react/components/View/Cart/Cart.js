@@ -54,7 +54,7 @@ export default class Cart extends Component {
             <th colSpan='100%'>
               {
                 myCart.length
-                ? <div className={`card`} onClick={() => !openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
+                ? <div className={`card`} onClick={() => openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                   <h1 className='date' onClick={() => _toggleCart(user.id)}> 
                     <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
@@ -67,7 +67,7 @@ export default class Cart extends Component {
                     Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
                   </z>
                   </h4>
-                  { openCarts.includes(user.id) ? <ul>
+                  { !openCarts.includes(user.id) ? <ul>
                     {
                       myCart.map((item) => {
                         return <li key={item.id} className={editId === item.id ? 'edit' : ''}>
@@ -113,7 +113,7 @@ export default class Cart extends Component {
             userCarts.others.map((userCart, i) => (
               <tr key={userCart.id}>
                 <td colSpan='100%'>
-                  <div className={`card`} onClick={() => !openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
+                  <div className={`card`} onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                     { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
                     <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
                       <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
@@ -124,7 +124,7 @@ export default class Cart extends Component {
                     </h4>
 
                     { 
-                      openCarts.includes(userCart.id) ? <ul>
+                      !openCarts.includes(userCart.id) ? <ul>
                         {
                           userCart.items.map((item) => (
                             <li key={item.id} className={editId === item.id ? 'edit' : ''}>
