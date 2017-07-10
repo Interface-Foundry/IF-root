@@ -17,12 +17,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     display: block;
   }
 
-  * {
-    @media only screen and (max-width: 600px) {
-      display: block;
-    }
-  }
-
   th {
     text-align: left;
     padding: ($padding / 1.5) ($padding / 2) $padding;
