@@ -32,8 +32,8 @@ export default class YPOCheckout extends Component {
   _handleSubmit = (e) => {
     const { props: { submitYpoData, cartId }, state: { orderNumber, accountNumber, deliveryMessage, voucherCode } } = this;
     e.preventDefault();
-    submitYpoData({ cartId, orderNumber, accountNumber, deliveryMessage, voucherCode });
-    window.open(`/api/cart/${cartId}/checkout`); // ¯\_(ツ)_/¯
+    submitYpoData({ cartId, orderNumber, accountNumber, deliveryMessage, voucherCode })
+      .then(() => window.location = `/api/cart/${cartId}/checkout`); // ¯\_(ツ)_/¯
   }
 
   componentWillReceiveProps = ({ orderNumber = '', accountNumber = '', deliveryMessage = '', voucherCode = '' }) =>

@@ -65,7 +65,7 @@ export default class Default extends Component {
                   { 
                     cart.leader.id === user.id || cart.leader === user.id 
                     ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
-                        <Icon icon='Unlocked'/> Unlock Cart 
+                        <Icon icon='Unlocked'/>Unlock Cart
                       </button> 
                     : null 
                   }
