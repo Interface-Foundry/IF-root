@@ -61,9 +61,7 @@ export default class App extends Component {
   componentWillUnmount() {
     const { _handleScroll } = this;
 
-    if (document.body.clientWidth > 600) {
-      this.scroll.removeEventListener('scroll', _handleScroll);
-    }
+    if (document.body.clientWidth > 600) this.scroll.removeEventListener('scroll', _handleScroll);
   }
 
   _handeKeyPress({ keyCode }) {

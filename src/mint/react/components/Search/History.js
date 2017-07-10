@@ -5,6 +5,8 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { getSearchHistory } from '../../utils';
 
+
+// Need to document //
 export default class History extends Component {
   static propTypes = {
     query: PropTypes.string,
@@ -19,6 +21,8 @@ export default class History extends Component {
     const { props: { query, categories, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
     history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
       suggestedCategories =  categories.slice(0, 5);
+
+
     return (
       <span className='history'>
         <ul className='previous'>
@@ -50,7 +54,6 @@ export default class History extends Component {
                     <Icon icon='Eye'/>
                   </div>
                   <div className='history__term-query' onMouseDown={(e) => {
-                    console.log(e);
                     updateQuery(category.humanName);
                     submitQuery(category.machineName, store, store_locale);
                   }}>
