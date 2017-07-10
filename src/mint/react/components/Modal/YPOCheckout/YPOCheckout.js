@@ -36,11 +36,18 @@ export default class YPOCheckout extends Component {
       .then(() => window.location = `/api/cart/${cartId}/checkout`); // ¯\_(ツ)_/¯
   }
 
-  componentWillReceiveProps = ({ orderNumber = '', accountNumber = '', deliveryMessage = '', voucherCode = '' }) =>
-    this.setState({ orderNumber, accountNumber, deliveryMessage, voucherCode })
+  componentWillReceiveProps = ({ orderNumber = '', accountNumber = '', deliveryMessage = '', voucherCode = '' }) => 
+    this.setState({ orderNumber, accountNumber, deliveryMessage, voucherCode });
+  
+
+  componentDidMount() {
+    const { orderNumber = '', accountNumber = '', deliveryMessage = '', voucherCode = '' } = this.props;
+    this.setState({ orderNumber, accountNumber, deliveryMessage, voucherCode });
+  }
 
   render = () => {
-    const { props: { total, locale, toggleYpoCheckout }, _updateAccountNumber, _updateOrderNumber, _updateVoucherCode, _updateDeliveryMessage } = this;
+    const { props: { total, locale, toggleYpoCheckout }, _updateAccountNumber, _updateOrderNumber, _updateVoucherCode, _updateDeliveryMessage, state: { accountNumber, orderNumber, deliveryMessage, voucherCode } } = this;
+
     return (
       <div className='ypo-checkout'>
         <a className='close' href='#' onClick={(e)=>{e.preventDefault(); toggleYpoCheckout(false);}}><Icon icon='Clear'/></a>
@@ -53,7 +60,7 @@ export default class YPOCheckout extends Component {
             </div>
             <span>
               <Icon icon='Member'/>
-              <input type='number' placeholder='YPO Account Number' required value={this.state.accountNumber} onChange={_updateAccountNumber} />
+              <input type='number' placeholder='YPO Account Number' required value={accountNumber} onChange={_updateAccountNumber} />
               <span className='required'>﹡</span>
             </span>
           </label>
@@ -64,7 +71,7 @@ export default class YPOCheckout extends Component {
             </div>
             <span>
               <Icon icon='Hash'/>
-              <input type='number' placeholder='Order Number' value={this.state.orderNumber} onChange={_updateOrderNumber} />
+              <input type='number' placeholder='Order Number' value={orderNumber} onChange={_updateOrderNumber} />
             </span>
           </label>
           
@@ -74,7 +81,7 @@ export default class YPOCheckout extends Component {
             </div>
             <span className='textarea'>
               <Icon icon='Chatbubble'/>
-              <textarea rows='3'  placeholder='Delivery Message' value={this.state.deliveryMessage} onChange={_updateDeliveryMessage} />
+              <textarea rows='3'  placeholder='Delivery Message' value={deliveryMessage} onChange={_updateDeliveryMessage} />
             </span>
           </label>
           
@@ -84,7 +91,7 @@ export default class YPOCheckout extends Component {
             </div>
             <span>
               <Icon icon='QR'/>
-              <input type='number' placeholder='Voucher Code' value={this.state.voucherCode} onChange={_updateVoucherCode} />
+              <input type='number' placeholder='Voucher Code' value={voucherCode} onChange={_updateVoucherCode} />
             </span>
           </label>
           
