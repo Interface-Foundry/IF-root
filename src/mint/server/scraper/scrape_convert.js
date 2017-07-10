@@ -7,64 +7,56 @@ var fx = require("money")
 const Translate = require('@google-cloud/translate')
 var currency = require('currency-code-map')
 
-//var dailyRates //we should be doing this seperately once a day so we dont get throttled
-
-
-
-//ACCEPT THIS INPUT:
-// user_country: 'string', //US (i'll pass it back..?)
-// user_locale:'string', //en-us && $0.00 
-
-
-
-/**
- * Scrapes a link
- * @returns full site HTML
- * @param the mongoId (as a string) of the last camel item we've shown the user
- */
-// var scrape = function * (url) {
-//     yield var res = getHTML(url);
-//     return res.then(body => {
-//         // console.log('success', body);
-//         console.log('success');
-//         return body;
-//       }).catch(err => {
-//         console.log('bad', err);
-//       });
-// }
 
 //come here and get localized
-var getDomain = function * (url,user_country,user_locale){
-
+var getLocale = function * (url,user_country,user_locale,store_country,domain){
 	var s = {
 		original_link: url,
 		domain: {
-			hostname: []
+			country: store_country,
+			currency: currency[store_country],
+			name: domain
 		},
 		user: {
 			country: user_country,
 			locale: user_locale,
 			currency: currency[user_country]
-		}
+		},
+		original_name:{
+
+		},
+		original_description:{
+
+		},
+		original_price:{
+
+		},
+		options:[]
 	}
 
-	switch(true){
-		case url.indexOf('muji.net') > -1 || url.indexOf('muji.com/jp') > -1:
-			s.domain.hostname.push('muji.net')
-			s.domain.hostname.push('muji.com/jp')
-			s.domain.name = 'muji_jp'
-			s.domain.description = 'Muji Japan'
-			s.domain.country = 'JP'
+	switch(store_country){
+		case 'JP':
 			s.domain.locale = 'ja'
-			s.domain.currency = currency[s.domain.country]
-			return s
-		break	
+			break
+		case 'KR':
+			s.domain.locale = 'ko'
+			break
 		default:
-			return s
+			s.domain.locale = store_country
 	}
+
+	switch(domain){
+		case 'muji.net':
+			s.domain.thumbnail_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/MUJI_logo.svg/176px-MUJI_logo.svg.png'
+			s.domain.main_image_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/MUJI_logo.svg/176px-MUJI_logo.svg.png'
+			s.domain.description = 'Muji Japan'
+			break
+	}
+
+	return s
 }
 
-var scrapeURL = function * (){
+var scrapeURL = function * (url){
 	var options = {
 		url: url,
 		// proxy: proxyUrl,
@@ -77,95 +69,126 @@ var scrapeURL = function * (){
 		},
 		// timeout: timeoutMs,
 	}
-	request(options, function (error, response, html) {
+	return yield request(options, function (error, response, html) {
 	  if (!error && response.statusCode == 200) {
-	    return cheerio.load(html)
+	    return html
 	  }else {
 	  	console.log('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
 	  }
-	})	
+	})
 }
 
-var ogImage
-var keywords
-var description
-var price
 
-var tryMeta = function * (){
- 	var meta = $('meta')
-	var keys = Object.keys(meta)
 
-	//abstracted function, get properties from page
-	//return as much as possible to fill defined schema
-	//RETURN THE NON TRANSLATED STUFF TOO, so user can view both
-	//these filled up suggestion will pre-populate the add item input form
 
-	keys.forEach(function(key){
-	if (meta[key].attribs && meta[key].attribs.property) {
-		if(meta[key].attribs.property === 'og:image'){
-			ogImage = meta[key].attribs.content
-		} 
+
+var tryHtml = function * (s,$) {
+	switch(s.domain.name){
+		case 'muji.net':
+
+			//get product id
+			s.product_id = yield urlValue(s.original_link,'detail',1)
+			s.parent_id = s.product_id //use the same as product id for muji
+
+			//get meta tags
+		 	var meta = $('meta')
+			var keys = Object.keys(meta)
+
+			//get images
+			keys.forEach(function(key){
+				if (meta[key].attribs && meta[key].attribs.property) {
+					if(meta[key].attribs.property === 'og:image'){
+						//ogImage = meta[key].attribs.content
+						s.thumbnail_url = meta[key].attribs.content
+						s.main_image_url = meta[key].attribs.content
+					} 
+				}
+			})
+
+			//get name and description from meta tags
+			keys.forEach(function(key){
+				if (meta[key].attribs && meta[key].attribs.name) {
+				   	if (meta[key].attribs.name === 'keywords'){
+				   		s.original_name.value = meta[key].attribs.content
+				   	}else if (meta[key].attribs.name === 'description') {
+				   		s.original_description.value = meta[key].attribs.content
+				   	}
+				}
+			})
+
+			// //alt method product name
+			// $('.productName').each(function(i, elm) {
+			//     console.log('product name: ',$(this).text().trim()) // for testing do text() 
+			// })
+			// //alt method description
+			// $('.desc').each(function(i, elm) {
+			//     console.log('DESCRIPTION ',$(this).text().trim()) // for testing do text() 
+			// })
+
+			//get price
+			$('.price').each(function(i, elm) {
+
+				if ($(this).text()){
+
+					var p = $(this).text().trim().replace(/[^0-9.]/g, "") //locate price, remove other text
+
+					console.log('pre float: ',p)
+
+					s.original_price.value = parseFloat(p)
+					
+					return false
+				}
+			})
+
+			//CHECK FOR SIZES
+			$('#size').find('dd').each(function(i, elm) {
+				//did user select?
+				var selected 
+				if($(this).has('.current').attr('class')){
+					selected = true
+				}else {
+					selected = false
+				}
+				s.options.push({
+					type: 'size',
+					original_name: {
+						value: $(this).text().trim()
+					},
+					selected: selected
+				})
+			})
+
+			//CHECK FOR COLORS
+			$('#color').find('dd').each(function(i, elm) {
+				//did user select?
+				var selected 
+				if($(this).has('.current').attr('class')){
+					selected = true
+				}else {
+					selected = false
+				}
+				s.options.push({
+					type: 'color',
+					original_name: {
+						value: $(this).text().trim()
+					},
+					selected: selected
+				})
+			})
+
+				// $(this).each(function(i, elm) {
+				// 	console.log('attribs: ',$(this).attr('class'))
+				// })
+
+
+				// var $fruits = $('#fruits li');
+				// console.log($fruits.filter('.orange'));
+
+			return s
+		break
+		default:
+			console.log('error no domain found for store')
 	}
-	});
-
-	keys.forEach(function(key){
-		if (meta[key].attribs && meta[key].attribs.name) {
-		   	if (meta[key].attribs.name === 'keywords'){
-		   		keywords = meta[key].attribs.content
-		   	}else if (meta[key].attribs.name === 'description') {
-		   		description = meta[key].attribs.content
-		   	}
-		}
-	});
-	console.log('image ',ogImage)
-	console.log('keywords ',keywords)
-	console.log('description ',description)   	
-}
-
-
-var tryProps = function * (){
-
-	$('.productName').each(function(i, elm) {
-	    console.log('product name: ',$(this).text().trim()) // for testing do text() 
-	})
-
-	$('.desc').each(function(i, elm) {
-	    console.log('DESCRIPTION ',$(this).text().trim()) // for testing do text() 
-	})
-
-	$('.price').each(function(i, elm) {
-		if ($(this).text()){
-			console.log('PRICE ',$(this).text().trim()) // for testing do text() 
-		}
-	})
-
-	$('#size').find('dd').each(function(i, elm) {
-		console.log('SIZE: ',$(this).text().trim())
-	})
-
-	$('#color').find('dd').each(function(i, elm) {
-		console.log('COLOR: ',$(this).text().trim())
-	})
-
-
-	var price = yield foreignExchange('USD','KRW',1,0.03)
-	console.log('price ',price)
-	var translated = translateText('hello how are you','fr')
-
-
-
-	// $('#size').each(function(i, elm) {
-	// 	console.log(i)
-	//    // console.log('SIZES ',$(this).text()) // for testing do text() 
-
-	//     //class = available
-	//     // class = current (check if nested inside)
-	// })
-
-	// $('dl #color').each(function(i, elm) {
-	//     console.log('COLORS ',$(this).text()) // for testing do text() 
-	// })
-
 }
 
 
@@ -177,16 +200,23 @@ var tryProps = function * (){
  * @param {number} The spread percent to include on top
  * @returns {number} The new price converted to the requested currency
  */
-var foreignExchange = function * (base,target,value,spread){
+var foreignExchange = function * (s,base,target,value,spread){
 	var rates = yield getRates()
 	if(rates && target in rates){
   		fx.rates = rates
 	    value = fx.convert(value, {from: base, to: target})
 	    //add an average currency spread on top of the conversion (3% on top of the currency value)
 	    //to account for fluctuations between adding to the cart and the checkout
-	    var s = 1.00 + spread
-	    value = value * s
-	    return value.toFixed(2) //idk if we are rounding up here?
+	    var sp = 1.00 + spread
+	    value = value * sp
+	    s.price = value.toFixed(2) //idk if we are rounding up here?
+
+	    s.original_price.fx_rate = rates
+	    s.original_price.fx_rate_src = 'fixer.io'
+	    s.original_price.fx_on =  new Date() //this might be different from current day, as markets closed on weekends
+	    s.original_price.fx_spread = spread
+
+	    return s
   	}
   	else {
   		console.log('conversion not found or something')
@@ -214,71 +244,159 @@ var getRates = function * (){
 	return JSON.parse(rateReq).rates
 }
 
+
+
+
 /**
  * Translates one or more sentence strings into target language
  * @param {string} Text (string or array of strings) to translate
  * @param {string} Target language
  * @returns {object} A list of currencies with corresponding rates
  */
-function translateText (text, target) {
+var translateText = function * (text, target) {
   // Instantiates a client
   const translate = Translate()
-
-  // The text to translate, e.g. "Hello, world!"
-  // const text = 'Hello, world!';
-
-  // The target language, e.g. "ru"
-  // const target = 'ru';
-
+  var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // multiple texts.
-  translate.translate(text, target)
+  yield translate.translate(text, target)
     .then((results) => {
-      let translations = results[0];
+      translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
-
-      console.log('Translations:');
-      translations.forEach((translation, i) => {
-        console.log(`${text[i]} => (${target}) ${translation}`);
-      });
     })
     .catch((err) => {
       console.error('ERROR:', err);
     });
-  // [END translate_translate_text]
+    return translations
 }
 
+
+var urlValue = function * (url,find,pointer){
+	//locate value in URL, pass URL to split and move up/down the array to find value
+	//i.e. get number in: /detail/4549738521792 
+	var split = url.split('/')
+	return split[split.indexOf(find) + pointer]
+}
+
+var translate = function * (s){
+
+	var c = []
+
+	if(s.original_name.value){
+		c.push({
+			type:'name',
+			value: s.original_name.value
+		})
+	}
+	if(s.original_description.value){
+		c.push({
+			type:'description',
+			value: s.original_description.value
+		})
+	}
+	if(s.options && s.options.length > 0){
+		s.options.forEach(function(o){
+			if(o.original_name){
+				c.push({
+					type:'option',
+					value: o.original_name.value
+				})
+			}
+			else {
+				console.log('no name found for option!')
+			}
+	    })
+	}
+
+	var t = _.map(c, 'value')
+	return {translate:t,context:c}
+}
 
 //do a thing
 co(function *(){
 
 	//incoming country / locale 
 	var user_country = 'US'
-	var user_locale = 'en-US'
+	var user_locale = 'en'
+	var store_country = 'JP'
+	var domain = 'muji.net'
+	var url = 'https://www.muji.net/store/cmdty/detail/4549738522577'
 
-	var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
+	
+	var html = yield scrapeURL(url)
+	var $ = cheerio.load(html)
+	s = yield tryHtml(s,$)
 
-	var s = yield getDomain(url,user_country,user_locale) //get domain 
+ 	s = yield foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
 
-	if(!s.domain.name){
-		console.log('ERROR CANT FIND VALID STORE URL')
-		return
+ 	var tc = yield translate(s)
+ 	var tc_map = yield translateText(tc.translate,s.user.locale)
+
+	for (var i = 0; i < tc.context.length; i++) {
+		console.log(tc.context.length)
+		if(tc.context[i].type == 'name'){
+			s.name = tc_map[i]
+			// c.push({
+			// 	type:'name',
+			// 	value: s.original_name.value
+			// })
+		}else if(tc.context[i].type == 'description'){
+			s.description = tc_map[i]
+			// c.push({
+			// 	type:'description',
+			// 	value: s.original_description.value
+			// })
+		}else if(tc.context[i].type == 'option'){
+			console.log('FIRING OPTION')
+			// s.options.forEach(function(o){
+			// 	if(o.original_name){
+			// 		c.push({
+			// 			type:'option',
+			// 			value: o.original_name.value
+			// 		})
+			// 	}
+			// 	else {
+			// 		console.log('no name found for option!')
+			// 	}
+		 //    })
+		}
+	    //Do something
 	}
 
-	console.log('SSSSS ',s)
-	
+	console.log('ZXZXZXZXZX ',s)
+
+
+
+ 	// s.name = yield translateText(s.original_name.value,s.user.locale)
+ 	// s.description = yield translateText(s.original_description.value,s.user.locale)
+
+ 	// if(s.options.length > 0){
+ 	// 	s.options = yield translateText(s.options,s.user.locale)
+ 	// }
+
+	//console.log('ssssss ',s)
+
+
+	// console.log('price ',price)
+
+
+
 	// //getRates() //this should be checking once a day, but not now 
 
-	// var $ = yield scrapeURL(url)
 
-	// //co routine
- //    s = yield tryMeta($,s)
- //    s = yield tryProps($,s)	
+    //s = yield tryProps($,s)	
 
 	// var price = yield foreignExchange('USD','KRW',1,0.03)
 
     //save RAW HTML here
+
+ //    var raw = await db.RawHtml.create({
+ //    	raw_html: html,
+ //    	original_url: url
+	// 	domain: domain
+	// })
 
 }).catch(onerror)
 
