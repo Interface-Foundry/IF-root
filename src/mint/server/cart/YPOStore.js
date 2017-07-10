@@ -106,6 +106,14 @@ class YPOStore extends Store {
   }
 
   async checkout(cart) {
+    if (cart.locked) {
+      return {
+        ok: false,
+        redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+        message: 'Order already submitted'
+      }
+    }
+
     if (typeof cart.leader === 'object') {
       var leader = cart.leader
     } else if (typeof cart.leader === 'string') {
@@ -178,8 +186,11 @@ class YPOStore extends Store {
       })
     });
 
+    await super.checkout(cart)
+
     return {
       ok: true,
+      redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
       message: 'Order submitted successfully'
     }
   }
