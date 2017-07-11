@@ -9,11 +9,13 @@ export default class LoadingTile extends Component {
         <div className='card'>
           <div className='card__loading'>
             <div className='overlay vertical'/>
+            <div className='overlay photo-bottom'/>
             <div className='overlay top'/>
             <div className='overlay bottom'/>
-            <div className='overlay bottom text'/>
+            <div className='overlay bottom empty-text'/>
             <div className='overlay mid'/>
-            <div className='overlay mid right'/>
+            <div className='overlay right'/>
+            <div className='overlay price-right'/>
           </div>
         </div>
       </td>

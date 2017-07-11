@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon, AlertBubble } from '../../../react-common/components';
-import { SearchContainer } from '../../containers';
+import { SearchContainer, ButtonsContainer } from '../../containers';
 
 export default class Default extends Component {
 
@@ -12,6 +12,7 @@ export default class Default extends Component {
     user: PropTypes.object,
     cart: PropTypes.object,
     showAlert: PropTypes.bool,
+    showCheckout: PropTypes.bool,
     _toggleLoginScreen: PropTypes.func,
     _toggleSidenav: PropTypes.func
   }
@@ -19,6 +20,7 @@ export default class Default extends Component {
   render() {
     const {
       user,
+      showCheckout,
       cart,
       showAlert,
       _toggleLoginScreen,
@@ -29,11 +31,15 @@ export default class Default extends Component {
       <span className='default'>
         <div className='header__left'>
           <Link to={`/cart/${cart.id}`}>
-            <div className={'image'} style={{
+            <div className={'image desktop'} style={{
               backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
+            }}/>
+            <div className={'image mobile'} style={{
+              backgroundImage: 'url(//storage.googleapis.com/kip-random/headtrans.png)'
             }}/>
           </Link>
           <SearchContainer />
+          {showCheckout ? <ButtonsContainer checkoutOnly={false} /> : null}
         </div>
         <div className='header__right'>
           {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}

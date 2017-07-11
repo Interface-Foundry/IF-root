@@ -1,4 +1,4 @@
-// react/components/modal/EditCart/index.js
+// react/components/Display/EditCart/index.js
 
 import EditCart from './EditCart';
 import './EditCart.scss';

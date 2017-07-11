@@ -46,6 +46,7 @@ var stores = [{
       skip: false,
       timeout: 25000,
       options: {
+        // this is a shirt without a size selected, somehow
         text: 'https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/ref=sr_1_15?s=apparel&ie=UTF8&qid=1497472759&sr=1-15&nodeID=7141123011&psd=1&keywords=shirts',
       },
       check(results) {
@@ -75,7 +76,7 @@ var stores = [{
         text: 'notebooks',
       },
       check(results) {
-        results.length.should.equal(10)
+        results.length.should.equal(4)
       }
     },{
       options: {
@@ -97,7 +98,8 @@ describe('Stores', () => {
   }))
 
   stores.filter(store => !store.skip).map(store => {
-    describe(store.name, () => {
+    describe(store.name, function() {
+      this.timeout(80000)
       store.searches.filter(search => !search.skip).map(search => {
         var search_description = 'search'
         if (search.options.category) search_description += ' category:' + search.options.category

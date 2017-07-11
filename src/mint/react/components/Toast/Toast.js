@@ -41,7 +41,7 @@ export default class Toast extends Component {
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
       ::this._clearParams();
-    }, 3000);
+    }, 4000);
   }
 
   _clearParams() {
@@ -50,7 +50,7 @@ export default class Toast extends Component {
     this.setState({ showToast: false });
     let cleanSearch = loc.search
       .replace(/toast=.*?&status=.*?($|&)/, '')
-      .replace(/(&*|\?*)$/, ''); // remove toast stuff from the url
+      .replace(/(&*|\?*)$/, ''); // remove toast stuff from the url, then clean out any trailing &s or ?s
     replace(loc.pathname + cleanSearch);
   }
 

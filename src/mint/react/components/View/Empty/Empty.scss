@@ -50,45 +50,54 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   &.results {
     padding: $padding * 2.5;
 
-    * {
-      display: block;
-      text-align: center;
-    }
+    .text {
+      padding: ($padding * 2) 0;
 
-    & > svg {
-      height: $nav-height;
-      width: $nav-height;
-      margin: 0 auto;
-      transform: rotate(180deg);
-      padding: ($padding * 2) 0 0;
+      h2 {
+        font-size: 28px;
+        font-weight: 100;
+        padding: ($padding / 2) 0;
 
-      @include animation(bounceDownSmallRotate 2s infinite);
-    }
-
-    h4 {
-      &:before {
-        display: none;
+        span {
+          font-size: 28px;
+          font-weight: bold;
+          padding: 0;
+          color: initial;
+        }
       }
 
-      background-color: #54a2eb;
-    }
+      p {
+        font-size: 14px;
+        padding: ($padding / 2) 0;
+      }
 
-    h5 {
-      display: inline-block;
-      margin: $padding $padding;
-      width: auto;
-      opacity: 0.5;
-      cursor: pointer;
-
-      @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
-
-      &:hover {
-        opacity: 1;
+      span {
+        font-size: 10px;
+        padding: ($padding / 2) 0;
+        color: $secondaryColor;
       }
     }
 
-    .image {
-      margin: 0 auto;
+    .suggested {
+      line-height: 50px;
+
+      @media only screen and (max-width: 600px) {
+        height: 150px;
+        overflow: hidden;
+      }
+
+      * {
+        display: inline-block;
+        padding: 0 $padding;
+        height: 50px;
+        line-height: 50px;
+        margin: 0;
+      }
+
+      h5 {
+        color: rgba(#888, 0.8);
+        cursor: pointer;
+      }
     }
   }
 }

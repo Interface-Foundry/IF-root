@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk';
 import { Route } from 'react-router-dom';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import Reducers from './reducers';
-import { get, getSiteState } from './actions';
+import { get, getSiteState, checkSession } from './actions';
 import { AppContainer } from './containers';
 
 //Analytics!
@@ -46,8 +46,8 @@ const store = createStore(
 );
 
 // Check session and prep carts and blogs
-store.dispatch(getSiteState(window.location.pathname))
-  .then(() => {
+store.dispatch(checkSession()).then(() => {
+  store.dispatch(getSiteState(window.location.pathname)).then(() => {
     // idk if this is an ok thing, but it keeps the site
     // from rendering before it recieves the json file of text
     // there's probably a better way tbh
@@ -77,3 +77,5 @@ store.dispatch(getSiteState(window.location.pathname))
     }
   })
   .then(() => Promise.all([store.dispatch(get('/api/carts', 'CARTS')), store.dispatch(get('/api/blog/posts', 'POSTS'))]));
+});
+

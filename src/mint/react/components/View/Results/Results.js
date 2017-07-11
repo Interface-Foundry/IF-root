@@ -30,15 +30,14 @@ export default class Results extends Component {
     myItems: []
   }
 
-  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading,query, user: { id }, results = [], cart: { items = [] } }) =>
-    lastUpdatedId !== this.props.lastUpdatedId
+  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading, query, user: { id }, results, cart: { items = [] } }) => lastUpdatedId !== this.props.lastUpdatedId
     || id !== this.props.user.id
     || numberOfItems(results) !== numberOfItems(this.props.results)
     || numberOfItems(items) !== numberOfItems(this.props.cart.items)
     || selectedItemId !== this.props.selectedItemId
     || loading !== this.props.loading
     || lazyLoading !== this.props.lazyLoading
-    || (numberOfItems(results) > 0 && numberOfItems(this.props.results) > 0) && (results[0] !== this.props.results[0])
+    || (results.length && this.props.results.length) && results[0].options && results[0].options.length > 0 && !this.props.results[0].options
     || query !== this.props.query
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
@@ -59,8 +58,8 @@ export default class Results extends Component {
       state: { myItems }
     } = this;
 
-    const isUrl = query.match(/(https?:\/\/(www)?)?.*(\.com|\.org|\.co\.uk)\//); //lol wat 
-    // (for cheaters: https://regex101.com/r/MYJG7J/1)
+    const isUrl = query.match(/(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig);
+    // (for cheaters: https://stackoverflow.com/a/8943487)
 
     if (!results.length && !(loading || lazyLoading)) return <EmptyContainer />; // don't bother with the loops if there aren't results
 
@@ -82,7 +81,7 @@ export default class Results extends Component {
       if (result.id && (result.id === selectedItemId || result.oldId === selectedItemId)) {
         selected = {
           row: acc.length,
-          result,
+          result: {...result, inCart: (result.asin && myItems.includes(result.asin))},
           index: i,
           options: splitOptionsByType(result.options)
         };
@@ -93,9 +92,7 @@ export default class Results extends Component {
     }, []);
 
     if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
-
     if (results.length === 1 && !results[0].options) fetchSearchItem(results[0].id); // get options if its a url
-
     return (
       <table className='results'>
         <tbody>
@@ -105,7 +102,7 @@ export default class Results extends Component {
                 {
                   loading
                   ? 'Loading...'
-                  : <p> About {results.length} results for <span className='price'>&ldquo;{query}&rdquo;</span> from {getStoreName(cart.store, cart.store_locale)} </p>
+                  : <p> Showing {results.length} results from {getStoreName(cart.store, cart.store_locale)} </p>
                 }
               </nav>
             </th>

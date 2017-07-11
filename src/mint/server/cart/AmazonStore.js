@@ -8,6 +8,7 @@ const LRU = require('lru-cache')
 // get the waterline mint database
 var db
 const dbReady = require('../../db')
+console.log(dbReady)
 dbReady.then((models) => {
   db = models
 })
@@ -72,7 +73,7 @@ class AmazonStore extends Store {
     }
 
     const asin = uri.match(/B[\dA-Z]{9}|\d{9}(X|\d)/)[0]
-    const amazonItem = this.catalogLookup({text: asin})
+    const amazonItem = await this.catalogLookup({text: asin})
     return [amazonItem]
   }
 
@@ -82,6 +83,9 @@ class AmazonStore extends Store {
    * @return {[amazonItem]}         the amazon item response for the asin
    */
   async catalogLookup(options) {
+    if (typeof options === 'string') {
+      options = {asin: options}
+    }
     const asin = options.text || options.asin
     console.log('looking up asin', asin)
 
@@ -112,6 +116,25 @@ class AmazonStore extends Store {
 
       // and like save a record in the db every time we scrape an item
       db.RawConnection.collection('amazon_catalog_lookups').insertOne(escapeKeys(amazonItem))
+    }
+
+
+    //
+    // Error checks that can happen from catalog lookups or url pasting
+    //
+    if (!amazonItem.Offers.Offer) {
+      // no offer for parent asins, but they likely have variations, so try to use one of the variations
+      var availableChildren = _.get(amazonItem, 'Variations.Item', [])
+        .filter(child => !!_.get(child, 'Offers.Offer.OfferListing'))
+
+      if (availableChildren.length > 0) {
+        return await this.catalogLookup(availableChildren[0].ASIN)
+      }
+
+      // or if we are in a variation that doesn't have a listing, get the parent which will then get an available listing
+      if (amazonItem.ASIN !== amazonItem.ParentASIN) {
+        return await this.catalogLookup(amazonItem.ParentASIN)
+      }
     }
 
     return amazonItem
@@ -382,7 +405,7 @@ class AmazonStore extends Store {
 
 
   /**
-   * sync cart to amazon api, gets subtotal and checkout link for cart with items
+   * creates an amazon cart
    *
    * @param      {object}   cart    the cart we are syncing
    * @return     {Promise}  { description_of_the_return_value }
@@ -397,38 +420,68 @@ class AmazonStore extends Store {
     cartAddAmazonParams.AssociateTag = this.credentials.assocId
     const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
 
+  async createAmazonCart(cart) {
+    // if there are no amazon items in the cart then amazan can't handle it
+    if (cart.items.length === 0 || !cart.items[0].asin) {
+      throw new Error('can only sync carts that have amazon items, and items must be populated')
+    }
+
+    // Create a mapping of asin -> quantity
+    var asins = cart.items.reduce((asins, item) => {
+      if (asins[item.asin]) {
+        asins[item.asin] += item.quantity
+      } else {
+        asins[item.asin] = item.quantity
+      }
+      return asins
+    }, {})
+
+    // add each asin and quantity to the request params
+    const amazonParams = {}
+    var i = 1;
+    for (var asin in asins) {
+      amazonParams[`Item.${i}.ASIN`] = asin;
+      amazonParams[`Item.${i}.Quantity`] = asins[asin] // the value in the map is quantity
+      i++
+    }
+
+    // create a totally new cart
+    amazonParams.AssociateTag = this.credentials.assocId
+    const results = await this.opHelper.execute('CartCreate', amazonParams);
     const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
     const amazonCart = results.result.CartCreateResponse.Cart
+    cart.subtotal = amazonCart.SubTotal.Amount / 100.00
+    cart.amazon_cartid = amazonCart.CartId
+    cart.amazon_hmac = amazonCart.HMAC
+    cart.amazon_purchase_url = amazonCart.PurchaseURL
+    cart.affiliate_checkout_url = await googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(amazonCart.PurchaseURL)}/id/mint/pid/shoppingcart`)
+    cart.dirty = false
+    await cart.save()
     return amazonCart
   }
 
   /**
-   * updateCart document in database with new cart properties specific to store
-   *
-   * @param      {<type>}   oldCartId  The old cartesian identifier
-   * @param      {<type>}   newCart    The new cartesian
-   * @return     {Promise}  { description_of_the_return_value }
+   * Returns a response with a redirect url for the affiliate-linked cart
+   * @param  {[type]}  cart [description]
+   * @return {Promise}      [description]
    */
-  async updateCart(oldCartId, newCart) {
-    const cart = await db.Carts.findOne({id: oldCartId})
-    cart.subtotal = newCart.SubTotal.Amount / 100.00
-    cart.amazon_cartid = newCart.CartId
-    cart.amazon_hmac = newCart.HMAC
-    cart.amazon_purchase_url = newCart.PurchaseURL
-    cart.affiliate_checkout_url = await googl.shorten(`http://motorwaytoroswell.space/product/${encodeURIComponent(newCart.PurchaseURL)}/id/mint/pid/shoppingcart`)
-    cart.dirty = false
-    await cart.save()
-  }
-
-  async checkout (cart, req, res) {
-    if (!cart.dirty) {
-      // yay cart is locked so we're pretty sure it hasn't meen messed with
-      return res.redirect(cart.affiliate_checkout_url)
+  async checkout (cart) {
+    if (!cart.dirty && cart.affiliate_checkout_url) {
+      // yay cart is not dirty so we're pretty sure it hasn't meen messed with
+      return {
+        ok: true,
+        redirect: cart.affiliate_checkout_url
+      }
     } else {
       // make sure the amazon cart is in sync with the cart in our database
-      var amazonCart = await this.sync(cart)
-      // redirect to the cart url
-      return res.redirect(cart.affiliate_checkout_url)
+      const amazonCart = await this.createAmazonCart(cart)
+
+      // if everything worked, do the normal things like send emails
+      await super.checkout(cart)
+      return {
+        ok: true,
+        redirect: cart.affiliate_checkout_url
+      }
     }
   }
 }
@@ -443,6 +496,7 @@ class AmazonStore extends Store {
  *                 what happened if not (TODO)
  */
 function getErrorsFromAmazonCartCreate (res) {
+  console.log('error check', res)
   if (!res.Request.Errors) {
     console.log('no errors from creating cart, phew')
     return null
@@ -471,59 +525,6 @@ function getErrorsFromAmazonCartCreate (res) {
   })
 }
 
-
-/**
- * condense items from multiple users/same user with same asin to conform amazon
- * format.
- *
- * @param      {array}  items   array of items from cart
- * @return     {array}  same as above but if asin was already there just reduced into same object
- */
-function condenseItems(items) {
-  var seenAsins = []
-  return items.reduce((prev, curr) => {
-    if (seenAsins.includes(curr.asin)) {
-      prev.find(x => x.asin === curr.asin).quantity += curr.quantity
-    } else {
-      seenAsins.push(curr.asin)
-      prev.push({
-        asin: curr.asin,
-        quantity: curr.quantity
-      })
-    }
-  return prev
-  }, [])
-}
-
-
-/**
- * create an amazon cart instead of worrying about updating cart and removing etc
- *
- * @param {array} items - array of items that would include:
- *                        ASIN - asin from amazon (TODO: allow for OfferListingId)
- *                        Quantity - quantity
- */
-function createAmazonCartWithItems (items) {
-  const useAsin = true
-  if (!items instanceof Array) {
-    items = [items]
-  }
-
-  // ability to use offerlistingid or asin later, just using asin rn
-
-  var amazonParams = {}
-
-  var condendesedItems = condenseItems(items)
-  var k = 1
-  for (i of condendesedItems) {
-    amazonParams[`Item.${k}.ASIN`] = i.asin
-    amazonParams[`Item.${k}.Quantity`] = i.quantity
-    k++
-  }
-  return amazonParams
-}
-
-
 /**
  * format cents to nice price.  amazon returns amount in cents
  *
@@ -538,8 +539,9 @@ function getItemPrice(item, priceType) {
   // place holder for time being since unsure what price to use
   const availablePrices = {}
   availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
+  availablePrices.salePrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount', 0))
   if (priceType === undefined) {
-    return availablePrices.basicItemPrice
+    return availablePrices.salePrice || availablePrices.basicItemPrice
   } else {
     // might be useful to return other possible prices in the future
     availablePrices.lowestPrice = formatAmazonPrice(_.get(item, 'OfferSummary.LowestNewPrice.Amount', 0))

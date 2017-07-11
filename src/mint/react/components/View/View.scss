@@ -3,16 +3,20 @@
 @import '../../../react-common/styles/Animations';
 
 .view {
-	position: relative;
-	max-width: 1066px;
-	margin: 0 auto;
-	padding: 0 0 $padding*2;
+  padding: 0 0 25px;
 
 	@media only screen and (max-width: 600px) {
-		padding: 0 0 $padding*5;
+    height: auto;
+		padding: 0 0 100px;
 	}
 
-	* {
+  &.view_search {
+    @media only screen and (max-width: 600px) {
+      padding: 0 0 0;
+    }
+  }
+
+	& > * {
 	    max-width: 1066px;
 	}
 
@@ -23,36 +27,5 @@
 	    padding: $padding $padding*2;
 	    margin: 10px 2px 0;
 	}
-
-	& > .buttons {
-		position: fixed;
-		width: 100%;
-		bottom: 0;
-		left: 0;
-		padding: 0;
-		height: 40px;
-		border-top: 1px solid $border-color-light;
-		z-index: 10;
-
-		@media only screen and (min-width: 600px) {
-			display: none;
-		}
-
-		button {
-			margin: 0 0;
-			width: 50%;
-			border-radius: 0;
-			padding: 0 $padding;
-			
-			&.blue,
-			&.locked {
-				background: $secondaryColor;
-				color: white;
-
-				svg {
-					fill: white;
-				}
-			}
-		}
-	}
 }
+

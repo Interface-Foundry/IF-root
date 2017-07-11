@@ -99,6 +99,7 @@ export default class Popup extends Component {
     return (
       <section className='popup' onClick={(e) => {if(e.target.className === 'popup' && !window.location.href.includes('newcart')) _toggleLoginScreen();}}>
         <form className={`popup__card ${success ? 'codemode':''}`} onSubmit={!success ? _enterMail : _enterCode}>
+          
           {
             window.location.href.includes('newcart') 
             ? null
@@ -118,17 +119,23 @@ export default class Popup extends Component {
           }
           {
             !success
-              ? <input className={`loginMail ${!mail.edited ? 'empty' : ''}`} onChange={_updateMail} value={mail.val} type='email' required autoFocus placeholder='Enter your email'/>
+              ? <div className='popup__card__login_fields'>
+                  <a className='popup__card__login_button' href='/api/auth/facebook'>
+                    <img src='//storage.googleapis.com/kip-random/website/login_with_fbook.png'/>
+                  </a>
+                  <input className={`loginMail ${!mail.edited ? 'empty' : ''}`} onChange={_updateMail} value={mail.val} type='email' required autoFocus placeholder='Enter your email'/>
+                </div>
               : <div className='autoTab'>
                   <input ref={(c) => { this.code_0 = c; }} className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 0)} value={code.val[0]||''} type="tel" pattern='[0-9]{3}' required autoFocus placeholder='000'/>
                   <input ref={(c) => { this.code_1 = c; }} className={`loginCode ${!code.edited ? 'empty' : ''}`} onChange={(e) => _updateCode(e, 1)} value={code.val[1]||''} type="tel" pattern='[0-9]{3}' required placeholder='000'/>
                 </div>
           }
+
           <button type='submit'  value='Submit'>{!success ? 'Sign Up ': 'Log In '} <Right/></button>
           {
             !success
             ? <div className='popup__description'>
-                <p>{loginSubtext} </p>
+                <p>{loginSubtext}</p>
               </div>
             : null
           }

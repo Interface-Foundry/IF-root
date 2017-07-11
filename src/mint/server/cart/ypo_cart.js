@@ -32,7 +32,7 @@ function createYpoItem (item) {
   delete item.id
   delete item._id
   return db.Items.create({
-    store: 'ypo',
+    store: 'YPO',
     name: item.name,
     asin: item.item_code.toString(),
     description: item.description,

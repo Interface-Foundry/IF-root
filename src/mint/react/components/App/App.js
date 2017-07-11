@@ -8,16 +8,14 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import ReactGA from 'react-ga';
 
-import { HeaderContainer, TabsContainer, ViewContainer, LoginScreenContainer, SidenavContainer, StoresContainer } from '../../containers';
-import { ErrorPage, Modal, Toast, Loading } from '..';
+import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginScreenContainer, SidenavContainer, StoresContainer, ModalContainer } from '../../containers';
+import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
 export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this._handleScroll = ::this._handleScroll;
+  state = {
+    showCheckout: false
   }
-
   static propTypes = {
     fetchCart: PropTypes.func,
     match: PropTypes.object,
@@ -29,6 +27,7 @@ export default class App extends Component {
     page: PropTypes.number,
     lazyLoading: PropTypes.bool,
     user: PropTypes.object,
+    tab: PropTypes.string,
     location: PropTypes.object,
     togglePopup: PropTypes.func,
     fetchMetrics: PropTypes.func,
@@ -41,15 +40,26 @@ export default class App extends Component {
     getMoreSearchResults: PropTypes.func
   }
 
+  _logPageView(path, userId) {
+    ReactGA.set({ userId });
+    ReactGA.event({
+      category: 'User',
+      action: 'Initial Load'
+    });
+  }
+
   componentDidMount() {
-    const { _handleScroll, _logPageView  } = this;
+    const { _logPageView } = this;
     _logPageView();
-    this.scroll.addEventListener('scroll', _handleScroll);
+
+    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', ::this._handleScroll);
+
   }
 
   componentWillUnmount() {
-    const { _handleScroll } = this;
-    this.scroll.removeEventListener('scroll', _handleScroll);
+    if (document.body.clientWidth > 600) {
+      this.scroll.removeEventListener('scroll', ::this._handleScroll);
+    }
   }
 
   _handeKeyPress({ keyCode }) {
@@ -66,27 +76,20 @@ export default class App extends Component {
     }
   }
 
-  _logPageView(path, userId) {
-    ReactGA.set({ userId });
-    ReactGA.event({
-      category: 'User',
-      action: 'Initial Load'
-    });
-  }
-
   _handleScroll() {
-    const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
+    const {
+      props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading },
+      scroll: { scrollTop, containerHeight, clientHeight }
+    } = this;
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
-    if (search) {
-      const scrollTop = this.scroll.scrollTop,
-        containerHeight = this.scroll.scrollHeight,
-        windowHeight = this.scroll.clientHeight;
-
+    if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
-      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading) {
-        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
-      }
+      getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
+    } else if (scrollTop > 200 && (!search || !search.length)) {
+      this.setState({ showCheckout: true });
+    } else if (scrollTop < 200 && (!search || !search.length)) {
+      this.setState({ showCheckout: false });
     }
   }
 
@@ -113,25 +116,47 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate = (nextProps, nextState) => nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }, { showCheckout }) =>
+    tab !== this.props.tab
+    || loading !== this.props.loading
+    || sidenav !== this.props.sidenav
+    || popup !== this.props.popup
+    || location.pathname !== this.props.location.pathname
+    || location.search !== this.props.location.search
+    || toast !== this.props.toast
+    || selectedItemId !== this.props.selectedItemId
+    || showCheckout !== this.state.showCheckout
 
   render() {
-    const { sidenav, popup, togglePopup, match, toast, status, loading, history: { replace } } = this.props;
+    const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
+
     return (
-      <section className='app' onKeyDown={::this._handeKeyPress}>
+      <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
-        <Route path={'/'} component={HeaderContainer} />
+        <ModalContainer />
+        <Route path={'/'} component={(props) => <HeaderContainer {...props} showCheckout={this.state.showCheckout}/>}   />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        <div className={`app__view ${sidenav ? 'squeeze' : ''}`} ref={(scroll) => this.scroll = scroll}>
+        <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
-          <Route path={'/cart/:cart_id/m/*'} component={Modal} />
+          <Route path={'/cart/:cart_id/m/*'} component={Display} />
           <Route path={'/newcart'} exact component={StoresContainer} />
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
-          <Route path={'/m/*'} exact component={Modal} />
+          <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
+
+
         </div>
-        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }
+        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
+
+        {
+          // no jittery fix for mobile
+        }
+        <div className='noJudder'>
+          { tab === 'cart' ? <ButtonsContainer /> : null }
+          <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+        </div>
+        
       </section>
     );
   }

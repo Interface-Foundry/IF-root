@@ -20,10 +20,8 @@ export default class Header extends Component {
     showAlert: false
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { numCarts: nextNumCarts } = nextProps, { numCarts } = this.props;
-    this.setState({ showAlert: !!(numCarts && nextNumCarts > numCarts) });
-  }
+  componentWillReceiveProps = ({ numCarts }) =>
+    this.setState({ showAlert: !!(this.props.numCarts && numCarts > this.props.numCarts) });
 
   render = () => (
     <nav className='navbar'>
@@ -48,13 +46,16 @@ export default class Header extends Component {
         }
       />
       <Route path={'/m/archive'} exact component={() => 
-          <SettingsHeader text='My Archived Carts' icon='Locked' {...this.props}/>
+          <SettingsHeader text='My Locked Carts' icon='Locked' {...this.props}/>
         }
       />
       <Route path={'/m/feedback'} exact component={() => 
           <SettingsHeader text='Feedback' icon="Email" {...this.props}/>
         }
       />
+      <span className='beta'>
+        beta
+      </span>
     </nav>);
 
 }

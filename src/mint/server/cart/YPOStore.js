@@ -5,6 +5,12 @@ const fs = require('fs')
 const path = require('path')
 const ypoConstants = require('./ypo_constants')
 const LRU = require('lru-cache')
+const soap = require('soap')
+const svcUrl11 = 'https://edigateway-test.ypo.co.uk/EdiServiceSoap11/WebXmlDataServiceLayer.YpoService.asmx'
+const svcUrl12 = 'https://edigateway-test.ypo.co.uk/EdiService/WcfXmlDataServiceLibrary.YpoService.svc'
+const username = 'kip'
+const password = 'K1p0rdering'
+const logging = require('../../../logging.js')
 
 var db
 const dbReady = require('../../db')
@@ -27,6 +33,12 @@ class YPOStore extends Store {
    * @param  {Object}  options the search options
    */
   getSearchType(options) {
+    // first check if there is a cateogry that matches the search query
+    var matchedCategory = ypoConstants.categories.filter(c => c.category === options.text)
+    if (matchedCategory.length === 1) {
+      options.category = matchedCategory[0].category
+    }
+
     if (_.get(options, 'category')) {
       return 'categorySearch'
     } else if (options.text && options.text.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
@@ -44,9 +56,10 @@ class YPOStore extends Store {
   async categorySearch(options) {
     const category = options.category
     const items = await db.YpoInventoryItems.find({category_2: category})
-    logging.info('options.page', options.page)
       .skip(10 * (options.page ? options.page - 1 : 1))
       .limit(10)
+
+    logging.info('options.page', options.page)
 
     return items
   }
@@ -100,43 +113,94 @@ class YPOStore extends Store {
     return items
   }
 
-  async checkout(cart, req, res) {
-    const leader = await db.UserAccounts.findOne({id: cart.leader})
-    const address = await db.Addresses.findOne({user_account: leader.id})
-    let cartFinal = {
-      items: cart.items.map(item => {
-        return {
-          'store': item.store,
-          'name': item.name,
-          'code': item.asin,
-          'price': item.price,
-          'quantity': item.quantity,
-          'cart': cart.id
-        }
-      }),
-      name: cart.name,
-      cart_id: cart.id,
-      ordered_by: {
-        'username': leader.name || leader.email_address.split('@')[0],
-        'email': leader.email_address,
-        'orderedAt': (new Date()).toString()
-      },
-      ypo_delivery_details: {
-        'account_number': leader.account_number,
-        'account_name': leader.account_name,
-        'address_1': address.line_1 || '',
-        'address_2': address.line_1 || '',
-        'town': address.city,
-        'region': address.state,
-        'postcode': address.zip,
-        'delivery_message': address.delivery_message,
-        'voucher_code': leader.ypo_voucher_code
+  async checkout(cart) {
+    if (cart.locked) {
+      return {
+        ok: false,
+        redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+        message: 'Order already submitted'
       }
     }
-    const builder = new xml2js.Builder()
-    const xml = builder.buildObject(cartFinal)
-    res.set('Content-Type', 'text/xml');
-    return res.send(xml)
+
+    if (typeof cart.leader === 'object') {
+      var leader = cart.leader
+    } else if (typeof cart.leader === 'string') {
+      leader = await db.UserAccounts.findOne({id: cart.leader})
+    }
+    const address = await db.Addresses.findOne({user_account: leader.id})
+
+    const itemsXML = cart.items.map(item => {
+        return `<item>
+            <store>YPO</store>
+            <code>${item.code}</code>
+            <quantity>${item.quantity}</quantity>
+        </item>`
+    })
+
+    const cartXML = `
+    <cart>
+      <name>${cart.name}</name>
+      <items>
+        ${itemsXML}
+      </items>
+      <orderedBy>
+          <username>${leader.name}</username>
+          <email>${leader.email}</email>
+          <orderedAt>${new Date().toISOString()}</orderedAt>
+      </orderedBy>
+      <order_number>${cart.order_number}</order_number>
+      <delivery_details>
+          <account_number>${cart.account_number}</account_number>
+          <delivery_message>${cart.delivery_message}</delivery_message>
+          <voucher_code>${cart.voucher_code}</voucher_code>
+      </delivery_details>
+    </cart>`.trim()
+
+    // name = kip cart name
+    // code = the product code from YPO inventory
+    // username = kip username of order submitter
+    // email = email of order submitter
+    //
+    // order_number = this field will be optional on kip front-end. if they don't fill it in, we need to generate an order number to send to YPO
+    // account_number = this is a required field for user to fill in, we can't process order without it
+    // delivery_message = optional text field
+    // voucher_code = optional field
+
+    await new Promise((resolve, reject) => {
+      soap.createClient(svcUrl11 + '?WSDL', {
+        forceSoap12Headers: false
+      }, function(err, client) {
+        if (err) {
+          return reject(err)
+        }
+
+        const args = {
+          CustomerKey: username,
+          Password: password,
+          cXmlOrder: cartXML
+        }
+
+        client.SendOrderToYpo(args, function(err, result) {
+          if (err) {
+            return reject(err)
+          }
+
+          console.log(result)
+          resolve({
+            ok: true,
+            message: 'Order submitted successfully'
+          })
+        });
+      })
+    });
+
+    await super.checkout(cart)
+
+    return {
+      ok: true,
+      redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+      message: 'Order submitted successfully'
+    }
   }
 }
 

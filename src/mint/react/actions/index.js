@@ -3,7 +3,8 @@ export {
   toggleSidenav,
   togglePopup,
   selectTab,
-  selectAccordion
+  selectAccordion,
+  toggleYpoCheckout
 }
 from './app';
 

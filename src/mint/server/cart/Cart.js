@@ -84,6 +84,14 @@ class Cart {
     _.merge(this, newCart)
   }
 
+  async addItemToCart (item, quantity) {
+    if (quantity === undefined) {
+      quantity = 1
+    }
+    item = await this.store.addItem(item, quantity)
+    return item;
+  }
+
   async deleteItemFromCart (item, userId) {
     if (!item) {
       throw new Error('Item not found')
@@ -104,7 +112,6 @@ class Cart {
     if (this.store === undefined) {
       throw new Error('Store required for checkout')
     }
-    logging.info('this.store', this.store)
     // const store = GetStore(this)
     // logging.info('STORE:', store)
     await this.store.checkout(this, req, res)
@@ -154,7 +161,6 @@ class Cart {
       totalItems: totalItems,
       cart: this
     })
-    logging.info('sending summary')
     await summary.send()
   }
 }

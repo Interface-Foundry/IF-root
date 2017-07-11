@@ -23,6 +23,7 @@ import {
   IoHappy,
   IoIosBox,
   IoLocked,
+  IoUnlocked,
   IoLogIn,
   IoLogOut,
   IoLoop,
@@ -33,7 +34,10 @@ import {
   IoPricetag,
   IoRefresh,
   IoSad,
-  IoSearch
+  IoSearch,
+  IoHome,
+  IoPound,
+  IoQrScanner
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -60,6 +64,8 @@ export default class Icon extends Component {
       return <IoAndroidFavorite/>;
     case 'Loop':
       return <IoLoop/>;
+    case 'Home':
+      return <IoHome/>;
     case 'PriceTag':
       return <IoPricetag/>;
     case 'Hamburger':
@@ -88,6 +94,8 @@ export default class Icon extends Component {
       return <IoCamera/>;
     case 'Locked':
       return <IoLocked/>;
+    case 'Unlocked':
+      return <IoUnlocked/>;
     case 'Check':
       return <IoCheckmark/>;
     case 'Search':
@@ -134,6 +142,10 @@ export default class Icon extends Component {
       return <Share/>;
     case 'Chatbubble':
       return <IoChatbubbleWorking/>;
+    case 'Hash':
+      return <IoPound/>;
+    case 'QR':
+      return <IoQrScanner/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

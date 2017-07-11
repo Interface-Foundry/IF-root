@@ -122,11 +122,11 @@ export default class Sidenav extends Component {
           <li className='sidenav__list__actions'>
             {
               archivedCarts.length
-              ? <SideNavLink to={'/m/archive'} ><h4><Icon icon='Archive'/> Archived Carts</h4></SideNavLink>
+              ? <SideNavLink className='lock' to={'/m/archive'}><Icon icon='Locked'/><h4>Archives</h4></SideNavLink>
               : null
             }
-            {user_account.name ? <SideNavLink to={'/m/settings'}><h4><Icon icon='Settings'/> My Settings</h4></SideNavLink> : null }
-            <SideNavLink to={'/m/feedback'} ><h4><Icon icon='Email'/>Feedback</h4></SideNavLink>
+            {user_account.name ? <SideNavLink className='settings' to={'/m/settings'}><Icon  icon='Settings'/><h4>Settings</h4></SideNavLink> : null }
+            <SideNavLink className='mail' to={'/m/feedback'}><Icon  icon='Email'/><h4>Feedback</h4></SideNavLink>
           </li>
           <footer className='sidenav__footer'>
             <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>

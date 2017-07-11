@@ -11,6 +11,7 @@ const fs = require('fs'),
   _ = require('lodash'),
   co = require('co'),
   auth = require('basic-auth');
+  passport = require('passport')
 
 // start any jobs
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
@@ -77,7 +78,6 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-
 /**
  * Creates a cookie-based session for the client
  */
@@ -125,8 +125,13 @@ if (process.env.LOGGING_MODE === 'database') {
 
     next()
   })
-
 }
+
+/**
+ * Initialize passport.js
+ */
+app.use(passport.initialize())
+app.use(passport.session())
 
 //
 // Back end routes
@@ -147,20 +152,33 @@ app.use('/sg', require('./sendgrid-webhook.js'));
  *  we can pass arrays to react by embedding their strings in javascript
  *  we could handle session data through fetching data with react
  */
-app.get('/cart/*', (req, res) =>
-  // Get the user_accont info, if exists (might not if they are clicking a shared link)
-  // Get the cart info, if doesn't exist res.render('pages/404'), views/pages/404.ejs static page, a nice 404 with a Start Shopping link to create a new cart.
-  res.render('pages/cart')
-);
-app.get('/m/*', (req, res) =>
+const default_cart = {
+  name: 'Kip Cart',
+  description: 'Shared Kip Cart',
+  thumbnail_url: '/favicon/social_image_main.png'
+}
+app.get('/cart/:cart_id*', (req, res) => co(function* () {
+  // for rendering meta tags, if anyone has a better way, let me know!
+  var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+  cart = Object.assign({}, default_cart, cart)
+  const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+  res.render('pages/cart', { cart, url })
+}))
+app.get('/m/:route*', (req, res) => {
   // allow modal routes
-  res.render('pages/cart')
-);
-app.get('/newcart', (req, res)=>{
-  res.render('pages/cart'); // render cart selection screen on server
+  const cart = Object.assign({}, default_cart, { name: 'Shop on Kip', description: _.capitalize(req.params.route) })
+  const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+  res.render('pages/cart', { cart, url })
 });
-app.get('/404', (_, res) => {
-  res.render('pages/cart');
+app.get('/newcart', (req, res) => {
+  const cart = Object.assign({}, default_cart, { name: 'Create a New Cart', description: 'Create your own cart on Kip!' })
+  const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+  res.render('pages/cart', { cart, url }) // render cart selection screen on server
+});
+app.get('/404', (req, res) => {
+  const cart = Object.assign({}, default_cart, { name: 'Oops!', description: 'Why are you sharing our 404 page?' })
+  const url = req.protocol + '://' + req.get('host') + req.originalUrl;
+  res.render('pages/cart', { cart, url })
 });
 app.get('/legal', (_, res) => {
   res.render('pages/index');

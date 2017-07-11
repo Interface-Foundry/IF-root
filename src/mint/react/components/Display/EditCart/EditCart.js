@@ -1,4 +1,4 @@
-// react/components/modal/EditCart/EditCart.js
+// react/components/Display/EditCart/EditCart.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -23,6 +23,7 @@ class EditCart extends Component {
 
   state = {
     editingName: false,
+    editingDescrip: false,
     cartName: ''
   }
 
@@ -62,7 +63,7 @@ class EditCart extends Component {
   render() {
     const {
       props: { clearCart, deleteCart, cart_id, cart, history: { push } },
-      state: { editingName },
+      state: { editingName, editingDescrip },
       _changeName,
       _saveName,
       _updateImage,

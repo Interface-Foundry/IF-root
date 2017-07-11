@@ -1,4 +1,4 @@
-// react/components/modal/EditCart/Image.js
+// react/components/Display/EditCart/Image.js
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';

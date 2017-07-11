@@ -306,9 +306,11 @@ module.exports = function (router) {
       if (existingCart && existingCart.id !== cart.id) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
+      logging.info('GETTING PREVIEWED ITEM FROM DB')
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
+      logging.info('CREATING ITEM FROM URL')
       // Create an item from the url
       item = yield cartUtils.addItem(req.body, cart, 1)
     }
@@ -325,7 +327,7 @@ module.exports = function (router) {
 
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
-
+    var item = yield db.Items.findOne({id: item.id}).populate('options')
     return res.send(item)
   }));
 
@@ -725,6 +727,7 @@ module.exports = function (router) {
       yield cart.save()
     }
 
+    var item = yield db.Items.findOne({id: item.id}).populate('options')
     res.send(item)
   }))
 
@@ -918,9 +921,16 @@ module.exports = function (router) {
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
-    console.log('store instance', (storeInstance || {})
-      .name)
-    var results = await storeInstance.search(searchOpts)
+    console.log('store instance', (storeInstance || {}).name)
+
+    try {
+      var results = await storeInstance.search(searchOpts)
+    } catch (e) {
+      return res.send({
+        ok: false,
+        message: e.message
+      })
+    }
     //for testing
     // results = await
     res.send(results)
@@ -961,38 +971,23 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart id
    */
   router.get('/cart/:cart_id/checkout', (req, res) => co(function* () {
-    // go to prototype
-    // return res.redirect('/prototype/checkout')
-    // get the cart
-    console.log('cart_id:', req.params.cart_id)
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('items').populate('checkouts')
-    // checkout removes the items from the cart object, so we have to make a copy
-    var items = cart.items.slice()
-    var user_id = _.get(req, 'UserSession.user_account.id')
+    var cart = yield db.Carts.findOneById(req.params.cart_id)
+      .populate('items')
+      .populate('leader')
 
-    var fullCart = yield Cart.GetById(cart.id)
+    var checkoutResponse = yield cart.checkout()
 
-    // yield cartUtils.checkout(cart, req, res)
-    yield fullCart.checkout(req, res)
+    if (checkoutResponse.redirect) {
+      res.redirect(checkoutResponse.redirect)
+    } else {
+      res.send(checkoutResponse)
+    }
 
     // create a new checkout event for record-keeping purposes
     var event = yield db.CheckoutEvents.create({
       cart: cart.id,
-      user: user_id
+      user: req.UserSession.user_account.id
     })
-
-    // and attach it to the cart and the user
-    var user = yield db.UserAccounts.findOne({id: user_id}).populate('checkouts')
-    user.checkouts.add(event)
-    cart.checkouts.add(event)
-    yield user.save()
-
-    cart.items = items;
-    cart.locked = true;
-    // this is redundant w the emails invoices will send out
-    // leaving it in for now bc those aren't fully here yet
-    yield cart.save()
-    yield fullCart.sendCartSummary(req)
   }))
 
   /**
@@ -1083,15 +1078,13 @@ module.exports = function (router) {
       else return 0;
     })
 
-    // if we're in production, don't show YPO
-    if (process.env.YPO_ENABLED !== undefined || process.env.YPO_ENABLED === false) {
-      logging.info('hiding ypo on production')
+    // YPO can be hidden by setting YPO_ENABLED: false in production-ecosystem.json etc
+    if (process.env.YPO_ENABLED === 'false') {
       stores = stores.filter(function (s) {
         return s.store_type != 'YPO'
       });
     }
 
-    // logging.info('stores', stores)
     res.send(stores)
   }))
 

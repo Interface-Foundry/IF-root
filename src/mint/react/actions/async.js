@@ -2,7 +2,6 @@ import { loading } from './';
 
 export const get = (url, type, cb) => {
   return async dispatch => {
-    dispatch(loading(type));
     try {
       dispatch(loading(type));
       const response = await fetch(url, {

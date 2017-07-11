@@ -1,20 +1,44 @@
 // react/components/Modal/Modal.js
 
 import React, { Component } from 'react';
-import { Route } from 'react-router';
+import { PropTypes } from 'prop-types';
 
-import { SettingsContainer, FeedbackContainer, EditCartContainer, ArchiveContainer } from '../../containers';
-import { Share } from '..';
+import { YpoCheckoutContainer } from '../../containers';
 
 export default class Modal extends Component {
+  static propTypes = {
+    showYpoCheckout: PropTypes.bool
+  }
+
+  state = {
+    showModal: false
+  }
+
+  // for more modals we can just do an or 
+  // e.g. {showModal: showYpoCheckout || showAmazonCheckout || ...}
+  componentWillReceiveProps = ({ showYpoCheckout }) =>
+    this.setState({ showModal: showYpoCheckout })
+
+  componentDidMount = () =>
+    this.setState({ showModal: this.props.showYpoCheckout })
+  shouldComponentUpdate = ({ showYpoCheckout }) =>
+    showYpoCheckout !== this.state.showYpoCheckout
+
   render = () =>
     (
-      <div className='modal'>
-        <Route path={'/cart/:cart_id/m/share'} exact component={Share} />
-        <Route path={'/cart/:cart_id/m/edit'} exact component={EditCartContainer} />
-        <Route path={'/m/settings'} exact component={SettingsContainer} />
-        <Route path={'/m/feedback'} exact component={FeedbackContainer} />
-        <Route path={'/m/archive'} exact component={ArchiveContainer} />
-      </div>
+      this.state.showModal
+      ? (
+          <div className='modal-overlay'>
+            <div className='modal-box'>
+              <div className='modal-box__head'>
+              </div>
+
+              <div className='modal-box__content'>
+                { this.props.showYpoCheckout ? <YpoCheckoutContainer /> : null }
+              </div>
+          </div>
+        </div>)
+      : null
     )
+
 }

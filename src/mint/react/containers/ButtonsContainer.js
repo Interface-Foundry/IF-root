@@ -8,7 +8,8 @@ import {
   reorderCart,
   selectTab,
   selectAccordion,
-  createInvoice
+  createInvoice,
+  toggleYpoCheckout
 } from '../actions';
 
 const mapStateToProps = (state, props) => {
@@ -26,7 +27,8 @@ const mapDispatchToProps = dispatch => ({
   updateCart: (cart) => dispatch(updateCart(cart)),
   selectTab: (tab) => dispatch(selectTab(tab)),
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
-  createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type))
+  createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
+  toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);
