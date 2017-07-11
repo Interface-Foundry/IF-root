@@ -201,7 +201,7 @@ module.exports = function (router) {
    */
   router.route('/payment')
     /**
-     * @api {get} /payment/:user_id get payment sources
+     * @api {get} /payment get payment sources
      * @apiDescription get payment sources for a user (i.e. stripe, venmo, etc.)
      * @apiGroup PaymentSources
      *
@@ -215,7 +215,7 @@ module.exports = function (router) {
     })
 
     /**
-     * @api {post} /payment/:user_id create payment source for user_id
+     * @api {post} /payment create payment source for user_id
      * @apiDescription create a new payment source for a user
      * @apiGroup PaymentSources
      *
@@ -235,6 +235,30 @@ module.exports = function (router) {
 
   router.route('/payment/:paymentsource_id')
     /**
+     * @api {post} /payment/:paymentsource_id
+     * @apiDescription create a payment for an invoice
+     * @apiGroup PaymentSources
+     *
+     * @apiParam {string} :paymentsource_id - id of payment source
+     * @apiParam {string} :invoice_id - id of invoice
+     *
+    */
+    .post(async (req, res) => {
+      const userId = req.UserSession.user_account.id
+      const paymentSourceId = req.params.paymentsource_id
+      const paymentSource = await PaymentSource.GetById(paymentSourceId)
+
+      if (paymentSource.user !== userId) {
+        throw new Error('UserId and paymentSource user must match')
+      }
+
+      const invoice = await Invoice.GetById(req.body.invoice_id)
+
+      const payment = await paymentSource.pay(invoice)
+      logging.info('paid', payment)
+      return res.send(payment)
+    })
+    /**
      * @api {delete} /payment/:paymentsource_id
      * @apiDescription delete the paymentsource
      * @apiGroup PaymentSources
@@ -243,8 +267,8 @@ module.exports = function (router) {
      */
     .delete(async (req, res) => {
       const userId = req.UserSession.user_account.id
-      const paymentId = req.params.paymentsource_id
-      await PaymentSource.DeletePaymentSource(userId, paymentId)
+      const paymentSourceId = req.params.paymentsource_id
+      await PaymentSource.DeletePaymentSource(userId, paymentSourceId)
       res.status(200).end()
     })
 

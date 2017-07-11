@@ -21,14 +21,15 @@ const mapStateToProps = (state, ownProps) => {
   user: state.user,
   invoice: state.payments.invoice,
   paymentSources: state.payments.paymentSources,
-  userPayment: state.payments.userPayment
+  userPaymentStatus: state.payments.userPaymentStatus,
+  payment: state.payments.payment
 };};
 
 // Just an example for mapping functions to the component.
 // What this does it connect the functions to redux, so that the results of those functions get passed to our redux store.
 const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
-  createPayment: (invoice_id) => dispatch(createPayment(invoice_id)),
+  createPayment: (paymentsource_id, invoice_id) => dispatch(createPayment(paymentsource_id, invoice_id)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
   createPaymentSource: (payment_data, payment_source) => dispatch(createPaymentSource(payment_data, payment_source)),
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),

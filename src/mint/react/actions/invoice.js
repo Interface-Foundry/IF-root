@@ -51,10 +51,10 @@ export const fetchPaymentStatus = invoice_id => get(
   })
 );
 
-export const createPayment = invoice_id => post(
-  `/api/invoice/payment/${invoice_id}`,
-  'CREATE_PAYMENTS',
-  {},
+export const createPayment = (paymentsource_id, invoice_id) => post(
+  `/api/payment/${paymentsource_id}`,
+  'CREATE_PAYMENT',
+  { 'invoice_id': invoice_id },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

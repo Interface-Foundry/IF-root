@@ -9,7 +9,8 @@ export default class PaymentSources extends Component {
     invoice: PropTypes.object,
     paymentSources: PropTypes.array,
     fetchPaymentSources: PropTypes.func,
-    deletePaymentSource: PropTypes.func
+    deletePaymentSource: PropTypes.func,
+    createPayment: PropTypes.func
   }
 
   state = {
@@ -23,7 +24,7 @@ export default class PaymentSources extends Component {
 
   render() {
 
-    const { props: { paymentSources, deletePaymentSource },
+    const { props: { invoice, createPayment, paymentSources, deletePaymentSource },
             state: { selectedCardIndex }
     } = this;
 
@@ -41,6 +42,7 @@ export default class PaymentSources extends Component {
             </li>
           ))
         }
+        <button onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}> pay </button>
       </div>
     );
   }
