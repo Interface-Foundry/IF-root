@@ -1,8 +1,9 @@
 import { get, post, put, del } from './async';
 
-export const createInvoice = (cart_id, invoice_type) => post(
-  `/api/${invoice_type}/${cart_id}`,
-  'CREATE_INVOICE', {},
+export const createInvoice = (cart_id, invoice_type, split_type) => post(
+  `/api/invoice/${invoice_type}/${cart_id}`,
+  'CREATE_INVOICE',
+  {'split_type': split_type},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -20,9 +21,9 @@ export const fetchInvoice = invoice_id => get(
   })
 );
 
-export const fetchInvoices = cart_id => get(
+export const fetchInvoiceByCart = cart_id => get(
   `/api/invoice/cart/${cart_id}`,
-  'INVOICES',
+  'INVOICE_BY_CART',
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -33,6 +34,27 @@ export const fetchInvoices = cart_id => get(
 export const fetchPaymentSources = () => get(
   '/api/payment',
   'PAYMENTSOURCES',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
+export const fetchPaymentStatus = invoice_id => get(
+  `/api/invoice/payment/${invoice_id}`,
+  'FETCH_PAYMENT_STATUS',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
+export const createPayment = (paymentsource_id, invoice_id) => post(
+  `/api/payment/${paymentsource_id}`,
+  'CREATE_PAYMENT',
+  { 'invoice_id': invoice_id },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -61,15 +83,6 @@ export const deletePaymentSource = (paymentsource_id) => del(
   })
 );
 
-export const postPayment = (invoice_id, paymentsource_id) => post(
-  `/api/invoice/payment/${invoice_id}`,
-  'ADD_PAYMENT', { paymentsource_id },
-  (type, json) => ({
-    type: `${type}_SUCCESS`,
-    response: json,
-    receivedAt: Date.now()
-  })
-);
 
 export const sendPaymentCollectionEmails = invoice_id => post(
   `/api/invoice/${invoice_id}`,
@@ -81,9 +94,10 @@ export const sendPaymentCollectionEmails = invoice_id => post(
   })
 );
 
-export const updateInvoiceOptions = (invoice_id, option, data) => put(
-  `/api/invoice/payment/${invoice_id}`,
-  'UPDATE_INVOICE_OPTIONS', { option_change: option, option_data: data },
+export const updateInvoice = (invoice_id, option, data) => put(
+  `/api/invoice/${invoice_id}`,
+  'UPDATE_INVOICE_OPTIONS',
+  { 'option_change': option, 'option_data': data },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

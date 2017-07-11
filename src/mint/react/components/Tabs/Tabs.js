@@ -6,10 +6,20 @@ import { numberOfItems } from '../../utils';
 import { AlertBubble } from '../../../react-common/components';
 import { Icon } from '../../../react-common/components';
 
+function addInvoiceTab(tabs, invoice) {
+  if (invoice && process.env.NODE_ENV === 'development') {
+    tabs.push({
+      tab: 'invoice',
+      display: 'Invoice'
+    });
+  }
+}
+
 export default class Tabs extends Component {
 
   static propTypes = {
     selectTab: PropTypes.func,
+    fetchInvoiceByCart: PropTypes.func,
     cart: PropTypes.object,
     search: PropTypes.object,
     tab: PropTypes.string,
@@ -20,8 +30,9 @@ export default class Tabs extends Component {
     tabs: []
   }
 
-  componentDidMount() {
-    const { cart: { items, id }, search: { query } } = this.props;
+  componentWillMount() {
+    const { cart: { items, id  }, search: { query } } = this.props;
+    // fetchInvoiceByCart(id);
     const tabs = [{
       id: 1,
       tab: 'cart',
@@ -41,13 +52,18 @@ export default class Tabs extends Component {
       url: `${id}/m/share`,
       display: 'Share'
     }];
+
+    addInvoiceTab(tabs, true);
     this.setState({ tabs });
+  }
+  componentDidMount() {
+    const { cart } = this.props;
   }
 
   clearHightlight = null
 
   componentWillReceiveProps(nextProps) {
-    const { cart: { items, id }, search: { query } } = nextProps,
+    const { invoice, cart: { items, id }, search: { query } } = nextProps,
     itemsChanged = items.length > this.props.cart.items.length,
       tabs = [{
         id: 1,
@@ -70,6 +86,7 @@ export default class Tabs extends Component {
         display: 'Share'
       }];
     clearTimeout(this.clearHightlight);
+    addInvoiceTab(tabs, invoice);
     this.setState({ tabs });
     this.clearHightlight = setTimeout(() => this.setState({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) }), 3000);
   }
@@ -91,24 +108,3 @@ export default class Tabs extends Component {
     );
   }
 }
-
-// const tabs = kip_pay_allowed ? [{
-//   tab: 'cart',
-//   url: `/cart/${id}`,
-//   display: `Cart (${numberOfItems(items)})`
-// }, {
-//   tab: 'search',
-//   url: `/cart/${id}?q=${query}`,
-//   display: 'Search'
-// }, {
-//   tab: 'invoice',
-//   display: 'Invoice'
-// }] : [{
-//   tab: 'cart',
-//   url: `/cart/${id}`,
-//   display: `Cart (${numberOfItems(items)})`
-// }, {
-//   tab: 'search',
-//   url: `/cart/${id}?q=${query}`,
-//   display: 'Search'
-// }];

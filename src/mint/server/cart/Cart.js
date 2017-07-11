@@ -15,7 +15,6 @@ class Cart {
    */
   constructor(cart) {
     // first set the default cart options if unset
-    debugger;
     this.user_locale = cart.user_locale || 'US'
     this.items = cart.items || []
 
@@ -48,7 +47,6 @@ class Cart {
 
     // create as the object
     var cart = new Cart(cartObject)
-    debugger;
     if (cartObject.store_locale) {
       cart.user_locale = cartObject.store_locale
     }
@@ -80,10 +78,10 @@ class Cart {
    * @return     {Promise}
    */
   // async sync () {
-  sync () {
-    // const newCart = await this.store.sync(this)
-    // await this.store.updateCart(this.id, newCart)
-    // _.merge(this, newCart)
+  async sync () {
+    const newCart = await this.store.sync(this.items)
+    await this.store.updateCart(this.id, newCart)
+    _.merge(this, newCart)
   }
 
   async addItemToCart (item, quantity) {

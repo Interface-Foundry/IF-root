@@ -5,12 +5,17 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 
+
+const displayInvoice = (process.env.NODE_ENV === 'development') ? true : false
+
 export default class Default extends Component {
   static propTypes = {
     push: PropTypes.func,
     cart: PropTypes.object,
     reorderCart: PropTypes.func,
     updateCart: PropTypes.func,
+    createInvoice: PropTypes.func,
+    selectTab: PropTypes.func,
     user: PropTypes.object,
     toggleYpoCheckout: PropTypes.func,
     checkoutOnly: PropTypes.bool
@@ -33,6 +38,17 @@ export default class Default extends Component {
     }
   }
 
+  _handleInvoiceButton = () => {
+    const { createInvoice, selectTab, cart, updateCart } = this.props;
+    updateCart({ ...cart, locked: true });
+    createInvoice(cart.id, 'mint', 'split_by_item');
+    selectTab('invoice');
+  }
+
+  _handleUnlockCart = () => {
+    const { updateCart, cart, invoice } = this.props;
+    updateCart({ ...cart, locked: false });
+    
   _orderCart = (e) => {
     const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart } = this.props;
     
@@ -53,6 +69,7 @@ export default class Default extends Component {
     return (
       <div className='default'>
         {
+
           cart.locked 
           ? <span>
               <button 
@@ -61,6 +78,7 @@ export default class Default extends Component {
                 > 
                   Re-Order {displayCost(total, cart.store_locale)}
                 </button>
+                { displayInvoice ? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
                   { 
                     (cart.leader.id === user.id || cart.leader === user.id) && checkoutOnly 
                     ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>

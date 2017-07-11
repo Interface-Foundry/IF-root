@@ -31,15 +31,20 @@ export {
 from './session';
 
 export {
+  // invoices
   fetchInvoice,
-  fetchInvoices,
+  fetchInvoiceByCart,
   createInvoice,
+  updateInvoice,
+  // payments
+  fetchPaymentStatus,
+  fetchPayments,
+  createPayment,
+  sendPaymentCollectionEmails,
+  // payment sources
   fetchPaymentSources,
   createPaymentSource,
-  deletePaymentSource,
-  postPayment,
-  sendPaymentCollectionEmails,
-  updateInvoiceOptions
+  deletePaymentSource
 }
 from './invoice';
 

@@ -1,38 +1,12 @@
 var moment = require('moment')
+const _ = require('lodash')
 const Cart = require('../cart/Cart')
-
-const email_utils = require('../utilities/email_utils')
+const userPaymentAmountHandler = require('../utilities/InvoiceUtils').userPaymentAmountHandler
 
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-const userPaymentAmountHandler = {
-  'split_equal': function (invoice) {
-    logging.info('even split')
-    var debts = {}
-    var perUser = invoice.total / (1.0 * invoice.members.length)
-    invoice.members.map(function (user) {
-      debts[user.id] = perUser
-    })
-    return debts
-  },
-  'split_single': function (invoice) {
-    logging.info('single payer split')
-    var debts = {}
-    debts[invoice.leader.id] = invoice.total
-    return debts
-  },
-  'split_by_item': async function (invoice) {
-    var cart = await db.Carts.findOne({id: invoice.cart}).populate('items')
-    var debts = {}
-    cart.items.map(function (item) {
-      if (debts[item.added_by]) debts[item.added_by] += item.price
-      else debts[item.added_by] = item.price
-    })
-    return debts
-  }
-}
 
 class Invoice {
   constructor(invoiceType) {
@@ -47,7 +21,7 @@ class Invoice {
    * @return     {Promise}  The invoice db object into class object
    */
   static async GetById (invoiceId) {
-    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('members')
+    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
     if (!invoice) {
       throw new Error('no invoice found')
     }
@@ -64,8 +38,8 @@ class Invoice {
    * @return     {Promise}  the invoices
    */
   static async GetByCartId (cartId) {
-    const invoice = await db.Invoices.find({cart: cartId}).populate('leader').populate('cart').populate('members')
-    return invoice
+    const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
+    return new invoiceHandlers[invoice.invoice_type](invoice)
   }
 
   /**
@@ -80,9 +54,33 @@ class Invoice {
     return new invoiceHandlers[invoiceType](invoiceData)
   }
 
+  static async CreateByCartId (cartId) {
+    const cart = await db.Carts.findOne({id: cartId})
+    return new invoiceHandlers['mint'](cart)
+  }
 
-  optionUpdate(option, optionData) {
-    Object.assign(this, {[option]: optionData})
+
+  /**
+   * Update a field or object in the db with new data
+   *
+   * @param      {invoiceId}   invoiceId   The invoice identifier
+   * @param      {option}   option      The option to change
+   * @param      {optionData}   optionData  The option data
+   * @return     {Promise}  the updated invoice
+   */
+  static async optionUpdate(invoiceId, option, optionData) {
+    let invoice
+    try {
+      invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
+    } catch (err) {
+      logging.error('error updating invoice, invoice does not exist probably', err)
+      return
+    }
+    invoice[option] = optionData
+    await invoice.save()
+
+    const updatedInvoice = await this.GetById(invoice.id)
+    return updatedInvoice
   }
 
 
@@ -94,6 +92,10 @@ class Invoice {
     return handlers[action](actionData)
   }
 
+  async updateInvoice () {
+    let cart = await Cart.GetById(this.cart.id)
+    await cart.sync()
+  }
 
   /**
    * Creates an invoice in the database.
@@ -109,16 +111,12 @@ class Invoice {
       invoice_type: this.invoice,
       cart: cart.id,
       paid: false,
-      total: cart.subtotal,
+      total: _.get(cart, 'subtotal'),
       split_type: this.split_type
     })
 
-    cart.members.map(function (m) {
-      newInvoice.members.add(m.id)
-    })
-
     await newInvoice.save()
-    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('members')
+    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
 
     return invoice
   }
@@ -280,27 +278,18 @@ class MintInvoice extends Invoice {
   }
 
   async checkPrevInvoice () {
-    const invoice = await db.Invoices.findOne({cart: this.cart})
+    const invoice = await db.Invoices.findOne({cart: this.cart}).populate('leader')
     if (invoice) {
       return invoice
     }
     return null
   }
 
-  /**
-   * we dont need to actually create a charge but after a user checks out an
-   * amazon cart we should note what items or whatever were in the cart at this point
-   */
-  get createAmazonCharge() {
-
-  }
-
-  // methods
 }
 
 
 const invoiceHandlers = {
-  [MintInvoice.name]: MintInvoice,
+  [MintInvoice.name]: MintInvoice
 }
 
 

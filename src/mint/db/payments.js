@@ -16,11 +16,24 @@ const paymentsCollection = Waterline.Collection.extend({
       defaultsTo: () => uuid.v4()
     },
 
+    /**
+     * if the payment is a success, refunded, failed, etc., , i.e. payment went through and user has completed paying?
+     */
+    status: {
+      type: 'string',
+      enum: ['success', 'failed', 'canceled', 'refunded']
+    },
+
     /** cart can have one invoice associated with the payment */
     invoice: Waterline.isA('invoices'),
 
     /** user can have many payments, payment would be one user */
     user: Waterline.isA('user_accounts'),
+
+    /**
+     * item, if split_by_items
+     */
+    items: Waterline.isMany('items'),
 
     /**
      * the source id
