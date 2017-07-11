@@ -337,21 +337,25 @@ var getRates = async function (){
 var translate = async function (text, target) {
   // Instantiates a client
 	// return [text]
+	logging.info('translate called')
   const translate = Translate()
   var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-  var results = await translate.translate(text, target)
-    // .then((results) => {
+	logging.info('google is gonna translate now')
+	logging.info('text, target', text, target)
+  return translate.translate(text, target)
+	// logging.info('got results:', results)
+    .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
 			return translations
-    // })
-    // .catch((err) => {
-    //   console.error('ERROR:', err);
-    // });
-    return translations
+    })
+    .catch((err) => {
+      console.error('ERROR:', err);
+    });
+    // return translations
 }
 
 
@@ -365,7 +369,7 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-
+	logging.info('translate text called')
 	var c = []
 
 	//collect text to translate into a single arr for google translate API
@@ -394,11 +398,13 @@ var translateText = async function (s){
 			}
 	    })
 	}
+	logging.info('about to do the actual translation')
 	//keep context of text mapping (need to double check the logic here....)
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
 	var tc_map = await translate(tc.translate,s.user.locale)
+	logging.info('Ttranslated')
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -413,6 +419,7 @@ var translateText = async function (s){
 			break
 		}
 	}
+	logging.info('about to return:', s)
 	return s
 }
 
@@ -424,17 +431,19 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		// var store_country = 'JP'
 		// var domain = 'muji.net'
 		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-
+		logging.info('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
 		var $ = cheerio.load(html)
 		s = await tryHtml(s,$)
 
-		logging.info('s', s)
+		logging.info('got html')
  		s = await foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
 		// logging.info('s2', s)
+		logging.info('exchanged currency')
 		s = await translateText(s)
 		// logging.info('s3', s)
+		logging.info('translated text')
 
 		// console.log('res: ', s)
 		return s

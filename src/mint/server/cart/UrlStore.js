@@ -30,7 +30,7 @@ class UrlStore extends Store {
     if (!uri || !uri.match(new RegExp(this.domain))) {
       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
     }
-
+    logging.info('OPTIONS', options)
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain.slice(4))

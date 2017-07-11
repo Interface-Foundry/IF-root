@@ -932,6 +932,12 @@ module.exports = function (router) {
       category: _.get(req, 'query.category'),
       page: _.get(req, 'query.page')
     }, _.isUndefined)
+
+    searchOpts.user_locale = req.locale.slice(0, 2)
+    var geo = geolocation(req.ip) || geolocation.default
+    searchOpts.user_country = geo.country;
+
+    //TODO add user locale & country
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
     logging.info('store, locale:', store, locale)
