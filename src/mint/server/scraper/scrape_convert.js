@@ -296,6 +296,7 @@ var foreignExchange = async function (s,base,target,value,spread){
 	    s.original_price.fx_rate_src = 'fixer.io'
 	    s.original_price.fx_on =  new Date() //this might be different from current day, as markets closed on weekends
 	    s.original_price.fx_spread = spread
+			s.original_price.fx_to = target
 
 	    return s
   	}
