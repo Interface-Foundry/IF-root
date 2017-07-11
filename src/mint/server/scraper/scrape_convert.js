@@ -133,6 +133,13 @@ var tryHtml = function * (s,$) {
 
 			$('.sku_colorList').each(function(i, elm) {
 
+				var available
+				if($(this).hasClass('nonstock')){
+					available = false
+				}else {
+					available = true
+				}
+
 				s.options.push({
 					type: 'color',
 					original_name: {
@@ -416,11 +423,16 @@ co(function *(){
 	//incoming country / locale 
 	var user_country = 'US'
 	var user_locale = 'en'
-	var store_country = 'JP'
+	//var store_country = 'JP'
+	var store_country = 'KR'
+
 	//var domain = 'muji.net'
-	var domain = 'store.punyus.jp'
+	//var domain = 'store.punyus.jp'
+	var domain = 'lotte.com'
+
 	//var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-	var url = 'https://store.punyus.jp/detail/PN17SS-193/'
+	//var url = 'https://store.punyus.jp/detail/PN17SS-402/?gastate=notstock'
+	var url = 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370476&allViewYn=N'
 
 	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
 	var html = yield scrapeURL(url)
