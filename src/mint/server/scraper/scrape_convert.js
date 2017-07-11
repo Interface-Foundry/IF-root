@@ -57,10 +57,10 @@ var getLocale = function * (url,user_country,user_locale,store_country,domain){
 			s.domain.description = 'Muji Japan'
 			break
 	}
-
 	return s
 }
 
+//scrapes URL and convets to UTF-8 if it isn't already
 var scrapeURL = function * (url){
 	var options = {
 		url: url,
@@ -84,8 +84,10 @@ var scrapeURL = function * (url){
 
 	  	//if not utf-8
 	    if(enc !== 'utf8') {
-	        var iconv = new Iconv(enc, 'UTF-8//TRANSLIT//IGNORE') //setup
-   			convert = iconv.convert(new Buffer(html)).toString('utf8') //do convert
+	    	//setup encoding
+	        var iconv = new Iconv(enc, 'UTF-8//TRANSLIT//IGNORE') 
+	        //do convert
+   			convert = iconv.convert(new Buffer(html)).toString('utf8') 
 	    }else {
 	    	convert = html
 	    }
@@ -123,12 +125,7 @@ var tryHtml = function * (s,$) {
 				}
 			})
 
-			console.log('SCRAPER NAME ????? ',$('.itemInfo').find('[itemprop=name]').text().trim())
-
-
-
 			s.original_name.value = $('.itemInfo').find('[itemprop=name]').text().trim()
-
 			s.original_description.value = $('.itemInfo').find('[itemprop=description]').text().trim()
 
 			var p = $('.price').text().trim().replace(/[^0-9.]/g, "")
@@ -136,27 +133,42 @@ var tryHtml = function * (s,$) {
 
 			$('.sku_colorList').each(function(i, elm) {
 
-				// //item not available
-				// var available
-				// if($(this).attr('class') == 'out'){
-				// 	available = false
-				// }else {
-				// 	available = true
-				// }
-
 				s.options.push({
 					type: 'color',
 					original_name: {
 						value: $('.sku_title',this).text().trim()
-					}
+					},
+				    thumbnail_url:$('img',this).attr('src'),
+				    main_image_url:$('img',this).attr('src'),
+				    option_id: i, //to keep track of parent options
+					available: true,
+					selected: false
 				})
 
-				$('.axis_sku',this).each(function(i, elm) {
-					console.log('SIZE?? ',$(this).text().trim())
+				//get sizes inside color options
+				$('.axis_item',this).each(function(z, elm) {
+
+					var available
+					if($(this).hasClass('nonstock')){
+						available = false
+					}else {
+						available = true
+					}
+
+					s.options.push({
+						type: 'size',
+						original_name: {
+							value: $(this).text().trim().split('/')[0].trim()
+						},
+						parent_id: i, //to keep track of parent option
+						available: available,
+						selected: false
+					})
 				})
 			})
 
 			return s
+
 		break
 
 		case 'muji.net':
@@ -214,7 +226,8 @@ var tryHtml = function * (s,$) {
 					original_name: {
 						value: $(this).text().trim()
 					},
-					selected: selected
+					selected: selected,
+					available: true
 				})
 			})
 
@@ -364,7 +377,7 @@ var translateText = function * (s){
 	}
 	if(s.options && s.options.length > 0){
 		s.options.forEach(function(o){
-			if(o.original_name){
+			if(o.original_name){ //we AREN'T translating size options, it breaks translations
 				c.push({
 					type:'option',
 					value: o.original_name.value
@@ -407,7 +420,7 @@ co(function *(){
 	//var domain = 'muji.net'
 	var domain = 'store.punyus.jp'
 	//var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-	var url = 'https://store.punyus.jp/detail/PN17T-014/'
+	var url = 'https://store.punyus.jp/detail/PN17SS-193/'
 
 	var s = yield getLocale(url,user_country,user_locale,store_country,domain) //get domain 
 	var html = yield scrapeURL(url)
