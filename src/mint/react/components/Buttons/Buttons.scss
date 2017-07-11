@@ -77,7 +77,9 @@
         }
 
         svg {
-          order: 1;
+          @media only screen and (max-width: 600px) {
+            order: 1;
+          }
 
           &:last-of-type {
             display: none;
@@ -108,7 +110,6 @@
 
           @media only screen and (max-width: 600px) {
             padding: 0 10px;
-
           }
         }
 
