@@ -8,20 +8,17 @@ var rawHtmlCollection = Waterline.Collection.extend({
 
     /** original html scraped from wherever */
     raw_html: {
-      type: 'text',
-      required: true
+      type: 'text'
     },
 
     /** original url we scraped from */
-    original_link: {
-      type: 'string',
-      required: true
+    original_url: {
+      type: 'string'
     },
 
     /** domain of the merchant we are scraping */
     domain: {
-      type: 'string',
-      required: true
+      type: 'string'
     },
 
     /** item created in the db based on the scraping */

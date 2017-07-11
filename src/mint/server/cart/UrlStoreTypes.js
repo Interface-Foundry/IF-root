@@ -4,6 +4,6 @@
 module.exports = {
   Muji: {
     locale: 'JP',
-    domain: 'www.muji.net'
+    domain: 'muji'
   }
 }

@@ -12,6 +12,10 @@ var charset = require('charset'),
     jschardet = require('jschardet'),
     Iconv = require('iconv').Iconv
 
+var db
+const dbReady = require('../../db')
+
+dbReady.then((models) => { db = models; })
 
 //come here and get localized
 var getLocale = function (url,user_country,user_locale,store_country,domain){
@@ -438,24 +442,20 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		var $ = cheerio.load(html)
 		s = await tryHtml(s,$)
 
-		logging.info('got html')
  		s = await foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
-		// logging.info('s2', s)
-		logging.info('exchanged currency')
 		s = await translateText(s)
-		// logging.info('s3', s)
-		logging.info('translated text')
 
-		// console.log('res: ', s)
+    //save RAW HTML here
+		logging.info('about to save raw html de rol de rol rol rol')
+ 	  var raw = await db.RawHtml.create({
+ 	   raw_html: String(html),
+ 	   original_url: url,
+		 domain: domain
+		})
+		logging.info('saved raw html')
+		s.raw_html = raw.id
+
 		return s
-
-    	//save RAW HTML here
-
- 	//    var raw = await db.RawHtml.create({
- 	//    	raw_html: html,
- 	//    	original_url: url
-		// 	domain: domain
-		// })
 }
 	// }).catch(onerror)
 // }
