@@ -126,6 +126,12 @@ var itemsCollection = Waterline.Collection.extend({
 
     /** @type {delivery_details} whatever miscellaneous merchant-specific details we have no where to put */
     details: Waterline.isA('delivery_details')
+  },
+
+  afterCreate: function (values, cb) {
+    if (!values.asin && values.product_id) values.asin = values.product_id
+    if (!values.parent_asin && values.parent_id) values.parent_asin = values.parent_id
+    cb()
   }
 });
 
