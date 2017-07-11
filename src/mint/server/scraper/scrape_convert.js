@@ -56,7 +56,7 @@ var getLocale = function (url,user_country,user_locale,store_country,domain){
 	return s
 }
 
-var scrapeURL = function * (url){
+var scrapeURL = async function (url) {
 	var options = {
 		url: url,
 		// proxy: proxyUrl,
@@ -69,7 +69,7 @@ var scrapeURL = function * (url){
 		},
 		// timeout: timeoutMs,
 	}
-	return yield request(options, function (error, response, html) {
+	return await request(options, function (error, response, html) {
 	  if (!error && response.statusCode == 200) {
 	    return html
 	  }else {
@@ -241,21 +241,22 @@ var getRates = async function (){
 var translateText = async function (text, target) {
 	logging.info('translate whoop de whoop')
   // Instantiates a client
+	// return [text]
   const translate = Translate()
   var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
-  // multiple texts.
+  // // multiple texts.
   var results = await translate.translate(text, target)
     // .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
 			return translations
     // })
-    // .catch((err) => {
-    //   console.error('ERROR:', err);
-    // });
-    // return translations
+    .catch((err) => {
+      console.error('ERROR:', err);
+    });
+    return translations
 }
 
 
@@ -322,7 +323,6 @@ var translate = async function (s){
 
 //do a thing
 var scrape = async function (url, user_country, user_locale, store_country, domain) {
-		logging.info('inner f called')
 		//incoming country / locale
 		var user_country = 'US'
 		var user_locale = 'en'
@@ -334,13 +334,15 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		var html = await scrapeURL(url)
 		var $ = cheerio.load(html)
 		s = tryHtml(s,$)
-		logging.info('s', s)
+
+		// logging.info('s', s)
+		logging.info('original_price', s.original_price)
  		s = await foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
-		logging.info('s2', s)
+		// logging.info('s2', s)
 		s = await translate(s)
 		// logging.info('s3', s)
 
-		console.log('res: ', s)
+		// console.log('res: ', s)
 		return s
 
     	//save RAW HTML here
