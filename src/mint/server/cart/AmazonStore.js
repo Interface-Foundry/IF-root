@@ -405,7 +405,7 @@ class AmazonStore extends Store {
 
 
   /**
-   * creates an amazon cart
+   * sync cart to amazon api, gets subtotal and checkout link for cart with items
    *
    * @param      {object}   cart    the cart we are syncing
    * @return     {Promise}  { description_of_the_return_value }
@@ -420,6 +420,17 @@ class AmazonStore extends Store {
     cartAddAmazonParams.AssociateTag = this.credentials.assocId
     const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
 
+    const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
+    const amazonCart = results.result.CartCreateResponse.Cart
+    return amazonCart
+  }
+
+  /**
+   * creates an amazon cart
+   *
+   * @param      {object}   cart    the cart we are syncing
+   * @return     {Promise}  { description_of_the_return_value }
+   */
   async createAmazonCart(cart) {
     // if there are no amazon items in the cart then amazan can't handle it
     if (cart.items.length === 0 || !cart.items[0].asin) {
@@ -601,6 +612,33 @@ function escapeKeys(obj) {
     }
   });
   return obj;
+}
+
+/**
+ * create an amazon cart instead of worrying about updating cart and removing etc
+ *
+ * @param {array} items - array of items that would include:
+ *                        ASIN - asin from amazon (TODO: allow for OfferListingId)
+ *                        Quantity - quantity
+ */
+function createAmazonCartWithItems (items) {
+  const useAsin = true
+  if (!items instanceof Array) {
+    items = [items]
+  }
+
+  // ability to use offerlistingid or asin later, just using asin rn
+
+  var amazonParams = {}
+
+  var condendesedItems = condenseItems(items)
+  var k = 1
+  for (i of condendesedItems) {
+    amazonParams[`Item.${k}.ASIN`] = i.asin
+    amazonParams[`Item.${k}.Quantity`] = i.quantity
+    k++
+  }
+  return amazonParams
 }
 
 module.exports = AmazonStore
