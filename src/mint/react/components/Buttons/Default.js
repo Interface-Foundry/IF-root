@@ -106,6 +106,7 @@ export default class Default extends Component {
                     </a>
                   </button>
                 }
+              {displayInvoice ? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
               {checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }
