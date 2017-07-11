@@ -14,12 +14,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   @media only screen and (max-width: 600px) {
     overflow-x: auto;
-    display: block;
-  }
 
-  * {
-    @media only screen and (max-width: 600px) {
+    tr {
       display: block;
+      width: 100%;
     }
   }
 
@@ -36,29 +34,34 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-top: 3px solid $secondaryColor;
       padding: 0;
 
-
       .info {
         border-top: 2px solid #E4F1FD;
         padding: $padding;
+
         h4, h5 {
           display: inline-block;
-          line-height: $nav-height/2;
+          line-height: $nav-height / 2;
           margin: 0;
           width: 50%;
+
           b {
             display: inline-block !important;
           }
+
           @media only screen and (max-width: 600px) {
             font-size: 12px;
           }
         }
+
         h5 {
           text-align: right;
           opacity: 0.8;
           font-weight: 500;
         }
+
         h4 {
           position: relative;
+
           span {
             border-bottom: 3px solid #4A9FF1;
             display: initial;
@@ -79,12 +82,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         .image {
           border-radius: 5px;
           display: inline-block;
-          height: $nav-height*2;
-          width: $nav-height*2;
+          height: $nav-height * 2;
+          width: $nav-height * 2;
 
           @media only screen and (max-width: 600px) {
-            height: $nav-height*2;
-            width: $nav-height*2;
+            height: $nav-height * 2;
+            width: $nav-height * 2;
           }
         }
 
@@ -94,7 +97,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           flex: 1 1 auto;
 
           @media only screen and (max-width: 600px) {
-            width: calc(100% - #{$nav-height*2});
+            width: calc(100% - #{$nav-height * 2});
           }
 
           .cart-description {
@@ -102,6 +105,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             min-height: 50px;
             padding: 5px 0;
             max-width: 400px;
+
             svg {
               display: inline-block;
             }
@@ -375,6 +379,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           .cart-description {
             .cart-description__text {
               color: white; // :shrug:
+           
             }
           }
         }

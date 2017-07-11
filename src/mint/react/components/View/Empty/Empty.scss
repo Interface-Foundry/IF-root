@@ -51,11 +51,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     padding: $padding * 2.5;
 
     .text {
-      padding: $padding*2 0;
+      padding: ($padding * 2) 0;
+
       h2 {
         font-size: 28px;
         font-weight: 100;
-        padding: $padding/2 0;
+        padding: ($padding / 2) 0;
+
         span {
           font-size: 28px;
           font-weight: bold;
@@ -63,14 +65,15 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           color: initial;
         }
       }
+
       p {
         font-size: 14px;
-        padding: $padding/2 0;
+        padding: ($padding / 2) 0;
       }
 
       span {
         font-size: 10px;
-        padding: $padding/2 0;
+        padding: ($padding / 2) 0;
         color: $secondaryColor;
       }
     }
@@ -82,6 +85,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         height: 150px;
         overflow: hidden;
       }
+
       * {
         display: inline-block;
         padding: 0 $padding;
@@ -92,6 +96,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       h5 {
         color: rgba(#888, 0.8);
+        cursor: pointer;
       }
     }
   }

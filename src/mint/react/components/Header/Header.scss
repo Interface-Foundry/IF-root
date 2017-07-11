@@ -3,38 +3,38 @@
 @import '../../../react-common/styles/Animations';
 
 .navbar {
-  position: relative;
-  display: block;
-  height: $nav-height;
-  line-height: $nav-height;
-  font-family: 'Raleway';
-  text-align: left;
   background: $secondaryColor;
-  color: white;
+  color: $color-white;
+  display: block;
+  font-family: 'Raleway';
+  height: $nav-height;
+  position: relative;
+  text-align: left;
   width: 100%;
   z-index: 100;
 
   & > .beta {
-    position: absolute;
-    background: white;
-    width: 45px;
-    left: 20px;
-    top: 45px;
-    font-size: 13px;
-    height: 25px;
-    line-height: 25px;
-    border-radius: 5px;
-    text-align: center;
+    background: $color-white;
+    border: 1px solid $secondaryColor;
+    border-radius: 3px;
     color: $secondaryColor;
-    padding: 0 $padding/2;
-    box-shadow: $card-box-shadow;
     display: block;
+    font-size: 8px;
+    font-weight: 900;
+    left: 26px;
+    padding: 0 3px;
+    position: absolute;
+    text-align: center;
+    text-transform: uppercase;
+    top: 37px;
 
     @media (max-width: 600px) {
-      left: 2.5px;
+      left: 11px;
+      top: 35px;
+
+      // transform: rotate(-25deg);
     }
   }
-
 
   @media (max-width: 600px) {
     padding: 0;
@@ -46,10 +46,10 @@
   .search {
     background: white;
     border-radius: 5px;
+
     @media only screen and (max-width: 600px) {
       // display: none;
       margin: 10px 0;
-
     }
   }
 
@@ -58,14 +58,43 @@
   }
 
   .header__left {
-    flex: 1 1 auto;
-    position: relative;
-    height: 100%;
-    white-space: nowrap;
     display: flex;
+    flex: 1 1 auto;
+    height: 100%;
+    position: relative;
+    white-space: nowrap;
 
     @media only screen and (max-width: 600px) {
       padding: 0 0 0 $padding;
+    }
+
+    .buttons {
+      @include animation(fadeInUp 0.5s);
+
+      height: 40px;
+      padding: 0;
+
+      .default {
+        span {
+          button {
+            &.yellow {
+              padding: 0;
+
+              &.lock {
+                padding: 0 $padding;
+              }
+            }
+
+            a:first-of-type {
+              padding: 0;
+            }
+
+            p {
+              padding: 5px;
+            }
+          }
+        }
+      }
     }
 
     a {
@@ -80,16 +109,19 @@
           padding-left: 0;
         }
       }
+
       .desktop {
         @media only screen and (max-width: 600px) {
           display: none;
         }
       }
+
       .mobile {
         width: 30px;
         margin: 0;
         height: 30px;
         margin: $padding $padding 0 0;
+
         @media only screen and (min-width: 600px) {
           display: none;
         }
@@ -185,7 +217,10 @@
   .header__right {
     height: $nav-height;
     text-align: right;
-    padding: 0 ($padding * 3);
+
+    .navbar__icon {
+      padding: 0 ($padding * 3);
+    }
 
     @media only screen and (max-width: 600px) {
       width: $nav-height;

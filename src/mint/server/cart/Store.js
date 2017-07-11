@@ -64,7 +64,7 @@ class Store {
         }
       })
       .then(items => {
-        // catch the common mistake where developers return an array of promises\
+        // catch the common mistake where developers return an array of promises
         return Promise.all(items)
       })
       .then(function (items) {
@@ -72,7 +72,21 @@ class Store {
         return that.processSearchItems(items)
       }) // and some optional post-processing
       .then(items => {
-        // logging.info('items****&', items)
+        // make sure the items are A-OK
+        if (items.length === 1 && (!items[0].price || items[0].price <= 0)) {
+          throw new Error(`No offers available for "${items[0].name}"`)
+        }
+
+        // filter out items that don't have prices
+        if (items.length > 1) {
+          items = items.filter(i => i.price && i.price > 0)
+        }
+
+        // bad if nothing was returned with an offer
+        if (items.length === 0) {
+          throw new Error('No offers returned from search')
+        }
+
         // do some post-search analytics logging
         console.log('analytics', {
           search_options: options,
@@ -90,7 +104,7 @@ class Store {
    * @return {Promise}      [description]
    */
   async checkout(cart) {
-    cart.locked = true;
+    // cart.locked = true;
     await cart.save()
   }
 

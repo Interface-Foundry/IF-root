@@ -12,7 +12,8 @@ export default class Default extends Component {
     reorderCart: PropTypes.func,
     updateCart: PropTypes.func,
     user: PropTypes.object,
-    toggleYpoCheckout: PropTypes.func
+    toggleYpoCheckout: PropTypes.func,
+    checkoutOnly: PropTypes.bool
   }
 
   _handleShare = () => {
@@ -34,19 +35,17 @@ export default class Default extends Component {
 
   _orderCart = (e) => {
     const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart } = this.props;
-    store === 'YPO'
-      ? toggleYpoCheckout(true)
-      : locked
-      ? reorderCart(id)
-      : leader.id === user.id
-      ? updateCart({ cart_id: id, locked: true })
-      : null;
-    store !== 'YPO' ? window.open(`/api/cart/${id}/checkout`) : null;
+    
+    if (store === 'YPO') toggleYpoCheckout(true);
+    else if (locked) reorderCart(id);
+
+    if (leader.id === user.id) updateCart({ cart_id: id, locked: true });
+    if (store !== 'YPO') window.open(`/api/cart/${id}/checkout`);
   }
 
   render() {
     const {
-      props: { cart, user, updateCart },
+      props: { cart, user, updateCart, checkoutOnly = true }, //show share is exclusively for the header rn, so default to true
       _orderCart
     } = this,
     total = calculateItemTotal(cart.items);
@@ -63,7 +62,7 @@ export default class Default extends Component {
                   Re-Order {displayCost(total, cart.store_locale)}
                 </button>
                   { 
-                    cart.leader.id === user.id || cart.leader === user.id 
+                    (cart.leader.id === user.id || cart.leader === user.id) && checkoutOnly 
                     ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
                         <Icon icon='Unlocked'/>Unlock Cart
                       </button> 
@@ -75,19 +74,19 @@ export default class Default extends Component {
                 cart.items.length === 0 
                 ? 
                   <button className='yellow sub' disabled={true}>
-                    Checkout <span>{displayCost(total, cart.store_locale)} </span>
+                    Checkout <span>{displayCost(total, cart.store_locale)}</span>
                   </button> 
                 : 
-                  <button className='yellow sub' onClick={_orderCart}>
+                  <button className='yellow sub' onClick={_orderCart} type='submit'>
                     <a href={`/api/cart/${cart.id}/checkout`} target="_blank">
                       <Icon icon='Cart'/>
-                      <p>{displayCost(total, cart.store_locale)}</p>
                       <p>Checkout</p>
+                      <p>{displayCost(total, cart.store_locale)}</p>
                       <Icon icon='RightChevron'/>
                     </a>
                   </button> 
                 }
-              <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button>
+              {checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }
       </div>

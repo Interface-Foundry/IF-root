@@ -15,7 +15,7 @@ const mapStateToProps = (state, ownProps) => ({
   selectedItemId: state.search.selectedItemId,
   tab: state.app.viewTab,
   categories: state.search.categories,
-  results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user),
+  results: splitAndMergeSearchWithCart(state.cart.present.items, state.search.results, state.user) || [],
   loading: state.search.loading,
   lazyLoading: state.search.lazyLoading,
   lastUpdatedId: state.search.lastUpdatedId
