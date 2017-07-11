@@ -1,3 +1,4 @@
+const logging = require('../../../logging.js')
 const scrape = require('./scrape_convert')
 
 //var uri = 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370476&allViewYn=N'

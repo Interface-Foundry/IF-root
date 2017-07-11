@@ -99,7 +99,7 @@ var scrapeURL = async function (url) {
 	    	convert = html
 	    }
 	  }else {
-	  	console.log('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
+	  	logging.info('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
 	  }
 
 	})
@@ -281,7 +281,7 @@ var tryHtml = async function (s,$) {
 			return s
 		break
 		default:
-			console.log('error no domain found for store')
+			logging.info('error no domain found for store')
 	}
 }
 
@@ -306,7 +306,7 @@ var foreignExchange = async function (base,target,value,spread,rates){
 	    return value.toFixed(2) //idk if we are rounding up here?
   	}
   	else {
-  		console.log('conversion not found or something')
+  		logging.info('conversion not found or something')
   	}
 }
 
@@ -329,7 +329,7 @@ var getRates = async function (){
 	  	fxRates.fetchDate = new Date().toString()
 	  }
 	  else {
-	  	console.log('ERROR '+response.statusCode+' IN CURRENCY EXCHANGE REQUEST! ', error)
+	  	logging.info('ERROR '+response.statusCode+' IN CURRENCY EXCHANGE REQUEST! ', error)
 	  }
 	  return
 	})
@@ -355,16 +355,16 @@ function is_older_than_1hour(datetime) {
 var translate = async function (text, target) {
   // Instantiates a client
 	// return [text]
-	console.log('translate called')
+	logging.info('translate called')
   const translate = Translate()
   var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-	console.log('google is gonna translate now')
-	console.log('text, target', text, target)
+	logging.info('google is gonna translate now')
+	logging.info('text, target', text, target)
   return translate.translate(text, target)
-	// console.log('got results:', results)
+	// logging.info('got results:', results)
     .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
@@ -387,7 +387,7 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-	console.log('translate text called')
+	logging.info('translate text called')
 	var c = []
 
 	//collect text to translate into a single arr for google translate API
@@ -412,17 +412,17 @@ var translateText = async function (s){
 				})
 			}
 			else {
-				console.log('no name found for option!')
+				logging.info('no name found for option!')
 			}
 	    })
 	}
-	console.log('about to do the actual translation')
+	logging.info('about to do the actual translation')
 	//keep context of text mapping (need to double check the logic here....)
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
 	var tc_map = await translate(tc.translate,s.user.locale)
-	console.log('Ttranslated')
+	logging.info('Ttranslated')
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -448,29 +448,24 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		// var store_country = 'JP'
 		// var domain = 'muji.net'
 		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
+		logging.info('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
 		var $ = cheerio.load(html)
 		s = await tryHtml(s,$)
-		console.log('got html')
 
 		var rates = await getRates()
  		var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
- 		s.price = price
-	    s.original_price.fx_rate = rates
-	    s.original_price.fx_rate_src = 'fixer.io'
-	    s.original_price.fx_on =  new Date()
-	    s.original_price.fx_spread = currencySpread
+ 		s = await storeFx(rates,price,s)
 
-		// console.log('s2', s)
-		console.log('exchanged currency')
+		// logging.info('s2', s)
+		logging.info('exchanged currency')
 
 		s = await translateText(s)
-		// console.log('s3', s)
-		console.log('translated text')
+		// logging.info('s3', s)
+		logging.info('translated text')
 
-		// console.log('res: ', s)
+		// logging.info('res: ', s)
 		return s
 
     //save RAW HTML here
@@ -487,6 +482,15 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 }
 	// }).catch(onerror)
 // }
+
+var storeFx = async function(rates,price,s){
+	s.original_price.fx_rate = rates
+    s.original_price.fx_rate_src = 'fixer.io'
+    s.original_price.fx_on =  new Date()
+    s.original_price.fx_spread = currencySpread
+	s.price = price
+	return s
+}
 
 /**
  * returns a random integer between 0 and the specified exclusive maximum.
