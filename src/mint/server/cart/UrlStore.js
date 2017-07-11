@@ -33,7 +33,7 @@ class UrlStore extends Store {
 
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
-    var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
+    var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain.slice(4))
     logging.info('itemData', itemData)
     return itemData
   }
@@ -101,16 +101,16 @@ class UrlStore extends Store {
     // logging.info('item description done', itemDescription.id)
 
     // create conversion
-    logging.info('itemData.original_price', itemData.original_price)
-    var originalPrice = await db.Conversions.create(itemData.original_price)
-    logging.info('original price', originalPrice)
-    originalPrice.converted_value = itemData.price * 1.0
-    await originalPrice.save()
+    // logging.info('itemData.original_price', itemData.original_price)
+    // var originalPrice = await db.Conversions.create(itemData.original_price)
+    // logging.info('original price', originalPrice)
+    // originalPrice.converted_value = itemData.price * 1.0
+    // await originalPrice.save()
     delete itemData.original_price
-    if (!Number(itemData.price)) {
-      logging.info('failed to scrape price')
-      delete itemData.price
-    }
+    // if (!Number(itemData.price)) {
+      // logging.info('failed to scrape price')
+      // delete itemData.price
+    // }
     // logging.info('original price done', originalPrice.id)
 
     //create item & associate it w details objects

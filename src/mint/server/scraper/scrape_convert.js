@@ -80,6 +80,7 @@ var scrapeURL = async function (url) {
 
 //try to get data from html
 var tryHtml = function (s,$) {
+	logging.info('S.DOMAIN.NAME', s.domain.name)
 	switch(s.domain.name){
 		case 'muji.net':
 
@@ -253,9 +254,9 @@ var translateText = async function (text, target) {
       translations = Array.isArray(translations) ? translations : [translations];
 			return translations
     // })
-    .catch((err) => {
-      console.error('ERROR:', err);
-    });
+    // .catch((err) => {
+    //   console.error('ERROR:', err);
+    // });
     return translations
 }
 
@@ -324,19 +325,18 @@ var translate = async function (s){
 //do a thing
 var scrape = async function (url, user_country, user_locale, store_country, domain) {
 		//incoming country / locale
-		var user_country = 'US'
-		var user_locale = 'en'
-		var store_country = 'JP'
-		var domain = 'muji.net'
-		var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+		// var user_country = 'US'
+		// var user_locale = 'en'
+		// var store_country = 'JP'
+		// var domain = 'muji.net'
+		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
 
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
 		var $ = cheerio.load(html)
-		s = tryHtml(s,$)
+		s = await tryHtml(s,$)
 
-		// logging.info('s', s)
-		logging.info('original_price', s.original_price)
+		logging.info('s', s)
  		s = await foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
 		// logging.info('s2', s)
 		s = await translate(s)
