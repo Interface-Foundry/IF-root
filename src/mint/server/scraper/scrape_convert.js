@@ -100,12 +100,12 @@ var scrapeURL = async function (url) {
 }
 
 //try to get data from html
-var tryHtml = function (s,$) {
+var tryHtml = async function (s,$) {
 	switch(s.domain.name){
 
 		case 'store.punyus.jp':
 			//get product id
-			s.product_id = yield urlValue(s.original_link,'detail',1)
+			s.product_id = await urlValue(s.original_link,'detail',1)
 			s.parent_id = s.product_id
 
 			//get meta tags
