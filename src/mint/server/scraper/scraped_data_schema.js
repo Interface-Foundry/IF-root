@@ -91,6 +91,16 @@
     product_id:'string',
     parent_id:'string',
     price_difference: 'float',
+    price: 'float',
+    original_price: {
+      type:'string', //currency type, i.e. SKW  
+      value:'float', //original value in SKW
+      fx_rate:'float', // foreign exchange rate
+      fx_rate_src:'string', //fx rate source, i.e. fixer.io
+      fx_on:'date', //date of conversion
+      fx_to:'string', //i.e. converted to USD
+      fx_spread:'float' //spread added on top
+    },
     thumbnail_url:'string',
     main_image_url:'string',
     available:'boolean',
