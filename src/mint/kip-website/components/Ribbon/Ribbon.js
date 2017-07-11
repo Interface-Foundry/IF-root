@@ -21,6 +21,7 @@ export default class Ribbon extends Component {
 
   render() {
     const { fixed, toggleSidenav, toggleModal, user_account, src, ribbonTemplate } = this.props;
+
     return (
       <nav className={`ribbon ${fixed ? 'background' : ''}`}>
         <div className="row row-1 head">

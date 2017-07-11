@@ -11,48 +11,41 @@ import { SidenavContainer, ModalContainer, RibbonContainer, LandingContainer, Bl
 import { Route } from 'react-router-dom';
 
 export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this._handleScroll = ::this._handleScroll;
+
+  static propTypes = {
+    animate: PropTypes.bool,
+    location: PropTypes.object,
+    fixed: PropTypes.bool,
+    sidenav: PropTypes.bool,
+    modal: PropTypes.bool,
+    animationOffset: PropTypes.number,
+    containerHeight: PropTypes.number,
+    scrollTo: PropTypes.number
   }
 
-  componentDidMount() {
-    const { _handleScroll } = this;
-    window
-      .addEventListener('scroll', _handleScroll);
-  }
+  componentDidMount = () => this.scroll.addEventListener('scroll', ::this._handleScroll);
 
-  componentWillUnmount() {
-    const { _handleScroll } = this;
-    window
-      .removeEventListener('scroll', _handleScroll);
-  }
+  componentWillUnmount = () => this.scroll.removeEventListener('scroll', ::this._handleScroll);
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate({ location, animate, fixed, sidenav, modal, animationOffset, containerHeight, scrollTo }, nextState) {
     // need this, otherwise page always rerender every scroll
-    return nextProps.location.pathname !== this.props.location.pathname
-      || nextProps.animate !== this.props.animate
-      || nextProps.fixed !== this.props.fixed
-      || nextProps.sidenav !== this.props.sidenav
-      || nextProps.modal !== this.props.modal
-      || nextProps.animationOffset !== this.props.animationOffset
-      || nextProps.containerHeight !== this.props.containerHeight
-      || nextProps.scrollTo !== this.props.scrollTo;
+    return location.pathname !== this.props.location.pathname
+      || animate !== this.props.animate
+      || fixed !== this.props.fixed
+      || sidenav !== this.props.sidenav
+      || modal !== this.props.modal
+      || animationOffset !== this.props.animationOffset
+      || containerHeight !== this.props.containerHeight
+      || scrollTo !== this.props.scrollTo;
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.scrollTo !== this.props.scrollTo) {
-      window
-        .scrollTop = nextProps.scrollTo;
-    }
-  }
+  componentWillReceiveProps = ({ scrollTo }) => scrollTo !== this.props.scrollTo
+    ? window.scrollTop = scrollTo : null;
 
   _handleScroll(e) {
-    const scrollTop = ReactDOM.findDOMNode(this.scroll)
+    const scrollTop = this.scroll
       .scrollTop,
       { fixed, animationState, animationOffset, containerHeight, handleScroll } = this.props;
-
-    console.log('inside scroll')
     // animate scroll, needs height of the container, and its distance from the top
     handleScroll(containerHeight, animationOffset, scrollTop, animationState, fixed);
   }
