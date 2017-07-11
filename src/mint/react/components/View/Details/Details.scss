@@ -383,7 +383,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     width: 100%;
 
     nav {
-      padding: $padding $padding 0;
+      padding: $padding $padding*3;
 
       .undo__button {
         @include animation(fadeInDown cubic-bezier(0, 0, 0.2, 1) 1s);

@@ -56,14 +56,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   td, th {
-    padding: ($padding / 3) ($padding / 2);
+    padding: 0 ($padding / 2);
 
     .card {
       position: relative;
       padding: $padding ($padding * 3);
       text-align: left;
       background: white;
-      border-radius: 5px;
       box-shadow: $card-box-shadow;
 
       @media only screen and (max-width: 600px) {

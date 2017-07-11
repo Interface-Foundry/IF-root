@@ -5,6 +5,17 @@
 .view {
   height: 100%;
 
+  th,td {
+    &:before {
+      content: '';
+      position: absolute;
+      height: 100%;
+      left: 15px;
+      top: 16px;
+      z-index: -1;
+      border-left: 2px solid $secondaryColor;
+    }
+  }
 	@media only screen and (max-width: 600px) {
     height: auto;
 		padding: 0 0 100px;
@@ -21,10 +32,11 @@
 	}
 
 	.card {
-		background-color: white;
+		  background-color: white;
 	    border-radius: $padding/2;
 	    box-shadow: $card-box-shadow;
 	    padding: $padding $padding*2;
+      border: 1px solid $border-color-light;
 	    margin: 10px 2px 0;
 	}
 }

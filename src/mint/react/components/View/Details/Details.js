@@ -111,7 +111,7 @@ export default class Details extends Component {
             </th>
           </tr>
           <tr>
-            <td>
+            <td className='lineStart'>
               <nav>
                 {
                   showUndo

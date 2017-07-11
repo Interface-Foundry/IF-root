@@ -40,6 +40,12 @@ export default class Tabs extends Component {
       icon: 'Person',
       url: `${id}/m/share`,
       display: 'Share'
+    }, {
+      id: 4,
+      icon: 'PriceTag',
+      tab: 'invoice',
+      url: `/cart/${id}`,
+      display: 'Invoice'
     }];
     this.setState({ tabs });
   }
@@ -68,6 +74,12 @@ export default class Tabs extends Component {
         icon: 'Person',
         url: `${id}/m/share`,
         display: 'Share'
+      }, {
+        id: 4,
+        icon: 'PriceTag',
+        tab: 'invoice',
+        url: `/cart/${id}`,
+        display: 'Invoice'
       }];
     clearTimeout(this.clearHightlight);
     this.setState({ tabs });
@@ -112,3 +124,5 @@ export default class Tabs extends Component {
 //   url: `/cart/${id}?q=${query}`,
 //   display: 'Search'
 // }];
+
+
