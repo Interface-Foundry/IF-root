@@ -11,10 +11,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   height: auto;
   margin: 0 auto;
   border-collapse: collapse;
-  
-  @media only screen and (max-width: 600px) {
-    margin: 0 0 100px;
-  }
 
   @media only screen and (max-width: 865px) {
     & * {
@@ -35,6 +31,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     bottom: -30px;
     color: white;
     text-align: center;
+
+    @media only screen and (max-width: 600px) {
+      bottom: 50px;
+    }
 
     span {
       cursor: pointer;
@@ -145,6 +145,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       padding: 0 ($padding * 3);
       border-radius: 5px;
 
+      &.warn {
+        background-color: $warningColor;
+        color: white;
+      }
+
       &:last-of-type {
         margin-left: $padding * 3;
         flex: 1 1 auto;
@@ -221,6 +226,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       @media only screen and (max-width: 865px) {
         padding: 0 $padding;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      &:last-of-type {
+        @media only screen and (max-width: 600px) {
+          margin-bottom: $nav-height * 2;
+        }
       }
     }
   }

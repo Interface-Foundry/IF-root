@@ -34,29 +34,33 @@
     flex-direction: column;
     padding-top: $padding;
 
-    button {
-      align-content: stretch;
-      background: $mainColor;
-      border: 0;
-      border-radius: 0 0 ($padding / 2) ($padding / 2);
-      display: flex;
-      font-size: 22px;
-      height: 40px;
-      justify-content: space-between;
-      margin-top: $padding * 2;
+    .buttons {
+      padding: 0;
+      width: 100%;
 
-      div {
-        span {
-          padding: $padding / 2;
-        }
-
-        &:last-child {
-          font-weight: 900;
-        }
+      .default {
+        height: 100%;
       }
 
-      svg {
-        font-size: 28px;
+      button {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        margin: 10px 0 0;
+        width: 100%;
+
+        a {
+          p {
+            border-bottom: 0;
+            color: black;
+            text-decoration: none;
+          }
+
+          svg {
+            &:last-of-type {
+              display: inline-block;
+            }
+          }
+        }
       }
     }
 

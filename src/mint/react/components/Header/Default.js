@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon, AlertBubble } from '../../../react-common/components';
-import { SearchContainer } from '../../containers';
+import { SearchContainer, ButtonsContainer } from '../../containers';
 
 export default class Default extends Component {
 
@@ -12,6 +12,7 @@ export default class Default extends Component {
     user: PropTypes.object,
     cart: PropTypes.object,
     showAlert: PropTypes.bool,
+    showCheckout: PropTypes.bool,
     _toggleLoginScreen: PropTypes.func,
     _toggleSidenav: PropTypes.func
   }
@@ -19,6 +20,7 @@ export default class Default extends Component {
   render() {
     const {
       user,
+      showCheckout,
       cart,
       showAlert,
       _toggleLoginScreen,
@@ -37,6 +39,7 @@ export default class Default extends Component {
             }}/>
           </Link>
           <SearchContainer />
+          {showCheckout ? <ButtonsContainer checkoutOnly={false} /> : null}
         </div>
         <div className='header__right'>
           {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}

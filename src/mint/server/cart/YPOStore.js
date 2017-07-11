@@ -10,6 +10,7 @@ const svcUrl11 = 'https://edigateway-test.ypo.co.uk/EdiServiceSoap11/WebXmlDataS
 const svcUrl12 = 'https://edigateway-test.ypo.co.uk/EdiService/WcfXmlDataServiceLibrary.YpoService.svc'
 const username = 'kip'
 const password = 'K1p0rdering'
+const logging = require('../../../logging.js')
 
 var db
 const dbReady = require('../../db')
@@ -32,6 +33,12 @@ class YPOStore extends Store {
    * @param  {Object}  options the search options
    */
   getSearchType(options) {
+    // first check if there is a cateogry that matches the search query
+    var matchedCategory = ypoConstants.categories.filter(c => c.category === options.text)
+    if (matchedCategory.length === 1) {
+      options.category = matchedCategory[0].category
+    }
+
     if (_.get(options, 'category')) {
       return 'categorySearch'
     } else if (options.text && options.text.match(/\b[a-zA-Z0-9]{1}[0-9]{5}\b/)) {
@@ -49,9 +56,10 @@ class YPOStore extends Store {
   async categorySearch(options) {
     const category = options.category
     const items = await db.YpoInventoryItems.find({category_2: category})
-    logging.info('options.page', options.page)
       .skip(10 * (options.page ? options.page - 1 : 1))
       .limit(10)
+
+    logging.info('options.page', options.page)
 
     return items
   }

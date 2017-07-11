@@ -53,7 +53,7 @@ export default function cart(state = initialState, action) {
   case 'ADD_ITEM_SUCCESS':
     return {
       ...state,
-      items: [...state.items, action.response]
+      items: [action.response, ...state.items]
     };
   case 'CLEAR_CART_SUCCESS':
     return {

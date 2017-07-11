@@ -223,6 +223,7 @@ button {
   text-align: left;
   height: calc(100% - 90px);
 
+
   &.displayOpen {
     height: calc(100% - 50px);
     padding: 0;
@@ -232,7 +233,7 @@ button {
     height: 100%;
     overflow: initial;
     -webkit-overflow-scrolling: none;
-    padding: $nav-height 0 80px;
+    padding: $nav-height 0 0;
   }
 
   @media only screen and (min-width: 600px) {

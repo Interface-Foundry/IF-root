@@ -20,10 +20,8 @@ export default class Header extends Component {
     showAlert: false
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { numCarts: nextNumCarts } = nextProps, { numCarts } = this.props;
-    this.setState({ showAlert: !!(numCarts && nextNumCarts > numCarts) });
-  }
+  componentWillReceiveProps = ({ numCarts }) =>
+    this.setState({ showAlert: !!(this.props.numCarts && numCarts > this.props.numCarts) });
 
   render = () => (
     <nav className='navbar'>

@@ -30,15 +30,14 @@ export default class Results extends Component {
     myItems: []
   }
 
-  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading, query, user: { id }, results = [], cart: { items = [] } }) =>
-    lastUpdatedId !== this.props.lastUpdatedId
+  shouldComponentUpdate = ({ lastUpdatedId, selectedItemId, loading, lazyLoading, query, user: { id }, results, cart: { items = [] } }) => lastUpdatedId !== this.props.lastUpdatedId
     || id !== this.props.user.id
     || numberOfItems(results) !== numberOfItems(this.props.results)
     || numberOfItems(items) !== numberOfItems(this.props.cart.items)
     || selectedItemId !== this.props.selectedItemId
     || loading !== this.props.loading
     || lazyLoading !== this.props.lazyLoading
-    || (numberOfItems(results) > 0 && numberOfItems(this.props.results) > 0) && (results[0] !== this.props.results[0])
+    || (results.length && this.props.results.length) && results[0].options && results[0].options.length > 0 && !this.props.results[0].options
     || query !== this.props.query
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
@@ -82,7 +81,7 @@ export default class Results extends Component {
       if (result.id && (result.id === selectedItemId || result.oldId === selectedItemId)) {
         selected = {
           row: acc.length,
-          result,
+          result: {...result, inCart: (result.asin && myItems.includes(result.asin))},
           index: i,
           options: splitOptionsByType(result.options)
         };
@@ -93,9 +92,7 @@ export default class Results extends Component {
     }, []);
 
     if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
-    if (results.length === 1 && !results[0].options) console.log({results})
     if (results.length === 1 && !results[0].options) fetchSearchItem(results[0].id); // get options if its a url
-
     return (
       <table className='results'>
         <tbody>

@@ -298,6 +298,7 @@ var foreignExchange = async function (base,target,value,spread,rates){
 	    //to account for fluctuations between adding to the cart and the checkout
 	    var sp = 1.00 + spread
 	    value = value * sp
+
 	    return value.toFixed(2) //idk if we are rounding up here?
   	}
   	else {
@@ -350,21 +351,25 @@ function is_older_than_1hour(datetime) {
 var translate = async function (text, target) {
   // Instantiates a client
 	// return [text]
+	console.log('translate called')
   const translate = Translate()
   var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-  var results = await translate.translate(text, target)
-    // .then((results) => {
+	console.log('google is gonna translate now')
+	console.log('text, target', text, target)
+  return translate.translate(text, target)
+	// console.log('got results:', results)
+    .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
 			return translations
-    // })
-    // .catch((err) => {
-    //   console.error('ERROR:', err);
-    // });
-    return translations
+    })
+    .catch((err) => {
+      console.error('ERROR:', err);
+    });
+    // return translations
 }
 
 
@@ -378,7 +383,7 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-
+	console.log('translate text called')
 	var c = []
 
 	//collect text to translate into a single arr for google translate API
@@ -407,11 +412,13 @@ var translateText = async function (s){
 			}
 	    })
 	}
+	console.log('about to do the actual translation')
 	//keep context of text mapping (need to double check the logic here....)
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
 	var tc_map = await translate(tc.translate,s.user.locale)
+	console.log('Ttranslated')
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -437,11 +444,13 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		// var store_country = 'JP'
 		// var domain = 'muji.net'
 		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-
+		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
 		var $ = cheerio.load(html)
 		s = await tryHtml(s,$)
+
+		console.log('got html')
 
 		var rates = await getRates()
  		var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
@@ -451,10 +460,12 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 	    s.original_price.fx_on =  new Date()
 	    s.original_price.fx_spread = currencySpread
 
+		// console.log('s2', s)
+		console.log('exchanged currency')
 
-		// logging.info('s2', s)
 		s = await translateText(s)
-		// logging.info('s3', s)
+		// console.log('s3', s)
+		console.log('translated text')
 
 		// console.log('res: ', s)
 		return s

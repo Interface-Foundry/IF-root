@@ -35,9 +35,11 @@ export default class Selected extends Component {
   }
 
   render() {
-    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation } = this.props,
-      afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
+    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation, removeItem } = this.props,
 
+      afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
+    console.log({ locked: cart.locked, id: user.id, inCart })
+    console.log({ selectedProps: this.props })
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
@@ -75,7 +77,7 @@ export default class Selected extends Component {
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
               { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
               { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
-              { !cart.locked && user.id && inCart ? <button className='sticky' disabled={true}>Update {item.quantity} In Cart</button> : null }
+              { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
               item.options ? (

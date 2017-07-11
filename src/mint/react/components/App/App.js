@@ -13,11 +13,9 @@ import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
 export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this._handleScroll = ::this._handleScroll;
+  state = {
+    showCheckout: false
   }
-
   static propTypes = {
     fetchCart: PropTypes.func,
     match: PropTypes.object,
@@ -51,18 +49,16 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const { _handleScroll, _logPageView } = this;
+    const { _logPageView } = this;
     _logPageView();
 
-    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', _handleScroll);
+    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', ::this._handleScroll);
 
   }
 
   componentWillUnmount() {
-    const { _handleScroll } = this;
-
     if (document.body.clientWidth > 600) {
-      this.scroll.removeEventListener('scroll', _handleScroll);
+      this.scroll.removeEventListener('scroll', ::this._handleScroll);
     }
   }
 
@@ -81,18 +77,19 @@ export default class App extends Component {
   }
 
   _handleScroll() {
-    const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
+    const {
+      props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading },
+      scroll: { scrollTop, containerHeight, clientHeight }
+    } = this;
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
-    if (search) {
-      const scrollTop = this.scroll.scrollTop,
-        containerHeight = this.scroll.scrollHeight,
-        windowHeight = this.scroll.clientHeight;
-
+    if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
-      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading && query) {
-        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
-      }
+      getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
+    } else if (scrollTop > 200 && (!search || !search.length)) {
+      this.setState({ showCheckout: true });
+    } else if (scrollTop < 200 && (!search || !search.length)) {
+      this.setState({ showCheckout: false });
     }
   }
 
@@ -119,16 +116,26 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate = (nextProps, nextState) => nextProps.tab !== this.props.tab || nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }, { showCheckout }) =>
+    tab !== this.props.tab
+    || loading !== this.props.loading
+    || sidenav !== this.props.sidenav
+    || popup !== this.props.popup
+    || location.pathname !== this.props.location.pathname
+    || location.search !== this.props.location.search
+    || toast !== this.props.toast
+    || selectedItemId !== this.props.selectedItemId
+    || showCheckout !== this.state.showCheckout
 
   render() {
     const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
+
     return (
       <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
         <ModalContainer />
-        <Route path={'/'} component={HeaderContainer} />
+        <Route path={'/'} component={(props) => <HeaderContainer {...props} showCheckout={this.state.showCheckout}/>}   />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>

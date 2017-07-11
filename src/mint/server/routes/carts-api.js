@@ -932,18 +932,29 @@ module.exports = function (router) {
       category: _.get(req, 'query.category'),
       page: _.get(req, 'query.page')
     }, _.isUndefined)
+
+    searchOpts.user_locale = req.locale.slice(0, 2)
+    var geo = geolocation(req.ip) || geolocation.default
+    searchOpts.user_country = geo.country;
+
+    //TODO add user locale & country
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
     logging.info('store, locale:', store, locale)
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
-    console.log('store instance', (storeInstance || {})
-      .name)
-    // get user locale & country and add to search options
-    searchOpts.user_locale = (req.locale.length > 5 ? req.locale.slice(0, 5): req.locale)
-    var geo = geolocation(req.ip) || geolocation.default
-    searchOpts.user_country = geo.country
-    // search de rol de rol rol rol
-    var results = await storeInstance.search(searchOpts)
+
+    console.log('store instance', (storeInstance || {}).name)
+
+    try {
+      var results = await storeInstance.search(searchOpts)
+    } catch (e) {
+      return res.send({
+        ok: false,
+        message: e.message
+      })
+    }
+    //for testing
+    // results = await
     res.send(results)
   })())
 
