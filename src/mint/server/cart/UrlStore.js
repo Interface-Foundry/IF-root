@@ -26,19 +26,17 @@ class UrlStore extends Store {
 
   async urlSearch (options) {
     logging.info('URLSEARCH called')
-    const uri = options.text
+    var uri = options.text
+    logging.info('URI', uri)
     // make sure this is a url from the right merchant
-    // var domainPattern = '.*\.?*.*.' + this.domain + '.*.*'
-    // var test = /.\.?.*\.?amazon\..+\.?.*/
-    var domainPattern = "muji"
-    if (!uri || !uri.match(new RegExp(domainPattern))) {
+    if (!uri || !uri.match(new RegExp(this.domain))) {
       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
     }
     logging.info("there's always money in the banana stand")
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
-    logging.info('itemData', itemData)
+    // logging.info('itemData', itemData)
     return itemData
   }
 

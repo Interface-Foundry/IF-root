@@ -4,6 +4,14 @@
 module.exports = {
   Muji: {
     locale: 'JP',
-    domain: 'muji'
+    domain: 'muji.net'
+  },
+  Punyus: {
+    locale: 'JP',
+    domain: 'store.punyus.jp'
+  },
+  Lotte: {
+    locale: 'KR',
+    domain: 'lotte.com'
   }
 }
