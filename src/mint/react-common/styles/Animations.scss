@@ -74,7 +74,6 @@
   }
 }
 
-
 @keyframes fadeOutDown {
   0% {
     opacity: 1;
@@ -184,6 +183,16 @@
 
   100% {
     background-position: -100% 0;
+  }
+}
+
+@keyframes loadingIndefinite {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 100px 0;
   }
 }
 
