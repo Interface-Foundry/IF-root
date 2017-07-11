@@ -13,8 +13,9 @@ export default class Stripe extends Component {
     createPaymentSource: PropTypes.func
   }
 
+
   render() {
-    const { invoice, user, createPaymentSource } = this.props;
+    const { invoice, user, userPayment, createPaymentSource } = this.props;
     const self = this;
     return (
       <StripeCheckout
@@ -25,7 +26,7 @@ export default class Stripe extends Component {
         description="Mint"
         panelLabel="PAY UP"
         allowRememberMe={false}
-        amount={100}
+        amount={userPayment.amount * 100}
       >
         <button>+ add card with stripe</button>
       </StripeCheckout>

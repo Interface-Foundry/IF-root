@@ -107,9 +107,6 @@ export default class InvoiceOptions extends Component {
           ))
         }
 
-        <div>
-        <button onClick={()=> fetchPaymentStatus(invoice.id)}>fetch payments for users</button>
-        </div>
       </ul>
       </div>
      </div> : null

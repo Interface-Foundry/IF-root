@@ -21,7 +21,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart, user, editId, updateItem } = this.props,
+    const { cart, user, editId, invoice, updateItem } = this.props,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id;
@@ -35,7 +35,7 @@ export default class Cart extends Component {
                 myCart.length
                 ? <div className='card'>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1>}
-                  <ItemPaidButton {...this.props}/>
+                  { invoice ? <ItemPaidButton {...this.props}/> : null}
                   <h1 className='date'> <span>  </span> </h1>
                   <h4>
                     <span className='grey'>{numberOfItems(myCart)} items ❄ Updated {timeFromDate(myCart[0].updatedAt)}</span>

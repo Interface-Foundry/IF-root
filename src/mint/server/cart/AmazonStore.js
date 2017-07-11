@@ -387,16 +387,13 @@ class AmazonStore extends Store {
    * @param      {object}   cart    the cart we are syncing
    * @return     {Promise}  { description_of_the_return_value }
    */
-  async sync() {
-    console.log('AM I IN THE AMAON CART???"')
-    logging.info('at least we are trying to show we are syncing the amazon cart')
+  async sync(items) {
     // if there are no amazon items in the cart then you can't sync it
-    if (cart.items.length === 0 || !cart.items[0].asin) {
+    if (items.length === 0 || !items[0].asin) {
       throw new Error('can only sync carts that have amazon items, and items must be populated')
     }
-
     // to sync with amazon, we create a totally new cart
-    const cartAddAmazonParams = createAmazonCartWithItems(cart.items);
+    const cartAddAmazonParams = createAmazonCartWithItems(items);
     cartAddAmazonParams.AssociateTag = this.credentials.assocId
     const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
 

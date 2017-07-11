@@ -58,11 +58,11 @@ class PaymentSource {
 
     // check if user has already paid
     if (_.get(paymentsOnThisInvoice, 'status') === 'success') {
+      logging.info('user has already paid')
       paymentStatus.paid = true
       paymentStatus.amount = paymentsOnThisInvoice.amount
       return paymentStatus
     }
-
     const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
     logging.info('got debts', debts)
     paymentStatus.amount = debts[userId]

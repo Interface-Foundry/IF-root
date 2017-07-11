@@ -13,11 +13,18 @@ export default class Payment extends Component {
     createPayment: PropTypes.func,
     updateInvoice: PropTypes.func,
     selectAccordion: PropTypes.func,
+    fetchPaymentStatus: PropTypes.func,
     selectedAccordion: PropTypes.string
   }
 
+  componentWillMount() {
+    const { fetchPaymentStatus, invoice } = this.props;
+    console.log('fetching paymentstatus', invoice.id);
+    fetchPaymentStatus(invoice.id);
+  }
+
   render() {
-  	const { invoice, createPayment, updateInvoice, selectAccordion, selectedAccordion } = this.props;
+  	const { createPayment, selectAccordion, selectedAccordion } = this.props;
 
     return (
       <div className='payment accordion'>

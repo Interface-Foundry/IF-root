@@ -78,10 +78,10 @@ class Cart {
    * @return     {Promise}
    */
   // async sync () {
-  sync () {
-    // const newCart = await this.store.sync(this)
-    // await this.store.updateCart(this.id, newCart)
-    // _.merge(this, newCart)
+  async sync () {
+    const newCart = await this.store.sync(this.items)
+    await this.store.updateCart(this.id, newCart)
+    _.merge(this, newCart)
   }
 
   async deleteItemFromCart (item, userId) {

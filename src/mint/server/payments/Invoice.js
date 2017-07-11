@@ -39,7 +39,7 @@ class Invoice {
    */
   static async GetByCartId (cartId) {
     const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
-    return invoice
+    return new invoiceHandlers[invoice.invoice_type](invoice)
   }
 
   /**
@@ -92,6 +92,10 @@ class Invoice {
     return handlers[action](actionData)
   }
 
+  async updateInvoice () {
+    let cart = await Cart.GetById(this.cart.id)
+    await cart.sync()
+  }
 
   /**
    * Creates an invoice in the database.
@@ -101,22 +105,20 @@ class Invoice {
   async createInvoice () {
     let cart = await Cart.GetById(this.cart)
     await cart.sync()
-    logging.info('cart syned', cart.subtotal)
 
-    // var newInvoice = await db.Invoices.create({
-    //   leader: cart.leader,
-    //   invoice_type: this.invoice,
-    //   cart: cart.id,
-    //   paid: false,
-    //   total: _.get(cart, 'subtotal', 10000), // FIX TOTAL LATER
-    //   split_type: this.split_type
-    // })
+    var newInvoice = await db.Invoices.create({
+      leader: cart.leader,
+      invoice_type: this.invoice,
+      cart: cart.id,
+      paid: false,
+      total: _.get(cart, 'subtotal'),
+      split_type: this.split_type
+    })
 
-    // await newInvoice.save()
-    // var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
+    await newInvoice.save()
+    var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
 
-    // return invoice
-    return
+    return invoice
   }
 
   /**

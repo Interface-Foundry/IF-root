@@ -50,10 +50,10 @@ export default function payments(state = initialState, action) {
       ...state,
       payments: action.response
     };
-  case 'INVOICE_BY_CART_SUCCESS':
+  case 'FETCH_PAYMENT_STATUS_SUCCESS':
     return {
       ...state,
-      invoice: action.response
+      userPayment: action.response
     };
   default:
     return state;

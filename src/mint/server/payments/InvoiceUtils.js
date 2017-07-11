@@ -17,7 +17,7 @@ const userPaymentAmountHandler = {
     return debts
   },
   'split_single': (invoice) => {
-    logging.info('single payer split')
+    logging.info('single payer split with invoice.total', invoice.total)
     const debts = {}
     debts[invoice.leader.id] = invoice.total
     return debts

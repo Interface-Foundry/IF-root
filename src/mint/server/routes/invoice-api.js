@@ -257,6 +257,7 @@ module.exports = function (router) {
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
     const invoice = await Invoice.GetByCartId(req.params.cart_id)
+    await invoice.updateInvoice()
     return res.send(invoice)
   })
 

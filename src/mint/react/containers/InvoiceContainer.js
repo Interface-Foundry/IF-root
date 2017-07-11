@@ -20,7 +20,8 @@ const mapStateToProps = (state, ownProps) => {
   cart: state.cart.present,
   user: state.user,
   invoice: state.payments.invoice,
-  paymentSources: state.payments.paymentSources
+  paymentSources: state.payments.paymentSources,
+  userPayment: state.payments.userPayment
 };};
 
 // Just an example for mapping functions to the component.
