@@ -99,7 +99,7 @@ var scrapeURL = async function (url) {
 	    	convert = html
 	    }
 	  }else {
-	  	logging.info('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
+	  	console.log('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
 	  }
 
 	})
@@ -281,7 +281,7 @@ var tryHtml = async function (s,$) {
 			return s
 		break
 		default:
-			logging.info('error no domain found for store')
+			console.log('error no domain found for store')
 	}
 }
 
@@ -306,7 +306,7 @@ var foreignExchange = async function (base,target,value,spread,rates){
 	    return value.toFixed(2) //idk if we are rounding up here?
   	}
   	else {
-  		logging.info('conversion not found or something')
+  		console.log('conversion not found or something')
   	}
 }
 
@@ -329,7 +329,7 @@ var getRates = async function (){
 	  	fxRates.fetchDate = new Date().toString()
 	  }
 	  else {
-	  	logging.info('ERROR '+response.statusCode+' IN CURRENCY EXCHANGE REQUEST! ', error)
+	  	console.log('ERROR '+response.statusCode+' IN CURRENCY EXCHANGE REQUEST! ', error)
 	  }
 	  return
 	})
@@ -355,16 +355,16 @@ function is_older_than_1hour(datetime) {
 var translate = async function (text, target) {
   // Instantiates a client
 	// return [text]
-	logging.info('translate called')
+	console.log('translate called')
   const translate = Translate()
   var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-	logging.info('google is gonna translate now')
-	logging.info('text, target', text, target)
+	console.log('google is gonna translate now')
+	console.log('text, target', text, target)
   return translate.translate(text, target)
-	// logging.info('got results:', results)
+	// console.log('got results:', results)
     .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
@@ -387,7 +387,7 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-	logging.info('translate text called')
+	console.log('translate text called')
 	var c = []
 
 	//collect text to translate into a single arr for google translate API
@@ -412,17 +412,17 @@ var translateText = async function (s){
 				})
 			}
 			else {
-				logging.info('no name found for option!')
+				console.log('no name found for option!')
 			}
 	    })
 	}
-	logging.info('about to do the actual translation')
+	console.log('about to do the actual translation')
 	//keep context of text mapping (need to double check the logic here....)
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
 	var tc_map = await translate(tc.translate,s.user.locale)
-	logging.info('Ttranslated')
+	console.log('Ttranslated')
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -448,7 +448,7 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		// var store_country = 'JP'
 		// var domain = 'muji.net'
 		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-		logging.info('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
+		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
 		var $ = cheerio.load(html)
@@ -458,24 +458,24 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
  		var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
  		s = await storeFx(rates,price,s)
 
-		// logging.info('s2', s)
-		logging.info('exchanged currency')
+		// console.log('s2', s)
+		console.log('exchanged currency')
 
 		s = await translateText(s)
-		// logging.info('s3', s)
-		logging.info('translated text')
+		// console.log('s3', s)
+		console.log('translated text')
 
-		// logging.info('res: ', s)
+		// console.log('res: ', s)
 		return s
 
     //save RAW HTML here
-		logging.info('about to save raw html de rol de rol rol rol')
+		console.log('about to save raw html de rol de rol rol rol')
  	  var raw = await db.RawHtml.create({
  	   raw_html: String(html),
  	   original_url: url,
 		 domain: domain
 		})
-		logging.info('saved raw html')
+		console.log('saved raw html')
 		s.raw_html = raw.id
 
 		return s
