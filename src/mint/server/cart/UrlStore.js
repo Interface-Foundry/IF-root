@@ -25,14 +25,14 @@ class UrlStore extends Store {
   }
 
   async urlSearch (options) {
-    logging.info('URLSEARCH called')
+    // logging.info('URLSEARCH called')
     var uri = options.text
-    logging.info('URI', uri)
+    // logging.info('URI', uri)
     // make sure this is a url from the right merchant
     if (!uri || !uri.match(new RegExp(this.domain))) {
       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
     }
-    logging.info("there's always money in the banana stand")
+    // logging.info("there's always money in the banana stand")
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
@@ -82,20 +82,20 @@ class UrlStore extends Store {
       delete itemData.options
     }
 
-    logging.info('original_name', itemData.original_name)
+    // logging.info('original_name', itemData.original_name)
     // create the item translations
     var itemName  = await db.Translations.create(itemData.original_name)
     itemName.translated_value = itemData.name
     await itemName.save()
     delete itemData.original_name
-    logging.info('item name done', itemName.id)
+    // logging.info('item name done', itemName.id)
 
-    logging.info('description', itemData.original_description)
+    // logging.info('description', itemData.original_description)
     var itemDescription  = await db.Translations.create(itemData.original_description)
     itemDescription.translated_value = itemData.description
     await itemDescription.save()
     delete itemData.original_description
-    logging.info('item description done', itemDescription.id)
+    // logging.info('item description done', itemDescription.id)
 
     // create conversion
     itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
@@ -117,7 +117,7 @@ class UrlStore extends Store {
       item.options.add(op.id)
     })
     await item.save()
-    logging.info('saved item')
+    // logging.info('saved item')
 
     item = await db.Items.findOne({id: item.id}).populate('options')
     // logging.info('ITEM', item)
