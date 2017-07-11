@@ -3,17 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { numberOfItems } from '../../utils';
-import { AlertBubble } from '../../../react-common/components';
 import { Icon } from '../../../react-common/components';
-
-function addInvoiceTab(tabs, invoice) {
-  if (invoice && process.env.NODE_ENV === 'development') {
-    tabs.push({
-      tab: 'invoice',
-      display: 'Invoice'
-    });
-  }
-}
 
 export default class Tabs extends Component {
 
@@ -23,22 +13,24 @@ export default class Tabs extends Component {
     cart: PropTypes.object,
     search: PropTypes.object,
     tab: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    invoice: PropTypes.object
   }
 
   state = {
     tabs: []
   }
 
-  componentWillMount() {
-    const { cart: { items, id  }, search: { query } } = this.props;
-    // fetchInvoiceByCart(id);
+  clearHightlight = null
+
+  _getTabs = ({ invoice, items, id, query, highlight = false }) => {
     const tabs = [{
       id: 1,
       tab: 'cart',
       icon: 'Home',
       url: `/cart/${id}`,
-      display: `Cart (${numberOfItems(items)})`
+      display: `Cart (${numberOfItems(items)})`,
+      highlight
     }, {
       id: 2,
       tab: 'search',
@@ -52,41 +44,19 @@ export default class Tabs extends Component {
       url: `${id}/m/share`,
       display: 'Share'
     }];
+    if (this.clearHighlight) clearTimeout(this.clearHightlight);
+    if (invoice && process.env.NODE_ENV === 'development') tabs.push({ tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
+    return tabs;
+  }
 
-    addInvoiceTab(tabs, true);
+  componentWillMount() {
+    const { invoice, cart: { items, id }, search: { query } } = this.props;
+    const tabs = ::this._getTabs({ invoice, items, id, query });
     this.setState({ tabs });
   }
-  componentDidMount() {
-    const { cart } = this.props;
-  }
 
-  clearHightlight = null
-
-  componentWillReceiveProps(nextProps) {
-    const { invoice, cart: { items, id }, search: { query } } = nextProps,
-    itemsChanged = items.length > this.props.cart.items.length,
-      tabs = [{
-        id: 1,
-        tab: 'cart',
-        icon: 'Home',
-        url: `/cart/${id}`,
-        display: `Cart (${numberOfItems(items)})`,
-        highlight: itemsChanged
-      }, {
-        id: 2,
-        tab: 'search',
-        icon: 'Search',
-        url: `/cart/${id}?q=${query}`,
-        display: 'Save'
-      }, {
-        id: 3,
-        tab: 'cart',
-        icon: 'Person',
-        url: `${id}/m/share`,
-        display: 'Share'
-      }];
-    clearTimeout(this.clearHightlight);
-    addInvoiceTab(tabs, invoice);
+  componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
+    const tabs = ::this._getTabs({ invoice, items, id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
     this.clearHightlight = setTimeout(() => this.setState({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) }), 3000);
   }

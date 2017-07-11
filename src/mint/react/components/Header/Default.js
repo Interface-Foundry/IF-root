@@ -39,7 +39,7 @@ export default class Default extends Component {
             }}/>
           </Link>
           <SearchContainer />
-          {showCheckout ? <ButtonsContainer checkoutOnly={false} /> : null}
+          {showCheckout ? <ButtonsContainer checkoutOnly={true} /> : null}
         </div>
         <div className='header__right'>
           {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}

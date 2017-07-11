@@ -20,7 +20,6 @@ export default class Stripe extends Component {
     fetchPaymentStatus(invoice.id);
   }
 
-
   render() {
     const { user, userPaymentStatus, createPaymentSource } = this.props;
     return (

@@ -6,17 +6,16 @@ import React, { Component } from 'react';
 import PaymentForm from './PaymentForm';
 import OptionsForm from './OptionsForm';
 
-
 export default class Forms extends Component {
 
   renderForm() {
     const { selectedAccordion } = this.props;
 
     switch (selectedAccordion.split(' form')[0]) {
-      case 'payment':
-        return <PaymentForm {...this.props}/>;
-      case 'changeinvoice':
-        return <OptionsForm {...this.props}/>;
+    case 'payment':
+      return <PaymentForm {...this.props}/>;
+    case 'changeinvoice':
+      return <OptionsForm {...this.props}/>;
     }
   }
 

@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 
-
 const displayInvoice = (process.env.NODE_ENV === 'development') ? true : false;
 
 export default class Default extends Component {
@@ -63,7 +62,7 @@ export default class Default extends Component {
   render() {
     //show share is exclusively for the header rn, so default to true
     const {
-      props: { cart, user, updateCart, checkoutOnly = true },
+      props: { cart, user, updateCart, checkoutOnly = false },
       _orderCart
     } = this,
     total = calculateItemTotal(cart.items);
@@ -82,7 +81,7 @@ export default class Default extends Component {
                 </button>
 
                   {
-                    (cart.leader.id === user.id || cart.leader === user.id) && checkoutOnly
+                    (cart.leader.id === user.id || cart.leader === user.id) && !checkoutOnly
                     ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
                         <Icon icon='Unlocked'/>Unlock Cart
                       </button>
@@ -106,8 +105,8 @@ export default class Default extends Component {
                     </a>
                   </button>
                 }
-              {displayInvoice ? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
-              {checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
+              {displayInvoice && !checkoutOnly ? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
+              {!checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }
 

@@ -1,7 +1,9 @@
 // react/reducers/invoices.js
 
 const initialState = {
-  paymentSources: []
+  paymentSources: [],
+  invoice: false,
+  userPaymentStatus: {}
 };
 
 export default function payments(state = initialState, action) {

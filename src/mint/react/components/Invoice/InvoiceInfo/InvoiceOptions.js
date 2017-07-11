@@ -4,31 +4,30 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 // import PaymentTypes from './PaymentTypes';
 
-const addressDummy = [
-    {
-        name: 'Derp Address 1',
-        streetAddress: '410 Derp street apt 1D',
-        city: 'Derponia',
-        state: 'DP',
-        zip: 36020,
-        country: 'United Derps'
-    },
-    {
-        name: 'Derp Address 2',
-        streetAddress: '420 Derp street apt 2D',
-        city: 'Derponia',
-        state: 'DP',
-        zip: 36020,
-        country: 'United Derps'
-    },
-    {
-        name: 'Derp Address 3',
-        streetAddress: '430 Derp street apt 3D',
-        city: 'Derponia',
-        state: 'DP',
-        zip: 36020,
-        country: 'United Derps'
-    }
+const addressDummy = [{
+    name: 'Derp Address 1',
+    streetAddress: '410 Derp street apt 1D',
+    city: 'Derponia',
+    state: 'DP',
+    zip: 36020,
+    country: 'United Derps'
+  },
+  {
+    name: 'Derp Address 2',
+    streetAddress: '420 Derp street apt 2D',
+    city: 'Derponia',
+    state: 'DP',
+    zip: 36020,
+    country: 'United Derps'
+  },
+  {
+    name: 'Derp Address 3',
+    streetAddress: '430 Derp street apt 3D',
+    city: 'Derponia',
+    state: 'DP',
+    zip: 36020,
+    country: 'United Derps'
+  }
 ];
 
 const paymentTypes = [{
@@ -44,17 +43,16 @@ const paymentTypes = [{
 
 export default class InvoiceOptions extends Component {
 
-    state = {
-        selectedIndex: null,
-        selectedType: null
-    }
+  state = {
+    selectedIndex: null,
+    selectedType: null
+  }
 
-    render() {
-        const { selectedAccordion, selectAccordion, invoice, fetchPaymentStatus, updateInvoice } = this.props,
-                { selectedIndex, selectedType } = this.state;
+  render() {
+    const { selectedAccordion, selectAccordion, invoice, fetchPaymentStatus, updateInvoice } = this.props, { selectedIndex, selectedType } = this.state;
 
-        return (
-          <div className='invoice accordion'>
+    return (
+      <div className='invoice accordion'>
             <nav onClick={() => selectAccordion('changeinvoice')}>
               <h3>Edit Info for Order</h3>
                 {

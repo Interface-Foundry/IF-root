@@ -5,9 +5,6 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import InvoiceOptions from './InvoiceOptions';
 
-
-
-
 export default class InvoiceInfo extends Component {
   static propTypes = {
     cart: PropTypes.object,

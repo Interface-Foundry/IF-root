@@ -14,7 +14,6 @@ export default class Invoice extends Component {
     selectedAccordion: PropTypes.string
   }
 
-
   render() {
     const { selectedAccordion } = this.props;
     return (

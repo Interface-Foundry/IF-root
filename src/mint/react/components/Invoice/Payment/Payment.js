@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import PaymentSources from './PaymentSources';
 import Stripe from './Stripe';
 
-
 export default class Payment extends Component {
 
   static propTypes = {
