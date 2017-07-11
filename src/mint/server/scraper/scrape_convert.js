@@ -7,6 +7,11 @@ var fx = require("money")
 const Translate = require('@google-cloud/translate')
 var currency = require('currency-code-map')
 
+//encoding stuff
+var charset = require('charset'),
+    jschardet = require('jschardet'),
+    Iconv = require('iconv').Iconv
+
 
 //come here and get localized
 var getLocale = function (url,user_country,user_locale,store_country,domain){
@@ -52,13 +57,14 @@ var getLocale = function (url,user_country,user_locale,store_country,domain){
 			s.domain.description = 'Muji Japan'
 			break
 	}
-
 	return s
 }
 
+//scrapes URL and convets to UTF-8 if it isn't already
 var scrapeURL = async function (url) {
 	var options = {
 		url: url,
+		encoding: null,
 		// proxy: proxyUrl,
 		headers: {
 		  'User-Agent': fakeUserAgent(),
@@ -69,19 +75,107 @@ var scrapeURL = async function (url) {
 		},
 		// timeout: timeoutMs,
 	}
-	return await request(options, function (error, response, html) {
-	  if (!error && response.statusCode == 200) {
-	    return html
+	var convert
+	await request(options, function (error, res, html) {
+	  if (!error && res.statusCode == 200) {
+
+	  	//detect char encoding
+	  	var enc = charset(res.headers, html) || jschardet.detect(html).encoding.toLowerCase()
+
+	  	//if not utf-8
+	    if(enc !== 'utf8') {
+	    	//setup encoding
+	        var iconv = new Iconv(enc, 'UTF-8//TRANSLIT//IGNORE')
+	        //do convert
+   			convert = iconv.convert(new Buffer(html)).toString('utf8')
+	    }else {
+	    	convert = html
+	    }
 	  }else {
 	  	console.log('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
 	  }
+
 	})
+	return convert
 }
 
 //try to get data from html
 var tryHtml = function (s,$) {
-	logging.info('S.DOMAIN.NAME', s.domain.name)
 	switch(s.domain.name){
+
+		case 'store.punyus.jp':
+			//get product id
+			s.product_id = yield urlValue(s.original_link,'detail',1)
+			s.parent_id = s.product_id
+
+			//get meta tags
+		 	var meta = $('meta')
+			var keys = Object.keys(meta)
+
+			//get images
+			keys.forEach(function(key){
+				if (meta[key].attribs && meta[key].attribs.property) {
+					if(meta[key].attribs.property === 'og:image'){
+						//ogImage = meta[key].attribs.content
+						s.thumbnail_url = meta[key].attribs.content
+						s.main_image_url = meta[key].attribs.content
+					}
+				}
+			})
+
+			s.original_name.value = $('.itemInfo').find('[itemprop=name]').text().trim()
+			s.original_description.value = $('.itemInfo').find('[itemprop=description]').text().trim()
+
+			var p = $('.price').text().trim().replace(/[^0-9.]/g, "")
+			s.original_price.value = parseFloat(p)
+
+			$('.sku_colorList').each(function(i, elm) {
+
+				var available
+				if($(this).hasClass('nonstock')){
+					available = false
+				}else {
+					available = true
+				}
+
+				s.options.push({
+					type: 'color',
+					original_name: {
+						value: $('.sku_title',this).text().trim()
+					},
+				    thumbnail_url:$('img',this).attr('src'),
+				    main_image_url:$('img',this).attr('src'),
+				    option_id: i, //to keep track of parent options
+					available: true,
+					selected: false
+				})
+
+				//get sizes inside color options
+				$('.axis_item',this).each(function(z, elm) {
+
+					var available
+					if($(this).hasClass('nonstock')){
+						available = false
+					}else {
+						available = true
+					}
+
+					s.options.push({
+						type: 'size',
+						original_name: {
+							value: $(this).text().trim().split('/')[0].trim()
+						},
+						parent_id: i, //to keep track of parent option
+						available: available,
+						selected: false
+					})
+				})
+			})
+
+			return s
+
+		break
+
 		case 'muji.net':
 
 			//get product id
@@ -137,7 +231,8 @@ var tryHtml = function (s,$) {
 					original_name: {
 						value: $(this).text().trim()
 					},
-					selected: selected
+					selected: selected,
+					available: true
 				})
 			})
 
@@ -239,8 +334,7 @@ var getRates = async function (){
  * @param {string} Target language
  * @returns {object} A list of currencies with corresponding rates
  */
-var translateText = async function (text, target) {
-	logging.info('translate whoop de whoop')
+var translate = async function (text, target) {
   // Instantiates a client
 	// return [text]
   const translate = Translate()
@@ -270,7 +364,7 @@ var urlValue = function (url,find,pointer){
 	return split[0]
 }
 
-var translate = async function (s){
+var translateText = async function (s){
 
 	var c = []
 
@@ -289,7 +383,7 @@ var translate = async function (s){
 	}
 	if(s.options && s.options.length > 0){
 		s.options.forEach(function(o){
-			if(o.original_name){
+			if(o.original_name){ //we AREN'T translating size options, it breaks translations
 				c.push({
 					type:'option',
 					value: o.original_name.value
@@ -304,7 +398,7 @@ var translate = async function (s){
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
-	var tc_map = await translateText(tc.translate,s.user.locale)
+	var tc_map = await translate(tc.translate,s.user.locale)
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -339,7 +433,7 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		logging.info('s', s)
  		s = await foreignExchange(s,s.domain.currency,s.user.currency,s.original_price.value,0.03)
 		// logging.info('s2', s)
-		s = await translate(s)
+		s = await translateText(s)
 		// logging.info('s3', s)
 
 		// console.log('res: ', s)
@@ -384,5 +478,4 @@ function onerror(err) {
   console.error(err.stack);
 }
 
-logging.info('s c r a p e', typeof(scrape))
 module.exports = scrape;
