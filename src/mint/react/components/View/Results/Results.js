@@ -81,7 +81,7 @@ export default class Results extends Component {
       if (result.id && (result.id === selectedItemId || result.oldId === selectedItemId)) {
         selected = {
           row: acc.length,
-          result,
+          result: {...result, inCart: (result.asin && myItems.includes(result.asin))},
           index: i,
           options: splitOptionsByType(result.options)
         };
@@ -93,7 +93,6 @@ export default class Results extends Component {
 
     if (selected) partitionResults.splice(selected.row, 0, [{ ...selected.result, selected: true, index: selected.index, options: selected.options }]);
     if (results.length === 1 && !results[0].options) fetchSearchItem(results[0].id); // get options if its a url
-
     return (
       <table className='results'>
         <tbody>
