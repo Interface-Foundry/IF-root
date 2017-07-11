@@ -504,11 +504,13 @@ function formatAmazonPrice(amount) {
 }
 
 function getItemPrice(item, priceType) {
+  debugger;
   // place holder for time being since unsure what price to use
   const availablePrices = {}
   availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
+  availablePrices.salePrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount', 0))
   if (priceType === undefined) {
-    return availablePrices.basicItemPrice
+    return availablePrices.salePrice || availablePrices.basicItemPrice
   } else {
     // might be useful to return other possible prices in the future
     availablePrices.lowestPrice = formatAmazonPrice(_.get(item, 'OfferSummary.LowestNewPrice.Amount', 0))
