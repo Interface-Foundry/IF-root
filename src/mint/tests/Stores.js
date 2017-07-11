@@ -10,7 +10,7 @@ dbReady.then((models) => { db = models }).catch(e => console.error(e))
 https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/ref=sr_1_15?s=apparel&ie=UTF8&qid=1497472759&sr=1-15&nodeID=7141123011&psd=1&keywords=shirts
 
 var stores = [{
-  skip: true,
+  skip: false,
   name: 'Amazon',
   locale: 'US',
   searches: [
