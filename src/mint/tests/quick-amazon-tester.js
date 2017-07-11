@@ -7,7 +7,8 @@ const store = StoreFactory.GetStore({
 
 async function test() {
   var result = await store.search({
-    text: 'https://www.amazon.com/GW-M1618-8-Fashion-Sneaker-13/dp/B01MZ2SL55?psc=1&SubscriptionId=AKIAIQWK3QCI5BOJTT5Q&tag=motorwaytoros-20&linkCode=xm2&camp=2025&creative=165953&creativeASIN=B01MZ2SL55'
+    text: 'B01N4WYOE3'
+    //text: 'https://www.amazon.com/Wrangler-Authentics-Sleeve-Classic-Rivera/dp/B01N3CRX2T/ref=sr_1_15?s=apparel&ie=UTF8&qid=1497472759&sr=1-15&nodeID=7141123011&psd=1&keywords=shirts'
   })
 
   console.log(result)

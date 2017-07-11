@@ -73,7 +73,7 @@ class AmazonStore extends Store {
     }
 
     const asin = uri.match(/B[\dA-Z]{9}|\d{9}(X|\d)/)[0]
-    const amazonItem = this.catalogLookup({text: asin})
+    const amazonItem = await this.catalogLookup({text: asin})
     return [amazonItem]
   }
 
@@ -83,6 +83,9 @@ class AmazonStore extends Store {
    * @return {[amazonItem]}         the amazon item response for the asin
    */
   async catalogLookup(options) {
+    if (typeof options === 'string') {
+      options = {asin: options}
+    }
     const asin = options.text || options.asin
     console.log('looking up asin', asin)
 
@@ -113,6 +116,25 @@ class AmazonStore extends Store {
 
       // and like save a record in the db every time we scrape an item
       db.RawConnection.collection('amazon_catalog_lookups').insertOne(escapeKeys(amazonItem))
+    }
+
+
+    //
+    // Error checks that can happen from catalog lookups or url pasting
+    //
+    if (!amazonItem.Offers.Offer) {
+      // no offer for parent asins, but they likely have variations, so try to use one of the variations
+      var availableChildren = _.get(amazonItem, 'Variations.Item', [])
+        .filter(child => !!_.get(child, 'Offers.Offer.OfferListing'))
+
+      if (availableChildren.length > 0) {
+        return await this.catalogLookup(availableChildren[0].ASIN)
+      }
+
+      // or if we are in a variation that doesn't have a listing, get the parent which will then get an available listing
+      if (amazonItem.ASIN !== amazonItem.ParentASIN) {
+        return await this.catalogLookup(amazonItem.ParentASIN)
+      }
     }
 
     return amazonItem
@@ -504,7 +526,6 @@ function formatAmazonPrice(amount) {
 }
 
 function getItemPrice(item, priceType) {
-  debugger;
   // place holder for time being since unsure what price to use
   const availablePrices = {}
   availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
