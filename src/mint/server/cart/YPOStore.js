@@ -10,6 +10,7 @@ const svcUrl11 = 'https://edigateway-test.ypo.co.uk/EdiServiceSoap11/WebXmlDataS
 const svcUrl12 = 'https://edigateway-test.ypo.co.uk/EdiService/WcfXmlDataServiceLibrary.YpoService.svc'
 const username = 'kip'
 const password = 'K1p0rdering'
+const logging = require('../../../logging.js')
 
 var db
 const dbReady = require('../../db')
@@ -32,7 +33,6 @@ class YPOStore extends Store {
    * @param  {Object}  options the search options
    */
   getSearchType(options) {
-    debugger;
     // first check if there is a cateogry that matches the search query
     var matchedCategory = ypoConstants.categories.filter(c => c.category === options.text)
     if (matchedCategory.length === 1) {
