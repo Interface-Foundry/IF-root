@@ -18,7 +18,7 @@ const stripeSecret = (process.env.NODE_ENV !== 'production') ? stripeConstants.t
 
 const _ = require('lodash')
 const stripe = require('stripe')(stripeSecret)
-const userPaymentAmountHandler = require('../utilities/invoiceUtils').userPaymentAmountHandler
+const userPaymentAmountHandler = require('../utilities/invoice_utils').userPaymentAmountHandler
 
 
 class PaymentSource {

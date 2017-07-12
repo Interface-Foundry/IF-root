@@ -443,11 +443,6 @@ var translateText = async function (s){
 //do a thing
 var scrape = async function (url, user_country, user_locale, store_country, domain) {
 		//incoming country / locale
-		// var user_country = 'US'
-		// var user_locale = 'en'
-		// var store_country = 'JP'
-		// var domain = 'muji.net'
-		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
 		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
@@ -458,18 +453,9 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
  		var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
  		s = await storeFx(rates,price,s)
 
-		// console.log('s2', s)
-		console.log('exchanged currency')
-
 		s = await translateText(s)
-		// console.log('s3', s)
-		console.log('translated text')
-
-		// console.log('res: ', s)
-		return s
 
     //save RAW HTML here
-		console.log('about to save raw html de rol de rol rol rol')
  	  var raw = await db.RawHtml.create({
  	   raw_html: String(html),
  	   original_url: url,

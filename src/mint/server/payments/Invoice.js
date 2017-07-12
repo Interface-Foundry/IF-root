@@ -1,7 +1,7 @@
 var moment = require('moment')
 const _ = require('lodash')
 const Cart = require('../cart/Cart')
-const userPaymentAmountHandler = require('../utilities/InvoiceUtils').userPaymentAmountHandler
+const userPaymentAmountHandler = require('../utilities/invoice_utils').userPaymentAmountHandler
 
 var db
 const dbReady = require('../../db')
