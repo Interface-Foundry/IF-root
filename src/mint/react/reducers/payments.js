@@ -2,7 +2,7 @@
 
 const initialState = {
   paymentSources: [],
-  invoice: false,
+  invoice: {},
   userPaymentStatus: {}
 };
 
@@ -41,6 +41,11 @@ export default function payments(state = initialState, action) {
     return {
       ...state,
       invoice: action.response
+    };
+  case 'INVOICE_BY_CART_FAILURE':
+    return {
+      ...state,
+      invoice: {}
     };
   case 'UPDATE_INVOICE_OPTIONS_SUCCESS':
     return {

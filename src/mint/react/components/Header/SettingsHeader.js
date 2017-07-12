@@ -18,28 +18,19 @@ export default class SettingsHeader extends Component {
 
   render() {
     const {
-      icon,
-      text,
-      user,
-      history: { goBack },
-      _toggleLoginScreen,
-      _toggleSidenav
+      history: { goBack }
     } = this.props;
     return (
       <span className='settings'>
-        <div className='header__left'>
           <a href='#' className='navbar__icon__close' onClick={(e)=> {e.preventDefault(); goBack();}}>
             <Icon icon='Left'/>
           </a>
-          <h3 className='navbar__modal__head'>
-            <Icon icon={icon}/>
-            <span className='underline'>{text}</span>
-          </h3>
-        </div>
-        <div className='header__right'>
-          {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}
-          <div className='navbar__icon' onClick={_toggleSidenav}><Icon icon='Hamburger'/></div>
-        </div>
+          <div className={'image desktop'} style={{
+              backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
+          }}>
+            <span className='beta'>beta</span>
+          </div> 
+
       </span>
     );
   }

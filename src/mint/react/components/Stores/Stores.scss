@@ -1,21 +1,25 @@
 // react/components/Stores/Stores.scss
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
+
 .cart_store {
   h3 {
     margin-top: -15px;
   }
+
   background: #fff;
   border-radius: 5px;
   box-shadow: $card-box-shadow;
   margin: $padding / 2;
-  padding: $padding * 2 $padding;
+  padding: ($padding * 2) $padding;
+
   .cart_store__list {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    // justify-content: space-evenly;
     margin: 0 auto;
+
     a {
       cursor: pointer;
       display: inline-block;
@@ -25,22 +29,26 @@
       min-width: 150px;
       padding: 1px;
       width: 100px;
+
       .cart__choice {
         background: white;
         border: 1px $border-color-light solid;
         border-radius: $padding;
         position: relative;
         text-align: center;
+
         .choice__details {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: $padding / 2.5 $padding / 2.5 0 $padding / 2.5;
+          padding: ($padding / 2.5) ($padding / 2.5) 0 ($padding / 2.5);
+
           .choice__image {
             align-self: center;
             height: $nav-height + 25px;
             width: $nav-height + 75px;
           }
+
           .choice__domain {
             color: #58595b;
             font-size: 0.7em;
@@ -52,26 +60,30 @@
             white-space: normal;
           }
         }
+
         .choice__select {
           position: relative;
           width: 100%;
-          height: $nav-height/2;
-          line-height: $nav-height/2;
+          height: $nav-height / 2;
+          line-height: $nav-height / 2;
           font-size: 10px;
           font-weight: 600;
           letter-spacing: 1px;
           text-transform: uppercase;
           background: $border-color-light;
-          border-radius: 0 0 $padding - 1 $padding - 1;
+          border-radius: 0 0 ($padding - 1) ($padding - 1);
         }
       }
+
       &:hover {
         .cart__choice {
           border-color: $thirdColor;
         }
+
         .choice__select {
           background: $thirdColor;
           color: white;
+
           &:before {
             content: '✔';
             font-size: 15px;
@@ -84,4 +96,3 @@
     }
   }
 }
-

@@ -137,6 +137,7 @@ export default class App extends Component {
         <ModalContainer />
         <Route path={'/'} component={(props) => <HeaderContainer {...props} showCheckout={this.state.showCheckout}/>}   />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+        <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Display} />
@@ -155,6 +156,7 @@ export default class App extends Component {
         <div className='noJudder'>
           { tab === 'cart' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+          <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         </div>
         
       </section>

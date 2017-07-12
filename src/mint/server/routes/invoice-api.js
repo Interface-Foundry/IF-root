@@ -274,13 +274,19 @@ module.exports = function (router) {
 
   /**
    * @api {get} /invoice/cart/:cart_id
-   * @apiDescription get an invoice related to a cart, if no invoices create one.
+   * @apiDescription get an invoice related to a cart
    * @apiGroup Invoice
    *
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    const invoice = await Invoice.GetByCartId(req.params.cart_id)
+    let invoice
+    try {
+      invoice = await Invoice.GetByCartId(req.params.cart_id)
+    } catch (err) {
+      logging.info('error getting invoice getbycartId')
+      return res.send({}).end()
+    }
     await invoice.updateInvoice()
     return res.send(invoice)
   })
@@ -327,7 +333,6 @@ module.exports = function (router) {
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-
     // check for old invoice.  deal with this later tbh
     const oldInvoice = await Invoice.GetByCartId(req.params.cart_id)
     if (oldInvoice) {
