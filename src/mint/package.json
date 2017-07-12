@@ -171,7 +171,7 @@
     "start": "npm run build & BUILD_MODE=prebuilt node ./server",
     "frontend": "SEND_EMAILS=; nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common",
     "backend-email": "npm run build & SEND_EMAILS=1; BUILD_MODE=prebuilt nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common ",
-    "backend": "npm run build & SEND_EMAILS=; BUILD_MODE=prebuilt nodemon ./server/index.js --ignore --ignore ./webpack-cache ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common --ignore ./wepack-cache",
+    "backend": "npm run build & SEND_EMAILS=; BUILD_MODE=prebuilt nodemon ./server/index.js --ignore --ignore ./webpack-cache --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common --ignore ./wepack-cache",
     "email": "SEND_EMAILS=1 nodemon ./server/index.js --ignore ./react/ --ignore ./public/ --ignore ./kip-website/ --ignore ./react-common",
     "test": "env BUILD_MODE=prebuilt mocha --bail tests/all.js",
     "react-test": "node_modules/.bin/karma start karma.conf.js",
