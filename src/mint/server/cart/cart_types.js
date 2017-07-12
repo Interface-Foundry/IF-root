@@ -3,25 +3,29 @@ var stores = [{
     "store_type": "Amazon_US",
     "store_name": "Amazon US",
     "store_domain": "amazon.com",
-    "store_countries": ["US"]
+    "store_countries": ["US"],
+    "default_image": "https://storage.googleapis.com/kip-random/kip_stores/cart_images/amazon_us.png"
   }, {
     "store_img": "https://storage.googleapis.com/kip-random/kip_stores/amazon_uk.png",
     "store_type": "Amazon_GB",
     "store_name": "Amazon UK",
     "store_domain": "amazon.co.uk",
-    "store_countries": ["GB"]
+    "store_countries": ["GB"],
+    "default_image": "https://storage.googleapis.com/kip-random/kip_stores/cart_images/amazon_uk.png"
   }, {
     "store_img": "https://storage.googleapis.com/kip-random/kip_stores/amazon_ca.png",
     "store_type": "Amazon_CA",
     "store_name": "Amazon Canada",
     "store_domain": "amazon.ca",
-    "store_countries": ["CA"]
+    "store_countries": ["CA"],
+    "default_image": "https://storage.googleapis.com/kip-random/kip_stores/cart_images/amazon_ca.png"
   }, {
     "store_img": "https://storage.googleapis.com/kip-random/kip_stores/ypo.png",
     "store_type": "YPO",
     "store_name": "YPO",
     "store_domain": "ypo.co.uk",
-    "store_countries": ["GB"]
+    "store_countries": ["GB"],
+    "default_image": "https://storage.googleapis.com/kip-random/kip_stores/cart_images/ypo_uk.png"
   }
 ]
 
@@ -33,7 +37,8 @@ Object.keys(urlStores).map(store => {
     store_type: store + '_' + urlStores[store].locale,
     store_name: store,
     store_domain: urlStores[store].domain,
-    store_countries: [urlStores[store].locale]
+    store_countries: [urlStores[store].locale],
+    default_image: urlStores[store].default_image
   })
 })
 

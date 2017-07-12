@@ -207,6 +207,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   if (chosen_store) {
     cart.store = chosen_store.store_name.split(' ')[0]
     cart.store_locale = chosen_store.store_countries[0]
+    cart.thumbnail_url = chosen_store.default_image
   }
   else throw new Error('Cannot create new cart for store ' + req.params.store)
   // if (!req.params.store) {
