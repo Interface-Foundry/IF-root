@@ -6,13 +6,8 @@
   display: inline-block;
   width: 100%;
   max-width: 800px;
-  margin: 10px 0 10px 30px;
-  height: 30px;
-
-  @media only screen and (min-width: 600px) {
-    margin: 5px 0 10px 30px;
+  margin: 5px 0 10px 30px;
   height: 40px;
-  }
 
   & > * {
     height: 100%;
@@ -29,10 +24,11 @@
     font-size: 16px;
     -webkit-appearance: none;
     border-radius: 0;
+    background: transparent;
   }
 
   button {
-    background: white;
+    background: transparent;
     width: $nav-height / 2;
     border: 0;
     border-radius: 5px 0 0 5px;
@@ -70,10 +66,7 @@
     top: 27px;
     z-index: 100;
     box-shadow: $card-box-shadow;
-
-    @media only screen and (min-width: 600px) {
-      top: 38px;
-    }
+    top: 38px;
 
     ul {
       max-height: 200px;
@@ -106,9 +99,11 @@
         color: black;
         cursor: pointer;
         height: 30px;
+
         * {
           overflow-y: hidden;
         }
+
         &.selected, &:hover {
           background: darken(white, 10%);
         }

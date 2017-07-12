@@ -3,7 +3,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Icon, AlertBubble } from '../../../react-common/components';
 import { SearchContainer, ButtonsContainer } from '../../containers';
 
 export default class Default extends Component {
@@ -19,17 +18,12 @@ export default class Default extends Component {
 
   render() {
     const {
-      user,
       showCheckout,
-      cart,
-      showAlert,
-      _toggleLoginScreen,
-      _toggleSidenav
+      cart
     } = this.props;
 
     return (
-      <span className='default'>
-        <div className='header__left'>
+      <span className='cart'>
           <Link to={`/cart/${cart.id}`}>
             <div className={'image desktop'} style={{
               backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
@@ -39,15 +33,7 @@ export default class Default extends Component {
             }}/>
           </Link>
           <SearchContainer />
-          {showCheckout ? <ButtonsContainer checkoutOnly={true} /> : null}
-        </div>
-        <div className='header__right'>
-          {!user.name ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}
-          <div className='navbar__icon' onClick={_toggleSidenav}>
-            <Icon icon='Hamburger'/>
-            {showAlert ? <AlertBubble top={13} right={25} /> : null}
-          </div>
-        </div>
+          {showCheckout ? <ButtonsContainer checkoutOnly={true} /> : null}       
       </span>
     );
   }
