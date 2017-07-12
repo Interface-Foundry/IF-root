@@ -14,7 +14,7 @@ export default class Tabs extends Component {
     search: PropTypes.object,
     tab: PropTypes.string,
     history: PropTypes.object,
-    invoice: PropTypes.object
+    invoice: PropTypes.bool
   }
 
   state = {
@@ -23,13 +23,13 @@ export default class Tabs extends Component {
 
   clearHightlight = null
 
-  _getTabs = ({ invoice, items, id, query, highlight = false }) => {
+  _getTabs = ({ invoice, numItems, id, query, highlight = false }) => {
     const tabs = [{
       id: 1,
       tab: 'cart',
       icon: 'Home',
       url: `/cart/${id}`,
-      display: `Cart (${numberOfItems(items)})`,
+      display: `Cart (${numItems})`,
       highlight
     }, {
       id: 2,
@@ -44,21 +44,21 @@ export default class Tabs extends Component {
       url: `${id}/m/share`,
       display: 'Share'
     }];
-    if (this.clearHighlight) clearTimeout(this.clearHightlight);
     if (invoice && process.env.NODE_ENV === 'development') tabs.push({ tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
     return tabs;
   }
 
   componentWillMount() {
     const { invoice, cart: { items, id }, search: { query } } = this.props;
-    const tabs = ::this._getTabs({ invoice, items, id, query });
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query });
     this.setState({ tabs });
   }
 
   componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
-    const tabs = ::this._getTabs({ invoice, items, id, query, highlight: items.length > this.props.cart.items.length });
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
-    this.clearHightlight = setTimeout(() => this.setState({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) }), 3000);
+    if (this.clearHighlight) clearTimeout(this.clearHightlight);
+    this.clearHightlight = setTimeout(() => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })), 3000);
   }
 
   render() {

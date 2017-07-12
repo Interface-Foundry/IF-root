@@ -24,18 +24,9 @@ history.listen((location, action) => {
 });
 const historyMiddleware = routerMiddleware(history);
 let middleware = [thunkMiddleware, historyMiddleware];
-if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
-  const { createLogger } = require('redux-logger');
-  const loggerMiddleware = createLogger({
-    duration: true,
-    timestamp: false,
-    collapsed: true,
-    level: 'info'
-  });
-  middleware = [...middleware, loggerMiddleware];
-}
-//apparently we should use in production? there's a bunch of posts
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;  //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
+
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 
 // Basically our initialization sequence

@@ -51,19 +51,16 @@ export default class Default extends Component {
 
   _orderCart = (e) => {
     const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart } = this.props;
-
     if (store === 'YPO') toggleYpoCheckout(true);
     else if (locked) reorderCart(id);
 
-    if (leader.id === user.id) updateCart({ cart_id: id, locked: true });
+    if (leader.id === user.id) updateCart({ id, locked: true });
     if (store !== 'YPO') window.open(`/api/cart/${id}/checkout`);
   }
 
   render() {
-    //show share is exclusively for the header rn, so default to true
     const {
-      props: { cart, user, updateCart, checkoutOnly = false },
-      _orderCart
+      props: { cart, user, updateCart, checkoutOnly = false }
     } = this,
     total = calculateItemTotal(cart.items);
 
@@ -75,7 +72,7 @@ export default class Default extends Component {
           ? <span>
               <button
                 className='yellow sub lock'
-                onClick={_orderCart}
+                onClick={::this._orderCart}
                 >
                   Re-Order {displayCost(total, cart.store_locale)}
                 </button>
@@ -96,8 +93,8 @@ export default class Default extends Component {
                     Checkout <span>{displayCost(total, cart.store_locale)}</span>
                   </button>
                 :
-                  <button className='yellow sub' onClick={_orderCart} type='submit'>
-                    <a href={`/api/cart/${cart.id}/checkout`} target="_blank">
+                  <button className='yellow sub' onClick={::this._orderCart}>
+                    <a href={`/api/cart/${cart.id}/checkout`} target="_blank" onClick={(e)=>e.preventDefault()}>
                       <Icon icon='Cart'/>
                       <p>Checkout</p>
                       <p>{displayCost(total, cart.store_locale)}</p>

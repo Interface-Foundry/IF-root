@@ -104,23 +104,23 @@
           }
 
           &:last-of-type {
-            order: 2;
             border-left: 2px solid darken($mainColor, 20%);
+            order: 2;
           }
 
           @media only screen and (max-width: 600px) {
             padding: 0 10px;
           }
         }
+      }
 
-        &:disabled {
-          background: lighten(#333, 70);
-          color: #333;
+      &:disabled {
+        background: lighten(#333, 70);
+        color: #333;
 
-          & span {
-            display: none; // we don't need the price I guess???? this is a mess
-         
-          }
+        & span {
+          display: none; // we don't need the price I guess???? this is a mess
+       
         }
       }
     }
@@ -131,8 +131,6 @@
       font-size: 10px;
       transform: scaleY(1.1);
       transform-origin: 0 0;
-
-
 
       @media only screen and (max-width: 600px) {
         line-height: ($nav-height - $padding) / 2;
@@ -167,6 +165,7 @@
 
         & span {
           display: none; // we don't need the price I guess???? this is a mess
+       
         }
       }
     }
