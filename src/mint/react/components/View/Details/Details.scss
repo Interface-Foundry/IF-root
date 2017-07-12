@@ -380,8 +380,40 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     text-align: left;
     width: 100%;
 
+    &.achievement {
+      padding: 0 $padding/2;
+      z-index: 2;
+      .icon {
+        position: relative;
+        padding: $padding/2;
+        display: inline-block;
+        background: white;
+        border: 1px solid rgba(51, 51, 51, 0.2);
+        border-radius: 0 $padding/2 $padding/2 0;
+        margin-top: $padding;
+        margin-left: -6px;
+        z-index: 10;
+
+        svg {
+          height: 20px;
+          width: 20px;
+          opacity: 0.3;
+        }
+      }
+      .text {
+        display: inline-block;
+        padding: $padding $padding*2 $padding $padding;
+        p {
+          opacity: 0.3;
+          &:last-of-type {
+            font-size: 10px;
+          }
+        }
+      }
+    }
+
     nav {
-      padding: $padding $padding*3 0;
+      padding: $padding $padding 0;
 
       .undo__button {
         @include animation(fadeInDown cubic-bezier(0, 0, 0.2, 1) 1s);
@@ -449,7 +481,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       span {
         display: inline-block !important;
         border-radius: 5px;
-        margin-right: $padding * 2;
 
         &.updated {
           color: rgba(#111, 0.5);

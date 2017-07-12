@@ -100,6 +100,8 @@ export const splitCartById = (state, props) => {
       let newMember = acc.others.find(member => member.id === linkedMember.id);
       newMember = {
         ...newMember,
+        createdAt: linkedMember.createdAt,
+        updatedAt: item.updatedAt,
         items: [...newMember.items, item]
       };
       acc = {
@@ -111,6 +113,8 @@ export const splitCartById = (state, props) => {
         id: item.added_by,
         email_address: linkedMember.email_address,
         name: linkedMember.name,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
         items: [item]
       });
     }

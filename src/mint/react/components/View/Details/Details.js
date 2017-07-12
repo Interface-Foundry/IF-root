@@ -40,7 +40,8 @@ export default class Details extends Component {
         value: likes.length
       }],
       likedList = likes.map((user) => user.id),
-      isAdmin = user.id === leader.id;
+      isAdmin = user.id === leader.id,
+      nextAchievement = members.length > 2 ? ( members.length > 5 ? [{ reqs: 10, discount: 100 }] : [{ reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] ) :  [{ reqs: 3, discount: 30 }, { reqs: 6, discount: 80 }];
 
     return (
       <table className='details'>
@@ -102,6 +103,21 @@ export default class Details extends Component {
               </div>
             </th>
           </tr>
+          {
+            nextAchievement.map((a, i) => (
+              <tr key={i}>
+                <td className='achievement'>
+                  <div className='icon'>
+                    <Icon icon='Person'/>
+                  </div>
+                  <div className='text'>
+                    <p>{a.reqs}pp Join</p>
+                    <p>{a.discount}% Discount!</p>
+                  </div>
+                </td>
+              </tr>
+            ))
+          }
           <tr>
             <td className='lineStart'>
               <nav>

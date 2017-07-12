@@ -52,6 +52,12 @@ export default class Cart extends Component {
         <thead>
           <tr>
             <th colSpan='100%'>
+               {
+                cart.members.length === 1 ? <div className='top'>
+                  <div className='circle'/>
+                  <p> <b>{user.name}</b> joined { timeFromDate(myCart[0].createdAt) }</p>
+                </div> : null
+              }
               {
                 myCart.length
                 ? <div className={`card`} onClick={() => !openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
@@ -113,6 +119,10 @@ export default class Cart extends Component {
             userCarts.others.map((userCart, i) => (
               <tr key={userCart.id}>
                 <td colSpan='100%'>
+                  <div className='top'>
+                    <div className='circle'/>
+                    <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
+                  </div>
                   <div className={`card`} onClick={() => !openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                     { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
                     <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
