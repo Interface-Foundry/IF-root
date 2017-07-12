@@ -231,27 +231,39 @@ var tryHtml = async function (s,$) {
 			})
 
 			//CHECK FOR SIZES
-      logging.info('SIZE STUFF')
+      console.log('SIZE STUFF')
 			$('#size').find('dd').each(function(i, elm) {
 				//did user select?
-        console.log('text:', $(this).text())
+        // console.log('text:', $(this).text().trim())
 				var selected
 				if($(this).has('.current').attr('class')){
 					selected = true
 				}else {
 					selected = false
 				}
-        //TODO regex out non latin & numeric characters
-        var sizeText = $(this).text().trim()
+        //regex out non latin & numeric characters
+        var sizeText = $(this).text().trim()//.replace(/[^0-9a-z]/gi, "")
+        console.log('sizeText', sizeText)
+        sizeText = sizeText.split('').map(c => c.charCodeAt())
+        sizeText = sizeText.filter(function (code) {
+          return (code >= 48 && code <= 57) || (code >= 65313 && code <= 65370)
+          // digits, and full-width latin characters
+        })
+        sizeText = sizeText.map(code => String.fromCharCode(code))
+        sizeText = sizeText.join('')
+        console.log('sizeText', sizeText)
+
 				s.options.push({
 					type: 'size',
 					original_name: {
-						value: 'speakerboxxx'
+						value: sizeText
 					},
 					selected: selected,
 					available: true
 				})
 			})
+      console.log('done w sizes')
+      logging.info('s.options', s.options) //no "the"
 
 			//CHECK FOR COLORS
 			$('#color').find('dd').each(function(i, elm) {
@@ -282,6 +294,7 @@ var tryHtml = async function (s,$) {
 					available: available
 				})
 			})
+      logging.info('BOUT TO RETURN S', s.options)
 			return s
 		break
 		default:

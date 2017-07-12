@@ -25,23 +25,21 @@ class UrlStore extends Store {
   }
 
   async urlSearch (options) {
-    // logging.info('URLSEARCH called')
     var uri = options.text
-    // logging.info('URI', uri)
     // make sure this is a url from the right merchant
     if (!uri || !uri.match(new RegExp(this.domain))) {
       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
     }
-    // logging.info("there's always money in the banana stand")
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
-    // logging.info('itemData', itemData)
     return itemData
   }
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
+    logging.info('ITEMDATA.OPTIONS', itemData[0].options) // the
+
     // logging.info('itemdata', itemData)
 
     //we're getting an array from the generic search and will never process more than one item
@@ -60,6 +58,7 @@ class UrlStore extends Store {
       for (var i = 0; i < itemData.options.length; i++) {
         logging.info('new option')
         var option = itemData.options[i]
+        logging.info('OPTION:', option) //the
         // create translations
         var original_name = await db.Translations.create(option.original_name)
         original_name.translated_value = option.name
@@ -78,6 +77,7 @@ class UrlStore extends Store {
         await opt.save()
         options.push(opt)
       }
+      logging.info('OPTIONS', options) //yes, the
 
       delete itemData.options
     }
@@ -113,6 +113,7 @@ class UrlStore extends Store {
     item.original_name = itemName.id
     item.original_description = itemDescription.id
     item.original_price = originalPrice.id
+    // logging.info('OPTIONS WE ARE ADDING GODDAMNIT', options) //THE
     options.map(op => {
       item.options.add(op.id)
     })
@@ -120,7 +121,7 @@ class UrlStore extends Store {
     // logging.info('saved item')
 
     item = await db.Items.findOne({id: item.id}).populate('options')
-    // logging.info('ITEM', item)
+    // logging.info('ITEM', item) // THE
 
     // return item
     return [item];
