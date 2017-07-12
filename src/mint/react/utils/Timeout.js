@@ -1,3 +1,6 @@
+// react/utils/Timeout.js
+// from https://stackoverflow.com/a/44691405/6465731
+
 import React, { Component } from 'react';
 
 export default Composition => class Timeout extends Component {

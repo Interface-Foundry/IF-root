@@ -14,7 +14,9 @@ class Tabs extends Component {
     search: PropTypes.object,
     tab: PropTypes.string,
     history: PropTypes.object,
-    invoice: PropTypes.bool
+    invoice: PropTypes.bool,
+    clearTimeouts: PropTypes.func,
+    setTimeout: PropTypes.func
   }
 
   state = {
@@ -45,7 +47,6 @@ class Tabs extends Component {
       display: 'Share'
     }];
     if (invoice && process.env.NODE_ENV === 'development') tabs.push({ tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
-
     return tabs;
   }
 
@@ -56,18 +57,13 @@ class Tabs extends Component {
   }
 
   componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
+    this.setState({ tabs });
 
     if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
-      const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
-      this.setState({ tabs });
-
       this.props.clearTimeouts();
-
       this.props.setTimeout(
-        () => this.setState(({ tabs }) => {
-          console.log({ tabs });
-          return { tabs: tabs.map((tab) => ({ ...tab, highlight: false })) };
-        }),
+        () => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })),
         3000);
     }
   }
