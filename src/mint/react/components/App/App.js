@@ -1,6 +1,6 @@
 // mint/react/components/App/App.js
 
-// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component. 
+// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component.
 // If change needed here please add the addition shouldComponentUpdate
 
 import PropTypes from 'prop-types';

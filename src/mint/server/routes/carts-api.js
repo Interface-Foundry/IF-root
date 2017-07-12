@@ -144,7 +144,8 @@ module.exports = function (router) {
     if (cart) {
       res.send(cart);
     } else {
-      throw new Error('Cart not found')
+      res.send({info: 'CART NOT FOUND'})
+      // throw new Error('Cart not found')
     }
 
   }));
@@ -265,7 +266,6 @@ module.exports = function (router) {
    */
   router.post('/cart/:cart_id/item', (req, res) => co(function* () {
     // only available for logged-in Users
-    logging.info('add to cart route called')
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
@@ -278,8 +278,6 @@ module.exports = function (router) {
     if (!cart) {
       throw new Error('Cart not found')
     }
-
-    logging.info('current privacy setting:', cart.privacy)
 
     //if the cart is display, the user must be the cart leader
     if (cart.privacy == 'display' && currentUser.id !== cart.leader.id) {
@@ -299,7 +297,6 @@ module.exports = function (router) {
 
     // Get or create the item, depending on if the user specifed a previewed item_id or a new url
     var item
-    logging.info('ITEM ID &&&', req.query.item_id, req.body.item_id)
     if (req.query.item_id && !req.body.item_id) req.body.item_id = req.query.item_id
     if (req.body.item_id) {
       // make sure it's not in a cart already
@@ -307,22 +304,15 @@ module.exports = function (router) {
       if (existingCart && existingCart.id !== cart.id) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
-      logging.info('GETTING PREVIEWED ITEM FROM DB')
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
-      logging.info('CREATING ITEM FROM URL')
       // Create an item from the url
-      logging.info('cart.store', cart.store)
-
       if (cart.store.includes('amazon') || cart.store.includes('YPO')) {
         item = yield cartUtils.addItem(req.body, cart, 1)
       }
       else throw new Error('item does not exist')
     }
-
-    logging.info('ostensibly added the item to the cart')
-    logging.info('ITEM ID UUUGH', item.id)
 
     // join the two database documents
     cart.items.add(item.id)
@@ -562,7 +552,13 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // get the cart
-    var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    try {
+      var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    } catch (err) {
+      logging.warn('no cart found with ', req.params.cart_id)
+      // logging.error('error fetching cart', err)
+      return res.send('Hey there we couldnt find that cart, want to start a new one?')
+    }
 
     // check permissions
     if (cart.leader !== userId) {

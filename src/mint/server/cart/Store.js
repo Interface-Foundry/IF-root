@@ -116,7 +116,6 @@ class Store {
    * @return {Promise}       [description]
    */
   async processSearchItems(items) {
-    logging.info('main process search items called')
     return items
   }
 

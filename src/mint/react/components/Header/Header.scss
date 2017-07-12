@@ -220,6 +220,10 @@
 
     .navbar__icon {
       padding: 0 ($padding * 3);
+      @media only screen and (max-width: 600px) {
+        padding: 0;
+      }
+
     }
 
     @media only screen and (max-width: 600px) {

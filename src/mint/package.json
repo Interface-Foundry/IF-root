@@ -82,7 +82,7 @@
     "react-transition-group": "^1.1.2",
     "react-typist": "^1.1.1",
     "redux": "^3.7.0",
-    "redux-form": "^6.8.0",
+    "redux-form": "^7.0.0",
     "redux-thunk": "^2.2.0",
     "redux-undo": "^1.0.0-beta9-9-5",
     "sails-mongo": "^0.12.3",
@@ -169,7 +169,7 @@
     "sass-lint": "^1.10.2",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
-    "webpack": "^3.1.0",
+    "webpack": "^3.2.0",
     "webpack-dev-middleware": "^1.11.0",
     "webpack-dev-server": "^2.5.1",
     "webpack-hot-middleware": "^2.18.2"

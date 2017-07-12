@@ -14,9 +14,13 @@ var charset = require('charset'),
     jschardet = require('jschardet'),
     Iconv = require('iconv').Iconv
 
+var db
+const dbReady = require('../../db')
+
+dbReady.then((models) => { db = models; })
+
 let fxRates //daily rates storage
 const currencySpread = 0.03 //what's our currency spread
-
 
 //come here and get localized
 var getLocale = function (url,user_country,user_locale,store_country,domain){
@@ -371,18 +375,30 @@ var tryHtml = async function (s,html) {
 			})
 
 			//CHECK FOR SIZES
+      console.log('SIZE STUFF')
 			$('#size').find('dd').each(function(i, elm) {
 				//did user select?
+        // console.log('text:', $(this).text().trim())
 				var selected
 				if($(this).has('.current').attr('class')){
 					selected = true
 				}else {
 					selected = false
 				}
+        //regex out non latin & numeric characters
+        var sizeText = $(this).text().trim()//.replace(/[^0-9a-z]/gi, "")
+        sizeText = sizeText.split('').map(c => c.charCodeAt())
+        sizeText = sizeText.filter(function (code) {
+          return (code >= 48 && code <= 57) || (code >= 65313 && code <= 65370)
+          // digits, and full-width latin characters
+        })
+        sizeText = sizeText.map(code => String.fromCharCode(code))
+        sizeText = sizeText.join('')
+
 				s.options.push({
 					type: 'size',
 					original_name: {
-						value: $(this).text().trim()
+						value: sizeText
 					},
 					selected: selected,
 					available: true
@@ -421,7 +437,9 @@ var tryHtml = async function (s,html) {
 			return s
 		break
 		default:
+
 			return logging.error('error no domain found for store')
+
 	}
 }
 
@@ -446,7 +464,7 @@ var foreignExchange = async function (base,target,value,spread,rates){
 	    return value.toFixed(2) //idk if we are rounding up here?
   	}
   	else {
-  		logging.info('conversion not found or something')
+  		console.log('conversion not found or something')
   	}
 }
 
@@ -456,7 +474,7 @@ var foreignExchange = async function (base,target,value,spread,rates){
  */
 var getRates = async function (){
 
-	//are the rates older than an hour? if so, get new ones 
+	//are the rates older than an hour? if so, get new ones
 	if (fxRates && fxRates.rates && fxRates.fetchDate && !is_older_than_1hour(fxRates.fetchDate)){
 		return fxRates.rates
 	}
@@ -466,10 +484,10 @@ var getRates = async function (){
 	await request('http://api.fixer.io/latest', function (error, response, data) {
 	  if (!error && response.statusCode == 200) {
 	  	fxRates = JSON.parse(data)
-	  	fxRates.fetchDate = new Date().toString()	  	
+	  	fxRates.fetchDate = new Date().toString()
 	  }
 	  else {
-	  	logging.info('ERROR '+response.statusCode+' IN CURRENCY EXCHANGE REQUEST! ', error)
+	  	console.log('ERROR '+response.statusCode+' IN CURRENCY EXCHANGE REQUEST! ', error)
 	  }
 	  return
 	})
@@ -477,7 +495,7 @@ var getRates = async function (){
 	return fxRates.rates
 }
 
-//true or false if input time is greater than an hour ago 
+//true or false if input time is greater than an hour ago
 //(can someone double check my time logic here thx)
 function is_older_than_1hour(datetime) {
 	var before = new Date(datetime),
@@ -495,16 +513,13 @@ function is_older_than_1hour(datetime) {
 var translate = async function (text, target) {
   // Instantiates a client
 	// return [text]
-	logging.info('translate called')
+	console.log('translate called')
   const translate = Translate()
   var translations
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-	logging.info('google is gonna translate now')
-	logging.info('text, target', text, target)
   return translate.translate(text, target)
-	// logging.info('got results:', results)
     .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
@@ -527,7 +542,6 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-	logging.info('translate text called')
 	var c = []
 
 	//collect text to translate into a single arr for google translate API
@@ -548,21 +562,21 @@ var translateText = async function (s){
 			if(o.original_name){
 				c.push({
 					type:'option',
+          subtype: o.type,
 					value: o.original_name.value
 				})
 			}
 			else {
-				logging.info('no name found for option!')
+				console.log('no name found for option!')
 			}
 	    })
 	}
-	logging.info('about to do the actual translation')
+	console.log('about to do the actual translation')
 	//keep context of text mapping (need to double check the logic here....)
 	var t = _.map(c, 'value')
 	var tc = {translate:t,context:c}
 	//send to google for translate
 	var tc_map = await translate(tc.translate,s.user.locale)
-	logging.info('Ttranslated')
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
@@ -572,7 +586,8 @@ var translateText = async function (s){
 			s.description = tc_map[i]
 		}else if(tc.context[i].type == 'option'){
 			for (var z = 0; z < tc.context.length - i; z++) {
-				s.options[z].name = tc_map[z + i]
+        if (s.domain.name === 'muji.net' && tc.context[z + i].subtype === 'size') s.options[z].name = tc.context[z + i].value
+        else s.options[z].name = tc_map[z + i]
 			}
 			break
 		}
@@ -583,12 +598,7 @@ var translateText = async function (s){
 //do a thing
 var scrape = async function (url, user_country, user_locale, store_country, domain) {
 		//incoming country / locale
-		// var user_country = 'US'
-		// var user_locale = 'en'
-		// var store_country = 'JP'
-		// var domain = 'muji.net'
-		// var url = 'https://www.muji.net/store/cmdty/detail/4549738522508'
-		logging.info('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
+		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain) //get domain
 		var html = await scrapeURL(url)
 		s = await tryHtml(s,html)
@@ -602,23 +612,18 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
  		var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
  		s = await storeFx(rates,price,s)
 
-		// logging.info('s2', s)
-		logging.info('exchanged currency')
-
 		s = await translateText(s)
-		// logging.info('s3', s)
-		logging.info('translated text')
 
-		// logging.info('res: ', s)
+    //save RAW HTML here
+ 	  var raw = await db.RawHtml.create({
+ 	   raw_html: String(html),
+ 	   original_url: url,
+		 domain: domain
+		})
+		console.log('saved raw html')
+		s.raw_html = raw.id
+
 		return s
-
-    	//save RAW HTML here
-
- 	//    var raw = await db.RawHtml.create({
- 	//    	raw_html: html,
- 	//    	original_url: url
-		// 	domain: domain
-		// })
 }
 	// }).catch(onerror)
 // }

@@ -4,8 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import PaymentForm from './PaymentForm';
-import ShippingForm from './ShippingForm';
-
+import OptionsForm from './OptionsForm';
 
 export default class Forms extends Component {
 
@@ -13,10 +12,10 @@ export default class Forms extends Component {
     const { selectedAccordion } = this.props;
 
     switch (selectedAccordion.split(' form')[0]) {
-      case 'payment':
-        return <PaymentForm {...this.props}/>;
-      case 'shipping':
-        return <ShippingForm {...this.props}/>;
+    case 'payment':
+      return <PaymentForm {...this.props}/>;
+    case 'changeinvoice':
+      return <OptionsForm {...this.props}/>;
     }
   }
 
@@ -32,7 +31,7 @@ export default class Forms extends Component {
             this.renderForm()
           }
         </div>
-      </div>  
+      </div>
     );
   }
 }

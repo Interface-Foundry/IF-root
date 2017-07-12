@@ -10,12 +10,18 @@ export default class Stripe extends Component {
     invoice: PropTypes.object,
     user: PropTypes.object,
     cart: PropTypes.object,
+    userPaymentStatus: PropTypes.object,
     createPaymentSource: PropTypes.func
   }
 
+  componentWillMount() {
+    const { fetchPaymentStatus, invoice } = this.props;
+    console.log('fetching paymentstatus', invoice.id);
+    fetchPaymentStatus(invoice.id);
+  }
+
   render() {
-    const { invoice, user, createPaymentSource } = this.props;
-    const self = this;
+    const { user, userPaymentStatus, createPaymentSource } = this.props;
     return (
       <StripeCheckout
         token={(stripe_data) => createPaymentSource(stripe_data, 'stripe')}
@@ -25,7 +31,7 @@ export default class Stripe extends Component {
         description="Mint"
         panelLabel="PAY UP"
         allowRememberMe={false}
-        amount={100}
+        amount={userPaymentStatus.amount * 100}
       >
         <button>+ add card with stripe</button>
       </StripeCheckout>

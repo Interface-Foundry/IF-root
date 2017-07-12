@@ -2,32 +2,37 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { numberOfItems } from '../../utils';
-import { AlertBubble } from '../../../react-common/components';
+import { numberOfItems, Timeout } from '../../utils';
 import { Icon } from '../../../react-common/components';
 
-export default class Tabs extends Component {
+class Tabs extends Component {
 
   static propTypes = {
     selectTab: PropTypes.func,
+    fetchInvoiceByCart: PropTypes.func,
     cart: PropTypes.object,
     search: PropTypes.object,
     tab: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    invoice: PropTypes.bool,
+    clearTimeouts: PropTypes.func,
+    setTimeout: PropTypes.func
   }
 
   state = {
     tabs: []
   }
 
-  componentDidMount() {
-    const { cart: { items, id }, search: { query } } = this.props;
+  clearHightlight = null
+
+  _getTabs = ({ invoice, numItems, id, query, highlight = false }) => {
     const tabs = [{
       id: 1,
       tab: 'cart',
       icon: 'Home',
       url: `/cart/${id}`,
-      display: `Cart (${numberOfItems(items)})`
+      display: `Cart (${numItems})`,
+      highlight
     }, {
       id: 2,
       tab: 'search',
@@ -41,37 +46,26 @@ export default class Tabs extends Component {
       url: `${id}/m/share`,
       display: 'Share'
     }];
+    if (invoice && process.env.NODE_ENV === 'development') tabs.push({ tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
+    return tabs;
+  }
+
+  componentWillMount() {
+    const { invoice, cart: { items, id }, search: { query } } = this.props;
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query });
     this.setState({ tabs });
   }
 
-  clearHightlight = null
-
-  componentWillReceiveProps(nextProps) {
-    const { cart: { items, id }, search: { query } } = nextProps,
-    itemsChanged = items.length > this.props.cart.items.length,
-      tabs = [{
-        id: 1,
-        tab: 'cart',
-        icon: 'Home',
-        url: `/cart/${id}`,
-        display: `Cart (${numberOfItems(items)})`,
-        highlight: itemsChanged
-      }, {
-        id: 2,
-        tab: 'search',
-        icon: 'Search',
-        url: `/cart/${id}?q=${query}`,
-        display: 'Save'
-      }, {
-        id: 3,
-        tab: 'cart',
-        icon: 'Person',
-        url: `${id}/m/share`,
-        display: 'Share'
-      }];
-    clearTimeout(this.clearHightlight);
+  componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
-    this.clearHightlight = setTimeout(() => this.setState({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) }), 3000);
+
+    if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
+      this.props.clearTimeouts();
+      this.props.setTimeout(
+        () => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })),
+        3000);
+    }
   }
 
   render() {
@@ -92,23 +86,4 @@ export default class Tabs extends Component {
   }
 }
 
-// const tabs = kip_pay_allowed ? [{
-//   tab: 'cart',
-//   url: `/cart/${id}`,
-//   display: `Cart (${numberOfItems(items)})`
-// }, {
-//   tab: 'search',
-//   url: `/cart/${id}?q=${query}`,
-//   display: 'Search'
-// }, {
-//   tab: 'invoice',
-//   display: 'Invoice'
-// }] : [{
-//   tab: 'cart',
-//   url: `/cart/${id}`,
-//   display: `Cart (${numberOfItems(items)})`
-// }, {
-//   tab: 'search',
-//   url: `/cart/${id}?q=${query}`,
-//   display: 'Search'
-// }];
+export default Timeout(Tabs);

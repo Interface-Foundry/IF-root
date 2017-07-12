@@ -1,6 +1,7 @@
 const Waterline = require('waterline')
 const uuid = require('uuid')
 
+var archive = require('./cold_storage')
 const constants = require('../server/constants.js')
 
 /**
@@ -47,11 +48,6 @@ const invoiceCollection = Waterline.Collection.extend({
     // cart: Waterline.isA('cart'),
     cart: Waterline.isA('carts'),
 
-    /**
-     * which members are part of the cart
-     */
-    members: Waterline.isMany('user_accounts'),
-
     /** Many-to-one relation with user accounts, so multiple users could pay */
     // payments: Waterline.isMany('payments'),
 
@@ -71,13 +67,18 @@ const invoiceCollection = Waterline.Collection.extend({
      */
     split_type: {
       type: 'string',
-      enum: ['split_single', 'split_equal', 'split_by_item']
+      enum: ['split_single', 'split_equal', 'split_by_item'],
+      defaultsTo: 'split_single'
     },
+
+    /** function to archive this object */
+    archive: archive,
 
     /** everything that would be a order in old db.payments*/
     cafe_order: {
-      type: 'json',
+      type: 'json'
     }
+
   }
 })
 

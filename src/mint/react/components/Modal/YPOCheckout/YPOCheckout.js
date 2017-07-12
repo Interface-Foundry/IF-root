@@ -112,7 +112,7 @@ export default class YPOCheckout extends Component {
             </span>
           </label>
           
-          <ButtonsContainer checkoutOnly={false}/>
+          <ButtonsContainer checkoutOnly={true}/>
         </form>
       </div>
     );
