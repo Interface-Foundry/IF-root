@@ -3,7 +3,7 @@ const _ = require('lodash')
 const Invoice = require('../payments/Invoice.js')
 const Cart = require('../cart/Cart.js')
 const PaymentSource = require('../payments/PaymentSources.js')
-const utils = require('../utilities/invoiceUtils.js')
+const utils = require('../utilities/invoice_utils.js')
 
 var db
 const dbReady = require('../../db')
