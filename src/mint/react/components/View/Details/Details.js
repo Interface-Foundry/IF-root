@@ -25,15 +25,7 @@ export default class Details extends Component {
   render() {
     const {
       cart: { name, locked, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
-      likeCart,
-      unlikeCart,
-      user,
-      cloneCart,
-      undoRemove,
-      showUndo,
-      cart,
-      oldCart
-    } = this.props,
+              likeCart, unlikeCart, user, cloneCart, undoRemove, showUndo, cart, oldCart } = this.props,
       metrics = [{
         name: 'Members',
         icon: 'Member',

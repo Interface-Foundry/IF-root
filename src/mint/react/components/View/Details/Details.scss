@@ -14,7 +14,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   @media only screen and (max-width: 600px) {
     overflow-x: auto;
-    display: block;
   }
 
   th {
@@ -22,7 +21,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     padding: ($padding / 1.5) ($padding / 2) $padding;
 
     @media only screen and (max-width: 600px) {
-      padding: 0 3px;
       display: block;
     }
 
@@ -383,7 +381,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     width: 100%;
 
     nav {
-      padding: $padding $padding*3;
+      padding: $padding $padding*3 0;
 
       .undo__button {
         @include animation(fadeInDown cubic-bezier(0, 0, 0.2, 1) 1s);

@@ -6,14 +6,18 @@
   height: 100%;
 
   th,td {
-    &:before {
+    &:after {
       content: '';
       position: absolute;
       height: 100%;
-      left: 15px;
-      top: 16px;
-      z-index: -1;
-      border-left: 2px solid $secondaryColor;
+      left: 12px;
+      top: 0px;
+      z-index: 1;
+      border-left: 1px solid rgba(#333, 0.2);
+    }
+    @media only screen and (max-width: 600px) {
+      position: relative;
+      padding: 0 10px;
     }
   }
 	@media only screen and (max-width: 600px) {
@@ -33,10 +37,10 @@
 
 	.card {
 		  background-color: white;
-	    border-radius: $padding/2;
+	    border-radius: 0 $padding/2 $padding/2 0;
 	    box-shadow: $card-box-shadow;
 	    padding: $padding $padding*2;
-      border: 1px solid $border-color-light;
+      border: 1px solid rgba(#333, 0.2);
 	    margin: 10px 2px 0;
 	}
 }

@@ -57,7 +57,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   td, th {
     padding: 0 ($padding / 2);
-
+    @media only screen and (max-width: 600px) {
+      padding: 0 $padding;
+    }
     .card {
       position: relative;
       padding: $padding ($padding * 3);
@@ -287,7 +289,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
     td, th {
       width: 100% !important;
-      padding: 0 3px;
       margin: 5px 0 10px;
 
       &:last-of-type {
