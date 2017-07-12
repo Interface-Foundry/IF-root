@@ -243,7 +243,6 @@ var tryHtml = async function (s,$) {
 				}
         //regex out non latin & numeric characters
         var sizeText = $(this).text().trim()//.replace(/[^0-9a-z]/gi, "")
-        console.log('sizeText', sizeText)
         sizeText = sizeText.split('').map(c => c.charCodeAt())
         sizeText = sizeText.filter(function (code) {
           return (code >= 48 && code <= 57) || (code >= 65313 && code <= 65370)
@@ -251,7 +250,6 @@ var tryHtml = async function (s,$) {
         })
         sizeText = sizeText.map(code => String.fromCharCode(code))
         sizeText = sizeText.join('')
-        console.log('sizeText', sizeText)
 
 				s.options.push({
 					type: 'size',
@@ -262,8 +260,6 @@ var tryHtml = async function (s,$) {
 					available: true
 				})
 			})
-      console.log('done w sizes')
-      logging.info('s.options', s.options) //no "the"
 
 			//CHECK FOR COLORS
 			$('#color').find('dd').each(function(i, elm) {
@@ -294,7 +290,6 @@ var tryHtml = async function (s,$) {
 					available: available
 				})
 			})
-      logging.info('BOUT TO RETURN S', s.options)
 			return s
 		break
 		default:
@@ -378,9 +373,7 @@ var translate = async function (text, target) {
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-	// console.log('text, target', text, target)
   return translate.translate(text, target)
-	// console.log('got results:', results)
     .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
@@ -423,6 +416,7 @@ var translateText = async function (s){
 			if(o.original_name){ //we AREN'T translating size options, it breaks translations
 				c.push({
 					type:'option',
+          subtype: o.type,
 					value: o.original_name.value
 				})
 			}
@@ -446,7 +440,8 @@ var translateText = async function (s){
 			s.description = tc_map[i]
 		}else if(tc.context[i].type == 'option'){
 			for (var z = 0; z < tc.context.length - i; z++) {
-				s.options[z].name = tc_map[z + i]
+        if (s.domain.name === 'muji.net' && tc.context[z + i].subtype === 'size') s.options[z].name = tc.context[z + i].value
+        else s.options[z].name = tc_map[z + i]
 			}
 			break
 		}

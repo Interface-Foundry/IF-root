@@ -38,9 +38,6 @@ class UrlStore extends Store {
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
-    logging.info('ITEMDATA.OPTIONS', itemData[0].options) // the
-
-    // logging.info('itemdata', itemData)
 
     //we're getting an array from the generic search and will never process more than one item
     var itemData = itemData[0]
@@ -56,9 +53,9 @@ class UrlStore extends Store {
     if (itemData.options) {
       // because apparently async/await doesn't work with HoF
       for (var i = 0; i < itemData.options.length; i++) {
-        logging.info('new option')
+        // logging.info('new option')
         var option = itemData.options[i]
-        logging.info('OPTION:', option) //the
+        // logging.info('OPTION:', option) //the
         // create translations
         var original_name = await db.Translations.create(option.original_name)
         original_name.translated_value = option.name
@@ -77,25 +74,20 @@ class UrlStore extends Store {
         await opt.save()
         options.push(opt)
       }
-      logging.info('OPTIONS', options) //yes, the
 
       delete itemData.options
     }
 
-    // logging.info('original_name', itemData.original_name)
     // create the item translations
     var itemName  = await db.Translations.create(itemData.original_name)
     itemName.translated_value = itemData.name
     await itemName.save()
     delete itemData.original_name
-    // logging.info('item name done', itemName.id)
 
-    // logging.info('description', itemData.original_description)
     var itemDescription  = await db.Translations.create(itemData.original_description)
     itemDescription.translated_value = itemData.description
     await itemDescription.save()
     delete itemData.original_description
-    // logging.info('item description done', itemDescription.id)
 
     // create conversion
     itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
@@ -109,21 +101,16 @@ class UrlStore extends Store {
 
     //create item & associate it w details objects
     var item = await db.Items.create(itemData)
-    //tous les meme
     item.original_name = itemName.id
     item.original_description = itemDescription.id
     item.original_price = originalPrice.id
-    // logging.info('OPTIONS WE ARE ADDING GODDAMNIT', options) //THE
     options.map(op => {
       item.options.add(op.id)
     })
     await item.save()
-    // logging.info('saved item')
 
     item = await db.Items.findOne({id: item.id}).populate('options')
-    // logging.info('ITEM', item) // THE
-
-    // return item
+  
     return [item];
   }
 }
