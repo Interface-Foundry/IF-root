@@ -9,6 +9,7 @@ import { splitCartById } from '../../../reducers';
 import { Icon } from '../../../../react-common/components';
 import { EmptyContainer } from '../../../containers';
 import CartButtons from './CartButtons';
+import ItemPaidButton from './ItemPaidButton';
 
 export default class Cart extends Component {
   static propTypes = {
@@ -40,7 +41,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart, user, editId, updateItem } = this.props,
+    const { cart, user, editId, invoice, updateItem } = this.props,
       { openCarts } = this.state,
       { _toggleCart } = this,
       userCarts = splitCartById(this.props, user),
@@ -54,8 +55,10 @@ export default class Cart extends Component {
             <th colSpan='100%'>
               {
                 myCart.length
+
                 ? <div className={`card`} onClick={() => openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
+                  { invoice ? <ItemPaidButton {...this.props}/> : null}
                   <h1 className='date' onClick={() => _toggleCart(user.id)}> 
                     <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
                   </h1>

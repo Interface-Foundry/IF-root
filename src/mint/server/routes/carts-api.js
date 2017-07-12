@@ -144,7 +144,8 @@ module.exports = function (router) {
     if (cart) {
       res.send(cart);
     } else {
-      throw new Error('Cart not found')
+      res.send({info: 'CART NOT FOUND'})
+      // throw new Error('Cart not found')
     }
 
   }));
@@ -562,7 +563,13 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // get the cart
-    var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    try {
+      var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    } catch (err) {
+      logging.warn('no cart found with ', req.params.cart_id)
+      // logging.error('error fetching cart', err)
+      return res.send('Hey there we couldnt find that cart, want to start a new one?')
+    }
 
     // check permissions
     if (cart.leader !== userId) {

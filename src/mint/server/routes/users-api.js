@@ -230,11 +230,11 @@ module.exports = function (router) {
    * @apiParam {string} email the user's email
    * @apiParam {string} cart_id the cart id
    */
-  router.get('/identify', (req, res) => co(function* () {
-    console.log('identify', req.query)
+  router.get('/identify', async (req, res) => {
+    logging.info('identify', req.query)
 
     // Check the cart to see if there's already a leader
-    var cart = yield db.Carts.findOne({ id: req.query.cart_id }).populate('leader')
+    var cart = await db.Carts.findOne({ id: req.query.cart_id }).populate('leader')
 
     // Find the user associated with this email, if any
     var email = decodeURIComponent(req.query.email.trim().toLowerCase())
@@ -248,10 +248,10 @@ module.exports = function (router) {
       // make them the glorious cart leader if the cart is leaderless, otherwise a member
       if (!cart.leader) {
         cart.leader = currentUser.id
-        yield cart.save()
+        await cart.save()
       } else if (!cart.members.includes(currentUser.id)) {
         cart.members.add(currentUser.id)
-        yield cart.save()
+        await cart.save()
       }
 
       // assert that everything is okay, even though like this is kind of a weird thing that just happened
@@ -266,12 +266,12 @@ module.exports = function (router) {
     }
 
     // If a user exists in the db, send them a magic link to prove it's them
-    var user = yield db.UserAccounts.findOne({
+    var user = await db.UserAccounts.findOne({
       email_address: email
     })
 
     if (user) {
-      console.log('email already exists in db, need to send a verification link in an email')
+      logging.info('email already exists in db, need to send a verification link in an email')
       res.send({
         ok: false,
         newAccount: false,
@@ -280,12 +280,12 @@ module.exports = function (router) {
       });
 
       // generate magic link here
-      var link = yield db.AuthenticationLinks.create({
+      var link = await db.AuthenticationLinks.create({
         user: user.id,
         cart: cart.id
       })
 
-      link = yield db.AuthenticationLinks.findOne({
+      link = await db.AuthenticationLinks.findOne({
         id: link.id
       }).populate('user').populate('cart')
 
@@ -293,7 +293,7 @@ module.exports = function (router) {
         console.log('http://localhost:3000/auth/' + link.id)
       }
 
-      var lostEmail = yield db.Emails.create({
+      var lostEmail = await db.Emails.create({
         recipients: email,
         subject: 'Log in to Kip',
         cart: cart.id
@@ -304,29 +304,29 @@ module.exports = function (router) {
         username: user.name || email
       })
 
-      yield lostEmail.send()
+      await lostEmail.send()
       return
     }
 
     // No user was found with the email address, so this is a new user, party!
-    console.log('creating new user ' + email + ' 🎉')
-    user = yield db.UserAccounts.create({
+    logging.info('creating new user ' + email + ' 🎉')
+    user = await db.UserAccounts.create({
       email_address: email,
       name: normalizeEmailToName(email)
     })
 
     // add them to the session
     req.UserSession.user_account = user.id
-    yield req.UserSession.save()
+    await req.UserSession.save()
 
     // make them the glorious cart leader if the cart is leaderless, otherwise a member
     if (!cart.leader) {
       cart.leader = user.id
-      yield cart.save()
+      await cart.save()
 
     } else if (!cart.members.includes(user.id)) {
       cart.members.add(user.id)
-      yield cart.save()
+      await cart.save()
 
     }
 
@@ -336,7 +336,7 @@ module.exports = function (router) {
       if (cart.store_locale = 'US') var dateString = (date.getMonth() + 1) + '/' + date.getDate() + '/' + String(date.getFullYear()).slice(2)
       else var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
       cart.name = dateString + ' Kip Cart'
-      yield cart.save()
+      await cart.save()
     }
 
     // Tell the front end that everything worked out pretty okay and we're happy to have a new user
@@ -361,7 +361,7 @@ module.exports = function (router) {
     }
 
     //Send an email to the member with the cart link
-    email = yield db.Emails.create({
+    email = await db.Emails.create({
       recipients: user.email_address,
       subject: subject,
       cart: cart.id
@@ -374,8 +374,9 @@ module.exports = function (router) {
     })
 
     // remember to actually send it
-    yield email.send();
-  }))
+    await email.send();
+  })
+
 
   /**
    * @api {get} /api/user Get
@@ -393,21 +394,21 @@ module.exports = function (router) {
    * @apiSuccessExample Response
    * {"email_address":"mctesty@example.com","createdAt":"2017-03-24T16:51:47.162Z","updatedAt":"2017-03-24T16:51:47.162Z","id":"04b36891-f5ab-492b-859a-8ca3acbf856b"}
    */
-  router.get('/user', (req, res) => co(function* () {
+  router.get('/user', async (req, res) => {
     var user
     if (_.get(req, 'query.email')) {
-      user = yield db.UserAccounts.findOne({
+      user = await db.UserAccounts.findOne({
         email_address: req.query.email.toLowerCase()
       }).populate('addresses');
     } else if (_.get(req, 'query.id')) {
-      user = yield db.UserAccounts.findOne({
+      user = await db.UserAccounts.findOne({
         id: req.query.id
       }).populate('addresses');
     } else {
       throw new Error('Cannot find user');
     }
     res.send(user);
-  }))
+  })
 
   /**
    * @api {get} /api/logout Logout
@@ -435,7 +436,7 @@ module.exports = function (router) {
    * @apiSuccessExample Response
    * {"email_address":"mctesty@example.com","createdAt":"2017-03-28T18:39:31.458Z","updatedAt":"2017-03-28T18:39:32.299Z","venmo_accepted":true,"venmo_id":"MoMcTesty","id":"0f30e352-f975-400a-b7bb-e46bc38e7649"}
    */
-  router.post('/user/:user_id', (req, res) => co(function* () {
+  router.post('/user/:user_id', async (req, res) => {
     // check permissions
     var currentUser = req.UserSession.user_account
     if (!currentUser || currentUser.id !== req.params.user_id) {
@@ -443,7 +444,7 @@ module.exports = function (router) {
     }
 
     // Find the user in the database
-    var user = yield db.UserAccounts.findOne({ id: req.params.user_id }).populate('addresses')
+    var user = await db.UserAccounts.findOne({ id: req.params.user_id }).populate('addresses')
 
     // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
     if (!user) {
@@ -458,10 +459,10 @@ module.exports = function (router) {
     // update the properties that they set
     _.merge(user, req.body)
 
-    yield user.save()
+    await user.save()
 
     res.send(user)
-  }))
+  })
 
   /**
    * @api {post} /api/user/:user_id/address Add Address
@@ -482,7 +483,7 @@ module.exports = function (router) {
    *   "user_account": user_id
    * }
    */
-  router.post('/user/:user_id/address', (req, res) => co(function* () {
+  router.post('/user/:user_id/address', async (req, res) => {
     // check permissions
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -490,7 +491,7 @@ module.exports = function (router) {
     var currentUser = req.UserSession.user_account
 
     // Find the user in the database
-    var user = yield db.UserAccounts.findOne({ id: req.params.user_id })
+    var user = await db.UserAccounts.findOne({ id: req.params.user_id })
 
     // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
     if (!user) {
@@ -498,12 +499,12 @@ module.exports = function (router) {
     }
 
     // create a new address associated with this user
-    var addr = yield db.Addresses.create(req.body);
+    var addr = await db.Addresses.create(req.body);
     addr.user_account = user.id;
-    yield addr.save();
+    await addr.save();
 
     res.send(addr);
-  }))
+  })
 
  /**
    * @api {get} /api/user/address return a list of user addresses
@@ -526,19 +527,19 @@ module.exports = function (router) {
    * }]
    */
 
-  router.get('/user/address', (req, res) => co(function* () {
+  router.get('/user/address', async (req, res) => {
     var currentUser = req.UserSession.user_account
 
     // Find the user in the database
-    var addr = yield db.Addresses.find({ user_account: currentUser.id })
+    var addr = await db.Addresses.find({ user_account: currentUser.id })
 
     // in case there isn't an address
     if (!addr) {
       res.send({});
     }
 
-    res.send(addr);
-  }))
+    return res.send(addr);
+  })
 
   /**
    * @api {post} /api/feedback Feedback
@@ -553,8 +554,8 @@ module.exports = function (router) {
    *  text: "can't add 36 oz beer bong to my cart. unacceptable." 😳
    * }
    */
-  router.post('/feedback', (req, res) => co(function* () {
-    var feedback = yield db.Feedback.create({
+  router.post('/feedback', async (req, res) => {
+    var feedback = await db.Feedback.create({
       user: _.get(req, 'UserSession.user_account.id'),
       session: req.UserSession.id,
       request_json: JSON.stringify({
@@ -578,7 +579,7 @@ module.exports = function (router) {
     res.status(200).end()
 
     // Now send an email message to us if we have one
-    var feedbackEmail = yield db.Emails.create({
+    var feedbackEmail = await db.Emails.create({
       recipients: 'hello@kipthis.com',
       subject: '[Mint Feedback] New Feedback from Mint'
     })
@@ -589,8 +590,8 @@ module.exports = function (router) {
       {
         user: _.get(req, 'UserSession.user_account')
       })
-    yield feedbackEmail.template('feedback', data)
+    await feedbackEmail.template('feedback', data)
 
-    yield feedbackEmail.send()
-  }))
+    await feedbackEmail.send()
+  })
 }

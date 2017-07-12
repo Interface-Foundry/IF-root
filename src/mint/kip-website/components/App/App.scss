@@ -1,6 +1,7 @@
 @import '../../themes/constants';
 @import '../../themes/grid';
 @import '../../themes/animations';
+
 // General
 body, html {
   height: 100%;
@@ -11,7 +12,8 @@ body, html {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-shadow: rgba(0, 0, 0, .01) 0 0 1px;
+  text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
+
   * {
     box-sizing: border-box;
     vertical-align: top;
@@ -39,6 +41,7 @@ input, textarea, select, a {
 
 button {
   cursor: pointer;
+
   &:focus {
     outline: 0;
   }
@@ -110,8 +113,10 @@ p {
     top: 0;
     background: rgba(white, 0.6);
     z-index: 1000;
+
     .sidenav__list {
       border: 0;
+
       @include animation(scrollInRight $material-bezier 0.33s);
     }
   }

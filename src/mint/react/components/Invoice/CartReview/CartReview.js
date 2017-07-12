@@ -4,10 +4,9 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 
-import { calculateItemTotal, displayCost, timeFromDate, numberOfItems } from '../../../utils';
+import { displayCost, numberOfItems } from '../../../utils';
 
-const shippingOptions = [
-  {
+const shippingOptions = [{
     name: 'Fast',
     shippingDate: moment().add(1, 'days').format('DD/MM/YYYY'),
     price: 100
@@ -21,27 +20,32 @@ const shippingOptions = [
 
 export default class CartReview extends Component {
 
+  static propTypes = {
+    selectedAccordion: PropTypes.string,
+    selectAccordion: PropTypes.func,
+    cart: PropTypes.object
+  }
+
   state = {
     selectedIndex: null
   }
 
   render() {
-  	const { selectedAccordion, selectAccordion, cart } = this.props,
-      { selectedIndex } = this.state;
+    const { selectedAccordion, selectAccordion, cart } = this.props, { selectedIndex } = this.state;
 
     return (
-    	<div className='review accordion'>
-    		<nav onClick={() => selectAccordion('review')}>
-    			<h3>3. Items and shipping</h3>
+      <div className='review accordion'>
+        <nav onClick={() => selectAccordion('review')}>
+          <h3>2. Items and shipping</h3>
           {
-              selectedIndex !== null && !selectedAccordion.includes('review') ? <div className='text'> 
+              selectedIndex !== null && !selectedAccordion.includes('review') ? <div className='text'>
                   <p>{numberOfItems(cart.items)} Items shipping {shippingOptions[selectedIndex].name} on {shippingOptions[selectedIndex].shippingDate}</p>
                   <span>change</span>
               </div> : null
           }
-    		</nav>
-    		{
-    			selectedAccordion.includes('review') ? <div> 
+        </nav>
+        {
+          selectedAccordion.includes('review') ? <div>
             <ul className='items'>
               <nav>
                 <h4>Cart Review</h4>
@@ -52,7 +56,7 @@ export default class CartReview extends Component {
                     <div className={'image'} style={{
                       backgroundImage: `url(${item.main_image_url})`
                     }}/>
-                    <div className='text'> 
+                    <div className='text'>
                       <h4>{item.name}</h4>
                       <h4>Qty: {item.quantity}</h4>
                       <h4>{displayCost(item.price * item.quantity, cart.store_locale)}</h4>
@@ -78,9 +82,9 @@ export default class CartReview extends Component {
                 ))
               }
             </ul>
-	    		</div> : null
-    		}
-    	</div>
+          </div> : null
+        }
+      </div>
     );
   }
 }
