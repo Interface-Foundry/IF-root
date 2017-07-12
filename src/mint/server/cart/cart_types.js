@@ -38,7 +38,8 @@ Object.keys(urlStores).map(store => {
     store_name: store,
     store_domain: urlStores[store].domain,
     store_countries: [urlStores[store].locale],
-    default_image: urlStores[store].default_image
+    default_image: urlStores[store].default_image,
+    global_direct: true
   })
 })
 

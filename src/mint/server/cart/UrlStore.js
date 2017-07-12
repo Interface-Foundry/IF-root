@@ -18,6 +18,7 @@ class UrlStore extends Store {
     super(name)
     this.country = country
     this.domain = domain
+    this.global_direct = true
   }
 
   getSearchType () {
@@ -110,7 +111,7 @@ class UrlStore extends Store {
     await item.save()
 
     item = await db.Items.findOne({id: item.id}).populate('options')
-  
+
     return [item];
   }
 }
