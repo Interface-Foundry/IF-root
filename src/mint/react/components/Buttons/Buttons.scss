@@ -94,8 +94,8 @@
           padding: ($padding / 2) $padding;
 
           &:first-of-type {
-            order: 0;
             font-weight: 400;
+            order: 0;
 
             @media only screen and (max-width: 600px) {
               flex: 1 1 auto;

@@ -2,10 +2,10 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { numberOfItems } from '../../utils';
+import { numberOfItems, Timeout } from '../../utils';
 import { Icon } from '../../../react-common/components';
 
-export default class Tabs extends Component {
+class Tabs extends Component {
 
   static propTypes = {
     selectTab: PropTypes.func,
@@ -14,7 +14,9 @@ export default class Tabs extends Component {
     search: PropTypes.object,
     tab: PropTypes.string,
     history: PropTypes.object,
-    invoice: PropTypes.bool
+    invoice: PropTypes.bool,
+    clearTimeouts: PropTypes.func,
+    setTimeout: PropTypes.func
   }
 
   state = {
@@ -57,8 +59,13 @@ export default class Tabs extends Component {
   componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
     const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
-    if (this.clearHighlight) clearTimeout(this.clearHightlight);
-    this.clearHightlight = setTimeout(() => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })), 3000);
+
+    if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
+      this.props.clearTimeouts();
+      this.props.setTimeout(
+        () => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })),
+        3000);
+    }
   }
 
   render() {
@@ -78,3 +85,5 @@ export default class Tabs extends Component {
     );
   }
 }
+
+export default Timeout(Tabs);

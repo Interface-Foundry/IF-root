@@ -8,7 +8,7 @@ import { getSearchHistory } from '../../utils';
 
 import History from './History';
 
-export default class Input extends Component {
+export default class Search extends Component {
 
   static propTypes = {
     cart: PropTypes.object,
@@ -67,7 +67,6 @@ export default class Input extends Component {
 
   render() {
     const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
-
     return (
       <form onSubmit={::this._handleSubmit} className='search'>
         <button type='submit' className='submit'>
@@ -76,7 +75,7 @@ export default class Input extends Component {
         <input 
           onFocus={()=>toggleHistory(true)} 
           onBlur={()=>toggleHistory(false)} 
-          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : ''} 
+          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : 'Search or Paste URL'} 
           value={query} 
           onChange={(e) => updateQuery(e.currentTarget.value)} 
           autoComplete="off" 
