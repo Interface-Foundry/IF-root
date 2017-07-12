@@ -22,13 +22,11 @@ class Invoice {
    */
   static async GetById (invoiceId) {
     const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
-    if (invoice) {
+    if (_.get(invoice, 'id')) {
       return new invoiceHandlers[invoice.invoice_type](invoice)
-    } else {
-      throw new Error('no invoice found for GetById')
-      logging.info('tried to get by GetbyId')
     }
-
+    logging.info('tried to get by GetbyId')
+    throw new Error('no invoice found for GetById')
   }
 
 
@@ -42,15 +40,12 @@ class Invoice {
    */
   static async GetByCartId (cartId) {
     const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
-    if (invoice) {
-      logging.info('trying to create new invoice instance')
+    if (_.get(invoice, 'id')) {
       return new invoiceHandlers[invoice.invoice_type](invoice)
-    } else {
-      // throw new Error('no invoice foundfor GetByCartId')
-      logging.info('tried to get by cartid')
-      return false
     }
-  }
+    logging.info('tried to get by cartid')
+    throw new Error('no invoice foundfor GetByCartId')
+    }
 
   /**
    * create a new invoice of type with data
