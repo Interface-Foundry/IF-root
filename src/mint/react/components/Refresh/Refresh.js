@@ -10,8 +10,8 @@ class Refresh extends Component {
   static propTypes = {
     refresh: PropTypes.func,
     cartId: PropTypes.string,
-    userId: PropTypes.string,
-    loading: PropTypes.bool
+    userId: PropTypes.string
+    // loading: PropTypes.bool
   }
 
   _update = () => {
@@ -20,7 +20,7 @@ class Refresh extends Component {
   }
 
   render = () => (
-    <div className={`refresh ${this.props.loading ? 'animate':''}`} onClick={()=>::this._update()}>
+    <div className={'refresh'} onClick={()=>::this._update()}>
         <div className='wrapper'><Icon icon='Refresh'/></div>
       </div>
   )

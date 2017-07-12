@@ -42,11 +42,14 @@
         border-bottom: 4px solid $secondaryColor;
         height: $nav-height - $padding - 1px;
       }
+
     }
 
     &.highlight {
       span, svg {
         color: $thirdColor;
+        // @include animation(glowText 1s linear infinite);
+        
       }
 
     }
