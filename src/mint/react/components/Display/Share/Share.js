@@ -58,6 +58,8 @@ export default class Share extends Component {
     }
   }
 
+  componentDidMount = () => this.props.selectTab('share')
+
   tryToOpen = route => {
     const { openFailedHandler } = this;
 

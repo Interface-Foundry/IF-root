@@ -41,9 +41,9 @@ class Tabs extends Component {
       display: 'Save'
     }, {
       id: 3,
-      tab: 'cart',
+      tab: 'share',
       icon: 'Person',
-      url: `${id}/m/share`,
+      url: `/cart/${id}/m/share`,
       display: 'Share'
     }];
     if (invoice && process.env.NODE_ENV === 'development') tabs.push({ tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
@@ -75,7 +75,7 @@ class Tabs extends Component {
       <div className='tabs'>
         {
           tabs.map((t) => (
-            <h1 key={t.id} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab && t.id !== 3 ? 'selected' : ''} ${t.highlight ? 'highlight' : ''}`}>
+            <h1 key={t.id} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab ? 'selected' : ''} ${t.highlight ? 'highlight' : ''}`}>
               <Icon icon={t.icon}/>
               <span>{t.display}</span>
             </h1>

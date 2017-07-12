@@ -19,12 +19,13 @@ export default class Default extends Component {
   render() {
     const {
       showCheckout,
-      cart
+      cart,
+      selectTab
     } = this.props;
 
     return (
       <span className='cart'>
-          <Link to={`/cart/${cart.id}`}>
+          <Link to={`/cart/${cart.id}`} onClick={()=> selectTab('cart')}>
             <div className={'image desktop'} style={{
               backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
             }}>
