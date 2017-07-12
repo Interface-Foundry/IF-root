@@ -231,18 +231,22 @@ var tryHtml = async function (s,$) {
 			})
 
 			//CHECK FOR SIZES
+      logging.info('SIZE STUFF')
 			$('#size').find('dd').each(function(i, elm) {
 				//did user select?
+        console.log('text:', $(this).text())
 				var selected
 				if($(this).has('.current').attr('class')){
 					selected = true
 				}else {
 					selected = false
 				}
+        //TODO regex out non latin & numeric characters
+        var sizeText = $(this).text().trim()
 				s.options.push({
 					type: 'size',
 					original_name: {
-						value: $(this).text().trim()
+						value: 'speakerboxxx'
 					},
 					selected: selected,
 					available: true
@@ -361,8 +365,7 @@ var translate = async function (text, target) {
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // // multiple texts.
-	console.log('google is gonna translate now')
-	console.log('text, target', text, target)
+	// console.log('text, target', text, target)
   return translate.translate(text, target)
 	// console.log('got results:', results)
     .then((results) => {
@@ -387,7 +390,6 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-	console.log('translate text called')
 	var c = []
 
 	//collect text to translate into a single arr for google translate API
@@ -422,7 +424,6 @@ var translateText = async function (s){
 	var tc = {translate:t,context:c}
 	//send to google for translate
 	var tc_map = await translate(tc.translate,s.user.locale)
-	console.log('Ttranslated')
 
 	//piece translations back into the original obj
 	for (var i = 0; i < tc.context.length; i++) {
