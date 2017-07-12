@@ -14,7 +14,7 @@ export default class Tabs extends Component {
     search: PropTypes.object,
     tab: PropTypes.string,
     history: PropTypes.object,
-    invoice: PropTypes.object
+    invoice: PropTypes.bool
   }
 
   state = {
