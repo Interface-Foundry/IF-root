@@ -56,6 +56,9 @@ var cartsCollection = Waterline.Collection.extend({
      */
     thumbnail_url: 'string',
 
+    /** @type {String} image link for Cart banner */
+    banner_url: 'string',
+
     /** @type {String} equivalent to CartId from amazon */
     amazon_cartid: 'string',
 
