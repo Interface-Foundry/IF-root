@@ -6,6 +6,7 @@ var _ = require('lodash');
 const cartUtils = require('../cart/cart_utils')
 const dealsDb = require('../deals/deals')
 const geolocation = require('../utilities/geolocation')
+const stores = require('../cart/cart_types').stores
 
 /**
  * Models loaded from the waterline ORM
@@ -198,22 +199,31 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   var cart = {}
 
   // Figure out what store they are shopping at and in what locale
-  console.log('req.params.store', req.params)
-  if (!req.params.store) {
-    cart.store = 'Amazon'
-    cart.store_locale = 'US'
-  } else if (req.params.store === 'YPO') {
-    cart.store = 'YPO'
-    cart.store_locale = 'GB'
-  } else if (req.params.store.includes('Amazon')) {
-    cart.store = 'Amazon'
-    cart.store_locale = req.params.store.split('_')[1]
-  } else if (req.params.store === 'Muji') {
-    cart.store = 'Muji'
-    cart.store_locale = 'JP'
-  } else {
-    throw new Error('Cannot create new cart for store ' + req.params.store)
+  console.log('req.params.store', req.params) //TODO dynamically
+  if (!req.params.store) throw new Error('No store provided for cart creation')
+  var chosen_store = stores.find(function (s) {
+    return req.params.store.includes(s.store_name.split(' ')[0])
+  })
+  if (chosen_store) {
+    cart.store = chosen_store.store_name.split(' ')[0]
+    cart.store_locale = chosen_store.store_countries[0]
   }
+  else throw new Error('Cannot create new cart for store ' + req.params.store)
+  // if (!req.params.store) {
+  //   cart.store = 'Amazon'
+  //   cart.store_locale = 'US'
+  // } else if (req.params.store === 'YPO') {
+  //   cart.store = 'YPO'
+  //   cart.store_locale = 'GB'
+  // } else if (req.params.store.includes('Amazon')) {
+  //   cart.store = 'Amazon'
+  //   cart.store_locale = req.params.store.split('_')[1]
+  // } else if (req.params.store.includes('Muji')) {
+  //   cart.store = 'Muji'
+  //   cart.store_locale = 'JP'
+  // } else {
+  //   throw new Error('Cannot create new cart for store ' + req.params.store)
+  // }
 
   // figure out what country the user is in
   var geo = geolocation(req) || geolocation.default

@@ -1,4 +1,4 @@
-const stores = [{
+var stores = [{
     "store_img": "https://storage.googleapis.com/kip-random/kip_stores/amazon_us.png",
     "store_type": "Amazon_US",
     "store_name": "Amazon US",
@@ -25,10 +25,24 @@ const stores = [{
   }
 ]
 
+var urlStores = require('./UrlStoreTypes')
+
+Object.keys(urlStores).map(store => {
+  stores.push({
+    store_img: urlStores[store].image,
+    store_type: store + '_' + urlStores[store].locale,
+    store_name: store,
+    store_domain: urlStores[store].domain,
+    store_countries: [urlStores[store].locale]
+  })
+})
+
 const countryCoordinates = {
   'US': [37.0902, -95.7129],
   'GB': [55.3781, -3.4360],
-  'CA': [56.1304, -106.3468]
+  'CA': [56.1304, -106.3468],
+  'JP': [36.2048, 138.2529],
+  'KR': [35.9078, 127.7669]
 }
 
 module.exports = {

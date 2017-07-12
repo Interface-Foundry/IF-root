@@ -26,7 +26,6 @@ Object.keys(UrlStoreTypes).map(name => {
 module.exports.GetStore = function(cart) {
   var store = cart.store + '_' + cart.store_locale
   if (stores[store]) {
-    logging.info('stores[store]', stores[store])
     return stores[store]
   } else {
     throw new Error(`Store ${store} not supported (cart ${cart.id})`)
