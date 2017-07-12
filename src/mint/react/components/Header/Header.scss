@@ -13,29 +13,6 @@
   width: 100%;
   z-index: 100;
 
-  & > .beta {
-    background: $color-white;
-    border: 1px solid $secondaryColor;
-    border-radius: 3px;
-    color: $secondaryColor;
-    display: block;
-    font-size: 8px;
-    font-weight: 900;
-    left: 26px;
-    padding: 0 3px;
-    position: absolute;
-    text-align: center;
-    text-transform: uppercase;
-    top: 37px;
-
-    @media (max-width: 600px) {
-      left: 11px;
-      top: 35px;
-
-      // transform: rotate(-25deg);
-    }
-  }
-
   @media (max-width: 600px) {
     padding: 0;
     position: fixed;
@@ -143,14 +120,39 @@
     }
 
     .image {
-      display: inline-block;
-      margin: 10px 0;
-      height: 35px;
-      width: 90px;
-      background-size: cover !important;
-      background-repeat: no-repeat;
       background-position: center;
-      background-size: contain;
+      background-repeat: no-repeat;
+      background-size: cover;
+
+      // background-size: cover !important;
+      display: inline-block;
+      height: 35px;
+      margin: 10px 0;
+      position: relative;
+      width: 90px;
+
+      .beta {
+        background: $color-white;
+        border: 1px solid $secondaryColor;
+        border-radius: 3px;
+        color: $secondaryColor;
+        display: block;
+        font-size: 8px;
+        font-weight: 900;
+        left: 5px;
+        padding: 0 3px;
+        position: absolute;
+        text-align: center;
+        text-transform: uppercase;
+        top: 27px;
+
+        @media (max-width: 600px) {
+          left: 11px;
+          top: 35px;
+
+          // transform: rotate(-25deg);
+        }
+      }
     }
 
     .members {
@@ -210,6 +212,20 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+    }
+  }
+
+  .settings {
+    .image {
+      flex: 1 1 auto;
+      background-size: contain;
+
+      .beta {
+        position: relative;
+        width: 30px;
+        margin: 0 auto;
+        left: -22px;
       }
     }
   }

@@ -27,7 +27,10 @@ export default class SettingsHeader extends Component {
           </a>
           <div className={'image desktop'} style={{
               backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
-          }}/> 
+          }}>
+            <span className='beta'>beta</span>
+          </div> 
+
       </span>
     );
   }

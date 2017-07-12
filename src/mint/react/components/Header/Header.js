@@ -74,9 +74,6 @@ export default class Header extends Component {
               {showAlert ? <AlertBubble top={13} right={25} /> : null}
             </div>
         </div>
-        <span className='beta'>
-          beta
-        </span>
       </nav>
     );
   }
