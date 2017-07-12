@@ -69,7 +69,7 @@ export default class Details extends Component {
                             {name}
                           </div> : ( isAdmin ? <Link to={`/cart/${id}/m/edit`}>
                               {name}
-                              <Icon icon='Edit'/>
+                              <Icon icon='Settings'/>
                             </Link> : <div className='locked'>
                               {name}
                             </div>
