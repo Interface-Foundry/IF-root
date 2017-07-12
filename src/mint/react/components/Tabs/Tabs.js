@@ -9,12 +9,11 @@ class Tabs extends Component {
 
   static propTypes = {
     selectTab: PropTypes.func,
-    fetchInvoiceByCart: PropTypes.func,
     cart: PropTypes.object,
     search: PropTypes.object,
     tab: PropTypes.string,
     history: PropTypes.object,
-    invoice: PropTypes.bool,
+    invoiceAvailable: PropTypes.bool,
     clearTimeouts: PropTypes.func,
     setTimeout: PropTypes.func
   }
@@ -24,6 +23,7 @@ class Tabs extends Component {
   }
 
   clearHightlight = null
+
 
   _getTabs = ({ invoice, numItems, id, query, highlight = false }) => {
     const tabs = [{
@@ -46,7 +46,7 @@ class Tabs extends Component {
       url: `/cart/${id}/m/share`,
       display: 'Share'
     }];
-    if (invoice && process.env.NODE_ENV === 'development') tabs.push({ tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
+    if (invoice && process.env.NODE_ENV === 'development') tabs.push({ id: 4, tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
     return tabs;
   }
 
@@ -59,7 +59,6 @@ class Tabs extends Component {
   componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
     const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
-
     if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
       this.props.clearTimeouts();
       this.props.setTimeout(

@@ -5,7 +5,6 @@ import { Tabs } from '../components';
 
 import {
   selectTab,
-  fetchInvoiceByCart
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -18,8 +17,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  selectTab: (tab) => dispatch(selectTab(tab)),
-  fetchInvoiceByCart: (id) => dispatch(fetchInvoiceByCart(id))
+  selectTab: (tab) => dispatch(selectTab(tab))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Tabs);
