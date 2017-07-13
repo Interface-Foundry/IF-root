@@ -12,7 +12,7 @@ export const get = (url, type, cb) => {
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
-        error: error.err
+        error
       });
     }
   };
@@ -36,7 +36,7 @@ export const post = (url, type, item, cb) => {
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
-        error: error.err
+        error
       });
     }
   };
@@ -59,7 +59,7 @@ export const put = (url, type, item, cb) => {
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
-        error: error.err
+        error
       });
     }
   };
@@ -78,7 +78,7 @@ export const del = (url, type, cb) => {
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,
-        error: error.err
+        error
       });
     }
   };

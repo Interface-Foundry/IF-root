@@ -28,13 +28,18 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   const { createLogger } = require('redux-logger');
   const loggerMiddleware = createLogger({
     timestamp: false,
-    collapsed: (getState, action, logEntry) => !logEntry.error,
-    diff: true,
-    level: 'info'
+    level: { // redux dev tools can do all of this without cluttering the console
+      // download! https://github.com/zalmoxisus/redux-devtools-extension
+      prevState: false,
+      action: 'error',
+      nextState: false,
+      error: 'error'
+    },
+    predicate: (_, action) => action.error // only logs messages with errors
   });
   middleware = [...middleware, loggerMiddleware];
 }
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;  //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
 
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 
