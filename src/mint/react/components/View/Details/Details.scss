@@ -25,46 +25,20 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     }
 
     .card {
-      border-top: 3px solid $secondaryColor;
       padding: 0;
-
-
-      .info {
-        border-top: 2px solid #E4F1FD;
-        padding: $padding;
-        h4, h5 {
-          display: inline-block;
-          line-height: $nav-height/2;
-          margin: 0;
-          width: 50%;
-          b {
-            display: inline-block !important;
-          }
-          @media only screen and (max-width: 600px) {
-            font-size: 12px;
-          }
-        }
-        h5 {
-          text-align: right;
-          opacity: 0.8;
-          font-weight: 500;
-        }
-        h4 {
-          position: relative;
-          span {
-            border-bottom: 3px solid #4A9FF1;
-            display: initial;
-          }
-        }
-      }
+      background: url(//s-media-cache-ak0.pinimg.com/originals/66/04/8f/66048fae13597918a08cd93b22149b48.jpg) no-repeat center center;
+      background-size: cover;
 
       .cover {
         display: flex;
         padding: $padding;
+        border: 3px solid white;
+        border-width: 3px 3px 1.5px 5px;
+        background: rgba(white, 0.7);
+        border-radius: 0 5px 0 0;
       }
 
       .left {
-        display: flex;
         flex: 1 1 auto;
         min-width: 270px;
 
@@ -284,7 +258,46 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       .metrics {
         display: block;
         width: 100%;
-        padding: 0px 5px 9px 13px;
+        padding: 5px 10px;
+        border: 3px solid white;
+        border-width: 1.5px 3px 3px 5px;
+        background: rgba(white, 0.7);
+        border-radius: 0 0 5px 0;
+
+        .store {
+          display: inline-block;
+          svg {
+            display: inline-block;
+            margin-top: 2.5px;
+            height: 20px;
+            width: 20px;
+          }
+          h4, h5 {
+            display: inline-block;
+            line-height: $nav-height/2;
+            margin: 0;
+            width: 50%;
+            b {
+              display: inline-block !important;
+            }
+            @media only screen and (max-width: 600px) {
+              font-size: 12px;
+            }
+          }
+          h5 {
+            text-align: right;
+            opacity: 0.8;
+            font-weight: 500;
+          }
+          h4 {
+            position: relative;
+            span {
+              border-bottom: 3px solid #4A9FF1;
+              display: initial;
+            }
+          }
+        }
+
 
         .metric {
           display: inline-block;

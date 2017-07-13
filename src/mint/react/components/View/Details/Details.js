@@ -76,9 +76,6 @@ export default class Details extends Component {
                     <ButtonsContainer/>
                   </div>
                 </div>
-                <div className='info'>
-                  <h4><span>{getStoreName(store, store_locale)}</span></h4>
-                </div>
                 <div className='metrics'>
                   {
                     metrics.map((m) => (
@@ -93,12 +90,13 @@ export default class Details extends Component {
                           <Icon icon={m.icon}/>
                           <p>{m.value}</p>
                         </div>
-                        <div className='sub'>
-                          <h4>{m.name}</h4>
-                        </div>
                       </div>
                     ))
                   }
+                  <div className='store'>
+                    <Icon icon='Home'/>
+                    <h4><span>{getStoreName(store, store_locale)}</span></h4>
+                  </div>
                 </div>
               </div>
             </th>
