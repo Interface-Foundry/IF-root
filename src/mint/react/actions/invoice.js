@@ -62,10 +62,10 @@ export const createPayment = (paymentsource_id, invoice_id) => post(
   })
 );
 
-export const createPaymentSource = (payment_data, payment_source) => post(
+export const createPaymentSource = (amount, payment_data, payment_source, invoice) => post(
   '/api/payment',
   'CREATE_PAYMENTSOURCE',
-  {'payment_data': payment_data, 'payment_source': payment_source},
+  {'amount': amount, 'invoice_id': invoice, 'payment_data': payment_data, 'payment_source': payment_source},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

@@ -38,9 +38,10 @@ export default class Default extends Component {
   }
 
   _handleInvoiceButton = () => {
-    const { createInvoice, selectTab, selectAccordion, cart, updateCart } = this.props;
+    const { createInvoice, fetchInvoiceByCart, selectTab, selectAccordion, cart, updateCart } = this.props;
     updateCart({ ...cart, locked: true });
     createInvoice(cart.id, 'mint', 'split_by_item');
+    fetchInvoiceByCart(cart.id)
     selectTab('invoice');
   }
 
