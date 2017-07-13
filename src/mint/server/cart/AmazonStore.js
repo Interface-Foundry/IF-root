@@ -641,4 +641,20 @@ function createAmazonCartWithItems (items) {
   return amazonParams
 }
 
+function condenseItems(items) {
+  var seenAsins = []
+  return items.reduce((prev, curr) => {
+    if (seenAsins.includes(curr.asin)) {
+      prev.find(x => x.asin === curr.asin).quantity += curr.quantity
+    } else {
+      seenAsins.push(curr.asin)
+      prev.push({
+        asin: curr.asin,
+        quantity: curr.quantity
+      })
+    }
+  return prev
+  }, [])
+}
+
 module.exports = AmazonStore

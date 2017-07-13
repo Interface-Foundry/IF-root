@@ -123,6 +123,10 @@ class Store {
     return items
   }
 
+  updateCart () {
+    
+  }
+
   // async sync () {
   //
   // }
