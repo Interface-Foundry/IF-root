@@ -33,7 +33,7 @@ const mapStateToProps = (state, ownProps) => {
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup,
     lazyLoading: state.search.lazyLoading,
-    invoice: state.payments.invoice
+    invoice: state.payments.invoice && !process.env.NODE_ENV.includes('production')
   };
 };
 

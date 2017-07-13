@@ -73,7 +73,7 @@
     "react-stripe-elements": "^0.0.2",
     "react-transition-group": "^1.1.2",
     "react-typist": "^1.1.1",
-    "redux": "^3.7.0",
+    "redux": "^3.7.2",
     "redux-form": "^7.0.0",
     "redux-thunk": "^2.2.0",
     "redux-undo": "beta",

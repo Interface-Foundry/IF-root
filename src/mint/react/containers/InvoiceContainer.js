@@ -19,7 +19,7 @@ const mapStateToProps = (state, ownProps) => {
   selectedAccordion: state.app.selectedAccordion,
   cart: state.cart.present,
   user: state.user,
-  invoice: state.payments.invoice,
+  invoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
   paymentSources: state.payments.paymentSources,
   userPaymentStatus: state.payments.userPaymentStatus,
   payment: state.payments.payment

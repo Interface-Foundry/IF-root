@@ -10,6 +10,7 @@ class Refresh extends Component {
   static propTypes = {
     refresh: PropTypes.func,
     cartId: PropTypes.string,
+    
     userId: PropTypes.string
     // loading: PropTypes.bool
   }

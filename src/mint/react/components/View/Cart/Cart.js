@@ -17,11 +17,12 @@ export default class Cart extends Component {
     user: PropTypes.object,
     editId: PropTypes.string,
     removeItem: PropTypes.func,
-    updateItem: PropTypes.func
+    updateItem: PropTypes.func,
+    invoice: PropTypes.bool.isRequired
   }
 
   constructor(props) {
-    super(props)
+    super(props);
     this._toggleCart = ::this._toggleCart;
   }
 

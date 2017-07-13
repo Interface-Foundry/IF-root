@@ -9,14 +9,16 @@ export default class ItemPaidButton extends Component {
     user: PropTypes.object,
     selectTab: PropTypes.func,
     selectAccordion: PropTypes.func
+    
   }
-  componentWillMount() {
-    const { invoice, fetchPaymentStatus } = this.props;
-    // console.log('invoice0idddd', invoice.id)
-    // if (invoice) {
-    //   fetchPaymentStatus(invoice.id);
-    // }
-  }
+
+  // componentWillMount() {
+  //   const { invoice, fetchPaymentStatus } = this.props;
+  //   // console.log('invoice0idddd', invoice.id)
+  //   // if (invoice) {
+  //   //   fetchPaymentStatus(invoice.id);
+  //   // }
+  // }
         // { testI.items.includes(item.id) && testI.paid === false ? <button onClick={()=> {testI.paid = true;}}>Pay For this</button> : <p> already paid </p>}
 
   render() {
