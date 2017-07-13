@@ -25,7 +25,7 @@ class Invoice {
     if (_.get(invoice, 'id')) {
       return new invoiceHandlers[invoice.invoice_type](invoice)
     }
-    logging.info('tried to get by GetbyId')
+    // logging.info('tried to get by GetbyId')
     throw new Error('no invoice found for GetById')
   }
 
@@ -62,7 +62,22 @@ class Invoice {
 
   static async CreateByCartId (cartId) {
     const cart = await db.Carts.findOne({id: cartId})
-    return new invoiceHandlers['mint'](cart)
+    var nodeInvoice = new invoiceHandlers['mint'](cart)
+    var dbInvoice = await db.Invoices.findOne({cart: cartId})
+    if (!dbInvoice) {
+      dbInvoice = await db.Invoices.create({
+        leader: cart.leader,
+        invoice_type: this.invoice,
+        cart: cart.id,
+        paid: false,
+        total: _.get(cart, 'subtotal'),
+        split_type: this.split_type
+      })
+    }
+
+    await dbInvoice.save()
+    return nodeInvoice
+    // var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
   }
 
 
@@ -263,7 +278,12 @@ class Invoice {
    */
   async userPaymentAmounts() {
     logging.info('this', this)
-    logging.info('THIS.SPLIT_TYpe', this.split_type)
+    if (!this.split_type) {
+      logging.info('no split type oh no')
+      var invoice = await db.Invoices.findOne({cart: this.id})
+      logging.info('here is our invoice:', invoice)
+      this.split_type = invoice.split_type
+    }
     var amounts = userPaymentAmountHandler[this.split_type](this)
     var payments = await db.Payments.find({invoice: this.id})
     payments.map(function (p) {

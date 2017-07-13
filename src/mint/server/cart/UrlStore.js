@@ -1,5 +1,4 @@
 const Store = require('./Store')
-// const Cart = require('./Cart')
 const scrape = require('../scraper/scrape_convert')
 const Invoice = require('../payments/Invoice')
 
@@ -118,10 +117,10 @@ class UrlStore extends Store {
 
   async checkout (cart) {
     logging.info('checkout called')
+    // var cart = await Cart.GetById()
     var invoice = await Invoice.CreateByCartId(cart.id)
     //TODO send out collection email
     await invoice.sendCollectionEmail()
-    logging.info('invoice', invoice)
     return invoice
   }
 

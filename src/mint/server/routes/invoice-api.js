@@ -339,7 +339,7 @@ module.exports = function (router) {
     if (oldInvoice) {
       // logging.info('invoice already exists for this cart_id, not creating new invoice', oldInvoice.id)
       // return res.send(oldInvoice)
-      logging.info('deleteing old invoice for time being')
+      logging.info('deleting old invoice for time being')
       await oldInvoice.archive()
     }
 
