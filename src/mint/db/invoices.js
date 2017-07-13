@@ -76,6 +76,11 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: 'split_single'
     },
 
+    /** the checkout url with our affiliate info in it */
+    affiliate_checkout_url: {
+      type: 'string'
+    },
+
     /** function to archive this object */
     archive: archive,
 
