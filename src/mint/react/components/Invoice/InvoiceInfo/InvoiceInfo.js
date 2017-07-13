@@ -21,6 +21,8 @@ export default class InvoiceInfo extends Component {
     let invoiceAvailable = false;
     if (invoice !== undefined) {
       invoiceAvailable = true;
+    } else {
+      console.log('INVOICE NOT AVAILABLE @@!!!')
     }
 
     return (

@@ -43,9 +43,8 @@ class Invoice {
     if (_.get(invoice, 'id')) {
       return new invoiceHandlers[invoice.invoice_type](invoice)
     }
-    logging.info('tried to get by cartid')
-    // throw new Error('no invoice foundfor GetByCartId')
-    return null
+    logging.info('tried to get by cartid, no invoice exists for cartid')
+    return
   }
 
   /**

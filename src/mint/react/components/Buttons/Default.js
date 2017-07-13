@@ -38,7 +38,7 @@ export default class Default extends Component {
   }
 
   _handleInvoiceButton = () => {
-    const { createInvoice, selectTab, cart, updateCart } = this.props;
+    const { createInvoice, selectTab, selectAccordion, cart, updateCart } = this.props;
     updateCart({ ...cart, locked: true });
     createInvoice(cart.id, 'mint', 'split_by_item');
     selectTab('invoice');
@@ -63,7 +63,6 @@ export default class Default extends Component {
       props: { cart, user, updateCart, checkoutOnly = false }
     } = this,
     total = calculateItemTotal(cart.items);
-
     return (
       <div className='default'>
         {

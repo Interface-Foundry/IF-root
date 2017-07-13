@@ -32,9 +32,7 @@ const mapStateToProps = (state, ownProps) => {
     page: state.search.page,
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup,
-    lazyLoading: state.search.lazyLoading,
-    // invoice: state.payments.invoice,
-    // showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production')
+    lazyLoading: state.search.lazyLoading
   };
 };
 

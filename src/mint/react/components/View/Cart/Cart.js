@@ -15,10 +15,10 @@ export default class Cart extends Component {
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,
+    invoice: PropTypes.object,
     editId: PropTypes.string,
     removeItem: PropTypes.func,
-    updateItem: PropTypes.func,
-    showInvoice: PropTypes.bool.isRequired
+    updateItem: PropTypes.func
   }
 
   constructor(props) {
@@ -42,7 +42,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart, user, editId, showInvoice, updateItem } = this.props,
+    const { cart, user, invoice, editId, updateItem } = this.props,
       { openCarts } = this.state,
       { _toggleCart } = this,
       userCarts = splitCartById(this.props, user),
@@ -59,8 +59,8 @@ export default class Cart extends Component {
 
                 ? <div className={`card`} onClick={() => openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
-                  { showInvoice ? <ItemPaidButton {...this.props}/> : null}
-                  <h1 className='date' onClick={() => _toggleCart(user.id)}> 
+                  { invoice.display ? <ItemPaidButton {...this.props}/> : null}
+                  <h1 className='date' onClick={() => _toggleCart(user.id)}>
                     <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
                   </h1>
                   <h4>
@@ -119,7 +119,7 @@ export default class Cart extends Component {
                 <td colSpan='100%'>
                   <div className={`card`} onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                     { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
-                    <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
+                    <h1 className='date' onClick={() => _toggleCart(userCart.id)}>
                       <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
                     </h1>
                     <h4>
@@ -127,7 +127,7 @@ export default class Cart extends Component {
                       <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
                     </h4>
 
-                    { 
+                    {
                       !openCarts.includes(userCart.id) ? <ul>
                         {
                           userCart.items.map((item) => (
@@ -163,7 +163,7 @@ export default class Cart extends Component {
                             </li>
                           ))
                         }
-                      </ul> : null 
+                      </ul> : null
                     }
                   </div>
                 </td>

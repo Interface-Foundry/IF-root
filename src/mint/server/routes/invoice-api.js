@@ -280,15 +280,15 @@ module.exports = function (router) {
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    let invoice
-    try {
-      invoice = await Invoice.GetByCartId(req.params.cart_id)
-    } catch (err) {
-      logging.info('error getting invoice getbycartId')
-      return res.send({}).end()
+
+    const invoice = await Invoice.GetByCartId(req.params.cart_id)
+    if (invoice) {
+      logging.info('this is the inoice', invoice)
+      await invoice.updateInvoice()
+      return res.send(invoice)
     }
-    await invoice.updateInvoice()
-    return res.send(invoice)
+    logging.info('error getting invoice getbycartId')
+    return res.send({display: false})
   })
 
   /**

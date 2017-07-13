@@ -43,9 +43,10 @@ export default function payments(state = initialState, action) {
       invoice: action.response
     };
   case 'INVOICE_BY_CART_FAILURE':
+    console.log('action')
     return {
       ...state,
-      invoice: {}
+      invoice: {'display': false}
     };
   case 'UPDATE_INVOICE_OPTIONS_SUCCESS':
     return {
