@@ -62,6 +62,16 @@
   }
 }
 
+@keyframes glowText {
+  0% {
+    text-shadow: 0 0 0 $thirdColor, 1px -1px 5px $thirdColor, -1px 1px 5px $thirdColor, 1px 1px 5px $thirdColor;
+  }
+
+  100% {
+    text-shadow: -10px -10px 10px rgba($thirdColor, 0), 10px -10px 10px rgba($thirdColor, 0), -10px 10px 10px rgba($thirdColor, 0), 10px 10px 10px rgba($thirdColor, 0);
+  }
+}
+
 @keyframes fadeInUp {
   0% {
     opacity: 0;

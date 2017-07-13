@@ -27,7 +27,7 @@ export default class EmptySearch extends Component {
             Search above or tap one of our suggested categories below to get started
           </p>
           <span>
-            Learn More
+            {/*Learn More*/ /* until we actually have something here */ } 
           </span>
         </div>
          <div className='suggested'>

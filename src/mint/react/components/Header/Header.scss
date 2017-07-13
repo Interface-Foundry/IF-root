@@ -8,6 +8,7 @@
   display: flex;
   font-family: 'Raleway';
   height: $nav-height;
+  overflow: visible;
   position: relative;
   text-align: left;
   width: 100%;
@@ -33,6 +34,7 @@
 
   .header__left {
     flex: 1 1 auto;
+    overflow: visible;
   }
 
   .cart, .settings {
@@ -40,6 +42,7 @@
     height: 100%;
     position: relative;
     white-space: nowrap;
+    overflow: visible;
 
     @media only screen and (max-width: 600px) {
       padding: 0 0 0 $padding;
@@ -148,7 +151,6 @@
 
         @media (max-width: 600px) {
           left: 2px;
-
 
           // transform: rotate(-25deg);
         }
