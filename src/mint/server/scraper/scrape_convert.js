@@ -59,13 +59,6 @@ var getLocale = function (url,user_country,user_locale,store_country,domain){
 			s.domain.locale = store_country
 	}
 
-	switch(domain){
-		case 'muji.net':
-			s.domain.thumbnail_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/MUJI_logo.svg/176px-MUJI_logo.svg.png'
-			s.domain.main_image_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/MUJI_logo.svg/176px-MUJI_logo.svg.png'
-			s.domain.description = 'Muji Japan'
-			break
-	}
 	return s
 }
 
@@ -103,17 +96,17 @@ var scrapeURL = async function (url) {
 }
 
 //some sites require us to process child option data
-var processChildOptions = async function(domain,parentOption,html){
+var processChildOptions = async function(s,parentOption,html,rates){
 
 	var $ = await cheerio.load(html)
 
-	switch(domain){
+	switch(s.domain.name){
 		case 'lotte.com':
 
-			//BUILD REAL OPTIONS HERE, COLOR + SIZE combinations....???????
-			//NO NO HAS TO BE COLOR > SIZE
-
-			//START BY ADDING PARENT OPTIONS (WITH AVAILABLE = true)
+			if(parentOption.original_price && parentOption.original_price.value){
+				var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
+ 				parentOption = await storeFx(rates[s.user.currency],price,parentOption)
+			}
 
 			var options = []
 
@@ -122,8 +115,7 @@ var processChildOptions = async function(domain,parentOption,html){
 
 			//parent option doesnt have any sub options
 			if($('.c_list li').length <= 0){
-				console.log('THIS PARENT OPTION HAS NO SUB OPTIONS!!')
-				return 
+				return options
 			}
 
 			//get options
@@ -166,20 +158,41 @@ var tryHtml = async function (s,html) {
 			//get product id
 			var parsed = url.parse(s.original_link, true)
 			if(parsed.query && parsed.query.goods_no){
+				s.product_id = parsed.query.goods_no
 				s.parent_id = parsed.query.goods_no
 			}
 			
-			//name, descrip
-			s.original_name.value = $('.group_tit').text().trim()
+			//name
+			if($('.group_tit').text().trim()){
+				s.original_name.value = $('.group_tit').text().trim()
+			}else if($('.pname').text().trim()){
+				s.original_name.value = $('.pname').text().trim()
+			}
+			
+			//descrip
 			s.original_description.value = $('.md_tip').text().trim()
 
 			//price
-			var p = $('.after_price').text().trim().replace(/[^0-9.]/g, "")
-			s.original_price.value = parseFloat(p)
+			if($('.after_price').text()){
+				var p = $('.after_price').text().trim().replace(/[^0-9.]/g, "")
+			}else if($('.big').text()){
+				var p = $('.big').text().trim().replace(/[^0-9.]/g, "")
+			}
+
+			if(p){
+				s.original_price.value = parseFloat(p)
+			}
+			
 
 			//image URL
-		    s.thumbnail_url = $('img','#fePrdImg01').attr('src')
-		    s.main_image_url = $('img','#fePrdImg01').attr('src')
+			if($('img','#fePrdImg01').attr('src')){
+			    s.thumbnail_url = $('img','#fePrdImg01').attr('src')
+			    s.main_image_url = $('img','#fePrdImg01').attr('src')
+			}else if ($('img','#prdImg').attr('src')){
+		    	s.thumbnail_url = $('img','#prdImg').attr('src')
+			    s.main_image_url = $('img','#prdImg').attr('src')			
+			}
+
 
 			//html queries to do for options
 			var optionQ = []
@@ -203,7 +216,7 @@ var tryHtml = async function (s,html) {
 							value: name 
 						},
 						original_price: {
-							value: price //
+							value: price
 						},
 					    thumbnail_url:img,
 					    main_image_url:img,
@@ -222,15 +235,16 @@ var tryHtml = async function (s,html) {
 
 			//check html for child options
 			var optionResults = []
+			var rates = await getRates()
 			for (i = 0; i < optionQ.length; i++) { 
-				optionResults.push(processChildOptions(s.domain.name,optionQ[i],results[i]))
+				optionResults.push(processChildOptions(s,optionQ[i],results[i],rates))
 			}
 
 			//wait for all options to finish
 			var options = await Promise.all(optionResults)
 
 			s.options = [].concat.apply([], options) //condense into on obj array
-			
+
 			return s
 			break
 
@@ -349,25 +363,26 @@ var tryHtml = async function (s,html) {
 			})
 
 			//CHECK FOR SIZES
-      console.log('SIZE STUFF')
+      		console.log('SIZE STUFF')
 			$('#size').find('dd').each(function(i, elm) {
 				//did user select?
-        // console.log('text:', $(this).text().trim())
+        		// console.log('text:', $(this).text().trim())
 				var selected
 				if($(this).has('.current').attr('class')){
 					selected = true
 				}else {
 					selected = false
 				}
-        //regex out non latin & numeric characters
-        var sizeText = $(this).text().trim()//.replace(/[^0-9a-z]/gi, "")
-        sizeText = sizeText.split('').map(c => c.charCodeAt())
-        sizeText = sizeText.filter(function (code) {
-          return (code >= 48 && code <= 57) || (code >= 65313 && code <= 65370)
-          // digits, and full-width latin characters
-        })
-        sizeText = sizeText.map(code => String.fromCharCode(code))
-        sizeText = sizeText.join('')
+
+		        //regex out non latin & numeric characters
+		        var sizeText = $(this).text().trim()//.replace(/[^0-9a-z]/gi, "")
+		        sizeText = sizeText.split('').map(c => c.charCodeAt())
+		        sizeText = sizeText.filter(function (code) {
+		          return (code >= 48 && code <= 57) || (code >= 65313 && code <= 65370)
+		          // digits, and full-width latin characters
+		        })
+		        sizeText = sizeText.map(code => String.fromCharCode(code))
+		        sizeText = sizeText.join('')
 
 				s.options.push({
 					type: 'size',
@@ -469,6 +484,15 @@ var getRates = async function (){
 	return fxRates.rates
 }
 
+var storeFx = async function(rates,price,s){
+	s.original_price.fx_rate = rates
+    s.original_price.fx_rate_src = 'fixer.io'
+    s.original_price.fx_on =  new Date()
+    s.original_price.fx_spread = currencySpread
+	s.price = price
+	return s
+}
+
 //true or false if input time is greater than an hour ago
 //(can someone double check my time logic here thx)
 function is_older_than_1hour(datetime) {
@@ -516,56 +540,50 @@ var urlValue = function (url,find,pointer){
 }
 
 var translateText = async function (s){
-	var c = []
+
+	//single string array to send for tranlsation
+	var t = []
 
 	//collect text to translate into a single arr for google translate API
 	if(s.original_name.value){
-		c.push({
-			type:'name',
-			value: s.original_name.value
-		})
+		t.push(s.original_name.value)
 	}
 	if(s.original_description.value){
-		c.push({
-			type:'description',
-			value: s.original_description.value
-		})
+		t.push(s.original_description.value)
 	}
 	if(s.options && s.options.length > 0){
-		s.options.forEach(function(o){
-			if(o.original_name){
-				c.push({
-					type:'option',
-          subtype: o.type,
-					value: o.original_name.value
-				})
+	    for (var i = 0; i < s.options.length; i++) {
+			if(s.options[i].original_name.value && s.options[i].type !== 'size'){
+				t.push(s.options[i].original_name.value)
 			}
-			else {
-				console.log('no name found for option!')
-			}
-	    })
-	}
-	console.log('about to do the actual translation')
-	//keep context of text mapping (need to double check the logic here....)
-	var t = _.map(c, 'value')
-	var tc = {translate:t,context:c}
-	//send to google for translate
-	var tc_map = await translate(tc.translate,s.user.locale)
-
-	//piece translations back into the original obj
-	for (var i = 0; i < tc.context.length; i++) {
-		if(tc.context[i].type == 'name'){
-			s.name = tc_map[i]
-		}else if(tc.context[i].type == 'description'){
-			s.description = tc_map[i]
-		}else if(tc.context[i].type == 'option'){
-			for (var z = 0; z < tc.context.length - i; z++) {
-        if (s.domain.name === 'muji.net' && tc.context[z + i].subtype === 'size') s.options[z].name = tc.context[z + i].value
-        else s.options[z].name = tc_map[z + i]
-			}
-			break
 		}
 	}
+	logging.info('about to do the actual translation')
+
+	//send to google for translate
+	var t_map = await translate(t,s.user.locale)
+	//piece translation back into 
+	if(s.original_name.value){
+		s.name = t_map[0]
+		t_map.shift()
+	}
+	if(s.original_description.value){
+		s.description = t_map[0]
+		t_map.shift()
+	}
+	if(s.options && s.options.length > 0){
+		for (var i = 0; i < s.options.length; i++) {
+			if(s.options[i].original_name.value){
+				if(s.options[i].type == 'size'){
+					s.options[i].name = s.options[i].original_name.value
+				}else {
+					s.options[i].name = t_map[0]
+					t_map.shift()
+				}
+			}
+		}
+	}
+
 	return s
 }
 
@@ -582,9 +600,8 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		}
 
 		var rates = await getRates()
-
  		var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
- 		s = await storeFx(rates,price,s)
+ 		s = await storeFx(rates[s.user.currency],price,s)
 
 		s = await translateText(s)
 
@@ -601,15 +618,6 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 }
 	// }).catch(onerror)
 // }
-
-var storeFx = async function(rates,price,s){
-	s.original_price.fx_rate = rates
-    s.original_price.fx_rate_src = 'fixer.io'
-    s.original_price.fx_on =  new Date()
-    s.original_price.fx_spread = currencySpread
-	s.price = price
-	return s
-}
 
 /**
  * returns a random integer between 0 and the specified exclusive maximum.
