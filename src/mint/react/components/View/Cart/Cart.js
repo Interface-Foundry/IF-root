@@ -39,13 +39,30 @@ export default class Cart extends Component {
     }
   }
 
+  _achievements(carts) {
+    console.log(carts)
+    if(carts.length > 4) {
+      return {1: { reqs: 6, discount: 80 }, 4: { reqs: 3, discount: 50 }}
+    } else if ( carts.length > 6 ) {
+      return {1: { reqs: 8, discount: 100 }, 4: { reqs: 6, discount: 80 }, 6: { reqs: 3, discount: 50 }}
+    } else {
+      return {1: { reqs: 3, discount: 50 }}
+    }
+  }
+
   render() {
     const { cart, user, editId, updateItem } = this.props,
       { openCarts } = this.state,
-      { _toggleCart } = this,
+      { _toggleCart, _achievements } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
-      isLeader = user.id === cart.leader.id;
+      otherCarts = userCarts.others.sort((a, b) => {
+          a = new Date(a.createdAt);
+          b = new Date(b.createdAt);
+          return a>b ? -1 : a<b ? 1 : 0;
+      }),
+      isLeader = user.id === cart.leader.id,
+      achieveIndex = _achievements(otherCarts);
 
     return (
       <table className='cart'>
@@ -55,6 +72,7 @@ export default class Cart extends Component {
                {
                 cart.members.length === 1 ? <div className='top'>
                   <div className='circle'/>
+                  <Icon icon='Right'/>
                   <p> <b>{user.name}</b> joined { timeFromDate(myCart[0].createdAt) }</p>
                 </div> : null
               }
@@ -116,13 +134,25 @@ export default class Cart extends Component {
         </thead>
         <tbody>
           {
-            userCarts.others.map((userCart, i) => (
+            otherCarts.map((userCart, i) => {
+              return (
               <tr key={userCart.id}>
-                <td colSpan='100%'>
-                  <div className='top'>
-                    <div className='circle'/>
-                    <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
-                  </div>
+                <td colSpan='100%' className={i <= 1 ? `green ${achieveIndex[i] ? 'gradient' : ''}` : ''}>
+                  { achieveIndex[i] ? <div className='achievement'>
+                      <div className='icon'>
+                        <Icon icon='Person'/>
+                      </div>
+                      <div className='text'>
+                        <p>💥 {achieveIndex[i].reqs}pp have Joined your cart</p>
+                        <p>You got a {achieveIndex[i].discount}% Discount!</p>
+                      </div>
+                      <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
+                    </div> : <div className={`top`}>
+                      <div className={`circle`}/>
+                      { i === 0 ? <Icon icon='Right'/> : null}
+                      <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
+                    </div> 
+                  }
                   <div className={`card`} onClick={() => !openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                     { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
                     <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
@@ -174,7 +204,7 @@ export default class Cart extends Component {
                   </div>
                 </td>
               </tr>
-            ))
+            )})
           }
           <tr>
            { myCart.length ? null : ( cart.locked ? null : <EmptyContainer /> ) }

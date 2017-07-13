@@ -18,7 +18,7 @@ export default class EmptySearch extends Component {
     const { categories, submitQuery, updateQuery, cart } = this.props;
 
     return (
-      <div className='empty results'>
+      <td className='empty results'>
         <div className='text'>
           <h2>
             <b>Hi! 😊&nbsp;Not sure what your looking for? </b>
@@ -40,7 +40,7 @@ export default class EmptySearch extends Component {
               ))
             }
           </div>
-      </div>
+      </td>
     );
   }
 }

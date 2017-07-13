@@ -17,7 +17,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .top {
-    padding: $padding 0 0;
+    position: relative;
+    padding: 0;
+    z-index: 9;
     .circle {
       display: inline-block;
       width: 15px;
@@ -31,6 +33,52 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       padding: 0 0 0 $padding;
       font-size: 12px;
       font-weight: 100;
+    }
+    svg {
+      vertical-align: middle;
+      position: absolute;
+      left: -3px;
+      top: 1px;
+      height: 13px;
+      width: 13px;
+      fill: white;
+    }
+  }
+
+  .achievement {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    width: 100%;
+    padding: 0 $padding/2;
+    z-index: 2;
+    margin-left: -16px;
+    & > p {
+      padding: 0 0 0 $padding*4;
+      font-size: 12px;
+    }
+    .icon {
+      position: relative;
+      padding: $padding/2;
+      display: inline-block;
+      background: $thirdColor;
+      border: 1px solid rgba(51, 51, 51, 0.2);
+      border-radius: 0 $padding/2 $padding/2 0;
+      z-index: 9;
+
+      svg {
+        height: 20px;
+        width: 20px;
+      }
+    }
+    .text {
+      display: inline-block;
+      padding: 0 $padding*2 $padding $padding;
+      p {
+        &:last-of-type {
+          font-size: 10px;
+        }
+      }
     }
   }
 
@@ -75,8 +123,18 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   td, th {
     padding: 0 ($padding / 2);
+    &.green {
+      &:after {
+        background: #00cb7b;
+      }
+    }
+    &.gradient {
+      &:after {
+        background: linear-gradient(to top, lighten(#333, 60%), #00cb7b 100%);
+      }
+    }
     @media only screen and (max-width: 600px) {
-      padding: 0 $padding;
+      padding: 0 $padding $padding;
     }
     .card {
       position: relative;
