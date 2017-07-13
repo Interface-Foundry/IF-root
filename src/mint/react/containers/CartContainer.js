@@ -28,7 +28,8 @@ const mapStateToProps = (state, ownProps) => ({
   oldCart: state.cart.past[0],
   query: state.search.query,
   user: state.user,
-  invoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
+  invoice: state.payments.invoice,
+  showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
   paymentStatus: state.payments.status
 });
 

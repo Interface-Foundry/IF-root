@@ -12,7 +12,8 @@ const mapStateToProps = (state, ownProps) => {
     tab: state.app.viewTab,
     search: state.search,
     cart: state.cart.present,
-    invoice: state.payments.invoice && !process.env.NODE_ENV.includes('production')
+    showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
+    invoice: state.payments.invoice
   };
 };
 

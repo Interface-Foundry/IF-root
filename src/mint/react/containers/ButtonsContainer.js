@@ -16,7 +16,8 @@ const mapStateToProps = (state, props) => {
   return {
     cart: state.cart.present,
     user: state.user,
-    invoice: state.payments.invoice && !process.env.NODE_ENV.includes('production')
+    invoice: state.payments.invoice,
+    // showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production')
   };
 };
 

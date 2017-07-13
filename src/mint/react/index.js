@@ -10,7 +10,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import ReactGA from 'react-ga';
 
 import Reducers from './reducers';
-import { checkSession, fetchInvoiceByCart, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
+import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
@@ -24,7 +24,16 @@ history.listen((location, action) => {
 });
 const historyMiddleware = routerMiddleware(history);
 let middleware = [thunkMiddleware, historyMiddleware];
-
+if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+  const { createLogger } = require('redux-logger');
+  const loggerMiddleware = createLogger({
+    timestamp: false,
+    collapsed: (getState, action, logEntry) => !logEntry.error,
+    diff: true,
+    level: 'info'
+  });
+  middleware = [...middleware, loggerMiddleware];
+}
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;  //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
 
 const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
