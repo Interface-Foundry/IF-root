@@ -102,7 +102,8 @@ var scrapeURL = async function (url) {
 	return convert
 }
 
-var tryOptionHtml = async function(domain,parentOption,html){
+//some sites require us to process child option data
+var processChildOptions = async function(domain,parentOption,html){
 
 	var $ = await cheerio.load(html)
 
@@ -116,42 +117,33 @@ var tryOptionHtml = async function(domain,parentOption,html){
 
 			var options = []
 
-			console.log('🌏🐝🌏 ',parentOption) 
+			//push parent style options
+			options.push(parentOption)
 
-
-
+			//parent option doesnt have any sub options
 			if($('.c_list li').length <= 0){
 				console.log('THIS PARENT OPTION HAS NO SUB OPTIONS!!')
 				return 
 			}
 
-			
 			//get options
 			$('.c_list li').each(function(i, elm) {
 
-				var name = $('.sec01',this).text().trim()
-				var product_id = $('a',this).attr('goodsno') //product id for this option
-
-				//checking available if this option has an a link (can't click option if it's unavail)
-				var available
-				if ($('a',this)){
-					available = true
-				}else {
-					available = false
-				}
-
-				optionQ.push({
+				options.push({
+					type: 'size', //size = child level option
 					original_name: {
-						value: name
+						value: $('.sec01',this).text().trim()
 					},
-				    product_id: product_id,
-				    parent_id: parentOption.product_id,
-				    available: available
+				    //product_id: product_id, //product ID of the size
+				    parent_id: parentOption.product_id, //product ID of the style
+
+				    //checking available if this option has an a link 
+				    //---> (can't click option if it's unavail)
+				    available: ( $('a',this).attr('goodsno') ) ? true : false 
 				})
 			})
 
-			console.log('🌏🌏🌏 ',optionQ) 
-
+			return options
 		break
 	}
 
@@ -196,68 +188,50 @@ var tryHtml = async function (s,html) {
 			$('.c_list li').each(function(i, elm) {
 
 				var opt_url = $('a',this).attr('loadurl') //url to get sub options for this options
-				var name = $('.sec01',this).text().trim()
-				var price = $('.sec02',this).text().trim().replace(/[^0-9.]/g, "")
+				var name = $('.sec01',this).text().trim() //name
+				var price = $('.sec02',this).text().trim().replace(/[^0-9.]/g, "") // price
 				var product_id = $('a',this).attr('goodsno') //product id for this option
 				var img = $('img',this).attr('src') //option image
 				img = img.replace('_60','_150') //make option images larger (150px instead of 60px)
 
+				//only process options that are still available
 				if(opt_url){
 					optionQ.push({
 						opt_url: 'http://www.lotte.com'+opt_url,
-						type: 'style',
+						type: 'style', //style = top level option
 						original_name: {
-							value: name
+							value: name 
 						},
 						original_price: {
-							value: price
+							value: price //
 						},
 					    thumbnail_url:img,
 					    main_image_url:img,
-					    product_id: product_id
+					    product_id: product_id,
+					    available: true //it's avail because it has a "loadurl" attribute in a href
 					})
-				}else {
-					console.log('ITEM COMPLETELY SOLD OUT DONT EVEN RETURN IT!!!!')
 				}
-
-				//loadurl: 
-				//http://www.lotte.com/goods/viewGoodsDetailOptInfo.lotte?goods_no=297941318
-				// reutrns nothing, so no sub options!
-
-				//http://www.lotte.com/goods/viewGoodsDetailOptInfo.lotte?goods_no=392012841
-				//returns HTML options, now check these
-
-				//PARALLEL QUERY ALL OPTION URLS!!!
-
-				//STORE goodsno 
-				//
-
-				//goods_no in the option select field
 			})	
 
 			//srape all product option URLs checking for suboptions ~
-
 			var htmlQ = []
 			for (i = 0; i < optionQ.length; i++) { 
 				htmlQ.push(scrapeURL(optionQ[i].opt_url))
 			}
 			var results = await Promise.all(htmlQ)
 
+			//check html for child options
 			var optionResults = []
 			for (i = 0; i < optionQ.length; i++) { 
-				optionResults.push(tryOptionHtml(s.domain.name,optionQ[i],results[i]))
+				optionResults.push(processChildOptions(s.domain.name,optionQ[i],results[i]))
 			}
 
+			//wait for all options to finish
 			var options = await Promise.all(optionResults)
 
-
+			s.options = [].concat.apply([], options) //condense into on obj array
 			
-
-			console.log('🐝🐝🐝 ',options)
-
-
-
-			// return s
+			return s
 			break
 
 		case 'store.punyus.jp':
@@ -614,13 +588,13 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 
 		s = await translateText(s)
 
-    //save RAW HTML here
- 	  var raw = await db.RawHtml.create({
- 	   raw_html: String(html),
- 	   original_url: url,
-		 domain: domain
+    	//save RAW HTML here
+ 	  	var raw = await db.RawHtml.create({
+ 	    raw_html: String(html),
+ 	   		original_url: url,
+		 	domain: domain
 		})
-		console.log('saved raw html')
+		logging.info('saved raw html')
 		s.raw_html = raw.id
 
 		return s
