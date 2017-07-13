@@ -37,7 +37,8 @@ import {
   IoSearch,
   IoHome,
   IoPound,
-  IoQrScanner
+  IoQrScanner,
+  IoArrowRightB
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -146,6 +147,8 @@ export default class Icon extends Component {
       return <IoPound/>;
     case 'QR':
       return <IoQrScanner/>;
+    case 'Right':
+      return <IoArrowRightB/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }
