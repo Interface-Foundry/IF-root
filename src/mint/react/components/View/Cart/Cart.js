@@ -39,31 +39,18 @@ export default class Cart extends Component {
     }
   }
 
-  _achievements(carts) {
-    console.log(carts)
-    if(carts.length > 4) {
-      return {1: { reqs: 6, discount: 80 }, 4: { reqs: 3, discount: 50 }}
-    } else if ( carts.length > 6 ) {
-      return {1: { reqs: 8, discount: 100 }, 4: { reqs: 6, discount: 80 }, 6: { reqs: 3, discount: 50 }}
-    } else {
-      return {1: { reqs: 3, discount: 50 }}
-    }
-  }
 
   render() {
     const { cart, user, editId, updateItem } = this.props,
       { openCarts } = this.state,
-      { _toggleCart, _achievements } = this,
+      { _toggleCart } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
-      otherCarts = userCarts.others.sort((a, b) => {
-          a = new Date(a.createdAt);
-          b = new Date(b.createdAt);
-          return a>b ? -1 : a<b ? 1 : 0;
-      }),
       isLeader = user.id === cart.leader.id,
-      achieveIndex = _achievements(otherCarts);
+      achieveIndex = {8: { reqs: 8, discount: 100, color: 'red' }, 6: { reqs: 6, discount: 80, color: 'yellow'  }, 3: { reqs: 3, discount: 50, color: 'green' }};
 
+
+    let color;
     return (
       <table className='cart'>
         <thead>
@@ -134,77 +121,80 @@ export default class Cart extends Component {
         </thead>
         <tbody>
           {
-            otherCarts.map((userCart, i) => {
+            userCarts.others.reverse().map((userCart, i) => {
+              color = userCart.memberNumber > 2 ? ( userCart.memberNumber > 5 ? ( userCart.memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
+              console.log(userCart.memberNumber, color)
               return (
-              <tr key={userCart.id}>
-                <td colSpan='100%' className={i <= 1 ? `green ${achieveIndex[i] ? 'gradient' : ''}` : ''}>
-                  { achieveIndex[i] ? <div className='achievement'>
-                      <div className='icon'>
-                        <Icon icon='Person'/>
-                      </div>
-                      <div className='text'>
-                        <p>💥 {achieveIndex[i].reqs}pp have Joined your cart</p>
-                        <p>You got a {achieveIndex[i].discount}% Discount!</p>
-                      </div>
-                      <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
-                    </div> : <div className={`top`}>
-                      <div className={`circle`}/>
-                      { i === 0 ? <Icon icon='Right'/> : null}
-                      <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
-                    </div> 
-                  }
-                  <div className={`card`} onClick={() => !openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
-                    { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
-                    <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
-                      <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
-                    </h1>
-                    <h4>
-                      <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
-                      <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
-                    </h4>
+                <tr key={userCart.id}>
+                  <td colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
+                    { achieveIndex[userCart.memberNumber] ? <div className='achievement'>
+                        <div className='icon'>
+                          <Icon icon='Person'/>
+                        </div>
+                        <div className='text'>
+                          <p>💥 {achieveIndex[userCart.memberNumber].reqs}pp have Joined your cart</p>
+                          <p>You got a {achieveIndex[userCart.memberNumber].discount}% Discount!</p>
+                        </div>
+                        <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
+                      </div> : <div className={`top`}>
+                        <div className={`circle`}/>
+                        { i === 0 ? <Icon icon='Right'/> : null}
+                        <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
+                      </div> 
+                    }
+                    <div className={`card`} onClick={() => !openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
+                      { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
+                      <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
+                        <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
+                      </h1>
+                      <h4>
+                        <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
+                        <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
+                      </h4>
 
-                    { 
-                      openCarts.includes(userCart.id) ? <ul>
-                        {
-                          userCart.items.map((item) => (
-                            <li key={item.id} className={editId === item.id ? 'edit' : ''}>
-                              <div className={'image'} style={{
-                                backgroundImage: `url(${item.main_image_url})`
-                              }}/>
-                              <div className='text'>
-                                <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
-                                <h1>{item.name}</h1>
-                                <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+                      { 
+                        openCarts.includes(userCart.id) ? <ul>
+                          {
+                            userCart.items.map((item) => (
+                              <li key={item.id} className={editId === item.id ? 'edit' : ''}>
+                                <div className={'image'} style={{
+                                  backgroundImage: `url(${item.main_image_url})`
+                                }}/>
+                                <div className='text'>
+                                  <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                                  <h1>{item.name}</h1>
+                                  <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+                                  {
+                                    !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
+                                      <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                                      <p>{ item.quantity }</p>
+                                      <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
+                                    </div> : null
+                                  }
+                                </div>
                                 {
-                                  !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
-                                    <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
-                                    <p>{ item.quantity }</p>
-                                    <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                                  </div> : null
-                                }
-                              </div>
-                              {
-                                editId === item.id ? (
-                                  <div className='extra'>
-                                    <div className='text__expanded'>
-                                      <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
-                                      <div>
-                                        {item.description}
+                                  editId === item.id ? (
+                                    <div className='extra'>
+                                      <div className='text__expanded'>
+                                        <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                                        <div>
+                                          {item.description}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ) : null
-                              }
-                              <CartButtons {...this.props} item={item}/>
-                            </li>
-                          ))
-                        }
-                      </ul> : null 
-                    }
-                  </div>
-                </td>
-              </tr>
-            )})
+                                  ) : null
+                                }
+                                <CartButtons {...this.props} item={item}/>
+                              </li>
+                            ))
+                          }
+                        </ul> : null 
+                      }
+                    </div>
+                  </td>
+                </tr>
+              )
+            })
           }
           <tr>
            { myCart.length ? null : ( cart.locked ? null : <EmptyContainer /> ) }

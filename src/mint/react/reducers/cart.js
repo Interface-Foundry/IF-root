@@ -85,44 +85,49 @@ export default function cart(state = initialState, action) {
 
 // Selectors
 export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id);
-
 export const splitCartById = (state, props) => {
   const id = props ? props.id : null;
+  // const badges = {2: { reqs: 8, discount: 100, color: 'red' }, 3: { reqs: 6, discount: 80, color: 'yellow'  }, 6: { reqs: 3, discount: 50, color: 'green' }}
 
-  return state.cart.items.reduce((acc, item) => {
-    acc.quantity = acc.quantity + (item.quantity || 1);
-    let linkedMember = getMemberById(state.cart, { id: item.added_by }) || {};
+  return state.cart.items.sort((a, b) => {
+        a = new Date(a.createdAt);
+        b = new Date(b.createdAt);
+        return a<b ? -1 : a>b ? 1 : 0;
+    }).reduce((acc, item, index) => {
+      acc.quantity = acc.quantity + (item.quantity || 1);
+      let linkedMember = getMemberById(state.cart, { id: item.added_by }) || {};
 
-    if (id === item.added_by) {
-      acc['my'].push(item);
-    } else if (acc.others.find(member => member.id === linkedMember.id)) {
-      const others = acc.others.filter(member => member.id !== linkedMember.id);
-      let newMember = acc.others.find(member => member.id === linkedMember.id);
-      newMember = {
-        ...newMember,
-        createdAt: linkedMember.createdAt,
-        updatedAt: item.updatedAt,
-        items: [...newMember.items, item]
-      };
-      acc = {
-        ...acc,
-        others: [...others, newMember]
-      };
-    } else {
-      acc.others.push({
-        id: item.added_by,
-        email_address: linkedMember.email_address,
-        name: linkedMember.name,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        items: [item]
-      });
-    }
+      if (id === item.added_by) {
+        acc['my'].push(item);
+      } else if (acc.others.find(member => member.id === linkedMember.id)) {
+        const others = acc.others.filter(member => member.id !== linkedMember.id);
+        let newMember = acc.others.find(member => member.id === linkedMember.id);
+        newMember = {
+          ...newMember,
+          createdAt: linkedMember.createdAt,
+          updatedAt: item.updatedAt,
+          items: [...newMember.items, item]
+        };
+        acc = {
+          ...acc,
+          others: [...others, newMember]
+        };
+      } else {
+        acc.others.push({
+          id: item.added_by,
+          email_address: linkedMember.email_address,
+          name: linkedMember.name,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          memberNumber: acc.others.length + 2,
+          items: [item]
+        });
+      }
 
-    return acc;
-  }, {
-    my: [],
-    others: [],
-    quantity: 0
-  });
+      return acc;
+    }, {
+      my: [],
+      others: [],
+      quantity: 0
+    });
 };
