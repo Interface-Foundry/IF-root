@@ -335,6 +335,7 @@ module.exports = function (router) {
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
     // check for old invoice.  deal with this later tbh
     const oldInvoice = await Invoice.GetByCartId(req.params.cart_id)
+    logging.info('tried to find an old invoice')
     if (oldInvoice) {
       // logging.info('invoice already exists for this cart_id, not creating new invoice', oldInvoice.id)
       // return res.send(oldInvoice)
@@ -348,8 +349,9 @@ module.exports = function (router) {
     }, _.isUndefined)
 
     logging.info('invoice data', invoiceData)
+    var cart = await Cart.GetById(req.params.cart_id)
     const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
-    const newInvoice = await invoice.createInvoice()
+    const newInvoice = await invoice.createInvoice(cart)
     logging.info('created new invoice: ', invoiceData)
     return res.send(newInvoice)
   })

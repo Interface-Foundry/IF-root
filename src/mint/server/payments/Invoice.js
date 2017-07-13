@@ -1,6 +1,6 @@
 var moment = require('moment')
 const _ = require('lodash')
-const Cart = require('../cart/Cart')
+// const Cart = require('../cart/Cart')
 const userPaymentAmountHandler = require('../utilities/invoice_utils').userPaymentAmountHandler
 
 var db
@@ -44,8 +44,9 @@ class Invoice {
       return new invoiceHandlers[invoice.invoice_type](invoice)
     }
     logging.info('tried to get by cartid')
-    throw new Error('no invoice foundfor GetByCartId')
-    }
+    // throw new Error('no invoice foundfor GetByCartId')
+    return null
+  }
 
   /**
    * create a new invoice of type with data
@@ -107,8 +108,8 @@ class Invoice {
    *
    * @return     {Promise}  returns the new object created in db
    */
-  async createInvoice () {
-    let cart = await Cart.GetById(this.cart)
+  async createInvoice (cart) {
+    // let cart = await Cart.GetById(this.cart)
     await cart.sync()
 
     var newInvoice = await db.Invoices.create({
@@ -261,6 +262,8 @@ class Invoice {
    * @return {object} { keys are user ids; values are the amount they have left to pay}
    */
   async userPaymentAmounts() {
+    logging.info('this', this)
+    logging.info('THIS.SPLIT_TYpe', this.split_type)
     var amounts = userPaymentAmountHandler[this.split_type](this)
     var payments = await db.Payments.find({invoice: this.id})
     payments.map(function (p) {
@@ -289,13 +292,11 @@ class MintInvoice extends Invoice {
     }
     return null
   }
-
 }
 
 
 const invoiceHandlers = {
   [MintInvoice.name]: MintInvoice
 }
-
 
 module.exports = Invoice

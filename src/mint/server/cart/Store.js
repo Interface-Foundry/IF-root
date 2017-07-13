@@ -1,4 +1,5 @@
 const emoji_utils = require('../utilities/emoji_utils');
+const Invoice = require('../payments/Invoice')
 
 /**
  * The basic Store class
@@ -105,6 +106,9 @@ class Store {
    */
   async checkout(cart) {
     // cart.locked = true;
+    logging.info('this is a test... speakerboxxx...')
+    var invoice = await Invoice.CreateByCartId(cart.id)
+    logging.info('invoice', invoice)
     await cart.save()
   }
 

@@ -1,6 +1,7 @@
 const Store = require('./Store')
+// const Cart = require('./Cart')
 const scrape = require('../scraper/scrape_convert')
-logging.info('scrape', typeof(scrape))
+const Invoice = require('../payments/Invoice')
 
 // get the waterline mint database
 var db
@@ -113,6 +114,23 @@ class UrlStore extends Store {
     item = await db.Items.findOne({id: item.id}).populate('options')
 
     return [item];
+  }
+
+  async checkout (cart) {
+    logging.info('checkout called')
+    var invoice = await Invoice.CreateByCartId(cart.id)
+    //TODO send out collection email
+    await invoice.sendCollectionEmail()
+    logging.info('invoice', invoice)
+    return invoice
+  }
+
+  sync (items) {
+    return {}
+  }
+
+  updateCart(cart_id, newCart) {
+    return
   }
 }
 
