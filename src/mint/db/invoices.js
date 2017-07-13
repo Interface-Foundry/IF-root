@@ -35,6 +35,11 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: 'order_not_complete'
     },
 
+    display: {
+      type: 'boolean',
+      defaultsTo: true
+    },
+
     /** is a leader for invoice necessary or is that cart leader? */
     leader: Waterline.isA('user_accounts'),
 

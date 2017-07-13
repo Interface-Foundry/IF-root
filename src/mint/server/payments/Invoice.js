@@ -25,8 +25,8 @@ class Invoice {
     if (_.get(invoice, 'id')) {
       return new invoiceHandlers[invoice.invoice_type](invoice)
     }
-    logging.info('tried to get by GetbyId')
-    throw new Error('no invoice found for GetById')
+    logging.info('no invoice found for GetbyId')
+    return
   }
 
 
