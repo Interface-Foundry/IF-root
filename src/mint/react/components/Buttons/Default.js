@@ -17,7 +17,7 @@ export default class Default extends Component {
     selectTab: PropTypes.func,
     user: PropTypes.object,
     toggleYpoCheckout: PropTypes.func,
-    checkoutOnly: PropTypes.bool
+    checkoutOnly: PropTypes.bool,
   }
 
   _handleShare = () => {

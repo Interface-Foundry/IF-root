@@ -11,6 +11,7 @@ const svcUrl12 = 'https://edigateway-test.ypo.co.uk/EdiService/WcfXmlDataService
 const username = 'kip'
 const password = 'K1p0rdering'
 const logging = require('../../../logging.js')
+const assert = require('assert')
 
 var db
 const dbReady = require('../../db')
@@ -123,6 +124,8 @@ class YPOStore extends Store {
       }
     }
 
+    assert(cart.account_number, 'Account number is required')
+
     if (typeof cart.leader === 'object') {
       var leader = cart.leader
     } else if (typeof cart.leader === 'string') {
@@ -131,9 +134,10 @@ class YPOStore extends Store {
     const address = await db.Addresses.findOne({user_account: leader.id})
 
     const itemsXML = cart.items.map(item => {
+      assert(item.code)
         return `<item>
             <store>YPO</store>
-            <code>${item.code}</code>
+            <code>${item.asin}</code>
             <quantity>${item.quantity}</quantity>
         </item>`
     })
@@ -166,6 +170,8 @@ class YPOStore extends Store {
     // account_number = this is a required field for user to fill in, we can't process order without it
     // delivery_message = optional text field
     // voucher_code = optional field
+
+    console.log(cartXML)
 
     await new Promise((resolve, reject) => {
       soap.createClient(svcUrl11 + '?WSDL', {

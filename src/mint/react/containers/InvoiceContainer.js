@@ -16,14 +16,16 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-  selectedAccordion: state.app.selectedAccordion,
-  cart: state.cart.present,
-  user: state.user,
-  invoice: state.payments.invoice,
-  paymentSources: state.payments.paymentSources,
-  userPaymentStatus: state.payments.userPaymentStatus,
-  payment: state.payments.payment
-};};
+    selectedAccordion: state.app.selectedAccordion,
+    cart: state.cart.present,
+    user: state.user,
+    invoice: state.payments.invoice,
+    showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
+    paymentSources: state.payments.paymentSources,
+    userPaymentStatus: state.payments.userPaymentStatus,
+    payment: state.payments.payment
+  };
+};
 
 // Just an example for mapping functions to the component.
 // What this does it connect the functions to redux, so that the results of those functions get passed to our redux store.
@@ -38,9 +40,4 @@ const mapDispatchToProps = dispatch => ({
   fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id))
 });
 
-
 export default connect(mapStateToProps, mapDispatchToProps)(Invoice);
-
-
-
-

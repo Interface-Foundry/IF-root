@@ -17,11 +17,12 @@ export default class Cart extends Component {
     user: PropTypes.object,
     editId: PropTypes.string,
     removeItem: PropTypes.func,
-    updateItem: PropTypes.func
+    updateItem: PropTypes.func,
+    showInvoice: PropTypes.bool.isRequired
   }
 
   constructor(props) {
-    super(props)
+    super(props);
     this._toggleCart = ::this._toggleCart;
   }
 
@@ -41,7 +42,7 @@ export default class Cart extends Component {
   }
 
   render() {
-    const { cart, user, editId, invoice, updateItem } = this.props,
+    const { cart, user, editId, showInvoice, updateItem } = this.props,
       { openCarts } = this.state,
       { _toggleCart } = this,
       userCarts = splitCartById(this.props, user),
@@ -58,7 +59,7 @@ export default class Cart extends Component {
 
                 ? <div className={`card`} onClick={() => openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
-                  { invoice ? <ItemPaidButton {...this.props}/> : null}
+                  { showInvoice ? <ItemPaidButton {...this.props}/> : null}
                   <h1 className='date' onClick={() => _toggleCart(user.id)}> 
                     <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
                   </h1>

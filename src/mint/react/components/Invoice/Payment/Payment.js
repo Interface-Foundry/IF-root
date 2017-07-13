@@ -8,7 +8,6 @@ import Stripe from './Stripe';
 export default class Payment extends Component {
 
   static propTypes = {
-    invoice: PropTypes.object,
     createPayment: PropTypes.func,
     updateInvoice: PropTypes.func,
     selectAccordion: PropTypes.func,
