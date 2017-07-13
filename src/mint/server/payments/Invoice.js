@@ -44,8 +44,9 @@ class Invoice {
       return new invoiceHandlers[invoice.invoice_type](invoice)
     }
     logging.info('tried to get by cartid')
-    throw new Error('no invoice foundfor GetByCartId')
-    }
+    // throw new Error('no invoice foundfor GetByCartId')
+    return null
+  }
 
   /**
    * create a new invoice of type with data
