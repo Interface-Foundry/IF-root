@@ -88,8 +88,9 @@
       translate_to:'string' //i.e. translated to en-us locale 
     },
     url:'string',
-    product_id:'string',
-    parent_id:'string',
+    opt_url: 'string', //a special URL to retrieve option info (like sizes available for a color)
+    product_id:'string', //top level option
+    parent_id:'string', //links back to top level option
     price_difference: 'float',
     price: 'float',
     original_price: {
