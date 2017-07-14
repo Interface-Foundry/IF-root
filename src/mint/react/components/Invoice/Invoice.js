@@ -16,7 +16,7 @@ export default class Invoice extends Component {
   }
 
   componentDidMount() {
-    const { cart, fetchInvoiceByCart } = this.props
+    const { cart, fetchInvoiceByCart } = this.props;
     fetchInvoiceByCart(cart.id);
   }
 
