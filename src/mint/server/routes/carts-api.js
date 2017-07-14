@@ -516,6 +516,13 @@ module.exports = function (router) {
 
     // Remove the cart-item association
     cart.items.remove(item.id)
+    logging.info('ITEM DELENDUM', item)
+
+    var activeMembers = cart.items.map(item => item.added_by)
+    if (item.added_by !== cart.leader && activeMembers.indexOf(item.added_by) < 0) {
+      logging.info('member no longer has items in the cart')
+      cart.members.remove(item.added_by)
+    }
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true

@@ -96,7 +96,6 @@ class Cart {
     if (!item) {
       throw new Error('Item not found')
     }
-
     // Make sure user has permission to delete it, leaders can delete anything,
     // members can delete their own stuff
     if (this.cart.leader !== userId && item.added_by !== userId) {

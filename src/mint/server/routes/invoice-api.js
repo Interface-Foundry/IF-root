@@ -126,14 +126,6 @@ module.exports = function (router) {
       const payment = await paymentSource.pay(invoice, paymentAmount)
       logging.info('paid')
 
-      // If this invoice has been fully paid, fire off whatever emails
-      var done = await invoice.paidInFull()
-      done = true;
-      if (done) {
-        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
-        await invoice.sendSuccessEmail(invoice)
-      }
-
       return res.send(payment)
     })
 
@@ -264,6 +256,14 @@ module.exports = function (router) {
       const payment = await paymentSource.pay(invoice)
       logging.info('paid', payment)
       return res.send({'amount': payment.amount, 'paid': true})
+
+      // If this invoice has been fully paid, fire off whatever emails
+      var done = await invoice.paidInFull()
+      if (done) {
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        await invoice.sendSuccessEmail(invoice)
+      }
+      
       return res.send(payment)
     })
     /**
