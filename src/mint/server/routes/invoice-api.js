@@ -263,7 +263,7 @@ module.exports = function (router) {
       }
 
       const invoice = await Invoice.GetById(req.body.invoice_id)
-
+      logging.info('creating payment with previously used card')
       const payment = await paymentSource.pay(invoice)
       logging.info('paid', payment)
       return res.send(payment)

@@ -127,7 +127,11 @@ class StripePaymentSource extends PaymentSource {
     return paymentSource
   }
 
-  async pay (paymentAmount, invoice) {
+  async pay (invoice) {
+
+    const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
+    logging.info('userId', this.user)
+    const paymentAmount = debts[this.user]
 
     const stripeResponse = await stripe.charges.create({
       amount: paymentAmount,
