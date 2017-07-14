@@ -13,8 +13,8 @@ const stripeConstants = {
     - testing: 'pk_test_8bnLnE2e1Ch7pu87SmQfP8p7'
 */
 
-
-const stripeSecret = (process.env.NODE_ENV !== 'production') ? stripeConstants.testId : stripeConstants.productionId
+const testStripeSecret = 'sk_test_3dsHoF4cErzMfawpvrqVa9Mc'
+const stripeSecret = process.env.STRIPE_SECRET || testStripeSecret
 
 const _ = require('lodash')
 const stripe = require('stripe')(stripeSecret)
