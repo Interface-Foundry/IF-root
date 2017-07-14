@@ -2,7 +2,6 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import InvoiceOptions from './InvoiceOptions';
 
 export default class InvoiceInfo extends Component {
@@ -13,12 +12,12 @@ export default class InvoiceInfo extends Component {
     updateInvoice: PropTypes.func
   }
 
-  shouldComponentUpdate = ({ invoice }) =>
-    invoice !== this.props.invoice
+  // shouldComponentUpdate = ({ invoice }) =>
+  //   invoice !== this.props.invoice
 
   render() {
 
-    const { selectedAccordion, selectAccordion, cart, user, invoice, updateInvoice } = this.props;
+    const { selectAccordion, cart, user, invoice, } = this.props;
     const isLeader = user.id === cart.leader.id;
 
     return (
