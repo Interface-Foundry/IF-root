@@ -28,7 +28,6 @@ export default class PaymentSources extends Component {
       props: { invoice, createPayment, paymentSources, deletePaymentSource },
       state: { selectedCardIndex }
     } = this;
-
     return (
       <div>
         {
@@ -43,7 +42,9 @@ export default class PaymentSources extends Component {
             </li>
           ))
         }
-        <button onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}> pay </button>
+      {
+        (paymentSources.length > 0) ? <button onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}> pay </button> : <h1> you need to add a card </h1>
+      }
       </div>
     );
   }

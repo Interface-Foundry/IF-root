@@ -4,7 +4,8 @@ export {
   togglePopup,
   selectTab,
   selectAccordion,
-  toggleYpoCheckout
+  toggleYpoCheckout,
+  setHeaderCheckout
 }
 from './app';
 

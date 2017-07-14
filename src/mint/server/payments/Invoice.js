@@ -13,6 +13,10 @@ class Invoice {
     this.invoice = invoiceType
   }
 
+  static InvoiceInitializer(invoice) {
+    return new MintInvoice(invoice)
+  }
+
   /**
    * Gets the Invoice by id
    *
@@ -23,10 +27,10 @@ class Invoice {
   static async GetById (invoiceId) {
     const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
     if (_.get(invoice, 'id')) {
-      return new invoiceHandlers[invoice.invoice_type](invoice)
+      return this.InvoiceInitializer(invoice)
     }
-    // logging.info('tried to get by GetbyId')
-    throw new Error('no invoice found for GetById')
+    logging.info('no invoice found for GetbyId')
+    return
   }
 
 
@@ -39,13 +43,13 @@ class Invoice {
    * @return     {Promise}  the invoices
    */
   static async GetByCartId (cartId) {
+    logging.info('trying to get invoice by cartid', cartId)
     const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
     if (_.get(invoice, 'id')) {
-      return new invoiceHandlers[invoice.invoice_type](invoice)
+      return this.InvoiceInitializer(invoice)
     }
-    logging.info('tried to get by cartid')
-    // throw new Error('no invoice foundfor GetByCartId')
-    return null
+    logging.info('tried to get by cartid, no invoice exists for cartid')
+    return
   }
 
   /**
@@ -57,27 +61,12 @@ class Invoice {
    * @return     {invoiceHandlers}  instantiation of the class
    */
   static Create (invoiceType, invoiceData) {
-    return new invoiceHandlers[invoiceType](invoiceData)
+    return this.InvoiceInitializer(invoice)
   }
 
   static async CreateByCartId (cartId) {
     const cart = await db.Carts.findOne({id: cartId})
-    var nodeInvoice = new invoiceHandlers['mint'](cart)
-    var dbInvoice = await db.Invoices.findOne({cart: cartId})
-    if (!dbInvoice) {
-      dbInvoice = await db.Invoices.create({
-        leader: cart.leader,
-        invoice_type: this.invoice,
-        cart: cart.id,
-        paid: false,
-        total: _.get(cart, 'subtotal'),
-        split_type: this.split_type
-      })
-    }
-
-    await dbInvoice.save()
-    return nodeInvoice
-    // var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
+    return this.InvoiceInitializer(invoice)
   }
 
 
@@ -312,8 +301,6 @@ class MintInvoice extends Invoice {
 }
 
 
-const invoiceHandlers = {
-  [MintInvoice.name]: MintInvoice
-}
+
 
 module.exports = Invoice

@@ -19,7 +19,7 @@ const mapStateToProps = (state, props) => ({
 
 const mapDispatchToProps = dispatch => ({
   handleScroll: (scrollTop, fixed, animationState, animationOffset, containerHeight) => dispatch(handleScroll(scrollTop, fixed, animationState, animationOffset, containerHeight)),
-  registerHeight: (heightFromTop, containerHeight) => dispatch(registerHeight(heightFromTop, containerHeight))
+  registerHeight: (heightFromTop, containerHeight) => dispatch(registerHeight(heightFromTop, containerHeight)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

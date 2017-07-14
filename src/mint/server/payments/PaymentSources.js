@@ -13,8 +13,8 @@ const stripeConstants = {
     - testing: 'pk_test_8bnLnE2e1Ch7pu87SmQfP8p7'
 */
 
-
-const stripeSecret = (process.env.NODE_ENV !== 'production') ? stripeConstants.testId : stripeConstants.productionId
+const testStripeSecret = 'sk_test_3dsHoF4cErzMfawpvrqVa9Mc'
+const stripeSecret = process.env.STRIPE_SECRET || testStripeSecret
 
 const _ = require('lodash')
 const stripe = require('stripe')(stripeSecret)
@@ -130,10 +130,11 @@ class StripePaymentSource extends PaymentSource {
   async pay (invoice) {
 
     const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
-    const userAmount = Math.round(debts[this.user] * 100)
+    logging.info('userId', this.user)
+    const paymentAmount = debts[this.user]
 
     const stripeResponse = await stripe.charges.create({
-      amount: userAmount,
+      amount: paymentAmount,
       currency: 'usd',
       customer: this.data.id
     })
@@ -144,7 +145,7 @@ class StripePaymentSource extends PaymentSource {
       invoice: invoice.id,
       user: this.user,
       payment_source: this.id,
-      amount: userAmount,
+      amount: paymentAmount,
       data: stripeResponse
     })
 

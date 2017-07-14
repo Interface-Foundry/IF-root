@@ -4,6 +4,11 @@ export const toggleSidenav = () => ({
   type: 'TOGGLE_SIDENAV'
 });
 
+export const setHeaderCheckout = show => ({
+  type: 'TOGGLE_HEADER_CHECKOUT',
+  show
+});
+
 export const toggleYpoCheckout = show => ({
   type: 'TOGGLE_YPO_CHECKOUT',
   show

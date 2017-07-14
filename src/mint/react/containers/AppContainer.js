@@ -11,7 +11,8 @@ import {
   navigateRightResults,
   navigateLeftResults,
   getMoreSearchResults,
-  fetchInvoiceByCart
+  fetchInvoiceByCart,
+  setHeaderCheckout
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -32,9 +33,7 @@ const mapStateToProps = (state, ownProps) => {
     page: state.search.page,
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup,
-    lazyLoading: state.search.lazyLoading,
-    // invoice: state.payments.invoice,
-    // showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production')
+    lazyLoading: state.search.lazyLoading
   };
 };
 
@@ -46,7 +45,9 @@ const mapDispatchToProps = dispatch => ({
   fetchInvoiceByCart: (id) => dispatch(fetchInvoiceByCart(id)),
   navigateRightResults: () => dispatch(navigateRightResults()),
   navigateLeftResults: () => dispatch(navigateLeftResults()),
-  getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page))
+  getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page)),
+  setHeaderCheckout: (show) => dispatch(setHeaderCheckout(show))
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

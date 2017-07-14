@@ -10,7 +10,7 @@ import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import ReactGA from 'react-ga';
 
 import Reducers from './reducers';
-import { checkSession, fetchCart, fetchCarts, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
+import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
@@ -29,7 +29,7 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   const loggerMiddleware = createLogger({
     timestamp: false,
     level: { // redux dev tools can do all of this without cluttering the console
-      // download! https://github.com/zalmoxisus/redux-devtools-extension
+      // download! http://extension.remotedev.io/
       prevState: false,
       action: 'error',
       nextState: false,
@@ -53,6 +53,7 @@ const cart_id = location.pathname.match(/cart\/(\w*)\/?/),
 store.dispatch(checkSession()).then(() => {
   store.dispatch(fetchStores());
   if (cart_id && cart_id[1]) {
+    store.dispatch(fetchInvoiceByCart(cart_id[1]));
     store.dispatch(fetchCart(cart_id[1]))
       .then((res) => {
         store.dispatch(fetchCategories(cart_id[1]));

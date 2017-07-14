@@ -2,7 +2,6 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import InvoiceOptions from './InvoiceOptions';
 
 export default class InvoiceInfo extends Component {
@@ -13,15 +12,13 @@ export default class InvoiceInfo extends Component {
     updateInvoice: PropTypes.func
   }
 
+  // shouldComponentUpdate = ({ invoice }) =>
+  //   invoice !== this.props.invoice
+
   render() {
 
-    const { selectedAccordion, selectAccordion, cart, user, invoice, updateInvoice } = this.props;
+    const { selectAccordion, cart, user, invoice, } = this.props;
     const isLeader = user.id === cart.leader.id;
-
-    let invoiceAvailable = false;
-    if (invoice !== undefined) {
-      invoiceAvailable = true;
-    }
 
     return (
       <div className='payment accordion'>
@@ -30,7 +27,9 @@ export default class InvoiceInfo extends Component {
             <h3> Invoice Info</h3>
           </div>
             <div>
-             {invoiceAvailable ? <text> leader: {invoice.leader.name}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> : <p> not available create one above </p>}
+             {
+              (invoice.leader && invoice.leader.name) ? <div>
+              <text> leader: {invoice.leader.name}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
             </div>
         </nav>
       { isLeader ? <InvoiceOptions {...this.props}/> : null }

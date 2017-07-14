@@ -14,6 +14,7 @@ export default class Stripe extends Component {
     createPaymentSource: PropTypes.func
   }
 
+
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;
     console.log('fetching paymentstatus', invoice.id);
@@ -21,17 +22,19 @@ export default class Stripe extends Component {
   }
 
   render() {
-    const { user, userPaymentStatus, createPaymentSource } = this.props;
+    const { user, invoice, userPaymentStatus, createPaymentSource } = this.props;
+    const invoiceId = invoice.id;
+    const amount = userPaymentStatus.amount;
     return (
       <StripeCheckout
-        token={(stripe_data) => createPaymentSource(stripe_data, 'stripe')}
-        stripeKey="pk_test_8bnLnE2e1Ch7pu87SmQfP8p7"
+        token={(stripe_data) => createPaymentSource(amount, stripe_data, 'stripe', invoiceId)}
+        stripeKey={process.env.STRIPE_KEY}
         email={user.email_address}
         name="Kip"
         description="Mint"
         panelLabel="PAY UP"
         allowRememberMe={false}
-        amount={userPaymentStatus.amount * 100}
+        amount={amount}
       >
         <button>+ add card with stripe</button>
       </StripeCheckout>

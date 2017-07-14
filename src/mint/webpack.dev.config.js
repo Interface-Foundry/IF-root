@@ -26,7 +26,8 @@ module.exports = {
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.ProgressPlugin(),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development')
+      'process.env.NODE_ENV': JSON.stringify('development'),
+      'process.env.STRIPE_KEY': JSON.stringify('pk_test_8bnLnE2e1Ch7pu87SmQfP8p7')
     })
   ],
   module: {

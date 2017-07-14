@@ -21,7 +21,7 @@ export default class SettingsHeader extends Component {
       history: { goBack }
     } = this.props;
     return (
-      <span className='settings'>
+      <span className='settingsHead'>
           <a href='#' className='navbar__icon__close' onClick={(e)=> {e.preventDefault(); goBack();}}>
             <Icon icon='Left'/>
           </a>

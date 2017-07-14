@@ -6,6 +6,7 @@ import { Invoice } from '../components';
 import {
   selectAccordion,
   fetchInvoice,
+  fetchInvoiceByCart,
   updateInvoice,
   createPayment,
   fetchPaymentStatus,
@@ -20,7 +21,6 @@ const mapStateToProps = (state, ownProps) => {
     cart: state.cart.present,
     user: state.user,
     invoice: state.payments.invoice,
-    showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
     paymentSources: state.payments.paymentSources,
     userPaymentStatus: state.payments.userPaymentStatus,
     payment: state.payments.payment
@@ -33,7 +33,8 @@ const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   createPayment: (paymentsource_id, invoice_id) => dispatch(createPayment(paymentsource_id, invoice_id)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
-  createPaymentSource: (payment_data, payment_source) => dispatch(createPaymentSource(payment_data, payment_source)),
+  fetchInvoiceByCart: (cart_id) => dispatch(fetchInvoiceByCart(cart_id)),
+  createPaymentSource: (payment_amount, payment_data, payment_source, invoice_id) => dispatch(createPaymentSource(payment_amount, payment_data, payment_source, invoice_id)),
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),
   deletePaymentSource: (paymentsource_id) => dispatch(deletePaymentSource(paymentsource_id)),
   updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data)),

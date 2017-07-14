@@ -4,6 +4,7 @@ const Invoice = require('../payments/Invoice.js')
 const Cart = require('../cart/Cart.js')
 const PaymentSource = require('../payments/PaymentSources.js')
 const utils = require('../utilities/invoice_utils.js')
+const assert = require('assert')
 
 var db
 const dbReady = require('../../db')
@@ -225,12 +226,21 @@ module.exports = function (router) {
      */
     .post(async (req, res) => {
       const userId = req.UserSession.user_account.id
+      logging.info('body from creating payment', req.body)
+      // create charge
+      const paymentAmount = _.get(req, 'body.amount')
       const paymentSourceType = _.get(req, 'body.payment_source', 'stripe')
-      const paymentSource = await PaymentSource.Create(paymentSourceType, {user: userId})
-      const createdSource = await paymentSource.createPaymentSource(req.body.payment_data)
-      logging.info('new payment source:', createdSource)
-      const paymentSources = await PaymentSource.GetForUserId(userId)
-      return res.send(paymentSources)
+      const createdPaymentSource = await PaymentSource.Create(paymentSourceType, {user: userId})
+      const createdSource = await createdPaymentSource.createPaymentSource(req.body.payment_data)
+
+      // charge new payment source
+      const paymentSourceId = createdSource.id
+      const paymentSource = await PaymentSource.GetById(paymentSourceId)
+
+      const invoice = await Invoice.GetById(req.body.invoice_id)
+      const payment = await paymentSource.pay(paymentAmount, invoice)
+      logging.info('paid', payment)
+      return res.send({'amount': paymentAmount, 'paid': true})
     })
 
   router.route('/payment/:paymentsource_id')
@@ -253,7 +263,7 @@ module.exports = function (router) {
       }
 
       const invoice = await Invoice.GetById(req.body.invoice_id)
-
+      logging.info('creating payment with previously used card')
       const payment = await paymentSource.pay(invoice)
       logging.info('paid', payment)
       return res.send(payment)
@@ -280,15 +290,14 @@ module.exports = function (router) {
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    let invoice
-    try {
-      invoice = await Invoice.GetByCartId(req.params.cart_id)
-    } catch (err) {
-      logging.info('error getting invoice getbycartId')
-      return res.send({}).end()
+    const invoice = await Invoice.GetByCartId(req.params.cart_id)
+    if (invoice) {
+      logging.info('this is the inoice', invoice)
+      await invoice.updateInvoice()
+      return res.send(invoice)
     }
-    await invoice.updateInvoice()
-    return res.send(invoice)
+    logging.info('error getting invoice getbycartId')
+    return res.send({display: false})
   })
 
   /**
@@ -333,26 +342,40 @@ module.exports = function (router) {
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-    // check for old invoice.  deal with this later tbh
-    const oldInvoice = await Invoice.GetByCartId(req.params.cart_id)
-    logging.info('tried to find an old invoice')
+    const oldInvoice = await db.Invoices.findOne({
+      cart: req.params.cart_id
+    })
+
     if (oldInvoice) {
-      // logging.info('invoice already exists for this cart_id, not creating new invoice', oldInvoice.id)
-      // return res.send(oldInvoice)
-      logging.info('deleting old invoice for time being')
-      await oldInvoice.archive()
+      throw new Error('Cannot create a new invoice when you already have one')
     }
 
-    const invoiceData = _.omitBy({
-      cart: req.params.cart_id,
-      split_type: _.get(req, 'body.split_type')
-    }, _.isUndefined)
+    // get the cart
+    var cart = await db.Carts.findOneById(req.params.cart_id)
+      .populate('items')
+      .populate('leader')
 
-    logging.info('invoice data', invoiceData)
-    var cart = await Cart.GetById(req.params.cart_id)
-    const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
-    const newInvoice = await invoice.createInvoice(cart)
-    logging.info('created new invoice: ', invoiceData)
-    return res.send(newInvoice)
+    // double check
+    assert(cart, 'Cart ' + req.params.cart_id + ' not found')
+
+    // then check it out :)
+    var checkoutResponse = await cart.checkout()
+
+    // make sure the cart is locked
+    if (!cart.locked) {
+      cart.locked = true
+      await cart.save()
+    }
+
+    // create the invoice document here, don't need an es6 class to create it i think
+    const invoice = await db.Invoices.create({
+      leader: cart.leader,
+      cart: req.params.cart_id,
+      paid: false,
+      total: cart.subtotal,
+      affiliate_checkout_url: cart.affiliate_checkout_url
+    })
+    logging.info('sending invoice now!')
+    return res.send(invoice)
   })
 }

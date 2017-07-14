@@ -63,7 +63,6 @@ export default class Default extends Component {
       props: { cart, user, updateCart, checkoutOnly = false }
     } = this,
     total = calculateItemTotal(cart.items);
-
     return (
       <div className='default'>
         {
@@ -102,7 +101,7 @@ export default class Default extends Component {
                     </a>
                   </button>
                 }
-              {displayInvoice && !checkoutOnly ? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
+              {displayInvoice && !checkoutOnly && (cart.items.length > 0)? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
               {!checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }

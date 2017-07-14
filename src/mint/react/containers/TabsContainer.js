@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Tabs } from '../components';
 
 import {
-  selectTab,
+  selectTab
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -12,7 +12,6 @@ const mapStateToProps = (state, ownProps) => {
     tab: state.app.viewTab,
     search: state.search,
     cart: state.cart.present,
-    showInvoice: state.payments.invoice && !process.env.NODE_ENV.includes('production'),
     invoice: state.payments.invoice
   };
 };

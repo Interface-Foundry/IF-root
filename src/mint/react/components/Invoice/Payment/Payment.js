@@ -16,11 +16,12 @@ export default class Payment extends Component {
   }
 
   render() {
-    const { selectAccordion, selectedAccordion } = this.props;
-
+    const { userPaymentStatus, selectAccordion, selectedAccordion } = this.props;
+    console.log('user paymentStatus', userPaymentStatus)
     return (
       <div className='payment accordion'>
         <nav onClick={() => selectAccordion('payment')}>
+
           <h3>2. Payment method</h3>
         </nav>
         {
@@ -29,8 +30,13 @@ export default class Payment extends Component {
               <h4>Your credit and debit cards</h4>
             </nav>
             <ul>
-              <PaymentSources {...this.props}/>
-              <Stripe {...this.props}/>
+              {
+                userPaymentStatus.paid ? <p> user has already paid </p> :
+                  <div>
+                    <PaymentSources {...this.props}/>
+                    <Stripe {...this.props}/>
+                  </div>
+              }
             </ul>
          </div> : null
         }

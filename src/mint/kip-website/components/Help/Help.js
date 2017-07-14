@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import ReactDOM from 'react-dom';
 import { PropTypes } from 'prop-types';
 import { replaceHtml } from '../../utils';
@@ -95,23 +95,26 @@ export default class Help extends Component {
             </ul>
           </nav>
           <div className="col-12 row-1 tutorial__slideshow" >
-            <CSSTransitionGroup
-              transitionName="slide"
-              transitionEnterTimeout={0}
-              transitionLeaveTimeout={0}>
+            <TransitionGroup>
               {
                 slides.map((i, index) => {
                   if(index !== selectedIndex ) return null;
                   return (
-                    <div key={i.id} className={`image ${images[selectedIndex].class} ${src==='slack' ? 'slack' : ''}`} style={{backgroundImage: `url(${i.src})`}}>
-                      <div className={`bubble ${src==='slack' ? 'slack' : ''}`}>
-                        <p>{i.bubble}</p>
+                      <CSSTransition
+                         key={index}
+                         classNames='slide'
+                         timeout={666}
+                      >
+                        <div key={i.id} className={`image ${images[selectedIndex].class} ${src==='slack' ? 'slack' : ''}`} style={{backgroundImage: `url(${i.src})`}}>
+                        <div className={`bubble ${src==='slack' ? 'slack' : ''}`}>
+                          <p>{i.bubble}</p>
+                        </div>
                       </div>
-                    </div>
+                    </CSSTransition>
                   );
                 })
               }
-            </CSSTransitionGroup>
+            </TransitionGroup>
           </div> 
         </section>
         <section className = 'FAQ'>

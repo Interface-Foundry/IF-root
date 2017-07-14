@@ -35,6 +35,11 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: 'order_not_complete'
     },
 
+    display: {
+      type: 'boolean',
+      defaultsTo: true
+    },
+
     /** is a leader for invoice necessary or is that cart leader? */
     leader: Waterline.isA('user_accounts'),
 
@@ -69,6 +74,11 @@ const invoiceCollection = Waterline.Collection.extend({
       type: 'string',
       enum: ['split_single', 'split_equal', 'split_by_item'],
       defaultsTo: () => 'split_single'
+    },
+
+    /** the checkout url with our affiliate info in it */
+    affiliate_checkout_url: {
+      type: 'string'
     },
 
     /** function to archive this object */

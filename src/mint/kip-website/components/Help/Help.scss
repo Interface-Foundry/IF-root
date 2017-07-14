@@ -286,7 +286,7 @@
         @include animation(fadeAndSlideInRight $material-bezier 0.66s);
       }
 
-      .slide-leave {
+      .slide-exit {
         @include animation(fadeAndSlideOutLeft $material-bezier 0.66s);
       }
     }
