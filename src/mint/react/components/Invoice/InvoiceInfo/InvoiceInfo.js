@@ -12,6 +12,10 @@ export default class InvoiceInfo extends Component {
     selectAccordion: PropTypes.func,
     updateInvoice: PropTypes.func
   }
+  componentWillMount() {
+    const { cart } = this.props
+    console.log('this is cart', cart)
+  }
 
   render() {
 
@@ -32,7 +36,9 @@ export default class InvoiceInfo extends Component {
             <h3> Invoice Info</h3>
           </div>
             <div>
-             {invoiceAvailable ? <text> leader: {invoice.leader.name}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> : <p> not available create one above </p>}
+             {
+              (invoice.leader && invoice.leader.name) ? <div>
+              <text> leader: {invoice.leader.name}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
             </div>
         </nav>
       { isLeader ? <InvoiceOptions {...this.props}/> : null }
