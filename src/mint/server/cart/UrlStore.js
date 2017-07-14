@@ -110,7 +110,7 @@ class UrlStore extends Store {
     })
     await item.save()
 
-    item = await db.Items.findOne({id: item.id}).populate('options')
+    item = await db.Items.findOne({id: item.id}).populate('options').populate('translations').populate('conversions')
 
     return [item];
   }
