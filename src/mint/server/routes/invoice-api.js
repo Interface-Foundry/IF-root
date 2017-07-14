@@ -123,7 +123,7 @@ module.exports = function (router) {
       const invoice = await Invoice.GetById(req.params.invoice_id)
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
       const paymentAmount = req.body.payment_amount
-      const payment = await paymentSource.pay(invoice, paymentAmount)
+      const payment = await paymentSource.pay(invoice)
       logging.info('paid')
 
       return res.send(payment)
@@ -239,7 +239,7 @@ module.exports = function (router) {
       logging.info('got invoice,', invoice)
 
       logging.info('creating payment')
-      const payment = await paymentSource.pay(paymentAmount, invoice)
+      const payment = await paymentSource.pay(invoice)
       logging.info('paid', payment)
       return res.send({'amount': paymentAmount, 'paid': true})
     })
@@ -275,7 +275,7 @@ module.exports = function (router) {
         await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
         await invoice.sendSuccessEmail(invoice)
       }
-      
+
       return res.send(payment)
     })
     /**
