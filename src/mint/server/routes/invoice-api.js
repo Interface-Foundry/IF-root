@@ -232,15 +232,16 @@ module.exports = function (router) {
       // charge new payment source
       const paymentSourceId = createdSource.id
       const paymentSource = await PaymentSource.GetById(paymentSourceId)
-      logging.info('getting paymentsource', paymentSource)
 
-      logging.info('getting invoice')
       const invoice = await Invoice.GetById(req.body.invoice_id)
-      logging.info('got invoice,', invoice)
-
-      logging.info('creating payment')
       const payment = await paymentSource.pay(invoice)
-      logging.info('paid', payment)
+
+      const done = await invoice.paidInFull()
+      if (done) {
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        await invoice.sendSuccessEmail(invoice)
+      }
+
       return res.send({'amount': paymentAmount, 'paid': true})
     })
 
