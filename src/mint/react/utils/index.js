@@ -40,7 +40,8 @@ export {
 from './testUtils';
 
 export {
-  checkPageScroll
+  checkPageScroll,
+  isScrolledIntoView
 }
 from './scroll';
 
