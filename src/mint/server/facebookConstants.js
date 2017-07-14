@@ -1,4 +1,4 @@
-const devhannah = {
+const dev = {
   clientID: 855809247908300,
   clientSecret: '9d0d946d5096bde7395d7e6256399a4c',
   baseUrl: 'https://0cc99afe.ngrok.io'
@@ -17,6 +17,5 @@ const mintdev = {
 }
 
 if (process.env.NODE_ENV === 'production') module.exports = production
-else if (process.env.NODE_ENV === 'development_hannah') module.exports = devhannah
-else if (process.env.NODE_ENV === 'development_chris') module.exports = devhannah
+else if (process.env.NODE_ENV === 'development_chris') module.exports = dev
 else module.exports = mintdev

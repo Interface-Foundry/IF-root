@@ -1,4 +1,4 @@
-// mint/react/components/View/Invoice/Stripe.js
+// mint/react/components/View/Invoice/Payment/PaymentSources.js
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -8,20 +8,26 @@ export default class PaymentSources extends Component {
   static propTypes = {
     invoice: PropTypes.object,
     paymentSources: PropTypes.array,
-    deletePaymentSource: PropTypes.func
+    fetchPaymentSources: PropTypes.func,
+    deletePaymentSource: PropTypes.func,
+    createPayment: PropTypes.func
   }
 
   state = {
-    selectedTypeIndex: null,
     selectedCardIndex: null
+  }
+
+  componentWillMount() {
+    const { fetchPaymentSources } = this.props;
+    fetchPaymentSources();
   }
 
   render() {
 
-    const { props: { paymentSources, deletePaymentSource },
-            state: { selectedCardIndex }
+    const {
+      props: { invoice, createPayment, paymentSources, deletePaymentSource },
+      state: { selectedCardIndex }
     } = this;
-
     return (
       <div>
         {
@@ -36,6 +42,9 @@ export default class PaymentSources extends Component {
             </li>
           ))
         }
+      {
+        (paymentSources.length > 0) ? <button onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}> pay </button> : <h1> you need to add a card </h1>
+      }
       </div>
     );
   }

@@ -2,14 +2,30 @@
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
 
-.loading {
-  @include animation(placeHolderShimmer 2s infinite);
+$color-red: rgba(255, 0, 0, 1);
+$color-orange: rgba(255, 165, 0, 1);
+$color-yellow: rgba(255, 255, 0, 1);
+$color-green: rgba(0, 128, 0, 1);
+$color-blue: rgba(0, 0, 255, 1);
+$color-purple: rgba(128, 0, 128, 1);
 
-  background: linear-gradient(to right, adjust-hue($thirdColor, 45deg) 8%, $thirdColor 18%, adjust-hue($thirdColor, 45deg) 33%);
-  background-size: 200% 5px;
-  height: 5px;
+$rainbow-gradient: -45deg, $color-red 0%, $color-red 14%, $color-orange 14%, $color-orange 31%, $color-yellow 31%, $color-yellow 48%, $color-green 48%, $color-green 65%, $color-blue 65%, $color-blue 82%, $color-purple 82%, $color-purple 97%, $color-red 97%;
+$default-gradient: to right, adjust-hue($thirdColor, 45deg) 8%, $thirdColor 18%, adjust-hue($thirdColor, 45deg) 33%;
+
+$default-size: 200% 4px;
+$rainbow-size: 100px 4px;
+
+$rainbow-animation: loadingIndefinite;
+$default-animation: placeHolderShimmer;
+
+.loading {
+  @include animation($default-animation 1s linear infinite);
+
+  background-image: linear-gradient($default-gradient);
+  background-size: $default-size;
+  height: 4px;
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: 100;
+  z-index: 1000;
 }

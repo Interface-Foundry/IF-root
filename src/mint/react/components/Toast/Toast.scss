@@ -3,8 +3,8 @@
 @import '../../../react-common/styles/Animations';
 
 .toast {
-  @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.6s);
-  @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
+  // @include animation(fadeInDown cubic-bezier(0.4, 0, 0.2, 1) 0.6s);
+  // @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
   z-index: 200;
   padding: $padding;
   border-radius: $padding/2;
@@ -35,7 +35,7 @@
   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.toastTransition-leave {
+.toastTransition-exit {
   @include animation(fadeOutUp cubic-bezier(0.4, 0, 0.2, 1) 0.99s);
   @include transition(all 0.99s cubic-bezier(0.4, 0, 0.2, 1));
 }

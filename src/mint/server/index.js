@@ -7,6 +7,7 @@ const fs = require('fs'),
   bodyParser = require('body-parser'),
   sessions = require('client-sessions'),
   path = require('path'),
+  locale = require('locale'),
   mintLogger = require('./mint_logging.js'),
   _ = require('lodash'),
   co = require('co'),
@@ -132,6 +133,11 @@ if (process.env.LOGGING_MODE === 'database') {
  */
 app.use(passport.initialize())
 app.use(passport.session())
+
+/**
+ * locale middleware
+ */
+app.use(locale())
 
 //
 // Back end routes

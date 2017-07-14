@@ -14,6 +14,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   @media only screen and (max-width: 600px) {
     overflow-x: auto;
+
+    tr {
+      display: block;
+      width: 100%;
+    }
   }
 
   th {
@@ -45,12 +50,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         .image {
           border-radius: 5px;
           display: inline-block;
-          height: $nav-height*2;
-          width: $nav-height*2;
+          height: $nav-height * 2;
+          width: $nav-height * 2;
 
           @media only screen and (max-width: 600px) {
-            height: $nav-height*2;
-            width: $nav-height*2;
+            height: $nav-height * 2;
+            width: $nav-height * 2;
           }
         }
 
@@ -60,7 +65,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           flex: 1 1 auto;
 
           @media only screen and (max-width: 600px) {
-            width: calc(100% - #{$nav-height*2});
+            width: calc(100% - #{$nav-height * 2});
           }
 
           .cart-description {
@@ -68,6 +73,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             min-height: 50px;
             padding: 5px 0;
             max-width: 400px;
+
             svg {
               display: inline-block;
             }
@@ -380,6 +386,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           .cart-description {
             .cart-description__text {
               color: white; // :shrug:
+           
             }
           }
         }

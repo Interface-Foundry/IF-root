@@ -1,7 +1,9 @@
 // react/reducers/invoices.js
 
 const initialState = {
-  paymentSources: []
+  paymentSources: [],
+  invoice: {},
+  userPaymentStatus: {paid: false}
 };
 
 export default function payments(state = initialState, action) {
@@ -23,7 +25,42 @@ export default function payments(state = initialState, action) {
   case 'CREATE_PAYMENTSOURCE_SUCCESS':
     return {
       ...state,
-      paymentSources: action.response
+      userPaymentStatus: action.response
+    };
+  case 'INVOICE_SUCCESS':
+    return {
+      ...state,
+      invoice: action.response
+    };
+  case 'CREATE_INVOICE_SUCCESS':
+    return {
+      ...state,
+      invoice: action.response
+    };
+  case 'INVOICE_BY_CART_SUCCESS':
+    return {
+      ...state,
+      invoice: action.response
+    };
+  case 'INVOICE_BY_CART_FAIL':
+    return {
+      ...state,
+      invoice: { 'display': false }
+    };
+  case 'UPDATE_INVOICE_OPTIONS_SUCCESS':
+    return {
+      ...state,
+      invoice: action.response
+    };
+  case 'CREATE_PAYMENT_SUCCESS':
+    return {
+      ...state,
+      payment: action.response
+    };
+  case 'FETCH_PAYMENT_STATUS_SUCCESS':
+    return {
+      ...state,
+      userPaymentStatus: action.response
     };
   default:
     return state;

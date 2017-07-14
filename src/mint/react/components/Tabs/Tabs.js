@@ -2,32 +2,36 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { numberOfItems } from '../../utils';
-import { AlertBubble } from '../../../react-common/components';
+import { numberOfItems, Timeout } from '../../utils';
 import { Icon } from '../../../react-common/components';
 
-export default class Tabs extends Component {
+class Tabs extends Component {
 
   static propTypes = {
     selectTab: PropTypes.func,
     cart: PropTypes.object,
     search: PropTypes.object,
     tab: PropTypes.string,
-    history: PropTypes.object
+    history: PropTypes.object,
+    clearTimeouts: PropTypes.func,
+    setTimeout: PropTypes.func,
   }
 
   state = {
     tabs: []
   }
 
-  componentDidMount() {
-    const { cart: { items, id }, search: { query } } = this.props;
+  clearHightlight = null
+
+
+  _getTabs = ({ invoice, numItems, id, query, highlight = false }) => {
     const tabs = [{
       id: 1,
       tab: 'cart',
       icon: 'Home',
       url: `/cart/${id}`,
-      display: `Cart (${numberOfItems(items)})`
+      display: `Cart (${numItems})`,
+      highlight
     }, {
       id: 2,
       tab: 'search',
@@ -36,9 +40,9 @@ export default class Tabs extends Component {
       display: 'Save'
     }, {
       id: 3,
-      tab: 'cart',
+      tab: 'share',
       icon: 'Person',
-      url: `${id}/m/share`,
+      url: `/cart/${id}/m/share`,
       display: 'Share'
     }, {
       id: 4,
@@ -47,43 +51,28 @@ export default class Tabs extends Component {
       url: `/cart/${id}`,
       display: 'Invoice'
     }];
+    if (invoice && invoice.display) {
+      tabs.push({ id: 4, tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
+    }
+    return tabs;
+  }
+
+  componentWillMount() {
+    const { invoice, cart: { items, id }, search: { query } } = this.props;
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query });
+
     this.setState({ tabs });
   }
 
-  clearHightlight = null
-
-  componentWillReceiveProps(nextProps) {
-    const { cart: { items, id }, search: { query } } = nextProps,
-    itemsChanged = items.length > this.props.cart.items.length,
-      tabs = [{
-        id: 1,
-        tab: 'cart',
-        icon: 'Home',
-        url: `/cart/${id}`,
-        display: `Cart (${numberOfItems(items)})`,
-        highlight: itemsChanged
-      }, {
-        id: 2,
-        tab: 'search',
-        icon: 'Search',
-        url: `/cart/${id}?q=${query}`,
-        display: 'Save'
-      }, {
-        id: 3,
-        tab: 'cart',
-        icon: 'Person',
-        url: `${id}/m/share`,
-        display: 'Share'
-      }, {
-        id: 4,
-        icon: 'PriceTag',
-        tab: 'invoice',
-        url: `/cart/${id}`,
-        display: 'Invoice'
-      }];
-    clearTimeout(this.clearHightlight);
+  componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
+    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
-    this.clearHightlight = setTimeout(() => this.setState({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) }), 3000);
+    if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
+      this.props.clearTimeouts();
+      this.props.setTimeout(
+        () => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })),
+        3000);
+    }
   }
 
   render() {
@@ -93,7 +82,7 @@ export default class Tabs extends Component {
       <div className='tabs'>
         {
           tabs.map((t) => (
-            <h1 key={t.id} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab && t.id !== 3 ? 'selected' : ''} ${t.highlight ? 'highlight' : ''}`}>
+            <h1 key={t.id} onClick={() => {push(t.url); selectTab(t.tab);}} className={`${tab === t.tab ? 'selected' : ''} ${t.highlight ? 'highlight' : ''}`}>
               <Icon icon={t.icon}/>
               <span>{t.display}</span>
             </h1>
@@ -126,3 +115,4 @@ export default class Tabs extends Component {
 // }];
 
 
+export default Timeout(Tabs);

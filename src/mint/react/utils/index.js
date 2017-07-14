@@ -29,7 +29,8 @@ export {
   splitAndMergeSearchWithCart,
   formatPrivacy,
   getStoreName,
-  splitOptionsByType
+  splitOptionsByType,
+  addLinkToDesktop
 }
 from './formatting';
 
@@ -39,7 +40,8 @@ export {
 from './testUtils';
 
 export {
-  checkPageScroll
+  checkPageScroll,
+  isScrolledIntoView
 }
 from './scroll';
 
@@ -54,6 +56,8 @@ export {
   addSearchHistory
 }
 from './search';
+
+export Timeout from './Timeout';
 
 export function sleep(time) {
   return new Promise(resolve => setTimeout(resolve, time));

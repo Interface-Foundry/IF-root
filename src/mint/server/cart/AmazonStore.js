@@ -73,7 +73,7 @@ class AmazonStore extends Store {
     }
 
     const asin = uri.match(/B[\dA-Z]{9}|\d{9}(X|\d)/)[0]
-    const amazonItem = this.catalogLookup({text: asin})
+    const amazonItem = await this.catalogLookup({text: asin})
     return [amazonItem]
   }
 
@@ -83,6 +83,9 @@ class AmazonStore extends Store {
    * @return {[amazonItem]}         the amazon item response for the asin
    */
   async catalogLookup(options) {
+    if (typeof options === 'string') {
+      options = {asin: options}
+    }
     const asin = options.text || options.asin
     console.log('looking up asin', asin)
 
@@ -113,6 +116,25 @@ class AmazonStore extends Store {
 
       // and like save a record in the db every time we scrape an item
       db.RawConnection.collection('amazon_catalog_lookups').insertOne(escapeKeys(amazonItem))
+    }
+
+
+    //
+    // Error checks that can happen from catalog lookups or url pasting
+    //
+    if (!amazonItem.Offers.Offer) {
+      // no offer for parent asins, but they likely have variations, so try to use one of the variations
+      var availableChildren = _.get(amazonItem, 'Variations.Item', [])
+        .filter(child => !!_.get(child, 'Offers.Offer.OfferListing'))
+
+      if (availableChildren.length > 0) {
+        return await this.catalogLookup(availableChildren[0].ASIN)
+      }
+
+      // or if we are in a variation that doesn't have a listing, get the parent which will then get an available listing
+      if (amazonItem.ASIN !== amazonItem.ParentASIN) {
+        return await this.catalogLookup(amazonItem.ParentASIN)
+      }
     }
 
     return amazonItem
@@ -383,6 +405,27 @@ class AmazonStore extends Store {
 
 
   /**
+   * sync cart to amazon api, gets subtotal and checkout link for cart with items
+   *
+   * @param      {object}   cart    the cart we are syncing
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async sync(items) {
+    // if there are no amazon items in the cart then you can't sync it
+    if (items.length === 0 || !items[0].asin) {
+      throw new Error('can only sync carts that have amazon items, and items must be populated')
+    }
+    // to sync with amazon, we create a totally new cart
+    const cartAddAmazonParams = createAmazonCartWithItems(items);
+    cartAddAmazonParams.AssociateTag = this.credentials.assocId
+    const results = await this.opHelper.execute('CartCreate', cartAddAmazonParams);
+
+    const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
+    const amazonCart = results.result.CartCreateResponse.Cart
+    return amazonCart
+  }
+
+  /**
    * creates an amazon cart
    *
    * @param      {object}   cart    the cart we are syncing
@@ -418,7 +461,7 @@ class AmazonStore extends Store {
     const results = await this.opHelper.execute('CartCreate', amazonParams);
     const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
     const amazonCart = results.result.CartCreateResponse.Cart
-    cart.subtotal = amazonCart.SubTotal.Amount / 100.00
+    cart.subtotal = amazonCart.SubTotal.Amount
     cart.amazon_cartid = amazonCart.CartId
     cart.amazon_hmac = amazonCart.HMAC
     cart.amazon_purchase_url = amazonCart.PurchaseURL
@@ -500,15 +543,16 @@ function getErrorsFromAmazonCartCreate (res) {
  * @return     {number}  amount formated to tenths or whatever usd is
  */
 function formatAmazonPrice(amount) {
-  return parseInt(amount) / 100
+  return parseInt(amount)
 }
 
 function getItemPrice(item, priceType) {
   // place holder for time being since unsure what price to use
   const availablePrices = {}
   availablePrices.basicItemPrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.Price.Amount', 0))
+  availablePrices.salePrice = formatAmazonPrice(_.get(item, 'Offers.Offer.OfferListing.SalePrice.Amount', 0))
   if (priceType === undefined) {
-    return availablePrices.basicItemPrice
+    return availablePrices.salePrice || availablePrices.basicItemPrice
   } else {
     // might be useful to return other possible prices in the future
     availablePrices.lowestPrice = formatAmazonPrice(_.get(item, 'OfferSummary.LowestNewPrice.Amount', 0))
@@ -568,6 +612,49 @@ function escapeKeys(obj) {
     }
   });
   return obj;
+}
+
+/**
+ * create an amazon cart instead of worrying about updating cart and removing etc
+ *
+ * @param {array} items - array of items that would include:
+ *                        ASIN - asin from amazon (TODO: allow for OfferListingId)
+ *                        Quantity - quantity
+ */
+function createAmazonCartWithItems (items) {
+  const useAsin = true
+  if (!items instanceof Array) {
+    items = [items]
+  }
+
+  // ability to use offerlistingid or asin later, just using asin rn
+
+  var amazonParams = {}
+
+  var condendesedItems = condenseItems(items)
+  var k = 1
+  for (i of condendesedItems) {
+    amazonParams[`Item.${k}.ASIN`] = i.asin
+    amazonParams[`Item.${k}.Quantity`] = i.quantity
+    k++
+  }
+  return amazonParams
+}
+
+function condenseItems(items) {
+  var seenAsins = []
+  return items.reduce((prev, curr) => {
+    if (seenAsins.includes(curr.asin)) {
+      prev.find(x => x.asin === curr.asin).quantity += curr.quantity
+    } else {
+      seenAsins.push(curr.asin)
+      prev.push({
+        asin: curr.asin,
+        quantity: curr.quantity
+      })
+    }
+  return prev
+  }, [])
 }
 
 module.exports = AmazonStore

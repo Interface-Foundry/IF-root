@@ -1,6 +1,7 @@
 const Waterline = require('waterline')
 const uuid = require('uuid')
 
+var archive = require('./cold_storage')
 const constants = require('../server/constants.js')
 
 /**
@@ -34,6 +35,11 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: 'order_not_complete'
     },
 
+    display: {
+      type: 'boolean',
+      defaultsTo: true
+    },
+
     /** is a leader for invoice necessary or is that cart leader? */
     leader: Waterline.isA('user_accounts'),
 
@@ -46,11 +52,6 @@ const invoiceCollection = Waterline.Collection.extend({
     /** cart associated with the payment */
     // cart: Waterline.isA('cart'),
     cart: Waterline.isA('carts'),
-
-    /**
-     * which members are part of the cart
-     */
-    members: Waterline.isMany('user_accounts'),
 
     /** Many-to-one relation with user accounts, so multiple users could pay */
     // payments: Waterline.isMany('payments'),
@@ -71,13 +72,23 @@ const invoiceCollection = Waterline.Collection.extend({
      */
     split_type: {
       type: 'string',
-      enum: ['split_single', 'split_equal', 'split_by_item']
+      enum: ['split_single', 'split_equal', 'split_by_item'],
+      defaultsTo: () => 'split_single'
     },
+
+    /** the checkout url with our affiliate info in it */
+    affiliate_checkout_url: {
+      type: 'string'
+    },
+
+    /** function to archive this object */
+    archive: archive,
 
     /** everything that would be a order in old db.payments*/
     cafe_order: {
-      type: 'json',
+      type: 'json'
     }
+
   }
 })
 

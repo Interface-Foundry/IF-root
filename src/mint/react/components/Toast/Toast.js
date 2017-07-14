@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 export default class Toast extends Component {
   static propTypes = {
@@ -41,7 +41,7 @@ export default class Toast extends Component {
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
       ::this._clearParams();
-    }, 5000);
+    }, 4000);
   }
 
   _clearParams() {
@@ -57,18 +57,21 @@ export default class Toast extends Component {
   render() {
     const { props: { status, toast }, state: { showToast } } = this;
     return (
-      <CSSTransitionGroup
-        transitionName='toastTransition'
-        transitionEnterTimeout={0}
-        transitionLeaveTimeout={0}>
+      <TransitionGroup>
         {
           showToast 
-            ? <div className={`${status} toast`} key={toast}>
-                {toast}
-            </div>
+            ? <CSSTransition
+               key={toast.length}
+               classNames='toastTransition'
+               timeout={990}
+              >
+                <div className={`${status} toast`} key={toast}>
+                  {toast}
+                </div>
+              </CSSTransition>
             : null
         }
-      </CSSTransitionGroup>
+      </TransitionGroup>
     );
   }
 }

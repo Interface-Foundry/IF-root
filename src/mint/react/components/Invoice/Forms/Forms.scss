@@ -2,7 +2,7 @@
 @import '../../../../react-common/styles/Animations';
 
 .forms {
-  position: fixed;
+  position: absolute;
   margin: 0 auto;
   padding: $padding*5 $padding 0;
   top: $nav-height*2;
@@ -12,11 +12,13 @@
   z-index: 50;
 
   .forms__modal {
+    position: absolute;
+    left: 10%;
     height: 300px;
-    width: 100%;
+    width: 80%;
     background: white;
     border-radius: 5px;
-    border: 1px solid $border-color-light;
+    border: 3px solid $border-color-light;
   }
 }
 

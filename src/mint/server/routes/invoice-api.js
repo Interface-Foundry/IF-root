@@ -1,10 +1,10 @@
 const _ = require('lodash')
-const moment = require('moment');
 
 const Invoice = require('../payments/Invoice.js')
 const Cart = require('../cart/Cart.js')
 const PaymentSource = require('../payments/PaymentSources.js')
 const utils = require('../utilities/invoice_utils.js')
+const assert = require('assert')
 
 var db
 const dbReady = require('../../db')
@@ -33,7 +33,13 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id - id of invoice
    */
     .get(async (req, res) => {
-      const invoice = await Invoice.GetById(req.params.invoice_id)
+      let invoice
+      try {
+        invoice = await Invoice.GetById(req.params.invoice_id)
+      } catch (err) {
+        logging.info('error getting invoice, possibly not available', err)
+        return res.send(500)
+      }
       return res.send(invoice)
     })
 
@@ -63,9 +69,11 @@ module.exports = function (router) {
      * @apiParam {object} option_data - the options to change stuff to
      */
     .put(async (req, res) => {
-      const invoice = await Invoice.GetById(req.params.invoice_id)
-      if (_.get(req, 'body.option_chage')) {
-        await invoice.optionUpdate(req.body.option_change, req.body.option_data)
+      logging.info('got req to update or action', req.body)
+      let invoice
+      if (_.get(req, 'body.option_change')) {
+        logging.info(`updating option for invoice ${req.params.invoice_id}: ${req.body.option_change} with ${req.body.option_data}`)
+        invoice = await Invoice.optionUpdate(req.params.invoice_id, req.body.option_change, req.body.option_data)
       }
 
       return res.send(invoice)
@@ -74,39 +82,36 @@ module.exports = function (router) {
   /**
    * invoice routes related to payments for an invoice (collecting/getting payments,)
    */
-  router.route('/invoice/payment/:invoice_id')
-    /**
-     * @api {get} /invoice/payment/:invoice_id get/collect payments for invoice
-     * @apiDescription collect payments for an invoice, either via email, alert, etc
-     * @apiGroup Payments
-     *
-     * @apiParam {string} :invoice_id - invoice id
-     * @apiParam {string} collection_metho (optional) - preference for how to bother users
-     */
-    .get(async (req, res) => {
-      logging.info('get payment called')
-      const collectionType = _.get(req, 'query.collection_method', 'email')
-      const invoice = await Invoice.GetById(req.params.invoice_id)
-      const paymentComplete = await invoice.paidInFull()
-      if (paymentComplete) {
-        return res.send(paymentComplete)
-      }
 
-      // ping users
-      const paymentStatus = await invoice.collectPayments(collectionType)
-      return res.send(paymentStatus)
+
+
+  router.route('/invoice/payment/:invoice_id')
+  /**
+  * @api {post} /invoice/payment/:invoice_id
+  * @apiDescription create the payment objects to be used with paymentsources for an invoice
+  * @apiGroup Payments
+  *
+  * @apiParam {string} :invoice_id - invoice id
+  */
+    .get(async (req, res) => {
+      logging.info('getting user payment status')
+      logging.info('req.user', req.UserSession.user_account.id)
+      const userId = req.UserSession.user_account.id
+      const invoiceId = req.params.invoice_id
+      const paymentObject = await PaymentSource.GetPaymentStatus(userId, invoiceId)
+      logging.info('paymentsObject for user:', paymentObject)
+      return res.send(paymentObject)
     })
 
-
-    /**
-     * @api {post} /invoice/payment/:invoice_idpost payment source to invoice
-     * @apiDescription post a payment to an invoice
-     * @apiGroup Payments
-     *
-     * @apiParam {string} :invoice_id - id of invoice to post payment to
-     * @apiParam {string} payment_source - id of payment source we are using
-     * @apiParam {number} payment_amount - amount of invoice to pay
-     */
+  /**
+  * @api {put} /invoice/payment/:invoice_id post payment source to invoice
+  * @apiDescription post a payment to an invoice
+  * @apiGroup Payments
+  *
+  * @apiParam {string} :invoice_id - id of invoice to post payment to
+  * @apiParam {string} payment_source - id of payment source we are using
+  * @apiParam {number} payment_amount - amount of invoice to pay
+  */
     .post(async (req, res) => {
       logging.info('posted to payment route')
       if (!_.get(req, 'body.payment_source')) {
@@ -128,6 +133,28 @@ module.exports = function (router) {
       }
 
       return res.send(payment)
+    })
+
+  /**
+  * @api {put} /invoice/payment/:invoice_id get/collect payments for invoice
+  * @apiDescription collect payments for an invoice, either via email, alert, etc
+  * @apiGroup Payments
+  *
+  * @apiParam {string} :invoice_id - invoice id
+  * @apiParam {string} collection_metho (optional) - preference for how to bother users
+  */
+    .put(async (req, res) => {
+      logging.info('get payment called')
+      const collectionType = _.get(req, 'query.collection_method', 'email')
+      const invoice = await Invoice.GetById(req.params.invoice_id)
+      const paymentComplete = await invoice.paidInFull()
+      if (paymentComplete) {
+        return res.send(paymentComplete)
+      }
+
+      // ping users
+      const paymentStatus = await invoice.collectPayments(collectionType)
+      return res.send(paymentStatus)
     })
 
   /**
@@ -175,7 +202,7 @@ module.exports = function (router) {
    */
   router.route('/payment')
     /**
-     * @api {get} /payment/:user_id get payment sources
+     * @api {get} /payment get payment sources
      * @apiDescription get payment sources for a user (i.e. stripe, venmo, etc.)
      * @apiGroup PaymentSources
      *
@@ -189,7 +216,7 @@ module.exports = function (router) {
     })
 
     /**
-     * @api {post} /payment/:user_id create payment source for user_id
+     * @api {post} /payment create payment source for user_id
      * @apiDescription create a new payment source for a user
      * @apiGroup PaymentSources
      *
@@ -199,15 +226,48 @@ module.exports = function (router) {
      */
     .post(async (req, res) => {
       const userId = req.UserSession.user_account.id
+      logging.info('body from creating payment', req.body)
+      // create charge
+      const paymentAmount = _.get(req, 'body.amount')
       const paymentSourceType = _.get(req, 'body.payment_source', 'stripe')
-      const paymentSource = await PaymentSource.Create(paymentSourceType, {user: userId})
-      const createdSource = await paymentSource.createPaymentSource(req.body.payment_data)
-      logging.info('new payment source:', createdSource)
-      const paymentSources = await PaymentSource.GetForUserId(userId)
-      return res.send(paymentSources)
+      const createdPaymentSource = await PaymentSource.Create(paymentSourceType, {user: userId})
+      const createdSource = await createdPaymentSource.createPaymentSource(req.body.payment_data)
+
+      // charge new payment source
+      const paymentSourceId = createdSource.id
+      const paymentSource = await PaymentSource.GetById(paymentSourceId)
+
+      const invoice = await Invoice.GetById(req.body.invoice_id)
+      const payment = await paymentSource.pay(paymentAmount, invoice)
+      logging.info('paid', payment)
+      return res.send({'amount': paymentAmount, 'paid': true})
     })
 
   router.route('/payment/:paymentsource_id')
+    /**
+     * @api {post} /payment/:paymentsource_id
+     * @apiDescription create a payment for an invoice
+     * @apiGroup PaymentSources
+     *
+     * @apiParam {string} :paymentsource_id - id of payment source
+     * @apiParam {string} :invoice_id - id of invoice
+     *
+    */
+    .post(async (req, res) => {
+      const userId = req.UserSession.user_account.id
+      const paymentSourceId = req.params.paymentsource_id
+      const paymentSource = await PaymentSource.GetById(paymentSourceId)
+
+      if (paymentSource.user !== userId) {
+        throw new Error('UserId and paymentSource user must match')
+      }
+
+      const invoice = await Invoice.GetById(req.body.invoice_id)
+      logging.info('creating payment with previously used card')
+      const payment = await paymentSource.pay(invoice)
+      logging.info('paid', payment)
+      return res.send(payment)
+    })
     /**
      * @api {delete} /payment/:paymentsource_id
      * @apiDescription delete the paymentsource
@@ -217,31 +277,27 @@ module.exports = function (router) {
      */
     .delete(async (req, res) => {
       const userId = req.UserSession.user_account.id
-      const paymentId = req.params.paymentsource_id
-      await PaymentSource.DeletePaymentSource(userId, paymentId)
+      const paymentSourceId = req.params.paymentsource_id
+      await PaymentSource.DeletePaymentSource(userId, paymentSourceId)
       res.status(200).end()
     })
 
   /**
    * @api {get} /invoice/cart/:cart_id
-   * @apiDescription get all invoices related to a cart, if no invoices create one.
+   * @apiDescription get an invoice related to a cart
    * @apiGroup Invoice
    *
    * @apiParam {type} :cart_id - cart_id to look for
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
-    const invoices = await Invoice.GetByCartId(req.params.cart_id)
-    if (invoices.length === 0) {
-      const invoiceData = {
-        cart: req.params.cart_id,
-        split: 'split_equal'
-      }
-      const invoice = Invoice.Create('mint', invoiceData)
-      const newInvoice = await invoice.createInvoice()
-      return res.send(newInvoice)
+    const invoice = await Invoice.GetByCartId(req.params.cart_id)
+    if (invoice) {
+      logging.info('this is the inoice', invoice)
+      await invoice.updateInvoice()
+      return res.send(invoice)
     }
-
-    res.send(invoices)
+    logging.info('error getting invoice getbycartId')
+    return res.send({display: false})
   })
 
   /**
@@ -272,7 +328,6 @@ module.exports = function (router) {
 
   //TESTING ROUTE to be deleted
   router.get('/remainingpayments/:invoice_id', async (req, res) => {
-    logging.info('this route was hit')
     var invoice = await Invoice.GetById(req.params.invoice_id)
     var paymentsLeft = await invoice.userPaymentAmounts()
     res.send(paymentsLeft)
@@ -287,16 +342,40 @@ module.exports = function (router) {
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
   router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
-    const invoiceData = _.omitBy({
+    const oldInvoice = await db.Invoices.findOne({
+      cart: req.params.cart_id
+    })
+
+    if (oldInvoice) {
+      throw new Error('Cannot create a new invoice when you already have one')
+    }
+
+    // get the cart
+    var cart = await db.Carts.findOneById(req.params.cart_id)
+      .populate('items')
+      .populate('leader')
+
+    // double check
+    assert(cart, 'Cart ' + req.params.cart_id + ' not found')
+
+    // then check it out :)
+    var checkoutResponse = await cart.checkout()
+
+    // make sure the cart is locked
+    if (!cart.locked) {
+      cart.locked = true
+      await cart.save()
+    }
+
+    // create the invoice document here, don't need an es6 class to create it i think
+    const invoice = await db.Invoices.create({
+      leader: cart.leader,
       cart: req.params.cart_id,
-      split_type: _.get(req, 'body.split_type', 'split_equal')
-    }, _.isUndefined)
-
-    logging.info('invoice data', invoiceData)
-
-    const invoice = Invoice.Create(req.params.invoice_type, invoiceData)
-    logging.info('invoice', invoice)
-    const newInvoice = await invoice.createInvoice()
-    return res.send(newInvoice)
+      paid: false,
+      total: cart.subtotal,
+      affiliate_checkout_url: cart.affiliate_checkout_url
+    })
+    logging.info('sending invoice now!')
+    return res.send(invoice)
   })
 }

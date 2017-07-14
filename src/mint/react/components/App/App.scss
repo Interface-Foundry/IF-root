@@ -80,11 +80,10 @@ button {
     & > .tabs {
       position: fixed;
       bottom: 0;
-      height: 40px;
       background: white;
       padding: 0;
       -webkit-transform: translate3d(0, 0, 0);
-      transform : translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       background-color: rgb(249, 249, 249);
@@ -92,12 +91,16 @@ button {
       background-position: center top;
       background-size: 100% 0.1rem;
       background-repeat: no-repeat;
+      display: flex;
+      justify-content: space-around;
+
       @media only screen and (min-width: 600px) {
         display: none;
       }
 
       h1 {
-        height: 40px;
+        height: 100%;
+        width: 100%;
         line-height: 40px;
         color: #8D8D8D;
         width: calc(100%/4);
@@ -109,6 +112,11 @@ button {
           height: 20px;
           width: 40px;
           margin: 5px auto 0;
+
+          @media only screen and (max-width: 600px) {
+            height: 25px;
+            width: 40px;
+          }
         }
 
         &.selected {
@@ -121,27 +129,32 @@ button {
           display: block;
           font-size: 10px;
           line-height: 10px;
+
+          @media only screen and (max-width: 600px) {
+            font-size: 12px;
+            line-height: 20px;
+          }
         }
       }
     }
-    
+
     & > .buttons {
       position: fixed;
       width: 100%;
-      bottom: 40px;
+      bottom: 50px;
       left: 0;
       padding: 0;
       height: 40px;
       z-index: 10;
       -webkit-transform: translate3d(0, 0, 0);
-      transform : translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
       -webkit-overflow-scrolling: touch;
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
+
       @media only screen and (min-width: 600px) {
         display: none;
       }
-
 
       button {
         margin: 0 0;
@@ -151,7 +164,6 @@ button {
 
         @media only screen and (max-width: 600px) {
           &.sub {
-
             a {
               text-align: left;
               height: 40px;
@@ -174,6 +186,7 @@ button {
             .text {
               height: 40px;
               width: 75%;
+
               span {
                 display: inline-block;
                 height: 40px;
@@ -181,6 +194,7 @@ button {
                 font-weight: 200;
                 font-size: 16px;
               }
+
               p {
                 display: inline-block;
                 height: 40px;
@@ -192,13 +206,15 @@ button {
             }
           }
         }
-        
+
         &.blue {
           display: none;
         }
+
         &.lock {
           width: 65%;
         }
+
         &.locked {
           background: $secondaryColor;
           color: white;
@@ -222,7 +238,6 @@ button {
   -webkit-overflow-scrolling: touch;
   text-align: left;
   height: calc(100% - 90px);
-
 
   &.displayOpen {
     height: calc(100% - 50px);

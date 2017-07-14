@@ -11,6 +11,7 @@ export HeaderContainer from './HeaderContainer';
 export InvoiceContainer from './InvoiceContainer';
 export LoginScreenContainer from './LoginScreenContainer';
 export ModalContainer from './ModalContainer';
+export RefreshContainer from './RefreshContainer';
 export ResultsContainer from './ResultsContainer';
 export SearchContainer from './SearchContainer';
 export SettingsContainer from './SettingsContainer';

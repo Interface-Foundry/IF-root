@@ -3,38 +3,18 @@
 @import '../../../react-common/styles/Animations';
 
 .navbar {
-  position: relative;
-  display: block;
-  height: $nav-height;
-  line-height: $nav-height;
-  font-family: 'Raleway';
-  text-align: left;
   background: $secondaryColor;
-  color: white;
+  color: $color-white;
+  display: flex;
+  font-family: 'Raleway';
+  height: $nav-height;
+  overflow: visible;
+  position: relative;
+  text-align: left;
   width: 100%;
   z-index: 100;
 
-  & > .beta {
-    position: absolute;
-    background: white;
-    width: 45px;
-    left: 20px;
-    top: 45px;
-    font-size: 13px;
-    height: 25px;
-    line-height: 25px;
-    border-radius: 5px;
-    text-align: center;
-    color: $secondaryColor;
-    padding: 0 $padding/2;
-    box-shadow: $card-box-shadow;
-    display: block;
-
-    @media (max-width: 600px) {
-      left: 2.5px;
-    }
-  }
-
+  transition: .5s;
 
   @media (max-width: 600px) {
     padding: 0;
@@ -46,23 +26,61 @@
   .search {
     background: white;
     border-radius: 5px;
-    @media only screen and (max-width: 600px) {
-      // display: none;
-      margin: 10px 0;
+    box-shadow: inset 0 0 1px rgb(50, 50, 93);
 
+    @media only screen and (max-width: 600px) {
+      margin: 5px 0;
     }
   }
 
-  span {
-    display: flex;
-  }
 
   .header__left {
     flex: 1 1 auto;
-    position: relative;
-    height: 100%;
-    white-space: nowrap;
+    overflow: visible;
+  }
+
+  .buttons {
+    height: 40px;
+    padding: 0;
+
+    &.checkoutButton-enter {
+      @include animation(fadeInHeaderButtons 0.5s);
+    }
+
+    &.checkoutButton-exit {
+      @include animation(fadeOutHeaderButtons .5s);
+      flex-grow: 0.00001;
+    }
+
+    .default {
+      span {
+        button {
+          &.yellow {
+            padding: 0;
+
+            &.lock {
+              padding: 0 $padding;
+            }
+          }
+
+          a:first-of-type {
+            padding: 0;
+          }
+
+          p {
+            padding: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  .cartHead, .settingsHead {
     display: flex;
+    height: 100%;
+    position: relative;
+    white-space: nowrap;
+    overflow: visible;
 
     @media only screen and (max-width: 600px) {
       padding: 0 0 0 $padding;
@@ -80,16 +98,19 @@
           padding-left: 0;
         }
       }
+
       .desktop {
         @media only screen and (max-width: 600px) {
           display: none;
         }
       }
+
       .mobile {
         width: 30px;
         margin: 0;
         height: 30px;
         margin: $padding $padding 0 0;
+
         @media only screen and (min-width: 600px) {
           display: none;
         }
@@ -111,14 +132,34 @@
     }
 
     .image {
-      display: inline-block;
-      margin: 10px 0;
-      height: 35px;
-      width: 90px;
-      background-size: cover !important;
-      background-repeat: no-repeat;
       background-position: center;
-      background-size: contain;
+      background-repeat: no-repeat;
+      background-size: cover; // background-size: cover !important;
+      display: inline-block;
+      height: 35px;
+      margin: 10px 0;
+      position: relative;
+      width: 90px;
+
+      .beta {
+        background: $color-white;
+        border: 1px solid $secondaryColor;
+        border-radius: 3px;
+        color: $secondaryColor;
+        display: block;
+        font-size: 8px;
+        font-weight: 900;
+        left: 5px;
+        padding: 0 3px;
+        position: absolute;
+        text-align: center;
+        text-transform: uppercase;
+        top: 27px;
+
+        @media (max-width: 600px) {
+          left: 2px; // transform: rotate(-25deg);
+        }
+      }
     }
 
     .members {
@@ -146,7 +187,6 @@
       @include animation(bounceDownSmall 1.5s);
 
       animation-iteration-count: 2; // too much twitching
-   
     }
 
     .navbar__modal__head {
@@ -166,15 +206,15 @@
 
       svg {
         font-size: 20px;
-        vertical-align: top !important;
-        line-height: $nav-height;
         height: $nav-height;
+        line-height: $nav-height;
         margin-right: $padding / 2;
+        vertical-align: top !important;
       }
 
       span {
-        font-size: 14px;
         display: inline-block;
+        font-size: 14px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -182,10 +222,31 @@
     }
   }
 
+  .settings {
+    .image {
+      flex: 1 1 auto;
+      background-size: contain;
+
+      .beta {
+        position: relative;
+        width: 30px;
+        margin: 0 auto;
+        left: -22px;
+      }
+    }
+  }
+
   .header__right {
     height: $nav-height;
     text-align: right;
-    padding: 0 ($padding * 3);
+
+    .navbar__icon {
+      padding: 0 ($padding * 3);
+
+      @media only screen and (max-width: 600px) {
+        padding: 0;
+      }
+    }
 
     @media only screen and (max-width: 600px) {
       width: $nav-height;
@@ -230,42 +291,14 @@
     }
   }
 
-  .settings {
-    background: white;
-
-    .header__left {
-      color: #333;
-
-      a {
-        display: inline-block;
-      }
-
-      h3 {
-        svg {
-          padding: $padding / 2;
-        }
-      }
-
-      text-align: center;
-    }
-
-    .header__right {
-      color: #333;
-
-      svg {
-        fill: #333;
-      }
-    }
-  }
-
   .navbar__icon__close {
-    position: relative;
-    z-index: 10;
-    text-align: center;
+    align-self: flex-start;
     cursor: pointer;
     height: $nav-height;
+    position: relative;
+    text-align: center;
     width: $nav-height;
-    align-self: flex-start;
+    z-index: 10;
 
     svg {
       height: 100%;

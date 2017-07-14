@@ -8,7 +8,7 @@ import { getSearchHistory } from '../../utils';
 
 import History from './History';
 
-export default class Input extends Component {
+export default class Search extends Component {
 
   static propTypes = {
     cart: PropTypes.object,
@@ -25,15 +25,34 @@ export default class Input extends Component {
     selectedQuery: -1
   }
 
-  _handleSubmit(previousQuery) {
-    const { cart: { store = '', store_locale = '' }, query, submitQuery } = this.props;
-
+  _submitSearch(search) {
+    const { cart: { store = '', store_locale = '' }, submitQuery } = this.props;
     this.setState({ selectedQuery: -1 });
-    submitQuery(previousQuery || query, store, store_locale);
+    submitQuery(search, store, store_locale);
+  }
+
+  _processSearch = (e) => {
+    const { query, updateQuery, categories } = this.props, { selectedQuery } = this.state,
+      history = query.length > 0 ? getSearchHistory(query) : [],
+      suggestedCategories = history.length > 0 ? categories : [];
+
+    const combined = [...history, ...suggestedCategories];
+    e.preventDefault();
+    if (selectedQuery > -1) {
+      if (combined[selectedQuery].machineName) {
+        updateQuery(combined[selectedQuery].humanName);
+        this._submitSearch(combined[selectedQuery].machineName);
+      } else {
+        updateQuery(combined[selectedQuery]);
+        this._submitSearch(combined[selectedQuery]);
+      }
+    } else {
+      this._submitSearch(query);
+    }
   }
 
   _handeKeyPress(e) {
-    const { query, updateQuery, categories } = this.props, { selectedQuery } = this.state,
+    const { query, categories } = this.props, { selectedQuery } = this.state,
       history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
       suggestedCategories = history.length > 0 ? categories.slice(0, 5) : [];
 
@@ -48,18 +67,7 @@ export default class Input extends Component {
         this.setState({ selectedQuery: selectedQuery - 1 });
         break;
       case 13:
-        e.preventDefault();
-        if (selectedQuery > -1) {
-          if (combined[selectedQuery].machineName) {
-            updateQuery(combined[selectedQuery].humanName);
-            this._handleSubmit(combined[selectedQuery].machineName);
-          } else {
-            updateQuery(combined[selectedQuery]);
-            this._handleSubmit(combined[selectedQuery]);
-          }
-        } else {
-          this._handleSubmit();
-        }
+        ::this._processSearch(e);
         break;
       }
     }
@@ -67,16 +75,15 @@ export default class Input extends Component {
 
   render() {
     const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
-
     return (
-      <form onSubmit={::this._handleSubmit} className='search'>
+      <form onSubmit={::this._processSearch} className='search'>
         <button type='submit' className='submit'>
             <Icon icon='Search'/>
         </button>
         <input 
           onFocus={()=>toggleHistory(true)} 
           onBlur={()=>toggleHistory(false)} 
-          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : ''} 
+          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : 'Search or Paste URL'} 
           value={query} 
           onChange={(e) => updateQuery(e.currentTarget.value)} 
           autoComplete="off" 

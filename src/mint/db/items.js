@@ -48,6 +48,9 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} item name or whatever we present maybe */
     name: 'string',
 
+    /** @type {translation} name in original language we translated out of */
+    original_name: Waterline.isA('translations'),
+
     /** @type {string} asin the amazon asin **/
     asin: 'string',
 
@@ -57,8 +60,16 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {string} item description */
     description: 'string',
 
+    /** @type {translation} description in original language we translated out of */
+    original_description: Waterline.isA('translations'),
+
     /** @type {number} item price per unit */
     price: 'float',
+
+    /** @type {conversion} currency conversion details */
+    original_price: Waterline.isA('conversions'),
+
+    /** */
 
     /** @type {string} small image */
     thumbnail_url: 'string',
@@ -77,8 +88,17 @@ var itemsCollection = Waterline.Collection.extend({
     /** @type {number} number of reviews */
     number_reviews: 'integer',
 
+    /** @type {raw_html} raw html we scraped this item from */
+    raw_html: Waterline.isA('raw_html'),
+
     /** the user that addded the item */
     added_by: Waterline.isA('user_accounts'),
+
+    /***/
+    verified: {
+      type: 'boolean',
+      defaultsTo: true
+    },
 
     /** @type {string} current status of the item's payment process */
     payment_status: {
@@ -106,6 +126,12 @@ var itemsCollection = Waterline.Collection.extend({
 
     /** @type {delivery_details} whatever miscellaneous merchant-specific details we have no where to put */
     details: Waterline.isA('delivery_details')
+  },
+
+  afterCreate: function (values, cb) {
+    if (!values.asin && values.product_id) values.asin = values.product_id
+    if (!values.parent_asin && values.parent_id) values.parent_asin = values.parent_id
+    cb()
   }
 });
 

@@ -10,13 +10,10 @@ export default class Header extends Component {
     cart: PropTypes.object
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      nextProps.title !== this.props.title ||
-      nextProps.subtext !== this.props.subtext ||
-      nextProps.color !== this.props.color
-    )
-  }
+  shouldComponentUpdate = (nextProps, nextState) =>
+    nextProps.title !== this.props.title
+    || nextProps.subtext !== this.props.subtext
+    || nextProps.color !== this.props.color
 
   render() {
     const { title, subtext = [], color } = this.props;

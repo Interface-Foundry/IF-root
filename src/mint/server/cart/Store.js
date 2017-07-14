@@ -1,4 +1,5 @@
 const emoji_utils = require('../utilities/emoji_utils');
+const Invoice = require('../payments/Invoice')
 
 /**
  * The basic Store class
@@ -16,6 +17,11 @@ class Store {
    * @return {Promise([Items])}         promise for an array of items
    */
   search(options) {
+
+    // create a pointer to this, bc arrow functions can't be
+    // used as / with generators
+    const that = this;
+
     console.log('Store search options', options)
     // set the page
     options.page = options.page || 0
@@ -49,6 +55,7 @@ class Store {
     // call out to the appropriate search function to perform the actual search
     return this[searchType](options)
       .then(items => {
+        logging.info(Array.isArray(items))
         if (!items) {
           return []
         } else if (!(items instanceof Array)) {
@@ -58,20 +65,38 @@ class Store {
         }
       })
       .then(items => {
-        // catch the common mistake where developers return an array of promises\
+        // catch the common mistake where developers return an array of promises
         return Promise.all(items)
       })
-      .then(this.processSearchItems.bind(this)) // and some optional post-processing
+      .then(function (items) {
+        // this.processSearchItems.bind(this)
+        return that.processSearchItems(items)
+      }) // and some optional post-processing
       .then(items => {
+        // make sure the items are A-OK
+        if (items.length === 1 && (!items[0].price || items[0].price <= 0)) {
+          throw new Error(`No offers available for "${items[0].name}"`)
+        }
+
+        // filter out items that don't have prices
+        if (items.length > 1) {
+          items = items.filter(i => i.price && i.price > 0)
+        }
+
+        // bad if nothing was returned with an offer
+        if (items.length === 0) {
+          throw new Error('No offers returned from search')
+        }
+
         // do some post-search analytics logging
-        console.log('analyitics', {
+        console.log('analytics', {
           search_options: options,
           store_name: this.name,
           number_results: items.length
         })
+        logging.info('real live item', items[0].id)
         return items
       })
-
   }
 
   /**
@@ -80,8 +105,8 @@ class Store {
    * @return {Promise}      [description]
    */
   async checkout(cart) {
-    cart.locked = true;
-    await cart.save()
+    // cart.locked = true;
+    // Create invoice
   }
 
   /**
@@ -93,6 +118,10 @@ class Store {
    */
   async processSearchItems(items) {
     return items
+  }
+
+  updateCart () {
+
   }
 
   // async sync () {

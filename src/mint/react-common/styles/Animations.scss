@@ -46,7 +46,7 @@
   }
 
   100% {
-    transform: translate3d(0px, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -59,6 +59,48 @@
   100% {
     opacity: 1;
     transform: translate3d(0, 0%, 0);
+  }
+}
+
+@keyframes glowText {
+  0% {
+    text-shadow: 0 0 0 $thirdColor, 1px -1px 5px $thirdColor, -1px 1px 5px $thirdColor, 1px 1px 5px $thirdColor;
+  }
+
+  100% {
+    text-shadow: -10px -10px 10px rgba($thirdColor, 0), 10px -10px 10px rgba($thirdColor, 0), -10px 10px 10px rgba($thirdColor, 0), 10px 10px 10px rgba($thirdColor, 0);
+  }
+}
+
+@keyframes fadeInHeaderButtons {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeOutHeaderButtons {
+  0% {
+    opacity: 1;
+    width: 100%;
+  }
+
+  75% {
+    width: 206px;
+  }
+
+  80% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+    width: 0.01px;
   }
 }
 
@@ -164,6 +206,16 @@
   }
 }
 
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
+
 @keyframes placeHolderShimmer {
   0% {
     background-position: 100% 0;
@@ -171,6 +223,16 @@
 
   100% {
     background-position: -100% 0;
+  }
+}
+
+@keyframes loadingIndefinite {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 100px 0;
   }
 }
 

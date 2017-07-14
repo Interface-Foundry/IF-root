@@ -11,7 +11,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     tab: state.app.viewTab,
     search: state.search,
-    cart: state.cart.present
+    cart: state.cart.present,
+    invoice: state.payments.invoice
   };
 };
 

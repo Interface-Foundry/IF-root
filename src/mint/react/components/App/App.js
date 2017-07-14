@@ -1,6 +1,6 @@
 // mint/react/components/App/App.js
 
-// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component. 
+// NOTES: Try to keep any or all state/prop changes out of here otherwise it will bleed down all the way to the smallest component.
 // If change needed here please add the addition shouldComponentUpdate
 
 import PropTypes from 'prop-types';
@@ -12,10 +12,10 @@ import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginS
 import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
+
 export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this._handleScroll = ::this._handleScroll;
+  state = {
+    showCheckout: false
   }
 
   static propTypes = {
@@ -39,7 +39,8 @@ export default class App extends Component {
     status: PropTypes.string,
     history: PropTypes.object,
     selectedItemId: PropTypes.string,
-    getMoreSearchResults: PropTypes.func
+    getMoreSearchResults: PropTypes.func,
+    setHeaderCheckout: PropTypes.func
   }
 
   _logPageView(path, userId) {
@@ -51,10 +52,10 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const { _handleScroll, _logPageView } = this;
+    const { _logPageView } = this;
     _logPageView();
 
-    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', _handleScroll);
+    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', ::this._handleScroll);
 
   }
 
@@ -79,18 +80,21 @@ export default class App extends Component {
   }
 
   _handleScroll() {
-    const { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading } = this.props;
 
+    const {
+      props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout },
+      scroll: { scrollTop, containerHeight, clientHeight }
+    } = this;
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
-    if (search) {
-      const scrollTop = this.scroll.scrollTop,
-        containerHeight = this.scroll.scrollHeight,
-        windowHeight = this.scroll.clientHeight;
-
+    if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
-      if (checkPageScroll(scrollTop, containerHeight, windowHeight) && !lazyLoading && query) {
-        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
-      }
+      getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
+    } else if (scrollTop > 200 && (!search || !search.length) && !this.state.showCheckout) {
+      this.setState({ showCheckout: true }); // don't keep changing
+      setHeaderCheckout(true);
+    } else if (scrollTop < 200 && (!search || !search.length) && this.state.showCheckout) {
+      this.setState({ showCheckout: false }); // don't keep changing
+      setHeaderCheckout(false);
     }
   }
 
@@ -117,10 +121,19 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate = (nextProps, nextState) => nextProps.tab !== this.props.tab || nextProps.loading !== this.props.loading || nextProps.sidenav !== this.props.sidenav || nextProps.popup !== this.props.popup || nextProps.location.pathname !== this.props.location.pathname || nextProps.location.search !== this.props.location.search || nextProps.toast !== this.props.toast || nextProps.selectedItemId !== this.props.selectedItemId
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }) =>
+    tab !== this.props.tab
+    || loading !== this.props.loading
+    || sidenav !== this.props.sidenav
+    || popup !== this.props.popup
+    || location.pathname !== this.props.location.pathname
+    || location.search !== this.props.location.search
+    || toast !== this.props.toast
+    || selectedItemId !== this.props.selectedItemId
 
   render() {
     const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
+
     return (
       <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
@@ -128,6 +141,7 @@ export default class App extends Component {
         <ModalContainer />
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+        <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Display} />
@@ -146,6 +160,7 @@ export default class App extends Component {
         <div className='noJudder'>
           { tab === 'cart' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
+          <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         </div>
         
       </section>

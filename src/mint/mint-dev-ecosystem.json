@@ -17,7 +17,8 @@
       "LOGGING_LEVEL": "info",
       "BUILD_MODE": "prebuilt",
       "YPO_ENABLED": true,
-      "BASIC_AUTH_PASSWORD": "cinna"
+      "BASIC_AUTH_PASSWORD": "cinna",
+      "STRIPE_SECRET": "sk_live_LsboW21QfCziFnE1DwCKOC8d"
     }
   }, {
     "name": "ci",

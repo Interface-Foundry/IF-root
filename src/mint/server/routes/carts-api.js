@@ -86,7 +86,7 @@ module.exports = function (router) {
         ]
       })
       .populate('items')
-      .populate('leader')
+      .populate('leader', selectMembersWithoutEmail)
       .populate('members', selectMembersWithoutEmail)
 
     res.send(carts)
@@ -115,7 +115,7 @@ module.exports = function (router) {
     // doing a stupid to test
     var user_id = _.get(req, 'UserSession.user_account.id');
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
-        .populate('leader')
+        .populate('leader', selectMembersWithoutEmail)
         .populate('members', selectMembersWithoutEmail)
         .populate('items')
 
@@ -144,7 +144,8 @@ module.exports = function (router) {
     if (cart) {
       res.send(cart);
     } else {
-      throw new Error('Cart not found')
+      res.send({info: 'CART NOT FOUND'})
+      // throw new Error('Cart not found')
     }
 
   }));
@@ -278,8 +279,6 @@ module.exports = function (router) {
       throw new Error('Cart not found')
     }
 
-    logging.info('current privacy setting:', cart.privacy)
-
     //if the cart is display, the user must be the cart leader
     if (cart.privacy == 'display' && currentUser.id !== cart.leader.id) {
       return res.sendStatus(403);
@@ -305,13 +304,14 @@ module.exports = function (router) {
       if (existingCart && existingCart.id !== cart.id) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
-      logging.info('GETTING PREVIEWED ITEM FROM DB')
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
-      logging.info('CREATING ITEM FROM URL')
       // Create an item from the url
-      item = yield cartUtils.addItem(req.body, cart, 1)
+      if (cart.store.includes('amazon') || cart.store.includes('YPO')) {
+        item = yield cartUtils.addItem(req.body, cart, 1)
+      }
+      else throw new Error('item does not exist')
     }
 
     // join the two database documents
@@ -326,6 +326,7 @@ module.exports = function (router) {
 
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
+
     var item = yield db.Items.findOne({id: item.id}).populate('options')
     return res.send(item)
   }));
@@ -390,7 +391,7 @@ module.exports = function (router) {
     if (!req.UserSession) return res.sendStatus(401)
 
     const user_id = req.UserSession.user_account.id
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader');
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader', selectMembersWithoutEmail);
     var setting = req.params.setting
 
     if (!cart) return res.sendStatus(404);
@@ -551,7 +552,13 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // get the cart
-    var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    try {
+      var cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    } catch (err) {
+      logging.warn('no cart found with ', req.params.cart_id)
+      // logging.error('error fetching cart', err)
+      return res.send('Hey there we couldnt find that cart, want to start a new one?')
+    }
 
     // check permissions
     if (cart.leader !== userId) {
@@ -573,7 +580,7 @@ module.exports = function (router) {
     cart.dirty = true
     yield cart.save()
 
-    cart = yield db.Carts.findOne({id: cart.id}).populate('leader')
+    cart = yield db.Carts.findOne({id: cart.id}).populate('leader', selectMembersWithoutEmail)
 
     res.send(cart)
   }))
@@ -593,12 +600,13 @@ module.exports = function (router) {
       var clone = yield db.Carts.findOne({id: clone_id}).populate('checkouts')
       return clone.checkouts.length
     })
+    logging.info('cart.likes', cart.likes)
     var checkouts = cart.checkouts.length + clone_checkouts.reduce((a, b) => a + b, 0)
     return res.send({
       views: cart.views, // views is just for the current cart; not its descendents
       clones: clones.length,
       checkouts: checkouts,
-      likes: cart.likes
+      likes: cart.likes.map(l => l.id)
     });
   }))
 
@@ -721,6 +729,7 @@ module.exports = function (router) {
     }
 
     var item = yield db.Items.findOne({id: item.id}).populate('options')
+
     res.send(item)
   }))
 
@@ -731,10 +740,19 @@ module.exports = function (router) {
    * @apiParam {String} :item_id
    */
   router.get('/item/:item_id', (req, res) => co(function* () {
+
     var item = yield db.Items.findOne({ id: req.params.item_id })
       .populate('options')
       .populate('added_by', selectMembersWithoutEmail)
-    res.send(item)
+    //for debugging
+    if (!item.options) item.options = []
+    // logging.info('ITEM', item)
+    if (!item) {
+      logging.error('item does not exist')
+      return res.sendStatus(500)
+    }
+    return res.send(item)
+    // return res.sendStatus(500)
   }))
 
   /**
@@ -900,23 +918,38 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => (async function () {
-    // parse the incoming text to extract either an asin, url, or search query
+    // parse the incoming text to extract either an asin, a url, or a search query
     const q = (req.query.q || '')
       .trim()
     if (!q) {
-      throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
+      throw new Error('must supply  a query string parameter  "q" which can be an asin, url, or search text')
     }
-    const searchOpts = _.omitBy({
+    var searchOpts = _.omitBy({
       text: q,
       category: _.get(req, 'query.category'),
       page: _.get(req, 'query.page')
     }, _.isUndefined)
+
+    searchOpts.user_locale = req.locale.slice(0, 2)
+    var geo = geolocation(req.ip) || geolocation.default
+    searchOpts.user_country = geo.country;
+
+    //TODO add user locale & country
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
+    logging.info('store, locale:', store, locale)
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
-    console.log('store instance', (storeInstance || {})
-      .name)
-    var results = await storeInstance.search(searchOpts)
+
+    console.log('store instance', (storeInstance || {}).name)
+
+    try {
+      var results = await storeInstance.search(searchOpts)
+    } catch (e) {
+      return res.send({
+        ok: false,
+        message: e.message
+      })
+    }
     //for testing
     // results = await
     res.send(results)
@@ -1041,6 +1074,8 @@ module.exports = function (router) {
       longitude: geo.ll[1]
     }
 
+    logging.info('user coordinates:', userCoords)
+
     // assemble list of stores
     var stores = [];
 
@@ -1105,6 +1140,9 @@ module.exports = function (router) {
     case 'YPO':
       var arrayCategories = yield category_utils.getYpoCategories()
       res.send(arrayCategories)
+      break;
+    case 'Muji':
+      res.send([])
       break;
     default:
       throw new Error('Cannot fetch categories for unhandled cart type: ' + cart.store)

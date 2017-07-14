@@ -77,8 +77,13 @@
         }
 
         svg {
+          @media only screen and (max-width: 600px) {
+            order: 1;
+          }
+
           &:last-of-type {
             display: none;
+            order: 4;
           }
         }
 
@@ -89,27 +94,78 @@
           padding: ($padding / 2) $padding;
 
           &:first-of-type {
-            border-right: 2px solid darken($mainColor, 20%);
             font-weight: 400;
+            order: 0;
 
             @media only screen and (max-width: 600px) {
               flex: 1 1 auto;
+              order: 1;
             }
+          }
+
+          &:last-of-type {
+            border-left: 2px solid darken($mainColor, 20%);
+            order: 2;
           }
 
           @media only screen and (max-width: 600px) {
             padding: 0 10px;
           }
         }
+      }
 
-        &:disabled {
-          background: lighten(#333, 70);
-          color: #333;
+      &:disabled {
+        background: lighten(#333, 70);
+        color: #333;
 
-          & span {
-            display: none; // we don't need the price I guess???? this is a mess
-         
-          }
+        & span {
+          display: none; // we don't need the price I guess???? this is a mess
+       
+        }
+      }
+    }
+
+    &.teal {
+      background: #10d8d8;
+      line-height: $nav-height - $padding;
+      font-size: 10px;
+      transform: scaleY(1.1);
+      transform-origin: 0 0;
+
+      @media only screen and (max-width: 600px) {
+        line-height: ($nav-height - $padding) / 2;
+      }
+
+      a {
+        display: block;
+      }
+
+      span {
+        line-height: $nav-height - $padding;
+
+        @media only screen and (max-width: 600px) {
+          display: block;
+          line-height: ($nav-height - $padding) / 3;
+        }
+      }
+
+      .text {
+        display: inline-block;
+        width: calc(100% - #{$nav-height - $padding});
+        height: 100%;
+
+        @media only screen and (max-width: 600px) {
+          width: auto;
+        }
+      }
+
+      &:disabled {
+        background: lighten(#333, 70);
+        color: #333;
+
+        & span {
+          display: none; // we don't need the price I guess???? this is a mess
+       
         }
       }
     }

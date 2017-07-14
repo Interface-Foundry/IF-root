@@ -3,7 +3,7 @@
 @import '../../../react-common/styles/Animations';
 
 .view {
-  height: 100%;
+  padding: 0 0 25px;
 
   th,td {
     &:after {
@@ -24,8 +24,8 @@
   }
 	@media only screen and (max-width: 600px) {
     height: auto;
-		padding: 0 0 100px;
-	}
+    padding: 0 0 100px;
+  }
 
   &.view_search {
     @media only screen and (max-width: 600px) {
@@ -33,9 +33,9 @@
     }
   }
 
-	& > * {
-	    max-width: 1066px;
-	}
+  & > * {
+    max-width: 966px;
+  }
 
 	.card {
 		  background-color: white;
@@ -46,4 +46,3 @@
 	    margin: 10px 2px 0;
 	}
 }
-
