@@ -103,8 +103,9 @@ var processChildOptions = async function(s,parentOption,html,rates){
 	switch(s.domain.name){
 		case 'lotte.com':
 
+			//convert parent option prices 
 			if(parentOption.original_price && parentOption.original_price.value){
-				var price = await foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,currencySpread,rates)
+				var price = await foreignExchange(s.domain.currency,s.user.currency,parentOption.original_price.value,currencySpread,rates)
  				parentOption = await storeFx(rates[s.user.currency],price,parentOption)
 			}
 
@@ -193,11 +194,27 @@ var tryHtml = async function (s,html) {
 			    s.main_image_url = $('img','#prdImg').attr('src')			
 			}
 
+			//get options type #1
+			if($('.opt_sel a').length > 0){
+				$('.opt_sel a').each(function(i, elm) {
+					s.options.push({
+						type: 'style', //style = top level option
+						original_name: {
+							value: $(this).text().trim() 
+						},
+					    product_id: $(this).attr('goods_no'),
+					    available: true //it's avail because it has a "loadurl" attribute in a href
+					})					
+				})
+				console.log(s)
+				return s
+			}
+			
+			//get options type #2
 
 			//html queries to do for options
 			var optionQ = []
 
-			//get options
 			$('.c_list li').each(function(i, elm) {
 
 				var opt_url = $('a',this).attr('loadurl') //url to get sub options for this options
@@ -501,7 +518,6 @@ function is_older_than_1hour(datetime) {
 	return ( ( now - before ) > ( 60 * 60 * 1000 )  ) ? true : false
 }
 
-
 /**
  * Translates one or more sentence strings into target language
  * @param {string} Text (string or array of strings) to translate
@@ -509,15 +525,15 @@ function is_older_than_1hour(datetime) {
  * @returns {object} A list of currencies with corresponding rates
  */
 var translate = async function (text, target) {
-  // Instantiates a client
+  	// Instantiates a client
 	// return [text]
 	console.log('translate called')
-  const translate = Translate()
-  var translations
-  // Translates the text into the target language. "text" can be a string for
-  // translating a single piece of text, or an array of strings for translating
-  // // multiple texts.
-  return translate.translate(text, target)
+  	const translate = Translate()
+  	var translations
+	// Translates the text into the target language. "text" can be a string for
+	// translating a single piece of text, or an array of strings for translating
+	// // multiple texts.
+  	return translate.translate(text, target)
     .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
