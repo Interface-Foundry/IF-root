@@ -49,6 +49,7 @@ For static.
 * `YPO_ENABLED` - shows ypo option in store if set to `true`
 * `MOCK_LOCALE` - if set to `GB`, `CA`, `SG`, or `US`, will make it so that your computer thinks you are in one of those countries. (see server/utilities/geolocation.js)
 * `BASIC_AUTH_PASSWORD` - if set, requires users to log in with a basic auth password.
+* `KIP_PAY_ENABLED` - enable kip pay
 
 For newbies, if you want to set an environmental variable in your **.bashrc** or **.zshrc** so that it is set every time you open a terminal and for every command run, for all the env vars above you can add a line like this:
 

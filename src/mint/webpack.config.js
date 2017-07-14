@@ -18,7 +18,8 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.GA': JSON.stringify(true || process.env.GA),
-      'process.env.STRIPE_KEY': JSON.stringify('pk_live_0LCJqLkmMCFKYDwbPCrhQknH')
+      'process.env.STRIPE_KEY': JSON.stringify('pk_live_0LCJqLkmMCFKYDwbPCrhQknH'),
+      'process.env.KIP_PAY_ENABLED': JSON.stringify(process.env.KIP_PAY_ENABLED)
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.LoaderOptionsPlugin({

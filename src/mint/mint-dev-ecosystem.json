@@ -18,7 +18,8 @@
       "BUILD_MODE": "prebuilt",
       "YPO_ENABLED": true,
       "BASIC_AUTH_PASSWORD": "cinna",
-      "STRIPE_SECRET": "sk_live_LsboW21QfCziFnE1DwCKOC8d"
+      "STRIPE_SECRET": "sk_live_LsboW21QfCziFnE1DwCKOC8d",
+      "KIP_PAY_ENABLED": false
     }
   }, {
     "name": "ci",
