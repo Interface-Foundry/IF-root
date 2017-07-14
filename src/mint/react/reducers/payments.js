@@ -38,6 +38,7 @@ export default function payments(state = initialState, action) {
       invoice: action.response
     };
   case 'INVOICE_BY_CART_SUCCESS':
+    console.log('got invoice by cart', action.response)
     return {
       ...state,
       invoice: action.response

@@ -11,7 +11,13 @@ import Forms from './Forms';
 export default class Invoice extends Component {
   static propTypes = {
     cart: PropTypes.object,
-    selectedAccordion: PropTypes.string
+    selectedAccordion: PropTypes.string,
+    fetchInvoiceByCart: PropTypes.func
+  }
+
+  componentDidMount() {
+    const { cart, fetchInvoiceByCart } = this.props
+    fetchInvoiceByCart(cart.id);
   }
 
   render() {

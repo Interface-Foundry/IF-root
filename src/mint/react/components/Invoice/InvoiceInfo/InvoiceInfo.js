@@ -12,22 +12,14 @@ export default class InvoiceInfo extends Component {
     selectAccordion: PropTypes.func,
     updateInvoice: PropTypes.func
   }
-  componentWillMount() {
-    const { cart } = this.props
-    console.log('this is cart', cart)
-  }
+
+  shouldComponentUpdate = ({ invoice }) =>
+    invoice !== this.props.invoice
 
   render() {
 
     const { selectedAccordion, selectAccordion, cart, user, invoice, updateInvoice } = this.props;
     const isLeader = user.id === cart.leader.id;
-
-    let invoiceAvailable = false;
-    if (invoice !== undefined) {
-      invoiceAvailable = true;
-    } else {
-      console.log('INVOICE NOT AVAILABLE @@!!!')
-    }
 
     return (
       <div className='payment accordion'>

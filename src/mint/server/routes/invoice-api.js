@@ -375,6 +375,7 @@ module.exports = function (router) {
       total: cart.subtotal,
       affiliate_checkout_url: cart.affiliate_checkout_url
     })
+    logging.info('sending invoice now!')
     return res.send(invoice)
   })
 }
