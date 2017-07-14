@@ -115,7 +115,7 @@ export default class Details extends Component {
               <nav>
                 {
                   showUndo
-                  ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo.</button></p></div>
+                  ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo</button></p></div>
                   : null
                 }
                 <p><span className='updated'>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></span></p>
