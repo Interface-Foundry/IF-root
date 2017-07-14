@@ -31,7 +31,7 @@ function getDescription (item) {
  * @return     {number}  amount formated to tenths or whatever usd is
  */
 function formatAmazonPrice(amount) {
-  return parseInt(amount) / 100
+  return parseInt(amount)
 }
 
 

@@ -461,7 +461,7 @@ class AmazonStore extends Store {
     const results = await this.opHelper.execute('CartCreate', amazonParams);
     const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
     const amazonCart = results.result.CartCreateResponse.Cart
-    cart.subtotal = amazonCart.SubTotal.Amount / 100.00
+    cart.subtotal = amazonCart.SubTotal.Amount
     cart.amazon_cartid = amazonCart.CartId
     cart.amazon_hmac = amazonCart.HMAC
     cart.amazon_purchase_url = amazonCart.PurchaseURL
@@ -543,7 +543,7 @@ function getErrorsFromAmazonCartCreate (res) {
  * @return     {number}  amount formated to tenths or whatever usd is
  */
 function formatAmazonPrice(amount) {
-  return parseInt(amount) / 100
+  return parseInt(amount)
 }
 
 function getItemPrice(item, priceType) {

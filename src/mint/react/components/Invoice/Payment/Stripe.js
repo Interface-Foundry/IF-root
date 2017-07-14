@@ -24,11 +24,11 @@ export default class Stripe extends Component {
   render() {
     const { user, invoice, userPaymentStatus, createPaymentSource } = this.props;
     const invoiceId = invoice.id;
-    const amount = userPaymentStatus.amount * 100;
+    const amount = userPaymentStatus.amount;
     return (
       <StripeCheckout
         token={(stripe_data) => createPaymentSource(amount, stripe_data, 'stripe', invoiceId)}
-        stripeKey="pk_test_8bnLnE2e1Ch7pu87SmQfP8p7"
+        stripeKey={process.env.STRIPE_KEY}
         email={user.email_address}
         name="Kip"
         description="Mint"
