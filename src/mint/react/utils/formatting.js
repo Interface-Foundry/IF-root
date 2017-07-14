@@ -15,9 +15,9 @@ export const displayCost = (val, currency) => {
   const opts = {
     maximumFractionDigits: 2,
     style: 'currency',
-    currency: currency === 'GB' ? 'GBP' : 'USD'
+    currency: currency === 'GB' ? 'GBP' :  'USD'
   };
-  return val.toLocaleString({}, opts);
+  return (val/100).toLocaleString({}, opts);
 };
 
 export const getNameFromEmail = email => {

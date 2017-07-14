@@ -28,7 +28,6 @@ export default class Search extends Component {
   _submitSearch(search) {
     const { cart: { store = '', store_locale = '' }, submitQuery } = this.props;
     this.setState({ selectedQuery: -1 });
-    console.log({ search, store, store_locale })
     submitQuery(search, store, store_locale);
   }
 
@@ -37,7 +36,6 @@ export default class Search extends Component {
       history = query.length > 0 ? getSearchHistory(query) : [],
       suggestedCategories = history.length > 0 ? categories : [];
 
-    console.log({ e, query, combined, })
     const combined = [...history, ...suggestedCategories];
     e.preventDefault();
     if (selectedQuery > -1) {
