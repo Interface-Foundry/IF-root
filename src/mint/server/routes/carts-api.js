@@ -600,12 +600,13 @@ module.exports = function (router) {
       var clone = yield db.Carts.findOne({id: clone_id}).populate('checkouts')
       return clone.checkouts.length
     })
+    logging.info('cart.likes', cart.likes)
     var checkouts = cart.checkouts.length + clone_checkouts.reduce((a, b) => a + b, 0)
     return res.send({
       views: cart.views, // views is just for the current cart; not its descendents
       clones: clones.length,
       checkouts: checkouts,
-      likes: cart.likes.length
+      likes: cart.likes.map(l => l.id)
     });
   }))
 
