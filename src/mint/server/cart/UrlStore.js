@@ -78,7 +78,7 @@ class UrlStore extends Store {
 
       delete itemData.options
     }
-
+    logging.info('created options')
     // create the item translations
     var itemName  = await db.Translations.create(itemData.original_name)
     itemName.translated_value = itemData.name
@@ -109,8 +109,8 @@ class UrlStore extends Store {
       item.options.add(op.id)
     })
     await item.save()
-
-    item = await db.Items.findOne({id: item.id}).populate('options').populate('translations').populate('conversions')
+    logging.info('about to create item')
+    item = await db.Items.findOne({id: item.id}).populate('options').populate('original_description').populate('original_price')
 
     return [item];
   }
