@@ -237,13 +237,6 @@ module.exports = function (router) {
       const createdPaymentSource = await PaymentSource.Create(paymentSourceType, {user: userId})
       const createdSource = await createdPaymentSource.createPaymentSource(req.body.payment_data)
 
-      // // charge new payment source
-      // const paymentSourceId = createdSource.id
-      // const paymentSource = await PaymentSource.GetById(paymentSourceId)
-
-      // const invoice = await Invoice.GetById(req.body.invoice_id)
-      // const payment = await paymentSource.pay(paymentAmount, invoice)
-      logging.info('paid', payment)
       return res.send({'amount': paymentAmount, 'paid': true})
     })
 
