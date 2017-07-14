@@ -12,13 +12,11 @@ export default class InvoiceInfo extends Component {
     updateInvoice: PropTypes.func
   }
 
-  // shouldComponentUpdate = ({ invoice }) =>
-  //   invoice !== this.props.invoice
-
   render() {
 
-    const { selectAccordion, cart, user, invoice, } = this.props;
-    const isLeader = user.id === cart.leader.id;
+    const { selectAccordion, cart, user, invoice } = this.props;
+    //bc sometimes the backend doesn't feel like returning an object
+    const isLeader = user.id === cart.leader.id || user.id === cart.leader;
 
     return (
       <div className='payment accordion'>
@@ -28,8 +26,8 @@ export default class InvoiceInfo extends Component {
           </div>
             <div>
              {
-              (invoice.leader && invoice.leader.name) ? <div>
-              <text> leader: {invoice.leader.name}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
+              (invoice.leader) ? <div>
+              <text> leader: {invoice.leader.name ||invoice.leader}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
             </div>
         </nav>
       { isLeader ? <InvoiceOptions {...this.props}/> : null }

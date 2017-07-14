@@ -17,7 +17,7 @@ export default class Default extends Component {
     selectTab: PropTypes.func,
     user: PropTypes.object,
     toggleYpoCheckout: PropTypes.func,
-    checkoutOnly: PropTypes.bool,
+    checkoutOnly: PropTypes.bool
   }
 
   _handleShare = () => {
@@ -69,13 +69,14 @@ export default class Default extends Component {
 
           cart.locked
           ? <span>
-              <button
-                className='yellow sub lock'
-                onClick={::this._orderCart}
-                >
-                  Re-Order {displayCost(total, cart.store_locale)}
-                </button>
-
+            <button className='yellow sub' onClick={::this._orderCart}>
+              <a href={`/api/cart/${cart.id}/checkout`} target="_blank" onClick={(e)=>e.preventDefault()}>
+                <Icon icon='Cart'/>
+                <p>Checkout</p>
+                <p>{displayCost(total, cart.store_locale)}</p>
+                <Icon icon='RightChevron'/>
+              </a>
+            </button>              
                   {
                     (cart.leader.id === user.id || cart.leader === user.id) && !checkoutOnly
                     ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
