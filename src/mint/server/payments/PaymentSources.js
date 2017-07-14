@@ -121,9 +121,11 @@ class StripePaymentSource extends PaymentSource {
 
     const paymentSource = await db.PaymentSources.create({
       user: user.id,
+      source: paymentInfo,
       payment_vendor: 'stripe',
       data: stripeResponse
     })
+
     return paymentSource
   }
 

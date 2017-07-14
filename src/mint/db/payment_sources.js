@@ -29,6 +29,11 @@ const paymentSourceCollection = Waterline.Collection.extend({
       enum: constants.PAYMENT_SOURCE
     },
 
+    /**
+     * json from stripe
+     */
+    source: 'json',
+
     /** peripheral data from source */
     data: 'json',
 
