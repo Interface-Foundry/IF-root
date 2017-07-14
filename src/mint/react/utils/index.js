@@ -29,7 +29,8 @@ export {
   splitAndMergeSearchWithCart,
   formatPrivacy,
   getStoreName,
-  splitOptionsByType
+  splitOptionsByType,
+  addLinkToDesktop
 }
 from './formatting';
 

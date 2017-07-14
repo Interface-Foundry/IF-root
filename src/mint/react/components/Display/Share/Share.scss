@@ -87,16 +87,23 @@
     width: 100%;
     padding: 0 ($padding * 2);
 
-    @media only screen and (min-width: 600px) {
-      display: none;
-    }
-
     .share__icons__icon {
       position: relative;
       display: inline-block;
       width: 33%;
       height: 45%;
       padding: ($padding * 3) 0 0;
+
+      &.Twitter{
+        svg {
+          color:#00aced;
+        }
+      }
+      &.Pinterest{
+        svg {
+          color:#cb2128;
+        }
+      }
 
       svg {
         display: block;

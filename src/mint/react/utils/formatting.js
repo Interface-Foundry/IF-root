@@ -50,6 +50,27 @@ const formatLinkForApp = (app, link) => {
   }
 };
 
+export const addLinkToDesktop = (links, url) => {
+  return links.map((i, index) => {
+    if (!i.link) return i;
+    return { ...i, link: formatLinkForDesktop(i, url) };
+  });
+};
+const formatLinkForDesktop = (socialPlatforms, url) => {
+  switch(socialPlatforms.icon) {
+    case 'Facebook':
+      return socialPlatforms.link.replace('display=',`display=page&href=${url}&redirect_uri=${url}`);
+    case 'Twitter':
+      return socialPlatforms.link.replace('url=',`url=${url}`);
+    case 'Gmail':
+      return socialPlatforms.link.replace('body=',`url=${url}`);
+    case 'Pinterest':
+      return socialPlatforms.link.replace('url=',`url=${url}&description=KipCart`);
+    default:
+      return socialPlatforms.link;
+  }
+}
+
 export const calculateItemTotal = (items) => {
   return items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 };
