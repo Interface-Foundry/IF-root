@@ -605,7 +605,7 @@ module.exports = function (router) {
       views: cart.views, // views is just for the current cart; not its descendents
       clones: clones.length,
       checkouts: checkouts,
-      likes: cart.likes
+      likes: cart.likes.length
     });
   }))
 
