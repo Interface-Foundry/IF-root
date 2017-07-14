@@ -17,7 +17,8 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production'),
-      'process.env.GA': JSON.stringify(true || process.env.GA)
+      'process.env.GA': JSON.stringify(true || process.env.GA),
+      'process.env.STRIPE_KEY': JSON.stringify('pk_live_0LCJqLkmMCFKYDwbPCrhQknH')
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.LoaderOptionsPlugin({
