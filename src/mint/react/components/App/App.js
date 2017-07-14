@@ -79,7 +79,7 @@ export default class App extends Component {
   }
 
   _handleScroll() {
-    if (scroll && scroll.scrollTop) {
+    if (this.scroll && (this.scroll.scrollTop || this.scroll.scrollTop === 0)) {
       const {
         props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout },
         scroll: { scrollTop, containerHeight, clientHeight }

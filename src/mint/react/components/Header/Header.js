@@ -27,10 +27,10 @@ export default class Header extends Component {
     showAlert: false
   }
 
-  shouldComponentUpdate = ({ userName, showCheckout, cartId }) =>
-    userName !== this.props.userName
-    || showCheckout !== this.props.showCheckout
-    || cartId !== this.props.cartId
+  // shouldComponentUpdate = ({ userName, showCheckout, cartId }) =>
+  //   userName !== this.props.userName
+  //   || showCheckout !== this.props.showCheckout
+  //   || cartId !== this.props.cartId
 
   render = () => {
     const {
