@@ -86,7 +86,7 @@ module.exports = function (router) {
         ]
       })
       .populate('items')
-      .populate('leader')
+      .populate('leader', selectMembersWithoutEemail)
       .populate('members', selectMembersWithoutEmail)
 
     res.send(carts)
@@ -115,7 +115,7 @@ module.exports = function (router) {
     // doing a stupid to test
     var user_id = _.get(req, 'UserSession.user_account.id');
     var cart = yield db.Carts.findOne({ id: req.params.cart_id })
-        .populate('leader')
+        .populate('leader', selectMembersWithoutEmail)
         .populate('members', selectMembersWithoutEmail)
         .populate('items')
 
@@ -391,7 +391,7 @@ module.exports = function (router) {
     if (!req.UserSession) return res.sendStatus(401)
 
     const user_id = req.UserSession.user_account.id
-    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader');
+    var cart = yield db.Carts.findOne({id: req.params.cart_id}).populate('leader', selectMembersWithoutEmail);
     var setting = req.params.setting
 
     if (!cart) return res.sendStatus(404);
@@ -580,7 +580,7 @@ module.exports = function (router) {
     cart.dirty = true
     yield cart.save()
 
-    cart = yield db.Carts.findOne({id: cart.id}).populate('leader')
+    cart = yield db.Carts.findOne({id: cart.id}).populate('leader', selectMembersWithoutEmail)
 
     res.send(cart)
   }))
