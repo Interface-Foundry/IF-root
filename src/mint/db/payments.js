@@ -41,11 +41,16 @@ const paymentsCollection = Waterline.Collection.extend({
     payment_source: Waterline.isA('payment_sources'),
 
     /** amount user paid */
-    amount: 'float',
+    amount: 'integer',
 
     /** allow for generalized response back from stripe/coinbase/etc
      * i guess after posting payment?*/
-    data: 'json'
+    data: 'json',
+
+    /**
+     * if we refund a payment we may receive a response back
+     */
+    refund: 'json'
   }
 })
 

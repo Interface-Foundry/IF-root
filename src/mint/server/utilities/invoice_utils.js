@@ -62,8 +62,7 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
     cart: invoice.cart
   })
 
-  const cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader').populate('address')
-
+  var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader')
   var itemsByUser = {}
   cart.items.map(function (item) {
     if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
@@ -88,8 +87,8 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
     totalItems: totalItems,
     date: paidEmail.sent_at,
     users: cart.members,
-    checkoutUrl: cart.affiliate_checkout_url || 'www.kipthis.com',
-    address: cart.address
+    checkoutUrl: cart.affiliate_checkout_url || 'www.kipthis.com'
+    // address: cart.address
   })
   logging.info('sending checkout email to hello@kipthis.com')
   await paidEmail.send()
