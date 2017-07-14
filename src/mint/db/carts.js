@@ -144,7 +144,6 @@ var cartsCollection = Waterline.Collection.extend({
 
     invoice: Waterline.isA('invoices'),
 
-
     //
     // YPO only
     //

@@ -118,8 +118,18 @@ class UrlStore extends Store {
   async checkout (cart) {
     logging.info('checkout called')
     // var cart = await Cart.GetById()
+
+    // Calculate cart total
+    var total = 0;
+    cart.items.map(function (item) {
+      total += (Number(item.price) * Number(item.quantity || 1));
+    });
+    cart.subtotal = (Math.round(total * 100))/100
+    await cart.save()
+
+    // Create invoice
     var invoice = await Invoice.CreateByCartId(cart.id)
-    //TODO send out collection email
+    // Send out collection email
     await invoice.sendCollectionEmail()
     return invoice
   }

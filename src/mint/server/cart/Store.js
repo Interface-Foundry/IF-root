@@ -106,10 +106,7 @@ class Store {
    */
   async checkout(cart) {
     // cart.locked = true;
-    logging.info('this is a test... speakerboxxx...')
-    var invoice = await Invoice.CreateByCartId(cart.id)
-    logging.info('invoice', invoice)
-    await cart.save()
+    // Create invoice
   }
 
   /**
@@ -124,7 +121,7 @@ class Store {
   }
 
   updateCart () {
-    
+
   }
 
   // async sync () {

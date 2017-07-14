@@ -24,9 +24,10 @@ const userPaymentAmountHandler = {
     return debts
   },
   'split_single': (invoice) => {
+    logging.info('invoice', invoice)
     logging.info('single payer split')
     const debts = {}
-    debts[invoice.leader.id] = invoice.total
+    debts[invoice.leader] = invoice.total
     return debts
   },
   'split_by_item': async (invoice) => {

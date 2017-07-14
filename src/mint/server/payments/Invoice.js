@@ -210,7 +210,7 @@ class Invoice {
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'http://localhost:3000'
     else var baseUrl = 'http://mint-dev.kipthis.com'
 
-    var cart = await db.Carts.findOne({id: this.cart.id}).populate('items').populate('members')
+    var cart = await db.Carts.findOne({id: this.id}).populate('items').populate('members')
     var users = cart.members
 
     var totalItems = cart.items.reduce(function (sum, item) {
@@ -218,8 +218,9 @@ class Invoice {
     }, 0)
 
     // logging.info('about to map over owing users')
-    await Object.keys(debts).map(async function (user_id) {
-      // logging.info('w/in the await')
+    logging.info('debita', debts)
+    for (var i = 0; i < Object.keys(debts).length; i++) {
+      var user_id = debts[Object.keys(debts)[i]]
       if (reminder || user_id !== cart.leader) {
         var user = await db.UserAccounts.findOne({id: user_id})
         var items = cart.items.filter(item => item.added_by === user_id)
@@ -250,7 +251,7 @@ class Invoice {
         await email.send();
         logging.info('just sent collection email')
       }
-    })
+    }
   }
 
   /**
@@ -277,11 +278,8 @@ class Invoice {
    * @return {object} { keys are user ids; values are the amount they have left to pay}
    */
   async userPaymentAmounts() {
-    logging.info('this', this)
     if (!this.split_type) {
-      logging.info('no split type oh no')
       var invoice = await db.Invoices.findOne({cart: this.id})
-      logging.info('here is our invoice:', invoice)
       this.split_type = invoice.split_type
     }
     var amounts = userPaymentAmountHandler[this.split_type](this)
@@ -293,7 +291,6 @@ class Invoice {
     return amounts
   }
 }
-
 
 class MintInvoice extends Invoice {
   constructor(args) {
