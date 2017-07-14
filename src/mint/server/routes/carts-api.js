@@ -86,7 +86,7 @@ module.exports = function (router) {
         ]
       })
       .populate('items')
-      .populate('leader', selectMembersWithoutEemail)
+      .populate('leader', selectMembersWithoutEmail)
       .populate('members', selectMembersWithoutEmail)
 
     res.send(carts)
