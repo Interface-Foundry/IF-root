@@ -29,7 +29,7 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
   const loggerMiddleware = createLogger({
     timestamp: false,
     level: { // redux dev tools can do all of this without cluttering the console
-      // download! https://github.com/zalmoxisus/redux-devtools-extension
+      // download! http://extension.remotedev.io/
       prevState: false,
       action: 'error',
       nextState: false,

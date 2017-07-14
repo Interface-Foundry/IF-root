@@ -31,11 +31,8 @@ export default class Selected extends Component {
   }
 
   render() {
-    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation, removeItem } = this.props,
-
+    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation } = this.props,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
-    console.log({ locked: cart.locked, id: user.id, inCart })
-    console.log({ selectedProps: this.props })
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>

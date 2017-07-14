@@ -72,7 +72,7 @@
   }
 }
 
-@keyframes fadeInUp {
+@keyframes fadeInHeaderButtons {
   0% {
     opacity: 0;
     transform: translate3d(0, 10px, 0);
@@ -81,6 +81,26 @@
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeOutHeaderButtons {
+  0% {
+    opacity: 1;
+    width: 100%;
+  }
+
+  75% {
+    width: 206px;
+  }
+
+  80% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+    width: 0.01px;
   }
 }
 

@@ -14,6 +14,8 @@
   width: 100%;
   z-index: 100;
 
+  transition: .5s;
+
   @media (max-width: 600px) {
     padding: 0;
     position: fixed;
@@ -27,17 +29,53 @@
     box-shadow: inset 0 0 1px rgb(50, 50, 93);
 
     @media only screen and (max-width: 600px) {
-      // display: none;
       margin: 5px 0;
     }
   }
+
 
   .header__left {
     flex: 1 1 auto;
     overflow: visible;
   }
 
-  .cart, .settings {
+  .buttons {
+    height: 40px;
+    padding: 0;
+
+    &.checkoutButton-enter {
+      @include animation(fadeInHeaderButtons 0.5s);
+    }
+
+    &.checkoutButton-exit {
+      @include animation(fadeOutHeaderButtons .5s);
+      flex-grow: 0.00001;
+    }
+
+    .default {
+      span {
+        button {
+          &.yellow {
+            padding: 0;
+
+            &.lock {
+              padding: 0 $padding;
+            }
+          }
+
+          a:first-of-type {
+            padding: 0;
+          }
+
+          p {
+            padding: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  .cartHead, .settingsHead {
     display: flex;
     height: 100%;
     position: relative;
@@ -46,35 +84,6 @@
 
     @media only screen and (max-width: 600px) {
       padding: 0 0 0 $padding;
-    }
-
-    .buttons {
-      @include animation(fadeInUp 0.5s);
-
-      height: 40px;
-      padding: 0;
-
-      .default {
-        span {
-          button {
-            &.yellow {
-              padding: 0;
-
-              &.lock {
-                padding: 0 $padding;
-              }
-            }
-
-            a:first-of-type {
-              padding: 0;
-            }
-
-            p {
-              padding: 5px;
-            }
-          }
-        }
-      }
     }
 
     a {
@@ -125,9 +134,7 @@
     .image {
       background-position: center;
       background-repeat: no-repeat;
-      background-size: cover;
-
-      // background-size: cover !important;
+      background-size: cover; // background-size: cover !important;
       display: inline-block;
       height: 35px;
       margin: 10px 0;
@@ -150,9 +157,7 @@
         top: 27px;
 
         @media (max-width: 600px) {
-          left: 2px;
-
-          // transform: rotate(-25deg);
+          left: 2px; // transform: rotate(-25deg);
         }
       }
     }
@@ -182,7 +187,6 @@
       @include animation(bounceDownSmall 1.5s);
 
       animation-iteration-count: 2; // too much twitching
-   
     }
 
     .navbar__modal__head {

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Tabs } from '../components';
 
 import {
-  selectTab,
+  selectTab
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {

@@ -12,10 +12,12 @@ import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginS
 import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
+
 export default class App extends Component {
   state = {
     showCheckout: false
   }
+
   static propTypes = {
     fetchCart: PropTypes.func,
     match: PropTypes.object,
@@ -37,7 +39,8 @@ export default class App extends Component {
     status: PropTypes.string,
     history: PropTypes.object,
     selectedItemId: PropTypes.string,
-    getMoreSearchResults: PropTypes.func
+    getMoreSearchResults: PropTypes.func,
+    setHeaderCheckout: PropTypes.func
   }
 
   _logPageView(path, userId) {
@@ -79,17 +82,19 @@ export default class App extends Component {
   _handleScroll() {
 
     const {
-      props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading },
+      props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout },
       scroll: { scrollTop, containerHeight, clientHeight }
     } = this;
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
     if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
       getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
-    } else if (scrollTop > 200 && (!search || !search.length)) {
-      this.setState({ showCheckout: true });
-    } else if (scrollTop < 200 && (!search || !search.length)) {
-      this.setState({ showCheckout: false });
+    } else if (scrollTop > 200 && (!search || !search.length) && !this.state.showCheckout) {
+      this.setState({ showCheckout: true }); // don't keep changing
+      setHeaderCheckout(true);
+    } else if (scrollTop < 200 && (!search || !search.length) && this.state.showCheckout) {
+      this.setState({ showCheckout: false }); // don't keep changing
+      setHeaderCheckout(false);
     }
   }
 
@@ -116,7 +121,7 @@ export default class App extends Component {
     }
   }
 
-  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }, { showCheckout }) =>
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }) =>
     tab !== this.props.tab
     || loading !== this.props.loading
     || sidenav !== this.props.sidenav
@@ -125,7 +130,6 @@ export default class App extends Component {
     || location.search !== this.props.location.search
     || toast !== this.props.toast
     || selectedItemId !== this.props.selectedItemId
-    || showCheckout !== this.state.showCheckout
 
   render() {
     const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
@@ -135,7 +139,7 @@ export default class App extends Component {
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
         <ModalContainer />
-        <Route path={'/'} component={(props) => <HeaderContainer {...props} showCheckout={this.state.showCheckout}/>}   />
+        <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>

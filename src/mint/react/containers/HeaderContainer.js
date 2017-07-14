@@ -4,9 +4,10 @@ import { togglePopup, toggleSidenav, selectTab } from '../actions';
 
 const mapStateToProps = (state, props) => {
   return {
-    cart: state.cart.present,
+    cartId: state.cart.present.id,
     numCarts: state.carts.carts.length,
-    user: state.user
+    userName: state.user.name||null,
+    showCheckout: state.app.showHeaderCheckout
   };
 };
 
