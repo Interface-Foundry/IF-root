@@ -1,7 +1,7 @@
 const Waterline = require('waterline')
 const uuid = require('uuid')
 
-var archive = require('./cold_storage')
+const archive = require('./cold_storage')
 const constants = require('../server/constants.js')
 
 /**

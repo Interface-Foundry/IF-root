@@ -89,6 +89,24 @@ class PaymentSource {
     return sourcesArray
   }
 
+
+  /**
+   * refund a payment by PaymentId
+   *
+   * @class      RefundPaymentId (name)
+   * @param      {<type>}   paymentId  The payment identifier
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  static async RefundPaymentId (paymentId) {
+    const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source')
+    logging.info('using payment.payment_source.payment_vendor',  payment.payment_source.payment_vendor)
+
+    const PaymentSourceClass = paymentSourceHandlers[payment.payment_source.payment_vendor]
+    PaymentSourceClass.refundPayment(payment)
+
+    return
+  }
+
   static async DeletePaymentSource(userId, paymentsourceId) {
     const paymentSource = await db.PaymentSources.findOne({id: paymentsourceId})
     if (paymentSource.user !== userId) {
@@ -154,8 +172,8 @@ class StripePaymentSource extends PaymentSource {
     return payment
   }
 
-  async refundPayment (paymentId) {
-    const payment = await db.Payments.findOne({id: paymentId})
+  static async refundPayment (payment) {
+    logging.info('in stripe refund', payment)
     const refund = stripe.refunds.create({
       charge: payment.data.id
     })

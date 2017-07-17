@@ -79,6 +79,39 @@ module.exports = function (router) {
       return res.send(invoice)
     })
 
+  router.route('/invoice/refund')
+    /**
+      * @api {post} /invoice/refund
+      * @apiDescription refund all payments for an invoice or a specific payment
+      * @apiGroup {Payments}
+      *
+      *
+      * @apiParam {object} { refund_type: refund_id }, refund type either invoice_id or payment_id, and then respective payment/invoice id
+      */
+    .post(async (req, res) => {
+
+      // refund all for invoice
+      if (_.get(req, 'body.invoice_id')) {
+        const invoiceId = req.body.invoice_id
+        const invoice = await Invoice.GetById(invoiceId)
+        if (_.get(req, 'UserSession.user_account.id') !== invoice.leader) {
+          throw new Error('Unauthorized, only leader can refund all')
+        }
+
+        const payments = await db.Payments.find({invoice: invoiceId})
+        const refunds = payments.map(async (payment)  => {
+          return await PaymentSource.RefundPaymentId(payment.id)
+        })
+        return res.send(refunds)
+      }
+
+      // individual refund
+      if (_.get(req, 'body.payment_id')) {
+        const refund = await PaymentSource.RefundPaymentId(req.body.payment_id)
+        return res.send(refund)
+      }
+    })
+
   /**
    * invoice routes related to payments for an invoice (collecting/getting payments,)
    */
