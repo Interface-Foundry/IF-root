@@ -68,9 +68,9 @@ export default class Selected extends Component {
     const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation, selectOption } = this.props,
       { options } = this.state,
       { _changeOption } = this,
+      optionIds = Object.keys(options).map((key, index) => options[key].selected),
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
-      
-
+    
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
@@ -107,7 +107,7 @@ export default class Selected extends Component {
               }
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
               { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item)}><span>✔ Save to Cart</span></button> : null}
+              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id, optionIds)}><span>✔ Save to Cart</span></button> : null}
               { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
@@ -115,7 +115,6 @@ export default class Selected extends Component {
                 <div className='options'>
                   {
                     Object.keys(options).map((key, index) => {
-                      console.log('selected: ', options[key])
                       const selected = options[key].selected || key;
                       return <select key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)}>
                         <option key={key} value={key} disabled={true}>{key}</option>
