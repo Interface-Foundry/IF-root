@@ -305,15 +305,20 @@ module.exports = function (router) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
 
-      // if item_json is supplied in the body, update the options
-      if (req.body.item_json) {
-        yield req.body.item_json.options.map(function * (op) {
-          yield db.ItemOption.update({id: op.id}, {selected: op.selected})
-        })
-      }
-
       // get the previwed item from the db
       item = yield db.Items.findOne({ id: req.body.item_id }).populate('options')
+
+      // if item_json is supplied in the body, update the options
+      if (req.body.option_ids) {
+        yield item.options.map(function * (option) {
+          if (!option.selected && req.body.option_ids.indexOf(option) > -1) {
+            yield db.ItemOptions.update({id: option.id}, {selected: true})
+          }
+          else if (option.selected) {
+            yield db.ItemOptions.update({id: option.id}, {selected: false})
+          }
+        })
+      }
 
     } else {
       // Create an item from the url
