@@ -1,4 +1,5 @@
 var request = require('request-promise')
+//var Agent = require('socks5-http-client/lib/Agent')
 
 //encoding stuff
 var charset = require('charset'),
@@ -18,7 +19,14 @@ module.exports.scrapeURL = async function (url) {
 		  'Accept-Language':'en-US,en;q=0.8',
 		  'Cache-Control':'max-age=0',
 		  'Connection':'keep-alive'
-		},
+		}
+		// agentClass: Agent,
+		// agentOptions: {
+		// 	socksHost: '109.201.154.239', 
+		// 	socksPort: 1080,
+		// 	socksUsername: 'x7229287',
+		// 	socksPassword: 'QbhYhHsKZG'
+		// }
 		// timeout: timeoutMs,
 	}
 	var convert
@@ -33,7 +41,7 @@ module.exports.scrapeURL = async function (url) {
    		convert = iconv.convert(new Buffer(html)).toString('utf8')
 
 	  }else {
-	  	logging.error('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
+	  	logging.error('HTML request error ',error)
 	  }
 	})
 	return convert
