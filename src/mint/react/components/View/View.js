@@ -33,8 +33,7 @@ export default class App extends Component {
       props = this.props,
       containers = {
         'search': ResultsContainer,
-        'cart': CartContainer,
-        'invoice': InvoiceContainer
+        'cart': CartContainer
       },
       Component = containers[tab];
 

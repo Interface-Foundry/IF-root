@@ -3,10 +3,9 @@
 
 .invoice {
 	position: relative;
-	margin-top: $padding*1.5;
 	background: white;
-	border-radius: $padding/2;
 	width: 100%;
+  height: 100%;
 	padding: $padding $padding*2;
 	border-top: 3px solid $secondaryColor;
 	box-shadow: $card-box-shadow !important;

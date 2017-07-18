@@ -161,6 +161,7 @@ export default class App extends Component {
           { tab === 'cart' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
+          <Route path={'/cart/:cart_id/m/invoice'} exact component={TabsContainer} />
         </div>
         
       </section>

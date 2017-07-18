@@ -48,7 +48,7 @@ class Tabs extends Component {
       id: 4,
       icon: 'PriceTag',
       tab: 'invoice',
-      url: `/cart/${id}`,
+      url: `/cart/${id}/m/invoice`,
       display: 'Invoice'
     }];
     if (invoice && invoice.display) {

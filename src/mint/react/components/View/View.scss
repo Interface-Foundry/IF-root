@@ -4,7 +4,7 @@
 
 .view {
   padding: 0 0 25px;
-  
+
 	@media only screen and (max-width: 600px) {
     height: auto;
     padding: 0 0 100px;
@@ -13,6 +13,12 @@
   &.view_search {
     @media only screen and (max-width: 600px) {
       padding: 0 0 0;
+    }
+  }
+
+  &.view_invoice {
+    @media only screen and (max-width: 600px) {
+      padding: 0 0 50px;
     }
   }
 

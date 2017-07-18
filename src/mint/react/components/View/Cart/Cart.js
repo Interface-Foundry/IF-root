@@ -51,7 +51,6 @@ export default class Cart extends Component {
       isLeader = user.id === cart.leader.id,
       achieveIndex = {8: { reqs: 8, discount: 100, color: 'red' }, 6: { reqs: 6, discount: 80, color: 'yellow'  }, 3: { reqs: 3, discount: 50, color: 'green' }};
 
-
     let color;
     return (
       <table className='cart'>
@@ -126,7 +125,6 @@ export default class Cart extends Component {
           {
             userCarts.others.reverse().map((userCart, i) => {
               color = userCart.memberNumber > 2 ? ( userCart.memberNumber > 5 ? ( userCart.memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
-              console.log(userCart.memberNumber, color)
               return (
                 <tr key={userCart.id}>
                   <td colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
