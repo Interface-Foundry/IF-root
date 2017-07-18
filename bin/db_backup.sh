@@ -19,6 +19,8 @@ _file_zip_mint="$_file_mint.tar.gz"
 mongo_fb="10.142.0.8"
 mongo_slack="10.142.0.13"
 mongo_mint="10.142.0.13"
+# mongo_fb="35.185.13.168"
+# mongo_slack="104.196.21.133"
 
 # mongodump -h 10.142.0.8 --db=foundry --out=$_file
 
@@ -41,4 +43,4 @@ gsutil cp $_file_zip_fb gs://kip-db-dump/latest/
 gsutil cp $_file_zip_slack gs://kip-db-dump/latest/
 gsutil cp $_file_zip_mint gs://kip-db-dump/latest/
 
-cd .. && rm -r tmp_
+# cd .. && rm -r tmp_
