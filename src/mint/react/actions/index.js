@@ -89,6 +89,16 @@ export {
 from './user';
 
 export {
+  selectAddress,
+  clearSelectedAddress,
+  fetchAddresses,
+  addAddress,
+  updateAddress,
+  toggleAddressForm
+}
+from './addresses';
+
+export {
   selectItem,
   submitQuery,
   updateQuery,

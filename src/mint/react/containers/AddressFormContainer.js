@@ -2,22 +2,16 @@
 
 import { connect } from 'react-redux';
 import { AddressForm } from '../components';
-import { toggleAddressForm } from '../actions/app';
-import { addAddress, updateAddress } from '../actions';
+import { addAddress, updateAddress, toggleAddressForm } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
-  total: state.cart.present.items.reduce((a, i) => a + i.price, 0),
-  locale: state.cart.present.store_locale,
-  name: state.user.selectedAddress.name,
+  name: state.user.selectedAddress.full_name,
   addressLine1: state.user.selectedAddress.line_1,
   addressLine2: state.user.selectedAddress.line_2,
   city: state.user.selectedAddress.city,
   region: state.user.selectedAddress.region,
   code: state.user.selectedAddress.code,
   country: state.user.selectedAddress.country,
-  addressList: state.user.addresses,
-  cartId: state.cart.present.id,
-  leader: state.cart.present.leader,
   addressId: state.user.selectedAddress.id,
   userId: state.user.id
 });

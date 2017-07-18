@@ -208,7 +208,7 @@ class YPOStore extends Store {
 
     return {
       ok: true,
-      redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+      redirect: `/cart/${cart.id}?toast=Order submitted successfully&status=success`,
       message: 'Order submitted successfully'
     }
   }

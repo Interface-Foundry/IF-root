@@ -14,6 +14,11 @@ export const toggleYpoCheckout = show => ({
   show
 });
 
+export const toggleAddressForm = show => ({
+  type: 'TOGGLE_ADDRESS_FORM',
+  show
+});
+
 export const togglePopup = () => ({
   type: 'TOGGLE_POPUP'
 });
@@ -22,6 +27,13 @@ export const selectTab = tab => ({
   type: 'SELECT_VIEW_TAB',
   response: {
     tab
+  }
+});
+
+export const selectAddress = address => ({
+  type: 'SELECT_ADDRESS',
+  response: {
+    address
   }
 });
 

@@ -1,8 +1,10 @@
 {
+  "parser": "babel-eslint",
   "globals": {
     "expect": true
   },
   "rules": {
+    "strict": 0,
     "semi": [1, "always"]
   }
 }

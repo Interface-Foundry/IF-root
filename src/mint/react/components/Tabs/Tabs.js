@@ -14,7 +14,7 @@ class Tabs extends Component {
     tab: PropTypes.string,
     history: PropTypes.object,
     clearTimeouts: PropTypes.func,
-    setTimeout: PropTypes.func,
+    createTimeout: PropTypes.func,
   }
 
   state = {
@@ -63,7 +63,7 @@ class Tabs extends Component {
     this.setState({ tabs });
     if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
       this.props.clearTimeouts();
-      this.props.setTimeout(
+      this.props.createTimeout(
         () => this.setState(({ tabs }) => ({ tabs: tabs.map((tab) => ({ ...tab, highlight: false })) })),
         3000);
     }

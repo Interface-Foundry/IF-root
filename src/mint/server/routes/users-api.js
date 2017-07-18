@@ -488,7 +488,6 @@ module.exports = function (router) {
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
     }
-    var currentUser = req.UserSession.user_account
 
     // Find the user in the database
     var user = await db.UserAccounts.findOne({ id: req.params.user_id })
@@ -506,8 +505,51 @@ module.exports = function (router) {
     res.send(addr);
   })
 
+  /**
+   * @api {post} /api/user/:user_id/address/:address_id Add Address
+   * @apiDescription Creates a new address and associates it with a user
+   * @apiGroup Users
+   * @apiParam {string} :user_id id of the user to update
+   * @apiParam {string} :address_id
+   * @apiParam {json} body the properties of the new address we're creating
+   *
+   * @apiParamExample Request
+   * post /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b/address/ae887daf89 {
+   *   "full_name": 'Chris Barry',
+   *   "line_1": '2222 Fredrick Douglass Blvd',
+   *   "line_2": "Apt 2B",
+   *   "city": "New York",
+   *   "region": 'NY',
+   *   "code": 94306,
+   *   "country": 'USA'
+   * }
+   */
+  router.post('/user/:user_id/address/:address_id', async(req, res) => {
+    // check permissions
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
+
+    // Find the address in the database
+    var user = await db.UserAccounts.findOne({ id: req.params.user_id })
+    var address = await db.Addresses.findOne({ user_account: user.id, id: req.params.address_id })
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    if (!user ) {
+      throw new Error('Could not find user ' + req.params.user_id)
+    } else if(!address) {
+      throw new Error('Could not find address ' + req.params.address_id)
+    }
+
+    delete req.body.id
+
+    _.merge(address, req.body)
+    await address.save()
+
+    res.send(address);
+  })
+
  /**
-   * @api {get} /api/user/address return a list of user addresses
+   * @api {get} /api/user/addresses return a list of user addresses
    * @apiDescription Returns all of the addresses associated with a user
    * @apiGroup Users
    *
@@ -527,7 +569,7 @@ module.exports = function (router) {
    * }]
    */
 
-  router.get('/user/address', async (req, res) => {
+  router.get('/user/addresses', async (req, res) => {
     var currentUser = req.UserSession.user_account
 
     // Find the user in the database
@@ -535,7 +577,7 @@ module.exports = function (router) {
 
     // in case there isn't an address
     if (!addr) {
-      res.send({});
+      res.send([]);
     }
 
     return res.send(addr);

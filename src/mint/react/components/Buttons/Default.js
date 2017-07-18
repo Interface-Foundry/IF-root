@@ -72,8 +72,8 @@ export default class Default extends Component {
               <button className='yellow sub' onClick={this._orderCart} >
                 <span className='inner-button'>
                   <Icon icon='Cart'/>
-                  <p>Checkout</p>
-                  <p>{displayCost(total, cart.store_locale)}</p>
+                  <p className='checkout-button-text'>Checkout</p>
+                  <p className='checkout-button-text'>{displayCost(total, cart.store_locale)}</p>
                   <Icon icon='RightChevron'/>
                 </span>
               </button>
@@ -96,8 +96,8 @@ export default class Default extends Component {
                   <button className='yellow sub' onClick={this._orderCart}>
                     <span className='inner-button'>
                       <Icon icon='Cart'/>
-                      <p>Checkout</p>
-                      <p>{displayCost(total, cart.store_locale)}</p>
+                      <p className='checkout-button-text'>Checkout</p>
+                      <p className='checkout-button-text'>{displayCost(total, cart.store_locale)}</p>
                       <Icon icon='RightChevron'/>
                     </span>
                   </button>

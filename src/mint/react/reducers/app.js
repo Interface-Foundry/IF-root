@@ -5,6 +5,7 @@ const initialState = {
   selectedAccordion: 'invoiceinfo',
   viewTab: 'cart',
   showYpoCheckout: false,
+  showAddressForm: false,
   showHeaderCheckout: false
 };
 
@@ -53,7 +54,17 @@ export default (state = initialState, action = {}) => {
   case 'TOGGLE_YPO_CHECKOUT':
     return {
       ...state,
-      showYpoCheckout: action.show !== undefined ? action.show : !state.show
+      showYpoCheckout: action.show !== undefined ? action.show : !state.showYpoCheckout
+    };
+  case 'TOGGLE_ADDRESS_FORM':
+    return {
+      ...state,
+      showAddressForm: action.show !== undefined ? action.show : !state.showAddressForm
+    };
+  case 'SELECT_ADDRESS':
+    return {
+      ...state,
+      selectedAddress: action.address
     };
   case 'SEARCH_SUCCESS':
   case 'SELECT_VIEW_TAB':
