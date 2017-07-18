@@ -7,6 +7,11 @@ export const editItem = item_id => ({
   }
 });
 
+export const selectOption = option_id => ({
+  type: 'SELECT_OPTION',
+  response: option_id
+});
+
 export const updateItem = (item_id, updatedValues) => post(
   `/api/item/${item_id}`,
   'UPDATE_ITEM', { ...updatedValues },
@@ -30,9 +35,9 @@ export const navigateAffilateUrl = item_id => get(
   })
 );
 
-export const addItem = (cart_id, item_id) => post(
+export const addItem = (cart_id, item) => post(
   `/api/cart/${cart_id}/item`,
-  'ADD_ITEM', { item_id },
+  'ADD_ITEM', { item_json: item },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

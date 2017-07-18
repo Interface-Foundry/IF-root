@@ -50,12 +50,15 @@ class UrlStore extends Store {
 
     // create options
     var options = []
+    var types = []
 
     if (itemData.options) {
       // because apparently async/await doesn't work with HoF
       for (var i = 0; i < itemData.options.length; i++) {
         // logging.info('new option')
         var option = itemData.options[i]
+
+
         // logging.info('OPTION:', option) //the
         // create translations
         var original_name = await db.Translations.create(option.original_name)
@@ -72,7 +75,14 @@ class UrlStore extends Store {
         var opt = await db.ItemOptions.create(option)
         opt.original_name = original_name.id
         opt.original_description = original_description.id
+
+        if(!types.includes(opt.type)) {
+          types.push(opt.type)
+          opt.selected = true;
+        }
+
         await opt.save()
+
         options.push(opt)
       }
 

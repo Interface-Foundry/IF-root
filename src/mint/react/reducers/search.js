@@ -106,6 +106,18 @@ export default (state = initialState, action) => {
         }]
         : [...acc, item], [])
     };
+  case 'SELECT_OPTION':
+    return {
+      ...state,
+      results: state.results.reduce((acc, item, i) =>
+        item.id === state.selectedItemId
+        ? [...acc, {
+          ...item,
+          ...action.response.item,
+          options: item.options.map(option => ({ ...option, selected: option.id === action.response }))
+        }]
+        : [...acc, item], [])
+    }
   default:
     return state;
   }

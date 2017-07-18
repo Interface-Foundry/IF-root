@@ -8,6 +8,11 @@ import { Icon } from '../../../../react-common/components';
 
 export default class Selected extends Component {
 
+  constructor(props) {
+    super(props);
+    this._changeOption = ::this._changeOption;
+  }
+
   static propTypes = {
     cart: PropTypes.object,
     item: PropTypes.object,
@@ -25,18 +30,47 @@ export default class Selected extends Component {
     fetchSearchItem: PropTypes.func
   }
 
+  state = {
+    options: null
+  }
+
+  _changeOption(optionId, type) {
+    const { options } = this.state;
+
+
+    let newOptions = {};
+    newOptions[type] = options[type];
+    newOptions[type].selected = optionId;
+
+    this.setState({
+      options: {
+        ...options,
+        ...newOptions
+      }
+    })
+  }
+
+  componentWillMount() {
+    const { fetchSearchItem, item } = this.props;
+
+    this.setState({options: item.options})
+  }
+
   componentWillReceiveProps(nextProps) {
     const { fetchSearchItem, item } = this.props;
     
     if (nextProps.item.id !== item.id) {
-      console.log('this never gets hit right')
       fetchSearchItem(nextProps.item.id);
     }
   }
 
   render() {
-    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation } = this.props,
+    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation, selectOption } = this.props,
+      { options } = this.state,
+      { _changeOption } = this,
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
+      
+
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
@@ -73,20 +107,21 @@ export default class Selected extends Component {
               }
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
               { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id)}><span>✔ Save to Cart</span></button> : null}
+              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item)}><span>✔ Save to Cart</span></button> : null}
               { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
-              item.options ? (
+              options ? (
                 <div className='options'>
                   {
-                    Object.keys(item.options).map((key, index) => {
-                      const selected = item.options[key].selected || key;
-                      return <select key={key} value={selected} onChange={(e) => fetchItemVariation(e.currentTarget.value, cart.store, cart.store_locale)}>
+                    Object.keys(options).map((key, index) => {
+                      console.log('selected: ', options[key])
+                      const selected = options[key].selected || key;
+                      return <select key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)}>
                         <option key={key} value={key} disabled={true}>{key}</option>
                         {
-                          item.options[key].map((option) => (
-                            <option key={option.id} value={option.parent_id}>{option.name}</option>
+                          options[key].map((option) => (
+                            <option key={option.id} value={option.id}>{option.name}</option>
                           ))
                         }
                       </select>;
@@ -98,7 +133,7 @@ export default class Selected extends Component {
             {
               item.iframe_review_url ? <div className='iframe'>
                 <iframe scrolling="no" src={`${item.iframe_review_url}`}/>
-              </div> : <div className='padding'/>
+              </div> : null
             }
             <div className='text__expanded'>
               <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>

@@ -5,7 +5,7 @@ import { replace } from 'react-router-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem, selectOption } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart, sleep } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -32,12 +32,12 @@ const mapDispatchToProps = dispatch => ({
     if (!isUrl(query)) addSearchHistory(query);
     return dispatch(submitQuery(query, store, locale));
   },
-  addItem: (cart_id, item_id) => {
+  addItem: (cart_id, item) => {
     ReactGA.event({
       category: 'Cart',
       action: 'Item Added'
     });
-    return dispatch(addItem(cart_id, item_id));
+    return dispatch(addItem(cart_id, item));
   },
   selectItem: (item_id) => {
     ReactGA.event({
@@ -50,6 +50,7 @@ const mapDispatchToProps = dispatch => ({
   navigateRightResults: () => dispatch(navigateRightResults()),
   navigateLeftResults: () => dispatch(navigateLeftResults()),
   fetchSearchItem: (item_id) => dispatch(fetchSearchItem(item_id)),
+  selectOption: (option_id) => dispatch(selectOption(option_id)),
   fetchItemVariation: (option_asin, store, locale) => dispatch(fetchItemVariation(option_asin, store, locale)),
   getMoreSearchResults: (query, store, locale, page) => dispatch(getMoreSearchResults(encodeURIComponent(query), store, locale, page)),
   removeItem: (cart_id, item_id) => dispatch(removeItem(cart_id, item_id)).then(() => setTimeout(() => dispatch(ActionCreators.clearHistory()), 10 * ONE_SECOND)),
