@@ -300,8 +300,7 @@ module.exports = function (router) {
       const invoice = await Invoice.GetById(req.body.invoice_id)
       logging.info('creating payment with previously used card')
       const payment = await paymentSource.pay(invoice)
-      logging.info('paid', payment)
-      return res.send({'amount': payment.amount, 'paid': true})
+      logging.info('paid')
 
       // If this invoice has been fully paid, fire off whatever emails
       var done = await invoice.paidInFull()
@@ -309,8 +308,13 @@ module.exports = function (router) {
         await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
         await invoice.sendSuccessEmail(invoice)
       }
-
-      return res.send(payment)
+      else {
+        //send collection emails
+        logging.info('sendCollectionEmail called')
+        await invoice.sendCollectionEmail()
+      }
+      return res.send({'amount': payment.amount, 'paid': true})
+      // return res.send(payment)
     })
     /**
      * @api {delete} /payment/:paymentsource_id
