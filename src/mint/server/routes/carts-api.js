@@ -304,8 +304,17 @@ module.exports = function (router) {
       if (existingCart && existingCart.id !== cart.id) {
         throw new Error('Item ' + req.body.item_id + ' is already in another cart ' + existingCart.id)
       }
+
+      // if item_json is supplied in the body, update the options
+      if (req.body.item_json) {
+        yield req.body.item_json.options.map(function * (op) {
+          yield db.ItemOption.update({id: op.id}, {selected: op.selected})
+        })
+      }
+
       // get the previwed item from the db
-      item = yield db.Items.findOne({ id: req.body.item_id })
+      item = yield db.Items.findOne({ id: req.body.item_id }).populate('options')
+
     } else {
       // Create an item from the url
       if (cart.store.includes('amazon') || cart.store.includes('YPO')) {
