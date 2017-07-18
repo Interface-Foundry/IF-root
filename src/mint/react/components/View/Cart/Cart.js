@@ -58,7 +58,7 @@ export default class Cart extends Component {
           <tr>
             <th colSpan='100%'>
                {
-                cart.members.length === 1 && myCart[0] ? <div className='top'>
+                cart.members.length === 1 && myCart.length > 0 ? <div className='top'>
                   <div className='circle'/>
                   <Icon icon='Right'/>
                   <p> <b>{user.name}</b> joined { timeFromDate(myCart[0].createdAt) }</p>
@@ -141,11 +141,11 @@ export default class Cart extends Component {
                         <div className={`circle`}/>
                         { i === 0 ? <Icon icon='Right'/> : null}
                         <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
-                      </div> 
+                      </div>
                     }
                     <div className={`card`} onClick={() => !openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                       { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
-                      <h1 className='date' onClick={() => _toggleCart(userCart.id)}> 
+                      <h1 className='date' onClick={() => _toggleCart(userCart.id)}>
                         <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
                       </h1>
                       <h4>
@@ -153,7 +153,7 @@ export default class Cart extends Component {
                         <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
                       </h4>
 
-                      { 
+                      {
                         openCarts.includes(userCart.id) ? <ul>
                           {
                             userCart.items.map((item) => (
@@ -189,7 +189,7 @@ export default class Cart extends Component {
                               </li>
                             ))
                           }
-                        </ul> : null 
+                        </ul> : null
                       }
                     </div>
                   </td>
