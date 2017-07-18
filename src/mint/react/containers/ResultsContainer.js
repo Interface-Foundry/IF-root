@@ -32,12 +32,12 @@ const mapDispatchToProps = dispatch => ({
     if (!isUrl(query)) addSearchHistory(query);
     return dispatch(submitQuery(query, store, locale));
   },
-  addItem: (cart_id, item) => {
+  addItem: (cart_id, item_id, option_ids) => {
     ReactGA.event({
       category: 'Cart',
       action: 'Item Added'
     });
-    return dispatch(addItem(cart_id, item));
+    return dispatch(addItem(cart_id, item_id, option_ids));
   },
   selectItem: (item_id) => {
     ReactGA.event({

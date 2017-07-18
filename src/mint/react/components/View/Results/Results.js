@@ -45,7 +45,15 @@ export default class Results extends Component {
 
     if ((items && numberOfItems(items) !== numberOfItems(this.props.cart.items)) || (items && !this.state.myItems.length)) {
       // do only when the number of items in the cart changes, instead of on rerender
-      const myItems = items.reduce((acc, i) => i.added_by === id ? [...acc, i.asin] : acc, []);
+      const myItems = items.reduce((acc, i) => i.added_by === id ? [...acc, i.id] : acc, []);
+      this.setState({ myItems });
+    }
+  }
+
+  componentWillMount() {
+    const { cart: { items = [] }, user: { id } } = this.props;
+    if(items && numberOfItems(items) > 0) {
+      const myItems = items.reduce((acc, i) => i.added_by === id ? [...acc, i.id] : acc, []);
       this.setState({ myItems });
     }
   }
@@ -73,15 +81,16 @@ export default class Results extends Component {
     const partitionResults = displayedResults.reduce((acc, result, i) => {
       if (i % size === 0) acc.push([]);
 
+      console.log(myItems)
       acc[acc.length - 1].push({
         ...result,
-        inCart: (result.asin && myItems.includes(result.asin))
+        inCart: (result.id && myItems.includes(result.id))
       });
 
       if (result.id && (result.id === selectedItemId || result.oldId === selectedItemId)) {
         selected = {
           row: acc.length,
-          result: {...result, inCart: (result.asin && myItems.includes(result.asin))},
+          result: {...result, inCart: (result.id && myItems.includes(result.id))},
           index: i,
           options: splitOptionsByType(result.options)
         };
