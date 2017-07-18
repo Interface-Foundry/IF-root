@@ -24,6 +24,7 @@ module.exports.scrapeURL = async function (url, proxy) {
 	}
 
   if (proxy) {
+    logging.info('USING PROXY')
     options.agentClass = Agent
 		options.agentOptions = {
 			socksHost: '109.201.154.239',
@@ -35,7 +36,9 @@ module.exports.scrapeURL = async function (url, proxy) {
 
 	var convert
 	await request(options, function (error, res, html) {
+    // if (!proxy) error = true
 	  if (!error && res.statusCode == 200) {
+      logging.info('scrape success')
 
 	  	//detect char encoding
 	  	var enc = charset(res.headers, html) || jschardet.detect(html).encoding.toLowerCase()
@@ -46,6 +49,7 @@ module.exports.scrapeURL = async function (url, proxy) {
 
 	  }else {
 	  	logging.error('HTML request error ',error)
+      return null
 	  }
 	})
 	return convert
@@ -72,7 +76,6 @@ module.exports.is_older_than_1hour = async function (datetime) {
  * returns a fake user agent to be used in request headers.
  */
 var fakeUserAgent = function () {
-  logging.info('fake user agent called')
   var osxVer = Math.floor(Math.random() * 9) + 1;
   var webkitMajVer = randomInt(999) + 111;
   var webkitMinVer = randomInt(99) + 11;

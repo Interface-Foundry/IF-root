@@ -60,10 +60,8 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		//incoming country / locale
 		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain)
-
 		var html = await utils.scrapeURL(url)
-		if (!html) html = await utils.scrapeUrl(url, true)
-
+		if (!html) html = await utils.scrapeURL(url, true)
 		s = await handle_html.tryHtml(s,html)
 
 		if(!s){
