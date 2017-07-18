@@ -81,7 +81,6 @@ export default class Results extends Component {
     const partitionResults = displayedResults.reduce((acc, result, i) => {
       if (i % size === 0) acc.push([]);
 
-      console.log(myItems)
       acc[acc.length - 1].push({
         ...result,
         inCart: (result.id && myItems.includes(result.id))

@@ -311,7 +311,7 @@ module.exports = function (router) {
       // if item_json is supplied in the body, update the options
       if (req.body.option_ids) {
         yield item.options.map(function * (option) {
-          if (!option.selected && req.body.option_ids.indexOf(option) > -1) {
+          if (req.body.option_ids.indexOf(option.id) > -1) {
             yield db.ItemOptions.update({id: option.id}, {selected: true})
           }
           else if (option.selected) {

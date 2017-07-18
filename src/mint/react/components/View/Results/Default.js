@@ -20,7 +20,7 @@ export default class Default extends Component {
     const { user, cart, item, inCart, selectItem, addItem, togglePopup, fetchSearchItem } = this.props;
     return (
       <td>
-        <div className={`card ${inCart ? 'incart' : ''}`} onClick={() => { if (!inCart) { selectItem(item.id); fetchSearchItem(item.id); }}}>
+        <div className={`card ${inCart ? 'incart' : ''}`} onClick={() => { selectItem(item.id); fetchSearchItem(item.id); }}>
           {
             inCart ? <span className='incart'> In Cart </span> : null
           }
