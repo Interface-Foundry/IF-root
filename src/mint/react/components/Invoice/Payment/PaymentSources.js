@@ -28,6 +28,7 @@ export default class PaymentSources extends Component {
       props: { invoice, createPayment, paymentSources, deletePaymentSource },
       state: { selectedCardIndex }
     } = this;
+    
     return (
       <div>
         {

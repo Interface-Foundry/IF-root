@@ -151,6 +151,19 @@ class StripePaymentSource extends PaymentSource {
 
     return payment
   }
+
+  async refundPayment (paymentId) {
+    const payment = await db.Payments.findOne({id: paymentId})
+    const refund = stripe.refunds.create({
+      charge: payment.data.id
+    })
+
+    payment.refund = refund
+    await payment.save()
+    await payment.archive()
+
+    return refund
+  }
 }
 
 const paymentSourceHandlers = {
