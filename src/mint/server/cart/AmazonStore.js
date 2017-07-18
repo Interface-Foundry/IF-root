@@ -487,6 +487,10 @@ class AmazonStore extends Store {
       // make sure the amazon cart is in sync with the cart in our database
       const amazonCart = await this.createAmazonCart(cart)
 
+      // save the raw amazon cart
+      cart.raw_order = JSON.stringify(amazonCart)
+      await cart.save()
+
       // if everything worked, do the normal things like send emails
       await super.checkout(cart)
       return {
