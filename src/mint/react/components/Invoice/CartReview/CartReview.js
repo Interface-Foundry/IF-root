@@ -36,13 +36,7 @@ export default class CartReview extends Component {
     return (
       <div className='review accordion'>
         <nav onClick={() => selectAccordion('review')}>
-          <h3>2. Items and shipping</h3>
-          {
-              selectedIndex !== null && !selectedAccordion.includes('review') ? <div className='text'>
-                  <p>{numberOfItems(cart.items)} Items shipping {shippingOptions[selectedIndex].name} on {shippingOptions[selectedIndex].shippingDate}</p>
-                  <span>change</span>
-              </div> : null
-          }
+          <h3>Summary</h3>
         </nav>
         {
           selectedAccordion.includes('review') ? <div>

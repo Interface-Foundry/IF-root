@@ -2,7 +2,7 @@ const initialState = {
   loading: false,
   sidenav: false,
   popup: false,
-  selectedAccordion: 'invoiceinfo',
+  selectedAccordion: 'review',
   viewTab: 'cart',
   showYpoCheckout: false,
   showHeaderCheckout: false

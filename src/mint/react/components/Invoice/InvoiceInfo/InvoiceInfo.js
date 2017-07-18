@@ -24,15 +24,12 @@ export default class InvoiceInfo extends Component {
       <div className='payment accordion'>
         <nav onClick={() => selectAccordion('invoiceinfo')}>
           <div>
-            <h3> Invoice Info</h3>
+            <h3>Delivery</h3>
           </div>
-            <div>
-             {
-              (invoice.leader && invoice.leader.name) ? <div>
-              <text> leader: {invoice.leader.name}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
-            </div>
+          <div>
+
+          </div>
         </nav>
-      { isLeader ? <InvoiceOptions {...this.props}/> : null }
       </div>
     );
   }

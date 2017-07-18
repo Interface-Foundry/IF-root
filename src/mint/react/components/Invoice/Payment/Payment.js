@@ -20,25 +20,8 @@ export default class Payment extends Component {
     return (
       <div className='payment accordion'>
         <nav onClick={() => selectAccordion('payment')}>
-
-          <h3>2. Payment method</h3>
+          <h3>Payment</h3>
         </nav>
-        {
-          selectedAccordion.includes('payment') ? <div>
-            <nav>
-              <h4>Your credit and debit cards</h4>
-            </nav>
-            <ul>
-              {
-                userPaymentStatus.paid ? <p> user has already paid </p> :
-                  <div>
-                    <PaymentSources {...this.props}/>
-                    <Stripe {...this.props}/>
-                  </div>
-              }
-            </ul>
-         </div> : null
-        }
       </div>
     );
   }

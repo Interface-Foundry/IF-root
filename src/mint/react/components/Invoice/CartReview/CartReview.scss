@@ -6,15 +6,12 @@
 	width: 100%;
 
 	ul {
-		padding: $padding;
-		display: inline-block;
-		width: 50%;
+		display: block;
+		width: 100%;
 		nav {
 			margin-bottom: $padding;
 		}
 		li {
-			border: 1px solid white;
-			padding: $padding;
 			margin-bottom: $padding;
 
 			.image {
@@ -31,7 +28,6 @@
 		}
 
 		&.delivery {
-			padding: $padding;
 			li {
 				border: 1px solid white;
 				padding: $padding;
