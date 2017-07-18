@@ -22,7 +22,9 @@ export default class InvoiceInfo extends Component {
 
     return (
       <div className='payment accordion'>
-        <nav onClick={() => selectAccordion('invoiceinfo')}>
+        <nav onClick={() => {
+          //selectAccordion('invoiceinfo')// 
+        }}>
           <div>
             <h3>Delivery</h3>
           </div>
@@ -34,3 +36,5 @@ export default class InvoiceInfo extends Component {
     );
   }
 }
+
+

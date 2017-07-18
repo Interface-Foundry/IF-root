@@ -158,7 +158,7 @@ export default class App extends Component {
           // no jittery fix for mobile
         }
         <div className='noJudder'>
-          { tab === 'cart' ? <ButtonsContainer /> : null }
+          { tab === 'cart' || tab === 'invoice' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/invoice'} exact component={TabsContainer} />

@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 
-import { displayCost, numberOfItems } from '../../../utils';
+import { Icon } from '../../../../react-common/components';
+import { displayCost, numberOfItems, calculateItemTotal } from '../../../utils';
 
 const shippingOptions = [{
     name: 'Fast',
@@ -31,19 +32,19 @@ export default class CartReview extends Component {
   }
 
   render() {
-    const { selectedAccordion, selectAccordion, cart } = this.props, { selectedIndex } = this.state;
+    const { selectedAccordion, selectAccordion, cart } = this.props, { selectedIndex } = this.state,
+      subTotal = displayCost(calculateItemTotal(cart.items), cart.store_locale),
+      Achievements = cart.members.length > 2 ? ( cart.members.length > 5 ? ( cart.members.length > 7 ? [{ reqs: 3, discount: 50 }, { reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] : [{ reqs: 3, discount: 50 }, { reqs: 6, discount: 80 }] ) : [{ reqs: 3, discount: 50 }] ) :  [];     
 
     return (
       <div className='review accordion'>
         <nav onClick={() => selectAccordion('review')}>
           <h3>Summary</h3>
+          <span className='sub'>{cart.items.length} items</span>
         </nav>
         {
           selectedAccordion.includes('review') ? <div>
             <ul className='items'>
-              <nav>
-                <h4>Cart Review</h4>
-              </nav>
               {
                 cart.items.map((item) => (
                   <li key={item.id} className='item'>
@@ -52,8 +53,8 @@ export default class CartReview extends Component {
                     }}/>
                     <div className='text'>
                       <h4>{item.name}</h4>
-                      <h4>Qty: {item.quantity}</h4>
-                      <h4>{displayCost(item.price * item.quantity, cart.store_locale)}</h4>
+                      <h4 className='right'>Qty: {item.quantity}</h4>
+                      <h4 className='price'>{displayCost(item.price * item.quantity, cart.store_locale)}</h4>
                     </div>
                   </li>
                 ))
@@ -61,18 +62,24 @@ export default class CartReview extends Component {
             </ul>
             <ul className='delivery'>
               <nav>
-                <h4>Delivery option</h4>
+                <p>Subtotal:</p>
+                <p className='right price'>{subTotal}</p>
+                <h5 className='blue'>Achievements</h5>
               </nav>
               {
-                shippingOptions.map((option, i) => (
-                  <li key={i} className={selectedIndex === i ? 'selected' : ''} onClick={() => this.setState({selectedIndex: i})}>
-                      <div className='circle'/>
-                      <div className='text'>
-                        <h4>{option.name}</h4>
-                        <p>Delivery on {option.shippingDate}</p>
-                        <p>{displayCost(option.price, cart.store_locale)}</p>
+                Achievements.map((a) => (
+                  <li>
+                    <div className='achievement'>
+                      <div className='icon'>
+                        <Icon icon='Person'/>
                       </div>
-                  </li>
+                      <div className='text'>
+                        <p>{a.reqs}pp in Cart</p>
+                        <span className='sub'>{a.discount}% Discount</span>
+                        <p>-{displayCost(calculateItemTotal(cart.items) * (1/a.discount), cart.store_locale)}</p>
+                      </div>
+                    </div>
+                  </li>                
                 ))
               }
             </ul>
