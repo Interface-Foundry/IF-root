@@ -68,9 +68,10 @@
       background: $mainColor;
       padding: 0 $padding;
 
-      a {
+      .inner-button {
         align-items: center;
         display: flex;
+        height: 100%;
 
         svg {
           height: $nav-height / 2;
@@ -120,7 +121,7 @@
 
         & span {
           display: none; // we don't need the price I guess???? this is a mess
-       
+
         }
       }
     }
@@ -165,7 +166,7 @@
 
         & span {
           display: none; // we don't need the price I guess???? this is a mess
-       
+
         }
       }
     }
