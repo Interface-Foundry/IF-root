@@ -128,8 +128,10 @@ module.exports = function (router) {
 
       // If this invoice has been fully paid, fire off whatever emails
       var done = await invoice.paidInFull()
+      done = true;
       if (done) {
         await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        await invoice.sendSuccessEmail(invoice)
       }
 
       return res.send(payment)
@@ -156,6 +158,7 @@ module.exports = function (router) {
       const paymentStatus = await invoice.collectPayments(collectionType)
       return res.send(paymentStatus)
     })
+
 
   /**
    * main ticket system route
@@ -193,6 +196,7 @@ module.exports = function (router) {
       const invoice = await db.Invoices.findOne({id: invoice_id})
       invoice.status = newStatus
       await invoice.save()
+
       return res.send(invoice)
     })
 

@@ -2,7 +2,7 @@ import { get, post, put, del } from './async';
 
 
 export const fetchAddress = user_id => get(
-  `/api/cart/${cart_id}`,
+  `/api/cart/${user_id}`,
   'CART',
   (type, json) => ({
     type: `${type}_SUCCESS`,

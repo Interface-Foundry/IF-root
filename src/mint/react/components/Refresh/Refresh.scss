@@ -24,9 +24,11 @@
     }
   }
 
-  &.animate {
+  &.rotating {
     svg {
-      @include animation(rotate 1s linear infinite);
+      @include animation(rotate 0.95s linear infinite);
+
+      transform-origin: 38% 50%;
     }
   }
 }
