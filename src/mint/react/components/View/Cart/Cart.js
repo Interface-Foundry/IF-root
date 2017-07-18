@@ -59,7 +59,7 @@ export default class Cart extends Component {
           <tr>
             <th colSpan='100%'>
                {
-                cart.members.length === 1 ? <div className='top'>
+                cart.members.length === 1 && myCart[0] ? <div className='top'>
                   <div className='circle'/>
                   <Icon icon='Right'/>
                   <p> <b>{user.name}</b> joined { timeFromDate(myCart[0].createdAt) }</p>
@@ -67,7 +67,7 @@ export default class Cart extends Component {
               }
               {
                 myCart.length
-                ? <div className={`card`} onClick={() => !openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
+                ? <div className={`card`} onClick={() => openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                   { invoice.display ? <ItemPaidButton {...this.props}/> : null}
                   <h1 className='date' onClick={() => _toggleCart(user.id)}>

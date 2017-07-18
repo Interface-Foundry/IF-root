@@ -10,7 +10,25 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   width: 100%;
   height: auto;
   margin: 0 auto;
-  border-collapse: collapse;
+  border-collapse: collapse;  
+
+  th,td {
+    &:after {
+      content: '';
+      position: absolute;
+      height: 100%;
+      left: 12px;
+      top: 0px;
+      width: 2px;
+      background: lighten(#333, 60%);
+      z-index: 1;
+    }
+
+    @media only screen and (max-width: 600px) {
+      position: relative;
+      padding: 0 10px;
+    }
+  }
 
   @media only screen and (max-width: 600px) {
     border-spacing: 0;

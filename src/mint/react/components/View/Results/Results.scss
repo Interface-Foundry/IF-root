@@ -693,14 +693,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
 
         &:after {
-          content: '';
-          position: absolute;
-          top: -15px;
-          width: 0;
-          height: 0;
-          border-right: 13px solid transparent;
-          border-bottom: 15px solid $secondaryColor;
-          border-left: 13px solid transparent;
+          display: none;
         }
 
         &.left {

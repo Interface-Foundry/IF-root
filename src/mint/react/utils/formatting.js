@@ -126,6 +126,6 @@ export const getStoreName = (store, store_locale) => {
       return 'Amazon.com';
     }
   } else {
-    return '';
+    return `${store}`;
   }
 };
