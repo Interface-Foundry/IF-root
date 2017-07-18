@@ -7,11 +7,6 @@ export const editItem = item_id => ({
   }
 });
 
-export const selectOption = option_id => ({
-  type: 'SELECT_OPTION',
-  response: option_id
-});
-
 export const updateItem = (item_id, updatedValues) => post(
   `/api/item/${item_id}`,
   'UPDATE_ITEM', { ...updatedValues },
