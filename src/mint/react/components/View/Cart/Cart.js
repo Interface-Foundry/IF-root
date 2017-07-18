@@ -71,7 +71,7 @@ export default class Cart extends Component {
                   { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                   { invoice.display ? <ItemPaidButton {...this.props}/> : null}
                   <h1 className='date' onClick={() => _toggleCart(user.id)}>
-                    <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
+                    <Icon icon={!openCarts.includes(user.id) ? 'Up' : 'Down'}/>
                   </h1>
                   <h4>
                     <span className='grey'>{numberOfItems(myCart)} items • Updated {timeFromDate(myCart[0].updatedAt)}</span>
