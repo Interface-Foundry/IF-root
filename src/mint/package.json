@@ -89,6 +89,7 @@
     "soap": "^0.19.2",
     "sockjs-client": "^1.1.2",
     "socks5-http-client": "^1.0.2",
+    "socks5-https-client": "^1.2.1",
     "spliddit": "^2.1.1",
     "tapable": "^0.2.6",
     "thunkify": "^2.1.2",

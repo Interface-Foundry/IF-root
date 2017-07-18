@@ -1,5 +1,5 @@
 var request = require('request-promise')
-//var Agent = require('socks5-http-client/lib/Agent')
+var Agent = require('socks5-https-client/lib/Agent')
 
 //encoding stuff
 var charset = require('charset'),
@@ -8,7 +8,8 @@ var charset = require('charset'),
 
 
 //scrapes URL and convets to UTF-8 if it isn't already
-module.exports.scrapeURL = async function (url) {
+module.exports.scrapeURL = async function (url, proxy) {
+
 	var options = {
 		url: url,
 		encoding: null,
@@ -20,15 +21,18 @@ module.exports.scrapeURL = async function (url) {
 		  'Cache-Control':'max-age=0',
 		  'Connection':'keep-alive'
 		}
-		// agentClass: Agent,
-		// agentOptions: {
-		// 	socksHost: '109.201.154.239', 
-		// 	socksPort: 1080,
-		// 	socksUsername: 'x7229287',
-		// 	socksPassword: 'QbhYhHsKZG'
-		// }
-		// timeout: timeoutMs,
 	}
+
+  if (proxy) {
+    options.agentClass = Agent
+		options.agentOptions = {
+			socksHost: '109.201.154.239',
+			socksPort: 1080,
+			socksUsername: 'x7229287',
+			socksPassword: 'QbhYhHsKZG'
+		}
+  }
+
 	var convert
 	await request(options, function (error, res, html) {
 	  if (!error && res.statusCode == 200) {
@@ -68,6 +72,7 @@ module.exports.is_older_than_1hour = async function (datetime) {
  * returns a fake user agent to be used in request headers.
  */
 var fakeUserAgent = function () {
+  logging.info('fake user agent called')
   var osxVer = Math.floor(Math.random() * 9) + 1;
   var webkitMajVer = randomInt(999) + 111;
   var webkitMinVer = randomInt(99) + 11;
@@ -86,4 +91,3 @@ var fakeUserAgent = function () {
 function randomInt(exclusiveMax) {
   return Math.floor(Math.random() * Math.floor(exclusiveMax))
 }
-
