@@ -59,7 +59,7 @@ export default class Cart extends Component {
           <tr>
             <th colSpan='100%'>
                {
-                cart.members.length === 1 && myCart[0] ? <div className=‘top’>
+                cart.members.length === 1 && myCart.length > 0 ? <div className='top'>
                   <div className='circle'/>
                   <Icon icon='Right'/>
                   <p> <b>{user.name}</b> joined { timeFromDate(myCart[0].createdAt) }</p>
