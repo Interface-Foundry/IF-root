@@ -73,7 +73,7 @@ const invoiceCollection = Waterline.Collection.extend({
     split_type: {
       type: 'string',
       enum: ['split_single', 'split_equal', 'split_by_item'],
-      defaultsTo: 'split_equal'
+      defaultsTo: 'split_single'
     },
 
     /** the checkout url with our affiliate info in it */

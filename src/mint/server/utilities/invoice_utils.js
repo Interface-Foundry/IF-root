@@ -80,7 +80,12 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
     username: cart.leader.name || cart.leader.email_address,
     baseUrl: baseUrl,
     id: cart.id,
-    items: nestedItems,
+    items: nestedItems.map(items => {
+      return items.map(item => {
+        item.price = item.price / 100
+        return item
+      })
+    }),
     total: '$' + (invoice.total / 100).toFixed(2),
     cart: cart,
     totalItems: totalItems,

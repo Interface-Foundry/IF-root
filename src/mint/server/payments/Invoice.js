@@ -166,7 +166,7 @@ class Invoice {
         items: items.map(item => {
           item.price = item.price / 100
           return item
-        }),,
+        }),
         users: cart.members,
         date: moment().format('dddd, MMMM Do, h:mm a'),
         total: '$' + (invoice.total / 100).toFixed(2),
