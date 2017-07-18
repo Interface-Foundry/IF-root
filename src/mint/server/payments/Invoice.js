@@ -163,10 +163,13 @@ class Invoice {
       await email.template('success', {
         username: user.name,
         baseUrl: baseUrl,
-        items: items,
+        items: items.map(item => {
+          item.price = item.price / 100
+          return item
+        }),,
         users: cart.members,
         date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: invoice.total,
+        total: '$' + (invoice.total / 100).toFixed(2),
         totalItems: totalItems,
         cart: invoice.cart,
         invoice_id: invoice.id
