@@ -100,11 +100,14 @@ class UrlStore extends Store {
       delete itemData.price
     }
 
+    // convert price to cents
+    itemData.price = itemData.price * 100
+
     //create item & associate it w details objects
     var item = await db.Items.create(itemData)
     item.original_name = itemName.id
     item.original_description = itemDescription.id
-    item.original_price = originalPrice.id
+    item.price_conversion = originalPrice.id
     options.map(op => {
       item.options.add(op.id)
     })

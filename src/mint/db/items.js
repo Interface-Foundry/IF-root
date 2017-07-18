@@ -67,7 +67,7 @@ var itemsCollection = Waterline.Collection.extend({
     price: 'float',
 
     /** @type {conversion} currency conversion details */
-    original_price: Waterline.isA('conversions'),
+    price_conversion: Waterline.isA('conversions'),
 
     /** */
 
