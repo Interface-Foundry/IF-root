@@ -30,9 +30,9 @@ export const navigateAffilateUrl = item_id => get(
   })
 );
 
-export const addItem = (cart_id, item_id) => post(
+export const addItem = (cart_id, item) => post(
   `/api/cart/${cart_id}/item`,
-  'ADD_ITEM', { item_id },
+  'ADD_ITEM', { item_json: item },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,

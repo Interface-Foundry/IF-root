@@ -97,10 +97,17 @@ export const splitAndMergeSearchWithCart = (items, results, user) => results.red
 }, []);
 
 export const splitOptionsByType = (options = []) => {
+  // return options.reduce((acc, option) => {
+  //   if(!acc[option.type]) acc[option.type] = [{id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name}];
+  //   else acc[option.type].push({id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name});
+  //   if(option.selected) acc[option.type].selected = option.asin;
+  //   return acc;
+  // }, {});
   return options.reduce((acc, option) => {
-    if(!acc[option.type]) acc[option.type] = [{id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name}];
-    else acc[option.type].push({id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name});
-    if(option.selected) acc[option.type].selected = option.asin;
+    if(!acc[option.type]) {
+      acc[option.type] = [{id: option.id, main_image_url: option.main_image_url, name: option.name}];
+    } else acc[option.type].push({id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name});
+    if(option.selected) acc[option.type].selected = option.id;
     return acc;
   }, {});
 };
