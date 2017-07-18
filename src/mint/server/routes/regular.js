@@ -227,7 +227,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   } else {
     var dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + String(date.getFullYear()).slice(2)
   }
-  cart.name = dateString + ' Kip Cart'
+  cart.name = cart.store + ' Kip Cart'
 
   // This is all we care about, creating new carts. 25 thousand carts per month is the goal
   cart = yield db.Carts.create(cart)
@@ -238,7 +238,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // Send an email to the user with the cart link
   var email = yield db.Emails.create({
     recipients: _.get(req, 'UserSession.user_account.email_address'),
-    subject: 'Your New Cart from Kip',
+    subject: `Your New ${cart.store} Cart from Kip`,
     cart: cart.id
   })
 
