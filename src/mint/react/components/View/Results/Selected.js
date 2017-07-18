@@ -86,7 +86,7 @@ export default class Selected extends Component {
                         <option key={key} value={key} disabled={true}>{key}</option>
                         {
                           item.options[key].map((option) => (
-                            <option key={option.id} value={option.asin}>{option.name}</option>
+                            <option key={option.id} value={option.parent_id}>{option.name}</option>
                           ))
                         }
                       </select>;

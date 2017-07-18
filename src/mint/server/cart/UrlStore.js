@@ -113,7 +113,7 @@ class UrlStore extends Store {
     })
     await item.save()
     logging.info('about to create item')
-    item = await db.Items.findOne({id: item.id}).populate('options').populate('original_description').populate('original_price')
+    item = await db.Items.findOne({id: item.id}).populate('options').populate('original_description')
 
     return [item];
   }

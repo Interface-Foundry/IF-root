@@ -26,9 +26,18 @@
 		}
 
 		nav {
+      position: relative;
 			width: 100%;
 			padding: $padding 0;
 			cursor: pointer;
+
+      .sub {
+        position: absolute;
+        left: 0px;
+        bottom: -2px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
 
 			h3 {
 				display: inline-block;
@@ -65,13 +74,8 @@
 		}
 
 		& > div {
-			width: 95%;
 			margin: 0 auto;
 			border-radius: $padding/2;
-
-			nav {
-				border-bottom: 1px solid $border-color-light;
-			}
 		}
 		&:last-of-type {
 			border-bottom: 1px solid transparent;

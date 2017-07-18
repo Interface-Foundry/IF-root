@@ -19,7 +19,9 @@ export default class Payment extends Component {
     const { userPaymentStatus, selectAccordion, selectedAccordion } = this.props;
     return (
       <div className='payment accordion'>
-        <nav onClick={() => selectAccordion('payment')}>
+        <nav onClick={() => {
+          // selectAccordion('payment')
+        }}>
           <h3>Payment</h3>
         </nav>
       </div>
