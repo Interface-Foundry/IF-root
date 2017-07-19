@@ -13,8 +13,13 @@ class Invoice {
     this.invoice = invoiceType
   }
 
-  static InvoiceInitializer(invoice) {
-    return new MintInvoice(invoice)
+  static InvoiceInitializer(invoice, invoiceType) {
+    if (invoiceType === undefined || invoiceType === 'mint') {
+      return new MintInvoice(invoice)
+    }
+    else {
+      return new MintInvoice(invoice)
+    }
   }
 
   /**
@@ -60,15 +65,29 @@ class Invoice {
    * @param      {object}           invoiceData  The invoice data
    * @return     {invoiceHandlers}  instantiation of the class
    */
-  static Create (invoiceType, invoiceData) {
-    return this.InvoiceInitializer(invoice)
+  static Create (invoiceData, invoiceType) {
+    return this.InvoiceInitializer(invoiceData, invoiceType)
   }
 
   static async CreateByCartId (cartId) {
-    const cart = await db.Carts.findOne({id: cartId})
-    var invoiceObject = this.InvoiceInitializer()
-    invoiceObject.createInvoice(cart)
-    return invoiceObject
+    let cart = await Cart.GetById(cartId)
+    await cart.sync()
+
+    const invoice = await db.Invoices.create({
+      leader: cart.leader,
+      cart: cart.id,
+      paid: false,
+      total: cart.subtotal,
+      affiliate_checkout_url: cart.affiliate_checkout_url
+    })
+
+    return this.InvoiceInitializer(invoice)
+  }
+
+  static async ChangeRefundStatus(invoiceId, newStatus) {
+    let invoice = await db.Invoices.findOne({cart: invoiceId})
+    invoice.refund_status = newStatus
+    await invoice.save()
   }
 
 
