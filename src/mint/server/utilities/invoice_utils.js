@@ -54,9 +54,9 @@ const userPaymentAmountHandler = {
 async function sendInternalCheckoutEmail (invoice, baseUrl) {
   logging.info('all payments complete')
   var paidEmail = await db.Emails.create({
-    recipients: 'hello@kipthis.com',
+    recipients: 'hannah.katznelson@gmail.com',
     sender: 'hello@kipthis.com',
-    subject: 'Payment Collected!',
+    subject: 'Payment Collected! [hello, Rachel]',
     template_name: 'kip_order_process',
     cart: invoice.cart
   })
@@ -83,6 +83,7 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
     items: nestedItems.map(items => {
       return items.map(item => {
         item.price = item.price / 100
+        logging.info('i t e m ', item)
         return item
       })
     }),
