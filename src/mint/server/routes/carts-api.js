@@ -279,8 +279,6 @@ module.exports = function (router) {
       throw new Error('Cart not found')
     }
 
-    logging.info('current privacy setting:', cart.privacy)
-
     //if the cart is display, the user must be the cart leader
     if (cart.privacy == 'display' && currentUser.id !== cart.leader.id) {
       return res.sendStatus(403);
@@ -310,7 +308,10 @@ module.exports = function (router) {
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
       // Create an item from the url
-      item = yield cartUtils.addItem(req.body, cart, 1)
+      if (cart.store.includes('amazon') || cart.store.includes('YPO')) {
+        item = yield cartUtils.addItem(req.body, cart, 1)
+      }
+      else throw new Error('item does not exist')
     }
 
     // join the two database documents
@@ -325,6 +326,7 @@ module.exports = function (router) {
 
     // Save all the weird shit we've added to this poor cart.
     yield [item.save(), cart.save()]
+
     var item = yield db.Items.findOne({id: item.id}).populate('options')
     return res.send(item)
   }));
@@ -734,6 +736,7 @@ module.exports = function (router) {
     }
 
     var item = yield db.Items.findOne({id: item.id}).populate('options')
+
     res.send(item)
   }))
 
@@ -744,10 +747,19 @@ module.exports = function (router) {
    * @apiParam {String} :item_id
    */
   router.get('/item/:item_id', (req, res) => co(function* () {
+
     var item = yield db.Items.findOne({ id: req.params.item_id })
       .populate('options')
       .populate('added_by', selectMembersWithoutEmail)
-    res.send(item)
+    //for debugging
+    if (!item.options) item.options = []
+    // logging.info('ITEM', item)
+    if (!item) {
+      logging.error('item does not exist')
+      return res.sendStatus(500)
+    }
+    return res.send(item)
+    // return res.sendStatus(500)
   }))
 
   /**
@@ -913,20 +925,28 @@ module.exports = function (router) {
    * GET https://mint.kipthis.com/api/itempreview?q=travel%20hand%20sanitizer
    */
   router.get('/itempreview', (req, res) => (async function () {
-    // parse the incoming text to extract either an asin, url, or search query
+    // parse the incoming text to extract either an asin, a url, or a search query
     const q = (req.query.q || '')
       .trim()
     if (!q) {
-      throw new Error('must supply a query string parameter "q" which can be an asin, url, or search text')
+      throw new Error('must supply  a query string parameter  "q" which can be an asin, url, or search text')
     }
-    const searchOpts = _.omitBy({
+    var searchOpts = _.omitBy({
       text: q,
       category: _.get(req, 'query.category'),
       page: _.get(req, 'query.page')
     }, _.isUndefined)
+
+    searchOpts.user_locale = req.locale.slice(0, 2)
+    var geo = geolocation(req.ip) || geolocation.default
+    searchOpts.user_country = geo.country;
+
+    //TODO add user locale & country
     const store = _.get(req, 'query.store', 'Amazon')
     const locale = _.get(req, 'query.store_locale', 'US')
+    logging.info('store, locale:', store, locale)
     var storeInstance = StoreFactory.GetStore({ store: store, store_locale: locale })
+
     console.log('store instance', (storeInstance || {}).name)
 
     try {
@@ -1061,6 +1081,8 @@ module.exports = function (router) {
       longitude: geo.ll[1]
     }
 
+    logging.info('user coordinates:', userCoords)
+
     // assemble list of stores
     var stores = [];
 
@@ -1125,6 +1147,9 @@ module.exports = function (router) {
     case 'YPO':
       var arrayCategories = yield category_utils.getYpoCategories()
       res.send(arrayCategories)
+      break;
+    case 'Muji':
+      res.send([])
       break;
     default:
       throw new Error('Cannot fetch categories for unhandled cart type: ' + cart.store)

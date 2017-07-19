@@ -29,6 +29,7 @@ waterline.loadCollection(require('./authentication_links'))
 waterline.loadCollection(require('./camel_items'))
 waterline.loadCollection(require('./carts'))
 waterline.loadCollection(require('./checkout_events'))
+waterline.loadCollection(require('./conversions'))
 waterline.loadCollection(require('./delivery_details'))
 waterline.loadCollection(require('./email_events'))
 waterline.loadCollection(require('./emails'))
@@ -38,8 +39,10 @@ waterline.loadCollection(require('./item_options'))
 waterline.loadCollection(require('./items'))
 waterline.loadCollection(require('./payments'))
 waterline.loadCollection(require('./payment_sources'))
+waterline.loadCollection(require('./raw_html'))
 waterline.loadCollection(require('./reactions'))
 waterline.loadCollection(require('./sessions'))
+waterline.loadCollection(require('./translations'))
 waterline.loadCollection(require('./user_accounts'))
 waterline.loadCollection(require('./ypo_inventory_items'))
 
@@ -72,6 +75,7 @@ var initialize = new Promise((resolve, reject) => {
       CamelItems: ontology.collections.camel_items,
       Carts: ontology.collections.carts,
       CheckoutEvents: ontology.collections.checkout_events,
+      Conversions: ontology.collections.conversions,
       DeliveryDetails: ontology.collections.delivery_details,
       EmailEvents: ontology.collections.email_events,
       Emails: ontology.collections.emails,
@@ -81,8 +85,10 @@ var initialize = new Promise((resolve, reject) => {
       Items: ontology.collections.items,
       Payments: ontology.collections.payments,
       PaymentSources: ontology.collections.payment_sources,
+      RawHtml: ontology.collections.raw_html,
       Reactions: ontology.collections.reactions,
       Sessions: ontology.collections.sessions,
+      Translations: ontology.collections.translations,
       UserAccounts: ontology.collections.user_accounts,
       YpoInventoryItems: ontology.collections.ypo_inventory_items
     };

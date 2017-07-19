@@ -18,7 +18,7 @@ var cloneItem = function * (item_id, user_id, cart_id) {
   var clonedItem = yield db.Items.create(itemJson)
   clonedItem.cart = cart_id
   clonedItem.added_by = user_id
-  clonedItem.details = item.details.id
+  if (item.details) clonedItem.details = item.details.id
   yield clonedItem.save()
 
   return clonedItem

@@ -4,7 +4,7 @@ module.exports = {
   MAGIC_URL_LENGTH: 32,
 
   // available stores we are supporting atm
-  STORES: ['YPO', 'Amazon'],
-  LOCALES: ['US', 'CA', 'GB'],
+  STORES: ['YPO', 'Amazon', 'Muji'],
+  LOCALES: ['US', 'CA', 'GB', 'JP'],
   PAYMENT_SOURCE: ['stripe']
 };

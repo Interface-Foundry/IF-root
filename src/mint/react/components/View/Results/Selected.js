@@ -27,7 +27,11 @@ export default class Selected extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { fetchSearchItem, item } = this.props;
-    if (nextProps.item.id !== item.id) fetchSearchItem(nextProps.item.id);
+    
+    if (nextProps.item.id !== item.id) {
+      console.log('this never gets hit right')
+      fetchSearchItem(nextProps.item.id);
+    }
   }
 
   render() {
@@ -73,7 +77,7 @@ export default class Selected extends Component {
               { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
-              item.options ? ( 
+              item.options ? (
                 <div className='options'>
                   {
                     Object.keys(item.options).map((key, index) => {
@@ -91,7 +95,7 @@ export default class Selected extends Component {
                 </div>
               ) : null
             }
-            { 
+            {
               item.iframe_review_url ? <div className='iframe'>
                 <iframe scrolling="no" src={`${item.iframe_review_url}`}/>
               </div> : <div className='padding'/>
