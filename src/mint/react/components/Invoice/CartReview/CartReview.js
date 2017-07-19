@@ -60,7 +60,7 @@ export default class CartReview extends Component {
                 ))
               }
             </ul>
-            <ul className='delivery'>
+            <ul className='achievements'>
               <nav>
                 <p>Subtotal:</p>
                 <p className='right price'>{subTotal}</p>
@@ -76,7 +76,7 @@ export default class CartReview extends Component {
                       <div className='text'>
                         <p>{a.reqs}pp in Cart</p>
                         <span className='sub'>{a.discount}% Discount</span>
-                        <p>-{displayCost(calculateItemTotal(cart.items) * (1/a.discount), cart.store_locale)}</p>
+                        <p className='right'>-{displayCost(calculateItemTotal(cart.items) * (1/a.discount), cart.store_locale)}</p>
                       </div>
                     </div>
                   </li>                

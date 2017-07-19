@@ -66,6 +66,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         flex: 1 1 auto;
         min-width: 270px;
 
+        @media only screen and (max-width: 600px) {
+          min-width: auto;
+        }
+
         .image {
           border-radius: 5px;
           display: inline-block;
