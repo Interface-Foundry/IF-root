@@ -6,6 +6,7 @@ var _ = require('lodash');
 const cartUtils = require('../cart/cart_utils')
 const dealsDb = require('../deals/deals')
 const geolocation = require('../utilities/geolocation')
+const stores = require('../cart/cart_types').stores
 
 /**
  * Models loaded from the waterline ORM
@@ -187,23 +188,43 @@ router.get('/auth/:id', (req, res) => co(function * () {
  * @apiParam {string} :store one of amazon_US, amazon_UK, amazon_CA, ypo (all defined in cart/cart_types.js)
  */
 router.get('/newcart/:store', (req, res) => co(function * () {
+  //check to make sure the user is logged in
+  const user_id = _.get(req, 'UserSession.user_account.id')
+  //FOR TESTING
+  // const user_id = '0f3cebf3-602b-4dc4-9f7f-6df88ab413fd'
+  // if (!user_id) throw new Error('must be logged in to create a cart')
+  // req.UserSession.user_account = yield db.UserAccounts.findOne({id: user_id})
+
   // cart body, used in db.Carts.create(cart) later
   var cart = {}
 
   // Figure out what store they are shopping at and in what locale
-  console.log('req.params.store', req.params)
-  if (!req.params.store) {
-    cart.store = 'Amazon'
-    cart.store_locale = 'US'
-  } else if (req.params.store === 'YPO') {
-    cart.store = 'YPO'
-    cart.store_locale = 'GB'
-  } else if (req.params.store.includes('Amazon')) {
-    cart.store = 'Amazon'
-    cart.store_locale = req.params.store.split('_')[1]
-  } else {
-    throw new Error('Cannot create new cart for store ' + req.params.store)
+  console.log('req.params.store', req.params) //TODO dynamically
+  if (!req.params.store) throw new Error('No store provided for cart creation')
+  var chosen_store = stores.find(function (s) {
+    return req.params.store.includes(s.store_name.split(' ')[0])
+  })
+  if (chosen_store) {
+    cart.store = chosen_store.store_name.split(' ')[0]
+    cart.store_locale = chosen_store.store_countries[0]
+    cart.thumbnail_url = chosen_store.default_image
   }
+  else throw new Error('Cannot create new cart for store ' + req.params.store)
+  // if (!req.params.store) {
+  //   cart.store = 'Amazon'
+  //   cart.store_locale = 'US'
+  // } else if (req.params.store === 'YPO') {
+  //   cart.store = 'YPO'
+  //   cart.store_locale = 'GB'
+  // } else if (req.params.store.includes('Amazon')) {
+  //   cart.store = 'Amazon'
+  //   cart.store_locale = req.params.store.split('_')[1]
+  // } else if (req.params.store.includes('Muji')) {
+  //   cart.store = 'Muji'
+  //   cart.store_locale = 'JP'
+  // } else {
+  //   throw new Error('Cannot create new cart for store ' + req.params.store)
+  // }
 
   // figure out what country the user is in
   var geo = geolocation(req) || geolocation.default
@@ -216,10 +237,10 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   ].filter(Boolean).length > 0
 
   // Add the cart leader if they are logged in
-  const user_id = _.get(req, 'UserSession.user_account.id')
-  if (user_id) {
+  // const user_id = _.get(req, 'UserSession.user_account.id')
+  // if (user_id) {
     cart.leader = user_id
-  }
+  // }
 
   var date = new Date()
   if (cart.store_locale === 'US') {

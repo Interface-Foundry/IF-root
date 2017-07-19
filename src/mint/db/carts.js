@@ -3,6 +3,9 @@ const uuid = require('uuid');
 const constants = require('../server/constants.js');
 const archive = require('./cold_storage');
 
+var cart_types = require('../server/cart/cart_types').stores
+cart_types = cart_types.map(store => store.store_type.split('_')[0])
+
 /**
  * Session collection is the database side of the node-client-session cookie
  */
@@ -74,10 +77,7 @@ var cartsCollection = Waterline.Collection.extend({
     /** @type {string} the online retailer */
     store: {
       type: 'string',
-      enum: [
-        'Amazon',
-        'YPO'
-      ],
+      enum: cart_types,
       defaultsTo: 'amazon',
       required: true
     },
@@ -98,7 +98,9 @@ var cartsCollection = Waterline.Collection.extend({
       enum: [
         'US',
         'GB',
-        'CA'
+        'CA',
+        'JP',
+        'KR'
       ],
       required: true
     },

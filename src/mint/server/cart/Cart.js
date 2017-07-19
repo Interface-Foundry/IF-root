@@ -1,6 +1,7 @@
 const GetStore = require('./StoreFactory').GetStore
 const _ = require('lodash')
 const moment = require('moment');
+// const Invoice = require('../payments/Invoice')
 
 var db
 const dbReady = require('../../db')
@@ -113,7 +114,7 @@ class Cart {
     }
     // const store = GetStore(this)
     // logging.info('STORE:', store)
-    await this.store.checkout(this, req, res)
+    return await this.store.checkout(this, req, res)
   }
 
   async sendCartSummary (req) {
