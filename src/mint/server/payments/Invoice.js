@@ -163,10 +163,13 @@ class Invoice {
       await email.template('success', {
         username: user.name,
         baseUrl: baseUrl,
-        items: items,
+        items: items.map(item => {
+          item.price = item.price / 100
+          return item
+        }),
         users: cart.members,
         date: moment().format('dddd, MMMM Do, h:mm a'),
-        total: invoice.total,
+        total: '$' + (invoice.total / 100).toFixed(2),
         totalItems: totalItems,
         cart: invoice.cart,
         invoice_id: invoice.id
@@ -220,21 +223,24 @@ class Invoice {
           template_name: 'collection'
         })
         // logging.info('created email')
-        if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] + ' at your earliest possible convenience.'
-        else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] + ' at your earliest possible convenience 😊'
+        if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] / 100 + ' at your earliest possible convenience.'
+        else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] / 100 + ' at your earliest possible convenience 😊'
         // logging.info('about to template')
         await email.template('collection', {
           username: user.name,
           baseUrl: baseUrl,
-          items: items,
+          items: items.map(item => {
+            item.price = item.price / 100
+            return item
+          }),
           users: users,
           date: moment().format('dddd, MMMM Do, h:mm a'),
-          total: invoice.total,
+          total: '$' + (invoice.total / 100).toFixed(2),
           totalItems: totalItems,
           cart: invoice.cart,
           invoice_id: invoice.id,
           text: text,
-          user_amount: debts[user_id]
+          user_amount: debts[user_id] / 100
         })
         // logging.info('templated; about to send')
         await email.send();
@@ -255,6 +261,7 @@ class Invoice {
     }, 0)
 
     if (amountPaid >= this.total) {
+      logging.info('PAID IN FULL', amountPaid, this.total)
       return true
     }
     return false

@@ -1,7 +1,7 @@
 // kip-website/index.js
 
 import React from 'react';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import createHistory from 'history/createBrowserHistory';
@@ -31,19 +31,24 @@ const historyMiddleware = routerMiddleware(history);
 
 let middleware = [thunkMiddleware, historyMiddleware];
 if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
+  const { createLogger } = require('redux-logger');
   const loggerMiddleware = createLogger({
-    duration: true,
     timestamp: false,
-    collapsed: true,
-    level: 'info'
+    level: { // redux dev tools can do all of this without cluttering the console
+      // download! http://extension.remotedev.io/
+      prevState: false,
+      action: 'error',
+      nextState: false,
+      error: 'error'
+    },
+    predicate: (_, action) => action.error // only logs messages with errors
   });
   middleware = [...middleware, loggerMiddleware];
 }
 
-const store = createStore(
-  Reducers,
-  applyMiddleware(...middleware)
-);
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
+
+const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
 
 // Check session and prep carts and blogs
 store.dispatch(checkSession()).then(() => {

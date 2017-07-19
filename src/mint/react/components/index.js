@@ -1,5 +1,5 @@
 // mint/react/components/index.js
-
+export AddressList from './AddressList';
 export App from './App';
 export Buttons from './Buttons';
 export Display from './Display';
@@ -16,4 +16,4 @@ export Toast from './Toast';
 export View from './View';
 export { Feedback, Settings, Share, EditCart, ArchivedCarts } from './Display';
 export { Results, Cart, Empty } from './View';
-export { YPOCheckout } from './Modal';
+export { YPOCheckout, AddressForm } from './Modal';

@@ -22,7 +22,7 @@ const ypoFieldDict = {
     'Item Code': 'item_code',
     'Code Name':'name',
     'Description': 'description',
-    'Price': 'price',
+    'Price': 'original_price',
     'UOM': 'unit_type',
     'UNSPSC code': 'unspsc_code',
     'Category 1': 'category_1',

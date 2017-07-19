@@ -9,28 +9,26 @@ class Refresh extends Component {
   static propTypes = {
     refresh: PropTypes.func,
     cartId: PropTypes.string,
-
+    createTimeout: PropTypes.func,
     userId: PropTypes.string
-    // loading: PropTypes.bool
   }
 
   state = {
     loading: false
   }
 
+  _resetLoading = () => this.setState({ loading: false })
+
   _update = () => {
-    const { refresh, cartId, userId } = this.props;
+    const { props: { refresh, cartId, userId, createTimeout }, _resetLoading } = this;
     this.setState({ loading: true });
-    this.props.setTimeout(() => this.setState({ loading: false }), 2000);
+    createTimeout(() => _resetLoading, 2000);
     refresh(cartId, userId);
   }
 
-  render = () => (
-    <div className={`refresh${this.state.loading? ' rotating':''}`} onClick={()=>::this._update()}>
-        <div className='wrapper'>
-          <Icon icon='Refresh'/>
-        </div>
-      </div>
-  )
+  render = () =>
+    <div className={`refresh${this.state.loading? ' rotating':''}`} onClick={this._update}>
+      <div className='wrapper'><Icon icon='Refresh'/></div>
+    </div>
 }
 export default Timeout(Refresh);

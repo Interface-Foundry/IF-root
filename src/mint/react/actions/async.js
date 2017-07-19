@@ -31,7 +31,6 @@ export const post = (url, type, item, cb) => {
         credentials: 'same-origin',
         'body': JSON.stringify(item)
       });
-
       return dispatch(cb(type, await response.json()));
     } catch (error) {
       return dispatch({

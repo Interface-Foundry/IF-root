@@ -1,6 +1,7 @@
 const Waterline = require('waterline')
 const uuid = require('uuid')
 
+const archive = require('./cold_storage')
 /**
  * Payments collection is the collection of payments to invoices
  */
@@ -50,7 +51,10 @@ const paymentsCollection = Waterline.Collection.extend({
     /**
      * if we refund a payment we may receive a response back
      */
-    refund: 'json'
+    refund: 'json',
+
+    /** function to archive this object */
+    archive: archive
   }
 })
 

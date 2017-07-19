@@ -66,7 +66,7 @@ export default class YPOCheckout extends Component {
     } = this;
 
     return (
-      <div className='ypo-checkout'>
+      <div className='ypo-checkout form-container'>
         <a className='close' href='#' onClick={::this._toggleYpo}><Icon icon='Clear'/></a>
         <h1>Last Step!</h1>
         <p>Before you check out, we need a couple details from your YPO Account 😊</p>
@@ -81,7 +81,7 @@ export default class YPOCheckout extends Component {
               <span className='required'>﹡</span>
             </span>
           </label>
-          
+
           <label>
             <div>
               Order Number <i>Optional</i>
@@ -91,7 +91,7 @@ export default class YPOCheckout extends Component {
               <input type='number' placeholder='Order Number' value={orderNumber} onChange={_updateOrderNumber} />
             </span>
           </label>
-          
+
           <label>
             <div>
               Delivery Message <i>Optional</i>
@@ -101,7 +101,7 @@ export default class YPOCheckout extends Component {
               <textarea rows='3'  placeholder='Delivery Message' value={deliveryMessage} onChange={_updateDeliveryMessage} />
             </span>
           </label>
-          
+
           <label>
             <div>
               Voucher Code <i>Optional</i>
@@ -111,7 +111,7 @@ export default class YPOCheckout extends Component {
               <input type='number' placeholder='Voucher Code' value={voucherCode} onChange={_updateVoucherCode} />
             </span>
           </label>
-          
+
           <ButtonsContainer checkoutOnly={true}/>
         </form>
       </div>

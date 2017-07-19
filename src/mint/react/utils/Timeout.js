@@ -4,33 +4,23 @@
 import React, { Component } from 'react';
 
 export default Composition => class Timeout extends Component {
-  constructor(props) {
-    super(props);
-  }
 
-  componentWillMount() {
-    this.timeouts = [];
-  }
+  timeouts = [];
 
-  setTimeout() {
+  createTimeout() {
     this.timeouts.push(setTimeout.apply(null, arguments));
   }
 
-  clearTimeouts() {
-    this.timeouts.forEach(clearTimeout);
-  }
+  clearTimeouts = () =>
+    this.timeouts.forEach(clearTimeout)
 
-  componentWillUnmount() {
-    this.clearTimeouts();
-  }
+  componentWillUnmount = () =>
+    this.clearTimeouts()
 
-  render() {
-    const { timeouts, setTimeout, clearTimeouts } = this;
-
-    return <Composition 
-        timeouts={timeouts} 
-        setTimeout={setTimeout} 
-        clearTimeouts={clearTimeouts} 
-        { ...this.props } />;
-  }
+  render = () =>
+    <Composition
+      timeouts={this.timeouts}
+      createTimeout={this.createTimeout}
+      clearTimeouts={this.clearTimeouts}
+      { ...this.props } />
 };

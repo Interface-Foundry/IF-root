@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 
-const displayInvoice = (process.env.NODE_ENV === 'development') ? true : false;
+const displayInvoice = (process.env.NODE_ENV === 'development') || process.env.KIP_PAY_ENABLED ? true : false;
 
 export default class Default extends Component {
   static propTypes = {
@@ -17,7 +17,7 @@ export default class Default extends Component {
     selectTab: PropTypes.func,
     user: PropTypes.object,
     toggleYpoCheckout: PropTypes.func,
-    checkoutOnly: PropTypes.bool,
+    checkoutOnly: PropTypes.bool
   }
 
   _handleShare = () => {
@@ -69,21 +69,22 @@ export default class Default extends Component {
 
           cart.locked
           ? <span>
-              <button
-                className='yellow sub lock'
-                onClick={::this._orderCart}
-                >
-                  Re-Order {displayCost(total, cart.store_locale)}
-                </button>
-
-                  {
-                    (cart.leader.id === user.id || cart.leader === user.id) && !checkoutOnly
-                    ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
-                        <Icon icon='Unlocked'/>Unlock Cart
-                      </button>
-                    : null
-                  }
-              </span>
+              <button className='yellow sub' onClick={this._orderCart} >
+                <span className='inner-button'>
+                  <Icon icon='Cart'/>
+                  <p className='checkout-button-text'>Checkout</p>
+                  <p className='checkout-button-text'>{displayCost(total, cart.store_locale)}</p>
+                  <Icon icon='RightChevron'/>
+                </span>
+              </button>
+              {
+                (cart.leader.id === user.id || cart.leader === user.id) && !checkoutOnly
+                ? <button className='locked' onClick={() => updateCart({ ...cart, locked: false })}>
+                    <Icon icon='Unlocked'/>Unlock Cart
+                  </button>
+                : null
+              }
+            </span>
             : <span>
               {
                 cart.items.length === 0
@@ -92,17 +93,17 @@ export default class Default extends Component {
                     Checkout <span>{displayCost(total, cart.store_locale)}</span>
                   </button>
                 :
-                  <button className='yellow sub' onClick={::this._orderCart}>
-                    <a href={`/api/cart/${cart.id}/checkout`} target="_blank" onClick={(e)=>e.preventDefault()}>
+                  <button className='yellow sub' onClick={this._orderCart}>
+                    <span className='inner-button'>
                       <Icon icon='Cart'/>
-                      <p>Checkout</p>
-                      <p>{displayCost(total, cart.store_locale)}</p>
+                      <p className='checkout-button-text'>Checkout</p>
+                      <p className='checkout-button-text'>{displayCost(total, cart.store_locale)}</p>
                       <Icon icon='RightChevron'/>
-                    </a>
+                    </span>
                   </button>
                 }
-              {displayInvoice && !checkoutOnly && (cart.items.length > 0)? <button className='teal sub' onClick={::this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
-              {!checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
+              {displayInvoice && !checkoutOnly && (cart.items.length > 0)? <button className='teal sub' onClick={this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
+              {!checkoutOnly ? <button className='blue' onClick={this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }
 

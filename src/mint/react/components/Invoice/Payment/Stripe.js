@@ -17,7 +17,6 @@ export default class Stripe extends Component {
 
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;
-    console.log('fetching paymentstatus', invoice.id);
     fetchPaymentStatus(invoice.id);
   }
 

@@ -1,5 +1,6 @@
 // mint/react/components/index.js
-
+export AddressFormContainer from './AddressFormContainer';
+export AddressListContainer from './AddressListContainer';
 export AppContainer from './AppContainer';
 export ArchiveContainer from './ArchiveContainer';
 export ButtonsContainer from './ButtonsContainer';

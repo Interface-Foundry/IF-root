@@ -20,8 +20,12 @@ export default class Invoice extends Component {
     fetchInvoiceByCart(cart.id);
   }
 
+  componentWillReceiveProps = ({ cart, fetchInvoiceByCart }) =>
+    cart.id !== this.props.cart.id ? fetchInvoiceByCart(cart.id) : null;
+
   render() {
     const { selectedAccordion } = this.props;
+    
     return (
       <div className='invoice'>
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}

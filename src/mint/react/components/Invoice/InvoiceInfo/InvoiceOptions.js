@@ -1,7 +1,8 @@
-// react/components/Invoice/Invoice.js
+// react/components/Invoice/InvoiceInfo/InvoiceOptions.js
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import {AddressListContainer} from '../../../containers';
 // import PaymentTypes from './PaymentTypes';
 
 const addressDummy = [{
@@ -65,49 +66,35 @@ export default class InvoiceOptions extends Component {
                 }
             </nav>
             {
-              selectedAccordion.includes('changeinvoice') ? <div>
+              selectedAccordion.includes('changeinvoice') ?
+              <div>
                 <nav>
-                  <h4>select/edit/remove your address</h4>
+                  <h4>Choose Your Address</h4>
                 </nav>
+                <AddressListContainer />
+                <div>
+                  <nav>
+                    <h4>Payment Type</h4>
+                  </nav>
                   <ul>
-                      {
-                          addressDummy.map((address, i) => (
-                              <li key={i} className={selectedIndex === i ? 'selected' : ''} onClick={() => this.setState({selectedIndex: i})}>
-                                  <div className='circle'/>
-                                  <div className='text'>
-                                      <h4>{address.name}</h4>
-                                      <p>{address.streetAddress}, {address.city}, {address.state}, {address.zip}, {address.country}</p>
-                                      <span>edit</span>
-                                      <span>delete</span>
-                                  </div>
-                              </li>
-                          ))
-                      }
+                    {
+                      paymentTypes.map((paymentType, i) => (
+                        <li key={i} className={selectedType === i ? 'selected' : ''} onClick={() => {
+                          this.setState({selectedType: i});
+                          updateInvoice(invoice.id, 'split_type', paymentType.type);
+                        }}>
+                        <div className='circle'/>
+                        <div className='text'>
+                          <h4>{paymentType.text}</h4>
+                        </div>
+                        </li>
+                      ))
+                    }
+
                   </ul>
-                  <button onClick={() => selectAccordion('shipping form')}>+ add address</button>
-
-                  <div>
-      <nav>
-        <h4>Payment Type</h4>
-      </nav>
-      <ul>
-        {
-          paymentTypes.map((paymentType, i) => (
-            <li key={i} className={selectedType === i ? 'selected' : ''} onClick={() => {
-              this.setState({selectedType: i});
-              updateInvoice(invoice.id, 'split_type', paymentType.type);
-            }}>
-            <div className='circle'/>
-            <div className='text'>
-              <h4>{paymentType.text}</h4>
-            </div>
-            </li>
-          ))
-        }
-
-      </ul>
-      </div>
-     </div> : null
+                </div>
+              </div>
+              : null
     }
     </div>
     );

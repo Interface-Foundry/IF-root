@@ -150,7 +150,7 @@ class YPOStore extends Store {
       </items>
       <orderedBy>
           <username>${leader.name}</username>
-          <email>${leader.email}</email>
+          <email>${leader.email_address}</email>
           <orderedAt>${new Date().toISOString()}</orderedAt>
       </orderedBy>
       <order_number>${cart.order_number}</order_number>
@@ -172,6 +172,10 @@ class YPOStore extends Store {
     // voucher_code = optional field
 
     console.log(cartXML)
+    cart.raw_order = cartXML;
+    await cart.save();
+
+    // log the cart xml to the db.
 
     await new Promise((resolve, reject) => {
       soap.createClient(svcUrl11 + '?WSDL', {
@@ -205,7 +209,7 @@ class YPOStore extends Store {
 
     return {
       ok: true,
-      redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+      redirect: `/cart/${cart.id}?toast=Order submitted successfully&status=success`,
       message: 'Order submitted successfully'
     }
   }

@@ -2,7 +2,7 @@ const Waterline = require('waterline')
 const uuid = require('uuid')
 
 const constants = require('../server/constants.js')
-var archive = require('./cold_storage')
+const archive = require('./cold_storage')
 
 /**
  * Payments collection is the collection of payment sources
@@ -28,6 +28,11 @@ const paymentSourceCollection = Waterline.Collection.extend({
       type: 'string',
       enum: constants.PAYMENT_SOURCE
     },
+
+    /**
+     * json from stripe
+     */
+    source: 'json',
 
     /** peripheral data from source */
     data: 'json',

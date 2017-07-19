@@ -79,6 +79,39 @@ module.exports = function (router) {
       return res.send(invoice)
     })
 
+  router.route('/invoice/refund')
+    /**
+      * @api {post} /invoice/refund
+      * @apiDescription refund all payments for an invoice or a specific payment
+      * @apiGroup {Payments}
+      *
+      *
+      * @apiParam {object} { refund_type: refund_id }, refund type either invoice_id or payment_id, and then respective payment/invoice id
+      */
+    .post(async (req, res) => {
+
+      // refund all for invoice
+      if (_.get(req, 'body.invoice_id')) {
+        const invoiceId = req.body.invoice_id
+        const invoice = await Invoice.GetById(invoiceId)
+        if (_.get(req, 'UserSession.user_account.id') !== invoice.leader) {
+          throw new Error('Unauthorized, only leader can refund all')
+        }
+
+        const payments = await db.Payments.find({invoice: invoiceId})
+        const refunds = payments.map(async (payment)  => {
+          return await PaymentSource.RefundPaymentId(payment.id)
+        })
+        return res.send(refunds)
+      }
+
+      // individual refund
+      if (_.get(req, 'body.payment_id')) {
+        const refund = await PaymentSource.RefundPaymentId(req.body.payment_id)
+        return res.send(refund)
+      }
+    })
+
   /**
    * invoice routes related to payments for an invoice (collecting/getting payments,)
    */
@@ -123,16 +156,8 @@ module.exports = function (router) {
       const invoice = await Invoice.GetById(req.params.invoice_id)
       const paymentSource = await PaymentSource.GetById(req.body.payment_source)
       const paymentAmount = req.body.payment_amount
-      const payment = await paymentSource.pay(invoice, paymentAmount)
+      const payment = await paymentSource.pay(invoice)
       logging.info('paid')
-
-      // If this invoice has been fully paid, fire off whatever emails
-      var done = await invoice.paidInFull()
-      done = true;
-      if (done) {
-        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
-        await invoice.sendSuccessEmail(invoice)
-      }
 
       return res.send(payment)
     })
@@ -242,8 +267,14 @@ module.exports = function (router) {
       const paymentSource = await PaymentSource.GetById(paymentSourceId)
 
       const invoice = await Invoice.GetById(req.body.invoice_id)
-      const payment = await paymentSource.pay(paymentAmount, invoice)
-      logging.info('paid', payment)
+      const payment = await paymentSource.pay(invoice)
+
+      const done = await invoice.paidInFull()
+      if (done) {
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        await invoice.sendSuccessEmail(invoice)
+      }
+
       return res.send({'amount': paymentAmount, 'paid': true})
     })
 
@@ -269,8 +300,21 @@ module.exports = function (router) {
       const invoice = await Invoice.GetById(req.body.invoice_id)
       logging.info('creating payment with previously used card')
       const payment = await paymentSource.pay(invoice)
-      logging.info('paid', payment)
-      return res.send(payment)
+      logging.info('paid')
+
+      // If this invoice has been fully paid, fire off whatever emails
+      var done = await invoice.paidInFull()
+      if (done) {
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        await invoice.sendSuccessEmail(invoice)
+      }
+      else {
+        //send collection emails
+        logging.info('sendCollectionEmail called')
+        await invoice.sendCollectionEmail()
+      }
+      return res.send({'amount': payment.amount, 'paid': true})
+      // return res.send(payment)
     })
     /**
      * @api {delete} /payment/:paymentsource_id

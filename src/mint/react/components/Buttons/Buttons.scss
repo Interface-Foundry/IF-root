@@ -68,15 +68,14 @@
       background: $mainColor;
       padding: 0 $padding;
 
-      a {
+      .inner-button {
         align-items: center;
         display: flex;
+        height: 100%;
 
         svg {
           height: $nav-height / 2;
-        }
 
-        svg {
           @media only screen and (max-width: 600px) {
             order: 1;
           }
@@ -87,7 +86,7 @@
           }
         }
 
-        p {
+        .checkout-button-text {
           display: inline;
           font-size: 16px;
           font-weight: 600;
@@ -120,15 +119,14 @@
 
         & span {
           display: none; // we don't need the price I guess???? this is a mess
-       
         }
       }
     }
 
     &.teal {
       background: #10d8d8;
-      line-height: $nav-height - $padding;
       font-size: 10px;
+      line-height: $nav-height - $padding;
       transform: scaleY(1.1);
       transform-origin: 0 0;
 
@@ -151,8 +149,8 @@
 
       .text {
         display: inline-block;
-        width: calc(100% - #{$nav-height - $padding});
         height: 100%;
+        width: calc(100% - #{$nav-height - $padding});
 
         @media only screen and (max-width: 600px) {
           width: auto;
@@ -165,7 +163,6 @@
 
         & span {
           display: none; // we don't need the price I guess???? this is a mess
-       
         }
       }
     }

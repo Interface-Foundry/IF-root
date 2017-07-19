@@ -21,8 +21,11 @@ var ypoInventoryItemsCollection = Waterline.Collection.extend({
     /**@type {string} item name*/
     name: 'string',
 
-    /**@type {number} item price*/
-    price: 'float',
+    /**@type {integer} item price*/
+    price: 'integer',
+
+    /**@type {float} price as YPO stores it, from ingest*/
+    original_price: 'float',
 
     /**@type {string} unit by which this item is sold / which this item
     represents. e.g. "pack". */
@@ -48,6 +51,11 @@ var ypoInventoryItemsCollection = Waterline.Collection.extend({
 
     /**@type {string} url for item view on YPO site*/
     product_url: 'string'
+  },
+
+  beforeCreate: function (record, cb) {
+    record.price = record.original_price * 100
+    cb()
   }
 });
 

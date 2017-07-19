@@ -26,7 +26,7 @@
 
   &.rotating {
     svg {
-      @include animation(rotate 0.95s linear infinite);
+      @include animation(rotate 0.95s linear 2);
 
       transform-origin: 38% 50%;
     }
