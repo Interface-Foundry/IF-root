@@ -50,8 +50,8 @@ export default class Cart extends Component {
               <div className={`card created`}>
                 <div className='image'/>
                 <div className='text'>
-                  <h1>{getStoreName(cart.store, cart.store_locale)} CART CREATED</h1>
-                  <p>By {user.name} {timeFromDate(cart.updatedAt)}</p>
+                  <h1>{getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED</h1>
+                  <p>By {user.name} {timeFromDate(cart.createdAt)}</p>
                 </div>
               </div>
             </td>
