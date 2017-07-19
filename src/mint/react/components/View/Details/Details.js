@@ -84,7 +84,9 @@ export default class Details extends Component {
                   </div>
                 </div>
                 <div className='info'>
-                  <h4><span>{getStoreName(store, store_locale)}</span></h4>
+                  <h4><span>
+                    <a href={'//' + getStoreName(store, store_locale)}>{getStoreName(store, store_locale)}</a>
+                  </span></h4>
                 </div>
                 <div className='metrics'>
                   {
