@@ -7,11 +7,10 @@ export const toggleAddressForm = show => ({
 
 export const selectAddress = ({ selectedAddressId, invoiceId }) => post(
   `/api/invoice/${invoiceId}/shipto`,
-  'SELECT_ADDRESS', {},
-  (type, selectedAddressId) =>
-  ({
+  'SELECT_ADDRESS', { address: selectedAddressId },
+  (type, selectedAddress) => ({
     type: `${type}_SUCCESS`,
-    selectedAddressId,
+    selectedAddress,
     receivedAt: Date.now()
   })
 );

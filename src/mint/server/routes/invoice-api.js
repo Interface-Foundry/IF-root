@@ -349,7 +349,7 @@ module.exports = function (router) {
       invoice = await Invoice.CreateByCartId(req.params.cart_id)
       if (invoice) return res.send(invoice)
     }
-    
+
     return res.send({display: false})
   })
 
@@ -379,7 +379,7 @@ module.exports = function (router) {
     var invoice = await db.Invoices.findOne({id: req.params.invoice_id})
     invoice.address = req.body.address
     await invoice.save()
-    res.sendStatus(200)
+    res.send({id: invoice.address})
   })
 
   /**
