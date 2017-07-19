@@ -37,6 +37,11 @@ export default (state = initialState, action) => {
       ...state,
       addresses: state.addresses.map(addr => addr.id === action.address.id ? action.address : addr)
     };
+  case 'DELETE_ADDRESS_SUCCESS':
+    return {
+      ...state,
+      addresses: action.addresses
+    };
   case 'ADD_ADDRESS_SUCCESS':
     return {
       ...state,

@@ -12,11 +12,12 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = dispatch => ({
   deleteAddress: ({ userId, addressId }) => dispatch(deleteAddress({ user_id: userId, address_id: addressId })),
   editAddress: ({ addressId }) => {
-    dispatch(selectAddress({selectedAddressId: addressId}));
+    dispatch(selectAddress({ selectedAddressId: addressId }));
     dispatch(toggleAddressForm(true));
   },
   addAddress: () => dispatch(toggleAddressForm(true)),
-  fetchAddresses: () => dispatch(fetchAddresses())
+  fetchAddresses: () => dispatch(fetchAddresses()),
+  selectAddress: ({ addressId }) => dispatch(selectAddress({ selectedAddressId: addressId }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressList);

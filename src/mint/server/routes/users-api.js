@@ -483,7 +483,7 @@ module.exports = function (router) {
    *   "user_account": user_id
    * }
    */
-  router.post('/user/:user_id/address', async (req, res) => {
+  router.post('/user/:user_id/address', async(req, res) => {
     // check permissions
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -506,11 +506,11 @@ module.exports = function (router) {
   })
 
   /**
-   * @api {post} /api/user/:user_id/address/:address_id Add Address
-   * @apiDescription Creates a new address and associates it with a user
-   * @apiGroup Users
-   * @apiParam {string} :user_id id of the user to update
-   * @apiParam {string} :address_id
+   * @api {post} /api/user/:user_id/address/:address_id Edit Address
+   * @apiDescription Edits an address associated with a user
+   * @apiGroup Addresses
+   * @apiParam {string} :user_id id of the user
+   * @apiParam {string} :address_id of the address to update
    * @apiParam {json} body the properties of the new address we're creating
    *
    * @apiParamExample Request
@@ -534,9 +534,9 @@ module.exports = function (router) {
     var user = await db.UserAccounts.findOne({ id: req.params.user_id })
     var address = await db.Addresses.findOne({ user_account: user.id, id: req.params.address_id })
     // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
-    if (!user ) {
+    if (!user) {
       throw new Error('Could not find user ' + req.params.user_id)
-    } else if(!address) {
+    } else if (!address) {
       throw new Error('Could not find address ' + req.params.address_id)
     }
 
@@ -546,6 +546,44 @@ module.exports = function (router) {
     await address.save()
 
     res.send(address);
+  })
+
+    /**
+   * @api {delete} /api/user/:user_id/address/:address_id Delete Address
+   * @apiDescription Removes an address from a user
+   * @apiGroup Addresses
+   * @apiParam {string} :user_id id of the user to update
+   * @apiParam {string} :address_id
+   * @apiParam {json} body the properties of the new address we're creating
+   *
+   * @apiParamExample Request
+   * delete /api/user/04b36891-f5ab-492b-859a-8ca3acbf856b/address/ae887daf89
+   */
+  router.delete('/user/:user_id/address/:address_id', async(req, res) => {
+    // check permissions
+    if (!_.get(req, 'UserSession.user_account.id')) {
+      throw new Error('Unauthorized')
+    }
+
+    // Find the address in the database
+    var user = await db.UserAccounts.findOne({ id: req.params.user_id })
+
+    // hope nothing crazy is going on b/c like the user is obvs logged in but the account doesn't exist in the db?
+    if (!user) {
+      throw new Error('Could not find user ' + req.params.user_id)
+    }
+    await db.Addresses.destroy({ user_account: user.id, id: req.params.address_id })
+
+    // Find the user in the database
+    var addr = await db.Addresses.find({ user_account: user.id })
+
+    // in case there isn't an address
+    if (!addr) {
+      res.send([]);
+    }
+
+    logging.info(addr)
+    res.send(addr);
   })
 
  /**

@@ -27,7 +27,7 @@ export default class AddressList extends Component {
                       <h4>{address.full_name}</h4>
                       <p>{address.line_1}, {address.line_2}, {address.city}, {address.region}, {address.code}, {address.country}</p>
                       <span onClick={()=>editAddress({addressId: address.id})}>edit</span>
-                      {/*<span onClick={()=>deleteAddress({addressId: address.id, userId})}>delete</span>*/}
+                      <span onClick={()=>deleteAddress({addressId: address.id, userId})}>delete</span>
                   </div>
               </li>
           ))
