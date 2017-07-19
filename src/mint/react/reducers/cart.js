@@ -111,7 +111,6 @@ export const splitCartById = (state, props) => {
           others: [...others, newMember]
         };
       } else {
-        console.log(linkedMember.name, acc.others.length + 1)
         acc.others.push({
           id: item.added_by,
           email_address: linkedMember.email_address,

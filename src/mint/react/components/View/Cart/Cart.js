@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
+import { getStoreName, timeFromDate } from '../../../utils';
 import { splitCartById } from '../../../reducers';
 
 import { EmptyContainer } from '../../../containers';
@@ -45,10 +46,23 @@ export default class Cart extends Component {
             })
           }
           <tr>
-           { myCart.length ? null : ( cart.locked ? null : <EmptyContainer /> ) }
+            <td colSpan='100%'>
+              <div className={`card created`}>
+                <div className='image'/>
+                <div className='text'>
+                  <h1>{getStoreName(cart.store, cart.store_locale)} CART CREATED</h1>
+                  <p>By {user.name} {timeFromDate(cart.updatedAt)}</p>
+                </div>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
     );
   }
 }
+
+
+          // <tr>
+          //  { myCart.length ? null : ( cart.locked ? null : <EmptyContainer /> ) }
+          // </tr>

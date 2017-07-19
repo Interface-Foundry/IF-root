@@ -24,18 +24,20 @@ export default class MyCart extends Component {
           {
             myCart.length
             ? <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
-              { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
-              <h1 className='date' onClick={() => this.setState({open: !open})}>
-                <Icon icon={open ? 'Up' : 'Down'}/>
-              </h1>
-              <h4>
-                <span className='grey'>{numberOfItems(myCart)} items • {timeFromDate(myCart[0].updatedAt)}</span>
-              </h4>
-              <h4>
-              <z>
-                Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
-              </z>
-              </h4>
+                <nav>
+                { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
+                <h1 className='date' onClick={() => this.setState({open: !open})}>
+                  <Icon icon={open ? 'Up' : 'Down'}/>
+                </h1>
+                <h4>
+                  <span className='grey'>{numberOfItems(myCart)} items • {timeFromDate(myCart[0].updatedAt)}</span>
+                </h4>
+                <h4>
+                <z>
+                  Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
+                </z>
+                </h4>
+              </nav>
               { open ? <ul>
                 {
                   myCart.map((item) => {

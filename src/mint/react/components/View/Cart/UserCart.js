@@ -18,20 +18,23 @@ export default class UserCart extends Component {
     const { userCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
           { open } = this.state;
 
-    console.log(userCart.memberNumber, userCart.name)
     return (
       <tr key={userCart.id}>
         <td colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
           <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
-            { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
-            <h1 className='date' onClick={() => this.setState({open: !open})}>
-              <Icon icon={open ? 'Up' : 'Down'}/>
-            </h1>
-            <h4>
-              <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
-              <span className='grey'>({numberOfItems(userCart.items)} items) • {timeFromDate(userCart.updatedAt)}</span>
-            </h4>
-
+            <nav>
+              <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/social/complete_1.png)'}}/>
+              <div className='text'>
+                { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
+                <h1 className='date' onClick={() => this.setState({open: !open})}>
+                  <Icon icon={open ? 'Up' : 'Down'}/>
+                </h1>
+                <h4>
+                  <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
+                  <span className='grey'>({numberOfItems(userCart.items)} items) • {timeFromDate(userCart.updatedAt)}</span>
+                </h4>
+              </div>
+            </nav>
             {
               open ? <ul>
                 {

@@ -20,6 +20,19 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   tbody {
+    .card {
+      .image {
+        display: inline-block;
+        background-size: cover;
+        width: $nav-height - $padding;
+        height: $nav-height - $padding;
+      }
+      .text {
+        width: calc(100% - #{$nav-height});
+        display: inline-block;
+        padding: 0 0 0 $padding;
+      }
+    }
     th,td {
       &:after {
         content: '';
@@ -198,38 +211,68 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       background: white;
       box-shadow: $card-box-shadow;
 
+      &.created {
+        background: $mainColor;
+
+        .image {
+          display: inline-block;
+          background: url(https://storage.googleapis.com/kip-random/social/new_cart.png);
+          background-size: cover;
+          width: $nav-height - $padding;
+          height: $nav-height - $padding;
+        }
+
+        .text {
+          width: calc(100% - #{$nav-height});
+          display: inline-block;
+          padding: 0 $padding;
+          h1 {
+            font-size: 14px;
+            line-height: 20px;
+            opacity: 0.7;
+          }
+          p {
+            font-size: 12px;
+            line-height: 20px;
+            opacity: 0.5;
+          }
+        }
+      }
+
       @media only screen and (max-width: 600px) {
         padding: $padding $padding;
       }
 
-      & > h1 {
-        position: relative;
-        display: inline-block;
-        width: 50%;
-        overflow: hidden;
-        font-size: 16px;
-        line-height: 20px;
-        font-weight: 100;
+      nav {
+        h1 {
+          position: relative;
+          display: inline-block;
+          width: 80%;
+          overflow: hidden;
+          font-size: 16px;
+          line-height: 20px;
+          font-weight: 100;
 
-        span {
-          opacity: 0.3;
-          font-size: 12px;
+          span {
+            opacity: 0.3;
+            font-size: 12px;
+          }
+
+          &:last-of-type {
+            float: right;
+            font-size: 12px;
+            width: 25px;
+            text-align: center;
+            cursor: pointer;
+          }
         }
 
-        &:last-of-type {
-          float: right;
-          font-size: 12px;
-          width: 25px;
-          text-align: center;
-          cursor: pointer;
-        }
-      }
+        h4 {
+          font-weight: 100;
 
-      & > h4 {
-        font-weight: 100;
-
-        z {
-          font-size: 15px;
+          z {
+            font-size: 15px;
+          }
         }
       }
 
