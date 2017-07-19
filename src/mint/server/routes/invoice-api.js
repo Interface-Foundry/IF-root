@@ -362,6 +362,22 @@ module.exports = function (router) {
   })
 
   /**
+   * @api {post} /api/invoice/:invoice_id/shipto
+   * @apiDescription set the shipping address for an order
+   * @apiGroup Invoice
+   *
+   * @apiParam {string} :invoice_id id of the invoice we are attaching a shipping address to
+   * @apiParam {string} address id of address we are shipping to
+   */
+  router.post('/invoice/:invoice_id/shipto', async (req, res) => {
+    if (!req.body.address) res.sendStatus(400)
+    var invoice = await db.Invoices.findOne({id: req.params.invoice_id})
+    invoice.address = req.body.address
+    await invoice.save()
+    res.sendStatus(200)
+  })
+
+  /**
    * @api {post} /api/invoice/:invoice_id/success send success emails
    * @apiDescription send email to all users to announce that the order has successfully gone through
    * @apiGroup Invoice

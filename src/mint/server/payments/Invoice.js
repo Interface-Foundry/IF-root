@@ -146,6 +146,8 @@ class Invoice {
       return sum + item.quantity
     }, 0)
 
+    
+
     await cart.members.map(async function (user) {
       // var user = await db.UserAccounts.findOne({id: user_id})
       var email = await db.Emails.create({

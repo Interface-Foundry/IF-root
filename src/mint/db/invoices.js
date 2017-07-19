@@ -43,6 +43,9 @@ const invoiceCollection = Waterline.Collection.extend({
     /** is a leader for invoice necessary or is that cart leader? */
     leader: Waterline.isA('user_accounts'),
 
+    /** where the items are being delivered */
+    delivery_address: Waterline.isA('addresses'),
+
     /** enter documentation here */
     invoice_type: {
       type: 'string',
