@@ -20,25 +20,34 @@ export default class Stores extends Component {
   }
 
   render() {
-    const { stores } = this.props;
-    const otherStores = stores.slice() || [];
-    const suggested = otherStores.shift() || [];
+    const { stores = [] } = this.props;
+    const globalDirect = process.env.NODE_ENV !== 'production' ? stores.filter(store => store.global_direct) : [],
+      normal = stores.filter(store => !store.global_direct),
+      firstStore = [normal.shift() || []],
+      suggested = firstStore.concat(globalDirect),
+      otherStores = normal.slice() || [];
 
     return (
       <section>
-        <div className='cart_store'> 
+        <div className='cart_store'>
           <h3>Suggested For You</h3>
           <ul className='cart_store__list suggested'>
-            <Store key={suggested.store_type} {...suggested} />
+          {suggested.map(store =>
+            <Store
+              key={store.store_type}
+              {...store}
+            />
+          )
+        }
           </ul>
         </div>
-        <div className='cart_store'> 
+        <div className='cart_store'>
           <h3>Other Stores</h3>
           <ul className='cart_store__list'>
-            {otherStores.map(store => 
-                <Store 
-                  key={store.store_type} 
-                  {...store} 
+            {otherStores.map(store =>
+                <Store
+                  key={store.store_type}
+                  {...store}
                 />
               )
             }

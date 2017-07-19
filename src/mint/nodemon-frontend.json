@@ -16,9 +16,5 @@
     "watch": [
         "./server/"
     ],
-    "env":
-    {
-        "SEND_EMAILS": ""
-    },
     "ext": "js json"
 }

@@ -17,6 +17,7 @@ export default class AddressForm extends Component {
     addressList: PropTypes.array,
     cartId: PropTypes.string,
     leader: PropTypes.object,
+    phone: PropTypes.string,
     addressId: PropTypes.string,
     userId: PropTypes.string,
     toggleAddressForm: PropTypes.func,
@@ -31,7 +32,8 @@ export default class AddressForm extends Component {
     city: '',
     region: '',
     code: '',
-    country: ''
+    country: '',
+    phone: ''
   }
 
   _updateName = e => this.setState({ name: e.target.value })
@@ -41,15 +43,16 @@ export default class AddressForm extends Component {
   _updateRegion = e => this.setState({ region: e.target.value })
   _updateCode = e => this.setState({ code: e.target.value })
   _updateCountry = e => this.setState({ country: e.target.value })
+  _updatePhone = e => this.setState({ phone: e.target.value })
 
   _saveAddress = e => {
-    const { state: { name, addressLine1, addressLine2, city, region, code, country }, props: { userId, addAddress } } = this;
-    addAddress({ name, addressLine1, addressLine2, city, region, code, country, userId });
+    const { state: { name, addressLine1, addressLine2, city, region, code, country, phone }, props: { userId, addAddress } } = this;
+    addAddress({ name, addressLine1, addressLine2, city, region, code, country, phone, userId });
   }
 
   _updateAddress = e => {
-    const { state: { name, addressLine1, addressLine2, city, region, code, country }, props: { userId, updateAddress, addressId } } = this;
-    updateAddress({ name, addressLine1, addressLine2, city, region, code, country, userId, addressId });
+    const { state: { name, addressLine1, addressLine2, city, region, code, country, phone }, props: { userId, updateAddress, addressId } } = this;
+    updateAddress({ name, addressLine1, addressLine2, city, region, code, country, phone, userId, addressId });
   }
 
   _toggleAddress = e => {
@@ -58,12 +61,12 @@ export default class AddressForm extends Component {
     toggleAddressForm(false);
   }
 
-  componentWillReceiveProps = ({ name = '', addressLine1 = '', addressLine2 = '', city = '', region = '', code = '', country = '' }) =>
-    this.setState({ name, addressLine1, addressLine2, city, region, code, country });
+  componentWillReceiveProps = ({ name = '', addressLine1 = '', addressLine2 = '', city = '', region = '', code = '', country = '', phone = '' }) =>
+    this.setState({ name, addressLine1, addressLine2, city, region, code, country, phone });
 
   componentDidMount = () => {
-    const { name = '', addressLine1 = '', addressLine2 = '', city = '', region = '', code = '', country = '' } = this.props;
-    this.setState({ name, addressLine1, addressLine2, city, region, code, country });
+    const { name = '', addressLine1 = '', addressLine2 = '', city = '', region = '', code = '', country = '', phone = '' } = this.props;
+    this.setState({ name, addressLine1, addressLine2, city, region, code, country, phone });
   }
 
   _handleSubmit = e => {
@@ -142,6 +145,16 @@ export default class AddressForm extends Component {
           <span>
             <Icon icon='Member'/>
             <input type='text' placeholder='Country' required value={this.state.country} onChange={this._updateCountry} />
+            <span className='required'>﹡</span>
+          </span>
+        </label>
+        <label>
+          <div>
+            Phone Number <i>Required</i>
+          </div>
+          <span>
+            <Icon icon='Member'/>
+            <input type='tel' placeholder='Phone Number' required value={this.state.phone} onChange={this._updatePhone} />
             <span className='required'>﹡</span>
           </span>
         </label>
