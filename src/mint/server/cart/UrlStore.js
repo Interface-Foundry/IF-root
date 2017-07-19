@@ -39,9 +39,12 @@ class UrlStore extends Store {
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
+    // logging.info('ITEM DATA(((((())))))', itemData)
 
     //we're getting an array from the generic search and will never process more than one item
     var itemData = itemData[0]
+    var original_currency = itemData.domain.currency
+
     delete itemData.domain
     delete itemData.user
 
@@ -91,10 +94,11 @@ class UrlStore extends Store {
     delete itemData.original_description
 
     // create conversion
-    logging.info('itemData.original_price', itemData.original_price)
     itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
+    itemData.original_price.type = original_currency
     var originalPrice = await db.Conversions.create(itemData.original_price)
     originalPrice.converted_value = itemData.price * 1.0
+    logging.info('originalPrice', originalPrice)
     delete itemData.original_price
     await originalPrice.save()
     if (!Number(itemData.price)) {
