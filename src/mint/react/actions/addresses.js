@@ -5,10 +5,16 @@ export const toggleAddressForm = show => ({
   show
 });
 
-export const selectAddress = ({ selectedAddressId }) => ({
-  type: 'SELECT_ADDRESS',
-  selectedAddressId
-});
+export const selectAddress = ({ selectedAddressId, invoiceId }) => post(
+  `/api/invoice/${invoiceId}/shipto`,
+  'SELECT_ADDRESS', {},
+  (type, selectedAddressId) =>
+  ({
+    type: `${type}_SUCCESS`,
+    selectedAddressId,
+    receivedAt: Date.now()
+  })
+);
 
 export const clearSelectedAddress = () => ({
   type: 'CLEAR_SELECTED_ADDRESS'
@@ -34,18 +40,18 @@ export const createInvoice = (cart_id, invoice_type, split_type) => post(
   })
 );
 
-export const addAddress = ({ full_name, line_1, line_2, city, region, code, country, user_account }) => post(
+export const addAddress = ({ full_name, line_1, line_2, city, region, code, country, user_account, phone_number }) => post(
   `/api/user/${user_account}/address`,
-  'ADD_ADDRESS', { full_name, line_1, line_2, city, region, code, country, user_account },
+  'ADD_ADDRESS', { full_name, line_1, line_2, city, region, code, country, user_account, phone_number },
   (type, newAddress) => ({
     type: `${type}_SUCCESS`,
     newAddress
   })
 );
 
-export const updateAddress = ({ full_name, line_1, line_2, city, region, code, country, user_account, address_id }) => post(
+export const updateAddress = ({ full_name, line_1, line_2, city, region, code, country, user_account, address_id, phone_number }) => post(
   `/api/user/${user_account}/address/${address_id}`,
-  'UPDATE_ADDRESS', { full_name, line_1, line_2, city, region, code, country, user_account },
+  'UPDATE_ADDRESS', { full_name, line_1, line_2, city, region, code, country, user_account, phone_number },
   (type, address) => ({
     type: `${type}_SUCCESS`,
     address

@@ -7,6 +7,7 @@ import { deleteAddress, selectAddress, toggleAddressForm, fetchAddresses, clearS
 const mapStateToProps = (state, ownProps) => ({
   addresses: state.user.addresses,
   selectedAddress: state.user.selectedAddress.id,
+  invoiceId: state.payments.invoice.id,
   userId: state.user.id
 });
 
@@ -18,7 +19,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(toggleAddressForm(true));
   },
   fetchAddresses: () => dispatch(fetchAddresses()),
-  selectAddress: ({ addressId }) => dispatch(selectAddress({ selectedAddressId: addressId }))
+  selectAddress: ({ addressId, invoiceId }) => dispatch(selectAddress({ selectedAddressId: addressId, invoiceId }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressList);
