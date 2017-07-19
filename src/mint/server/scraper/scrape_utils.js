@@ -1,4 +1,5 @@
 var request = require('request-promise')
+var Agent = require('socks5-https-client/lib/Agent')
 
 //encoding stuff
 var charset = require('charset'),
@@ -7,7 +8,8 @@ var charset = require('charset'),
 
 
 //scrapes URL and convets to UTF-8 if it isn't already
-module.exports.scrapeURL = async function (url) {
+module.exports.scrapeURL = async function (url, proxy) {
+
 	var options = {
 		url: url,
 		encoding: null,
@@ -18,12 +20,25 @@ module.exports.scrapeURL = async function (url) {
 		  'Accept-Language':'en-US,en;q=0.8',
 		  'Cache-Control':'max-age=0',
 		  'Connection':'keep-alive'
-		},
-		// timeout: timeoutMs,
+		}
 	}
+
+  if (proxy) {
+    logging.info('USING PROXY')
+    options.agentClass = Agent
+		options.agentOptions = {
+			socksHost: '109.201.154.239',
+			socksPort: 1080,
+			socksUsername: 'x7229287',
+			socksPassword: 'QbhYhHsKZG'
+		}
+  }
+
 	var convert
 	await request(options, function (error, res, html) {
+    // if (!proxy) error = true
 	  if (!error && res.statusCode == 200) {
+      logging.info('scrape success')
 
 	  	//detect char encoding
 	  	var enc = charset(res.headers, html) || jschardet.detect(html).encoding.toLowerCase()
@@ -33,7 +48,8 @@ module.exports.scrapeURL = async function (url) {
    		convert = iconv.convert(new Buffer(html)).toString('utf8')
 
 	  }else {
-	  	logging.error('ERROR '+response.statusCode+' IN REQUEST!!!!! ', error)
+	  	logging.error('HTML request error ',error)
+      return null
 	  }
 	})
 	return convert
@@ -78,4 +94,3 @@ var fakeUserAgent = function () {
 function randomInt(exclusiveMax) {
   return Math.floor(Math.random() * Math.floor(exclusiveMax))
 }
-
