@@ -29,7 +29,7 @@ export default class MyCart extends Component {
                 <Icon icon={open ? 'Up' : 'Down'}/>
               </h1>
               <h4>
-                <span className='grey'>{numberOfItems(myCart)} items • Updated {timeFromDate(myCart[0].updatedAt)}</span>
+                <span className='grey'>{numberOfItems(myCart)} items • {timeFromDate(myCart[0].updatedAt)}</span>
               </h4>
               <h4>
               <z>

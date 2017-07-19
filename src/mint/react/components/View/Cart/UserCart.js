@@ -22,21 +22,6 @@ export default class UserCart extends Component {
     return (
       <tr key={userCart.id}>
         <td colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
-          { achieveIndex[userCart.memberNumber] ? <div className='achievement'>
-              <div className='icon'>
-                <Icon icon='Person'/>
-              </div>
-              <div className='text'>
-                <p>💥 {achieveIndex[userCart.memberNumber].reqs}pp have Joined your cart</p>
-                <p>You got a {achieveIndex[userCart.memberNumber].discount}% Discount!</p>
-              </div>
-              <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
-            </div> : <div className={`top`}>
-              <div className={`circle`}/>
-              { index === 0 ? <Icon icon='Right'/> : null}
-              <p> <b>{userCart.name}</b> joined { timeFromDate(userCart.createdAt) }</p>
-            </div>
-          }
           <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
             { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
             <h1 className='date' onClick={() => this.setState({open: !open})}>
@@ -44,7 +29,7 @@ export default class UserCart extends Component {
             </h1>
             <h4>
               <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
-              <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
+              <span className='grey'>({numberOfItems(userCart.items)} items) • {timeFromDate(userCart.updatedAt)}</span>
             </h4>
 
             {

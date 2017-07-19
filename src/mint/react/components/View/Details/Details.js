@@ -101,21 +101,6 @@ export default class Details extends Component {
               </div>
             </th>
           </tr>
-          {
-            nextAchievement.map((a, i) => (
-              <tr key={i}>
-                <td className='achievement'>
-                  <div className='icon'>
-                    <Icon icon='Person'/>
-                  </div>
-                  <div className='text'>
-                    <p>{a.reqs}pp Join</p>
-                    <p>{a.discount}% Discount!</p>
-                  </div>
-                </td>
-              </tr>
-            ))
-          }
           <tr>
             <td className='lineStart'>
               <nav>
