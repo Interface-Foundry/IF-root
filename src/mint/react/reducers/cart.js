@@ -89,17 +89,15 @@ export const splitCartById = (state, props) => {
   const id = props ? props.id : null;
   // const badges = {2: { reqs: 8, discount: 100, color: 'red' }, 3: { reqs: 6, discount: 80, color: 'yellow'  }, 6: { reqs: 3, discount: 50, color: 'green' }}
 
-  return state.cart.items.sort((a, b) => {
-        a = new Date(a.createdAt);
-        b = new Date(b.createdAt);
-        return a<b ? -1 : a>b ? 1 : 0;
-    }).reduce((acc, item, index) => {
+  return state.cart.items.reduce((acc, item, index) => {
       acc.quantity = acc.quantity + (item.quantity || 1);
       let linkedMember = getMemberById(state.cart, { id: item.added_by }) || {};
 
       if (id === item.added_by) {
         acc['my'].push(item);
-      } else if (acc.others.find(member => member.id === linkedMember.id)) {
+      } 
+
+      if (acc.others.find(member => member.id === linkedMember.id)) {
         const others = acc.others.filter(member => member.id !== linkedMember.id);
         let newMember = acc.others.find(member => member.id === linkedMember.id);
         newMember = {
@@ -113,13 +111,14 @@ export const splitCartById = (state, props) => {
           others: [...others, newMember]
         };
       } else {
+        console.log(linkedMember.name, acc.others.length + 1)
         acc.others.push({
           id: item.added_by,
           email_address: linkedMember.email_address,
           name: linkedMember.name,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
-          memberNumber: acc.others.length + 2,
+          memberNumber: acc.others.length + 1,
           items: [item]
         });
       }

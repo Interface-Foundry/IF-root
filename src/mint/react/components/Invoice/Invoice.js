@@ -22,10 +22,9 @@ export default class Invoice extends Component {
 
   render() {
     const { selectedAccordion } = this.props;
-    console.log(selectedAccordion)
     return (
       <div className='invoice'>
-        { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
+        { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null }
         <InvoiceInfo {...this.props}/>
         <Payment {...this.props}/>
         <CartReview {...this.props}/>
