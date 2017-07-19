@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { AddressForm } from '../components';
-import { addAddress, updateAddress, toggleAddressForm } from '../actions';
+import { addAddress, updateAddress, toggleAddressForm, deleteAddress, selectAddress } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
   name: state.user.selectedAddress.full_name,
@@ -21,7 +21,8 @@ const mapDispatchToProps = dispatch => ({
   updateAddress: ({ userId, name, addressLine1, addressLine2, city, region, code, country, addressId }) =>
     dispatch(updateAddress({ address_id: addressId, user_account: userId, full_name: name, line_1: addressLine1, line_2: addressLine2, city, region, code, country })).then(() => dispatch(toggleAddressForm(false))),
   addAddress: ({ userId, name, addressLine1, addressLine2, city, region, code, country }) =>
-    dispatch(addAddress({ user_account: userId, full_name: name, line_1: addressLine1, line_2: addressLine2, city, region, code, country })).then(() => dispatch(toggleAddressForm(false)))
+    dispatch(addAddress({ user_account: userId, full_name: name, line_1: addressLine1, line_2: addressLine2, city, region, code, country })).then(() => dispatch(toggleAddressForm(false))),
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressForm);

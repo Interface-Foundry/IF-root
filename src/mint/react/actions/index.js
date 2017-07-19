@@ -94,7 +94,8 @@ export {
   fetchAddresses,
   addAddress,
   updateAddress,
-  toggleAddressForm
+  toggleAddressForm,
+  deleteAddress
 }
 from './addresses';
 

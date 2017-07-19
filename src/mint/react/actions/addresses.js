@@ -1,4 +1,4 @@
-import { get, post } from './async';
+import { get, post, del } from './async';
 
 export const toggleAddressForm = show => ({
   type: 'TOGGLE_ADDRESS_FORM',
@@ -49,5 +49,14 @@ export const updateAddress = ({ full_name, line_1, line_2, city, region, code, c
   (type, address) => ({
     type: `${type}_SUCCESS`,
     address
+  })
+);
+
+export const deleteAddress = ({ user_id, address_id }) => del(
+  `/api/user/${user_id}/address/${address_id}`,
+  'DELETE_ADDRESS',
+  (type, addresses) => ({
+    type: `${type}_SUCCESS`,
+    addresses
   })
 );
