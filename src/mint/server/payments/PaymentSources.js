@@ -64,7 +64,7 @@ class PaymentSource {
       return paymentStatus
     }
     const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
-    logging.info('got debts', debts)
+    logging.info('got debts', JSON.stringify(debts))
     paymentStatus.amount = debts[userId]
     return paymentStatus
   }

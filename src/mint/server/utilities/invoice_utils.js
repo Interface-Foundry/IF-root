@@ -27,7 +27,7 @@ const userPaymentAmountHandler = {
     logging.info('invoice', invoice)
     logging.info('single payer split')
     const debts = {}
-    debts[invoice.leader] = invoice.total
+    debts[invoice.leader.id] = invoice.total
     return debts
   },
   'split_by_item': async (invoice) => {
@@ -64,6 +64,9 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
 
   var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader')
   var itemsByUser = {}
+  for (var i = 0; i < cart.items.length; i++) {
+    cart.items[i] = await db.Items.findOne({id: cart.items[i].id}).populate('price_conversion')
+  }
   cart.items.map(function (item) {
     if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
     else itemsByUser[item.added_by].push(item)

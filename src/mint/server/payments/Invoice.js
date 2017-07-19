@@ -1,6 +1,6 @@
 var moment = require('moment')
 const _ = require('lodash')
-// const Cart = require('../cart/Cart')
+const Cart = require('../cart/Cart')
 const userPaymentAmountHandler = require('../utilities/invoice_utils').userPaymentAmountHandler
 
 var db
@@ -66,7 +66,9 @@ class Invoice {
 
   static async CreateByCartId (cartId) {
     const cart = await db.Carts.findOne({id: cartId})
-    return this.InvoiceInitializer(invoice)
+    var invoiceObject = this.InvoiceInitializer()
+    invoiceObject.createInvoice(cart)
+    return invoiceObject
   }
 
 
@@ -114,7 +116,7 @@ class Invoice {
    */
   async createInvoice (cart) {
     // let cart = await Cart.GetById(this.cart)
-    await cart.sync()
+    if (cart.sync) await cart.sync()
 
     var newInvoice = await db.Invoices.create({
       leader: cart.leader,
@@ -127,7 +129,7 @@ class Invoice {
 
     await newInvoice.save()
     var invoice = await db.Invoices.findOne({id: newInvoice.id}).populate('leader')
-
+    logging.info('invoice', invoice)
     return invoice
   }
 
@@ -146,7 +148,7 @@ class Invoice {
       return sum + item.quantity
     }, 0)
 
-    
+
 
     await cart.members.map(async function (user) {
       // var user = await db.UserAccounts.findOne({id: user_id})

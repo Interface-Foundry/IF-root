@@ -91,6 +91,7 @@ class UrlStore extends Store {
     delete itemData.original_description
 
     // create conversion
+    logging.info('itemData.original_price', itemData.original_price)
     itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
     var originalPrice = await db.Conversions.create(itemData.original_price)
     originalPrice.converted_value = itemData.price * 1.0
@@ -113,8 +114,8 @@ class UrlStore extends Store {
     })
     await item.save()
     logging.info('about to create item')
-    item = await db.Items.findOne({id: item.id}).populate('options').populate('original_description').populate('original_price')
-
+    item = await db.Items.findOne({id: item.id}).populate('options').populate('original_description').populate('price_conversion')
+    logging.info('created item', item)
     return [item];
   }
 
