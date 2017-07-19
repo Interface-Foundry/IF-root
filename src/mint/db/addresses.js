@@ -13,6 +13,7 @@ var addressesCollection = Waterline.Collection.extend({
     zip: 'string', //code
     country: 'string',
     delivery_message: 'string',
+    phone_number: 'integer'
 
     /** Many-to-many relation with user accounts */
     user_account: Waterline.isA('user_accounts')
