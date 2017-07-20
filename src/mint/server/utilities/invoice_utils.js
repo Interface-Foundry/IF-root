@@ -5,6 +5,10 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+
+// add $10.00 fee to illustrate how it would work for user payments
+const KIP_PAY_FEE = 1000
+
 /**
  * split amount owned by split_type
  *
@@ -17,7 +21,7 @@ const userPaymentAmountHandler = {
     const cartId = (_.get(invoice, 'cart.id')) ? invoice.cart.id : invoice.cart
     const cart = await db.Carts.findOne({id: cartId}).populate('members')
     const debts = {}
-    const perUser = Math.round(invoice.total / (1.0 * cart.members.length))
+    const perUser = Math.round((invoice.total + KIP_PAY_FEE) / (1.0 * cart.members.length))
     cart.members.map(function (user) {
       debts[user.id] = perUser
     })
@@ -27,17 +31,19 @@ const userPaymentAmountHandler = {
     logging.info('invoice', invoice)
     logging.info('single payer split')
     const debts = {}
-    debts[invoice.leader.id] = invoice.total
+    debts[invoice.leader.id] = invoice.total + KIP_PAY_FEE
     return debts
   },
   'split_by_item': async (invoice) => {
     logging.info('splitting by item')
     const cartId = (_.get(invoice, 'cart.id')) ? invoice.cart.id : invoice.cart
-    const cart = await db.Carts.findOne({id: cartId}).populate('items')
+    const cart = await db.Carts.findOne({id: cartId}).populate('items').populate('members')
     const debts = {}
+    // the fee kip charges
+    const perUserFee = Math.round(KIP_PAY_FEE / cart.members.length)
     cart.items.map(item => {
       if (debts[item.added_by]) debts[item.added_by] += item.price * item.quantity
-      else debts[item.added_by] = item.price * item.quantity
+      else debts[item.added_by] = item.price * item.quantity + perUserFee
     })
     return debts
   }

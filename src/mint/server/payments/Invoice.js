@@ -101,7 +101,39 @@ class Invoice {
     }
 
     const invoice = await db.Invoices.findOne({ id: link.invoice })
-    invoice.refund_ability = (newStatus === 'complete') ? false : newStatus
+
+    /*
+     We need a URL route for the kip team to be able to open a link that marks the
+     cart as purchased (on Kip's side). If success, it sends a new email to
+     hello@kipthis.com saying the cart is purchased by Kip. Then there's another
+     URL inside this email to undo marking the cart purchased.
+    */
+
+    if (newStatus === 'complete') {
+      let baseUrl
+      if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
+      else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
+      else baseUrl = 'http://mint-dev.kipthis.com'
+
+      invoice.refund_ability = false
+
+      // send email
+      const email = await db.Emails.create({
+        recipients: 'hello@kipthis.com',
+        subject: 'someone at kip successfully purchased cart',
+        template_name: 'successfully_purchased_cart'
+      })
+
+      await email.template('successfully_purchased_cart', {
+        revertUrl: `${baseUrl}/api/invoice/refund/${refundKey}/revert`
+      })
+      await email.send();
+    } else if (newStatus === 'revert') {
+      invoice.refund_ability = true
+    } else {
+      invoice.refund_ability = newStatus
+    }
+
     await invoice.save()
     return invoice
   }
