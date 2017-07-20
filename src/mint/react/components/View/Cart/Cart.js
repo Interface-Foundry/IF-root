@@ -59,12 +59,12 @@ export default class Cart extends Component {
                       imageSrc={imageSrc}
                       number={memberNumber}
                       classes={achieveIndex[memberNumber].color}/>
-                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✔'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={`gradient ${color}`} imageSrc={imageSrc}/>
+                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✓'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={`gradient ${color}`} imageSrc={imageSrc}/>
                   </tr>
                 )
               }
 
-              if (memberNumber < lastAward) memberNumber = '✔'
+              if (memberNumber < lastAward) memberNumber = '✓'
               return (
                 <tr key={userCart.id}>
                   <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
