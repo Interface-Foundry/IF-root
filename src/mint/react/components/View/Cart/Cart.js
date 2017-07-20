@@ -35,30 +35,27 @@ export default class Cart extends Component {
         </thead>
         <tbody>
           {
-            userCarts.others.sort((a, b) => {
-              a = new Date(a.createdAt);
-              b = new Date(b.createdAt);
-              return a>b ? -1 : a<b ? 1 : 0;
-            }).map((userCart, index) => {
-              let color = userCart.memberNumber > 2 ? ( userCart.memberNumber > 5 ? ( userCart.memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
-              let imageSrc = userCart.memberNumber > 2 ? ( userCart.memberNumber > 5 ? ( userCart.memberNumber > 7 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+            userCarts.others.map((userCart, index) => {
+              let memberNumber = userCarts.others.length - index;
+              let color = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
+              let imageSrc = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
 
-              if(achieveIndex[userCart.memberNumber]) {
+              if(achieveIndex[memberNumber]) {
                 return (
-                  <span className='double'>
+                  <div className='double' key={userCart.id} >
                     <RewardCard 
-                      title={`${achieveIndex[userCart.memberNumber].discount}% OFF`}
+                      title={`${achieveIndex[memberNumber].discount}% OFF`}
                       sub={`REWARD EARNED`}
                       imageSrc={imageSrc}
-                      number={userCart.memberNumber}
-                      classes={achieveIndex[userCart.memberNumber].color}/>
-                    <UserCart key={userCart.id} index={index} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
-                  </span>
+                      number={memberNumber}
+                      classes={achieveIndex[memberNumber].color}/>
+                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={memberNumber} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
+                  </div>
                 )
               }
 
               return (
-                <UserCart key={userCart.id} index={index} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
+                <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
               )
             })
           }

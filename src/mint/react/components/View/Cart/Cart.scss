@@ -209,7 +209,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
 
         &.green {
-          background: $secondaryColor;
+          background: $thirdColor;
+          color: white;
         }
 
         .image {
@@ -226,12 +227,11 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           h1 {
             font-size: 14px;
             line-height: 20px;
-            opacity: 0.7;
           }
           p {
             font-size: 12px;
             line-height: 20px;
-            opacity: 0.5;
+            font-weight: bold;
           }
         }
       }
@@ -247,6 +247,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           font-size: 16px;
           line-height: 20px;
           font-weight: 100;
+
+          svg {
+            vertical-align: top !important;
+          }
 
           span {
             opacity: 0.3;

@@ -25,7 +25,7 @@ export default class MyCart extends Component {
             myCart.length
             ? <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
                 <nav>
-                { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
+                { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Send'/></a></h1> : <h1>{user.name}</h1> }
                 <h1 className='date' onClick={() => this.setState({open: !open})}>
                   <Icon icon={open ? 'Up' : 'Down'}/>
                 </h1>

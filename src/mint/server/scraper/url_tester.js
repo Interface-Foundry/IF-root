@@ -6,9 +6,10 @@ const scrape = require('./scrape_convert')
 
 //var uri = 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370475&allViewYn=N'
 
-var uri = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+var uri = 'https://store.punyus.jp/detail/PNSM17SS-012/'
 //var domain = 'lotte.com'
-var domain = 'muji.net'
+// var domain = 'muji.net'
+var domain = 'store.punyus.jp'
 //var story_country = 'KR'
 var story_country = 'JP'
 

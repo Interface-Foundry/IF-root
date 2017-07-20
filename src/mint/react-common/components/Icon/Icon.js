@@ -40,7 +40,8 @@ import {
   IoQrScanner,
   IoArrowRightB,
   IoSocialTwitter,
-  IoSocialPinterest
+  IoSocialPinterest,
+  IoPaperAirplane
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -155,6 +156,8 @@ export default class Icon extends Component {
       return <IoSocialTwitter/>;
     case 'Pinterest':
       return <IoSocialPinterest/>;
+    case 'Send':
+      return <IoPaperAirplane/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }
