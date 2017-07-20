@@ -43,7 +43,24 @@ const userPaymentAmountHandler = {
   }
 }
 
-
+async function paymentSourceTypes(invoice) {
+  var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('members')
+  var payment_types = []
+  for (var i = 0; i < cart.members.length; i++) {
+    var payment = await db.Payments.findOne({
+      user: cart.members[i].id,
+      invoice: invoice.id
+    }).populate('payment_source')
+    // logging.info('PAYMENT', payment)
+    if (payment) {
+      // logging.info('payment source', payment.payment_source)
+      payment_types.push(payment.payment_source.payment_vendor)
+    }
+    else payment_types.push(null)
+  }
+  logging.info('payment types')
+  return payment_types
+}
 
 /**
  * Sends an internal checkout email.
@@ -80,6 +97,9 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
     return a + b.quantity
   }, 0)
 
+  paymentSourceTypes = await paymentSourceTypes(invoice)
+  logging.info('payment source types', paymentSourceTypes)
+
   await paidEmail.template('kip_order_process', {
     username: cart.leader.name || cart.leader.email_address,
     baseUrl: baseUrl,
@@ -94,6 +114,7 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
     total: '$' + (invoice.total / 100).toFixed(2),
     cart: cart,
     totalItems: totalItems,
+    paymentSourceTypes: paymentSourceTypes,
     date: paidEmail.sent_at,
     users: cart.members,
     checkoutUrl: cart.affiliate_checkout_url || 'www.kipthis.com'
