@@ -8,6 +8,7 @@ const mapStateToProps = (state, ownProps) => ({
   addresses: state.user.addresses,
   selectedAddress: state.user.selectedAddress.id,
   invoiceId: state.payments.invoice.id,
+  invoiceAddress: state.payments.invoice.address.id,
   userId: state.user.id
 });
 

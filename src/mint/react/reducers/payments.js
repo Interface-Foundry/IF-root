@@ -3,7 +3,7 @@
 const initialState = {
   paymentSources: [],
   invoice: {},
-  userPaymentStatus: {paid: false}
+  userPaymentStatus: { paid: false }
 };
 
 export default function payments(state = initialState, action) {
@@ -61,6 +61,14 @@ export default function payments(state = initialState, action) {
     return {
       ...state,
       userPaymentStatus: action.response
+    };
+  case 'SELECT_ADDRESS_SUCCESS':
+    return {
+      ...state,
+      invoice: {
+        ...state.invoice,
+        address: action.selectedAddress
+      }
     };
   default:
     return state;
