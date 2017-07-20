@@ -30,6 +30,8 @@ if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyCZ_lrnpJYBtjbfEcEf8kXBh1H8pJBx-bM')
 }
 
+const socket = require('../socket').getSocket()
+
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -342,6 +344,9 @@ module.exports = function (router) {
     yield [item.save(), cart.save()]
 
     var item = yield db.Items.findOne({id: item.id}).populate('options')
+
+    socket.emit('itemAdded', item)
+
     return res.send(item)
   }));
 
@@ -389,6 +394,8 @@ module.exports = function (router) {
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
     yield [newItem.save(), cart.save()]
+
+    socket.emit('itemUpdated', newItem)
 
     return res.send(newItem)
   }));
@@ -536,6 +543,8 @@ module.exports = function (router) {
 
     yield cart.save()
 
+    socket.emit('itemDeleted', item)
+
     // Just say ok
     res.status(200)
       .end()
@@ -595,6 +604,8 @@ module.exports = function (router) {
     yield cart.save()
 
     cart = yield db.Carts.findOne({id: cart.id}).populate('leader', selectMembersWithoutEmail)
+
+    socket.emit('cartUpdated', cart)
 
     res.send(cart)
   }))
@@ -744,6 +755,8 @@ module.exports = function (router) {
 
     var item = yield db.Items.findOne({id: item.id}).populate('options')
 
+    socket.emit('itemUpdated', item)
+
     res.send(item)
   }))
 
@@ -890,6 +903,7 @@ module.exports = function (router) {
     cart.likes.add(user_id)
     yield cart.save()
     var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+    socket.emit('liked', modifiedCart.likes)
     res.send(modifiedCart.likes)
   }))
 
@@ -911,6 +925,7 @@ module.exports = function (router) {
      yield cart.save()
 
      var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
+     socket.emit('unliked', modifiedCart.likes)
      res.send(modifiedCart.likes)
    }))
 
@@ -1062,6 +1077,7 @@ module.exports = function (router) {
    * @apiParam :cart_id the cart we are adding it to
    */
   router.post('/item/:item_id/clone/:cart_id', (req, res) => co(function* () {
+
     var user_id = _.get(req, 'UserSession.user_account.id')
     if (!user_id) throw new Error('User not logged in')
 
@@ -1070,7 +1086,7 @@ module.exports = function (router) {
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
     cart.members.add(user_id)
     yield cart.save()
-
+    socket.emit('itemCloned', clone)
     res.send(clone)
   }))
 
@@ -1163,6 +1179,13 @@ module.exports = function (router) {
     }
   }))
 
+  // test route 4 socket
+  router.get('/socket/test', async (req, res) => {
+    var socket = require('../socket').getSocket()
+    console.log('SOCKET:', socket)
+    socket.emit('test', 'So much test wow test')
+  })
+
   /**
    * @api {get} Remove User
    * @apiDescription Remove a user from the cart. Leader can remove anyone but themselves, members can only remove themselves.
@@ -1199,7 +1222,7 @@ module.exports = function (router) {
     }
 
     // If the invoice is in "single payer" mode, and the user IS the owner, then
-    if (cart.invoie.split_type === '') {
+    if (cart.invoice.split_type === '') {
 
     }
   })

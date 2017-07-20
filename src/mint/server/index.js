@@ -13,7 +13,7 @@ const fs = require('fs'),
   co = require('co'),
   auth = require('basic-auth');
   passport = require('passport');
-  startSocket = require('./socket/socket').startSocket;
+  startSocket = require('./socket').startSocket;
 
 // start any jobs
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
