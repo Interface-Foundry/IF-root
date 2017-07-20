@@ -8,17 +8,22 @@ export default class AddressList extends Component {
     addresses: PropTypes.array,
     addAddress: PropTypes.func,
     fetchAddresses: PropTypes.func,
-    selectedAddress: PropTypes.string
+    selectedAddress: PropTypes.object,
+    invoiceAddress: PropTypes.string
   }
 
   componentWillMount = () => this.props.fetchAddresses()
 
   render = () => {
-    const { props: { addresses = [], addAddress, selectedAddress = '' }, props } = this;
+    const { props: { addresses = [], addAddress, invoiceAddress, selectedAddress }, props } = this;
+    console.log(selectedAddress)
     return (
       <div>
         <ul>
-        { addresses.map(addr => <AddressItem {...props} key={addr.id} address={addr} selectedAddress={selectedAddress}/>) }
+        {
+          addresses.map(addr =>
+            <AddressItem {...props} key={addr.id} address={addr} selectedAddress={selectedAddress || invoiceAddress}/>)
+        }
         </ul>
         <button onClick={addAddress}>+Add Address</button>
       </div>
