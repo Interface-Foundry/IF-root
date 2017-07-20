@@ -93,6 +93,7 @@ button {
       background-repeat: no-repeat;
       display: flex;
       justify-content: space-around;
+      border-bottom: 0;
 
       @media only screen and (min-width: 600px) {
         display: none;
@@ -173,7 +174,6 @@ button {
             svg {
               height: 30px;
               width: 30px;
-              margin-bottom: 5px;
 
               &:last-of-type {
                 height: 20px;

@@ -67,8 +67,8 @@ export default class CartReview extends Component {
                 <h5 className='blue'>Achievements</h5>
               </nav>
               {
-                Achievements.map((a) => (
-                  <li>
+                Achievements.map((a, i) => (
+                  <li key={i}>
                     <div className='achievement'>
                       <div className='icon'>
                         <Icon icon='Person'/>

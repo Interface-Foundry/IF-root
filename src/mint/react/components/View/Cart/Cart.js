@@ -52,29 +52,33 @@ export default class Cart extends Component {
 
               if(achieveIndex[memberNumber]) {
                 return (
-                  <div className='double' key={userCart.id} >
+                  <tr className={`double ${achieveIndex[memberNumber].color}`} key={userCart.id}>
                     <RewardCard 
                       title={`${achieveIndex[memberNumber].discount}% OFF`}
                       sub={`REWARD EARNED`}
                       imageSrc={imageSrc}
                       number={memberNumber}
                       classes={achieveIndex[memberNumber].color}/>
-                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✔'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
-                  </div>
+                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✔'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={`gradient ${color}`} imageSrc={imageSrc}/>
+                  </tr>
                 )
               }
 
               if (memberNumber < lastAward) memberNumber = '✔'
               return (
-                <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
+                <tr key={userCart.id}>
+                  <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
+                </tr>
               )
             })
           }
-          <RewardCard 
-            title={`${getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED`}
-            sub={`By ${user.name} ${timeFromDate(cart.createdAt)}`}
-            imageSrc='https://storage.googleapis.com/kip-random/social/new_cart.png'
-            classes='yellow'/>
+          <tr className={`double yellow bottom`}>
+            <RewardCard 
+              title={`${getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED`}
+              sub={`By ${user.name} ${timeFromDate(cart.createdAt)}`}
+              imageSrc='https://storage.googleapis.com/kip-random/social/new_cart.png'
+              classes='yellow'/>
+          </tr>
         </tbody>
       </table>
     );

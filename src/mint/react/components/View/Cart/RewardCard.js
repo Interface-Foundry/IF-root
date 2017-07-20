@@ -9,19 +9,17 @@ export default class RewardCard extends Component {
     const { title, sub, imageSrc, classes, number } = this.props;
 
     return (
-      <tr>
-        <td colSpan='100%' className={classes}>
-          <div className={`card reward ${classes}`}>
-            <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
-              { number }
-            </div>
-            <div className='text'>
-              <h1>{title}</h1>
-              <p>{sub}</p>
-            </div>
+      <th colSpan='100%' className={classes}>
+        <div className={`card reward ${classes}`}>
+          <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
+            { number }
           </div>
-        </td>
-      </tr>
+          <div className='text'>
+            <h1>{title}</h1>
+            <p>{sub}</p>
+          </div>
+        </div>
+      </th>
     )
   }
 }

@@ -25,8 +25,21 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         display: flex;
       }
 
+      &.bottom {
+        td,th {
+          &:after {
+            height: 100%;
+          }   
+        }     
+      }
+
       td,th {
         margin: 0 !important;
+        display: block;
+
+        &:after {
+          height: calc(100% + #{$padding});
+        }
 
         .card {
           margin-bottom: $padding !important;
@@ -57,7 +70,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         height: 100%;
         left: 12px;
         top: 0px;
-        width: 2px;
+        width: 3px;
         background: lighten(#333, 60%);
         z-index: 1;
       }
