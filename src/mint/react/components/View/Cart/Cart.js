@@ -26,7 +26,8 @@ export default class Cart extends Component {
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
-      achieveIndex = {8: { reqs: 8, discount: 70, color: 'red' }, 6: { reqs: 6, discount: 50, color: 'yellow'  }, 3: { reqs: 3, discount: 20, color: 'green' }};
+      lastAward = userCarts.others.length > 3 ? ( userCarts.others.length > 6 ? ( userCarts.others.length > 10 ?  10 : 6 ) : 3 ) : 0,
+      achieveIndex = {10: { reqs: 10, discount: 70, color: 'red' }, 6: { reqs: 6, discount: 50, color: 'yellow'  }, 3: { reqs: 3, discount: 20, color: 'green' }};
 
     return (
       <table className='cart'>
@@ -36,7 +37,7 @@ export default class Cart extends Component {
         <tbody>
           {
             userCarts.others.map((userCart, index) => {
-              const memberNumber = userCarts.others.length - index;
+              let memberNumber = userCarts.others.length - index;
               const color = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
               const imageSrc = memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
 
@@ -50,11 +51,12 @@ export default class Cart extends Component {
                       imageSrc={rewardSrc}
                       number={memberNumber}
                       classes={achieveIndex[memberNumber].color}/>
-                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={memberNumber} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
+                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✔'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
                   </div>
                 )
               }
 
+              if (memberNumber < lastAward) memberNumber = '✔'
               return (
                 <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
               )
