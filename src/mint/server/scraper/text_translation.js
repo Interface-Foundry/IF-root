@@ -23,7 +23,7 @@ module.exports.translateText = async function (s){
 
 	//send to google for translate
 	var t_map = await translate(t,s.user.locale)
-	//piece translation back into 
+	//piece translation back into
 	if(s.original_name.value){
 		s.name = t_map[0]
 		t_map.shift()
@@ -67,10 +67,20 @@ var translate = async function (text, target) {
     .then((results) => {
       translations = results[0]
       translations = Array.isArray(translations) ? translations : [translations];
+			translations = pg(translations)
 			return translations
     })
     .catch((err) => {
       logging.error('ERROR:', err);
     });
     // return translations
+}
+
+/**
+ * takes an array of translations / text and makes it pg
+ */
+var pg = function (translations) {
+	return translations.map(function (text) {
+		return text.replace(/fuck/gi, 'funk')
+	})
 }
