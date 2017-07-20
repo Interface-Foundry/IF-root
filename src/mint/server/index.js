@@ -254,8 +254,6 @@ const io = require('socket.io').listen(http);
 
 startSocket(io);
 
-console.log('io:', io)
-
 http.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
