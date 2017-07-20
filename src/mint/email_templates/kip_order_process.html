@@ -196,11 +196,12 @@
                                                         <% for(var j=0; j<items[i].length; j++) {%>
                                                             <span style="color:#000;">
                                                              <%=items[i][j].name%> <br/><br/>
+                                                             <%=items[i][j].option_string%> <br/><br/>
                                                              <%=items[i][j].original_link%> <br/><br/>
                                                              Qty: <%=items[i][j].quantity%>   Price: $<%=items[i][j].price.toFixed(2)%><br>
                                                              Original Price: <%=items[i][j].price_conversion.value / 100%> <%=items[i][j].price_conversion.type%><br><br>
-                                                             Paid with <%=paymentSourceTypes[i]%>
-                                                            </span>
+                                                             <%=(paymentSourceTypes[i] ? 'Paid with ' + paymentSourceTypes[i] : '')%>
+                                                           </span><br/><br/>
                                                         <% } %>
                                                      <% } %>
                                                  </td>

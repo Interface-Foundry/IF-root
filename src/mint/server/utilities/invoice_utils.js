@@ -82,7 +82,13 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
   var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members').populate('leader')
   var itemsByUser = {}
   for (var i = 0; i < cart.items.length; i++) {
-    cart.items[i] = await db.Items.findOne({id: cart.items[i].id}).populate('price_conversion')
+    cart.items[i] = await db.Items.findOne({id: cart.items[i].id}).populate('price_conversion').populate('options')
+
+    //construct string describing item options here instead of in html
+    var option_string = cart.items[i].options.filter(op => op.selected)
+    option_string = option_string.map(op => (op.type ? op.type.toUpperCase() + ': ' + op.name : op.name))
+    option_string = option_string.join(', ')
+    cart.items[i].option_string = option_string
   }
   cart.items.map(function (item) {
     if (!itemsByUser[item.added_by]) itemsByUser[item.added_by] = [item]
@@ -98,7 +104,6 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
   }, 0)
 
   paymentSourceTypes = await paymentSourceTypes(invoice)
-  logging.info('payment source types', paymentSourceTypes)
 
   await paidEmail.template('kip_order_process', {
     username: cart.leader.name || cart.leader.email_address,
