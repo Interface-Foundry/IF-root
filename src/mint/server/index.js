@@ -246,11 +246,20 @@ app.use(function errorHandler(err, req, res, next) {
   }
 })
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`App listening at http://127.0.0.1:${PORT}`);
-});
+if (process.env.LETSENCRYPT_DOMAIN) {
+  require('letsencrypt-express').create({
+    server: 'staging',
+    email: 'peter@interfacefoundry.com',
+    agreeTos: true,
+    approveDomains: [ process.env.LETSENCRYPT_DOMAIN ],
+    app: app
+  }).listen(80, 443);
+} else {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`App listening at http://127.0.0.1:${PORT}`);
+  });
+}
 
 function printNiceError(err) {
   if (!err) {
