@@ -98,8 +98,13 @@ class PaymentSource {
    * @return     {Promise}  { description_of_the_return_value }
    */
   static async RefundPaymentId (paymentId) {
-    const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source')
+    const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source').populate('invoice')
     logging.info('using payment.payment_source.payment_vendor',  payment.payment_source.payment_vendor)
+
+    logging.info('checking if invoice can be refunded:', payment.invoice.refund_status)
+    if (payment.invoice.refund_status === false) {
+      throw new Error('Cant refund when refund_status === false')
+    }
 
     const PaymentSourceClass = paymentSourceHandlers[payment.payment_source.payment_vendor]
     PaymentSourceClass.refundPayment(payment)

@@ -15,6 +15,8 @@ const invoiceData = {}
 var client;
 var cartId;
 var invoiceId;
+var payment;
+var paymentId;
 
 describe('invoice tests', () => {
 
@@ -92,6 +94,24 @@ describe('invoice tests', () => {
 
   it.skip('post a payment from a stripe payment id to an invoice and get remaining balance', async () => {
     // body...
+  })
+
+
+  it.skip('refund a payment', async () => {
+    const refund = await request.post({
+      uri: `${localhost}/invoice/refund`,
+      body: {
+        payment_id: paymentId
+      },
+      json: true
+    })
+    assert.equal(refund.status, true)
+  })
+
+  it.skip('mark refund as paid, change refund_status', async () => {
+    const refund = await request.get({
+      uri: `${localhost}/invoice/refund`,
+    })
   })
 
   after(async () => {

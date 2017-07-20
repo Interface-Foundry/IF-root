@@ -79,6 +79,14 @@ const invoiceCollection = Waterline.Collection.extend({
       defaultsTo: () => 'split_single'
     },
 
+    /**
+     * if an invoice can no longer be refunded (i.e. kip purchases stuff)
+     */
+    refund_ability: {
+      type: 'boolean',
+      defaultsTo: true
+    },
+
     /** the checkout url with our affiliate info in it */
     affiliate_checkout_url: {
       type: 'string'
