@@ -1,6 +1,8 @@
 const Server = require('socket.io');
+let socket;
 
 function startSocket(io) {
+  socket = io;
   io.on('connection', (socket) => {
     // socket.emit('state', store.getState());
     socket.emit('state', 'hello!!');
@@ -9,5 +11,8 @@ function startSocket(io) {
 }
 
 module.exports = {
-  startSocket: startSocket
+  startSocket: startSocket,
+  getSocket: function () {
+    return socket
+  }
 }
