@@ -34,14 +34,14 @@
       border: 1px solid lighten(#333, 60%);
 	    margin: 0px 2px 10px;
 	}
-
-  tbody {
-    tr {
-      &:last-of-type {
-        .card {
-          margin: 0 2px;
-        }
-      }
-    }
-  }
 }
+
+ // tbody {
+ //    tr {
+ //      &:last-of-type {
+ //        .card {
+ //          margin: 0 2px;
+ //        }
+ //      }
+ //    }
+ //  }
