@@ -16,7 +16,7 @@ export default class AddressList extends Component {
 
   render = () => {
     const { props: { addresses = [], addAddress, invoiceAddress, selectedAddress }, props } = this;
-    console.log(selectedAddress)
+    console.log({ selectedAddress, invoiceAddress })
     return (
       <div>
         <ul>

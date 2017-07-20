@@ -20,7 +20,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(toggleAddressForm(true));
   },
   fetchAddresses: () => dispatch(fetchAddresses()),
-  selectAddress: ({ addressId, invoiceId }) => dispatch(selectAddress({ selectedAddressId: addressId, invoiceId }))
+  selectAddress: ({ address, invoiceId }) => dispatch(selectAddress({ address, invoiceId }))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddressList);

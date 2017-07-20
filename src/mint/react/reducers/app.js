@@ -61,11 +61,6 @@ export default (state = initialState, action = {}) => {
       ...state,
       showAddressForm: action.show !== undefined ? action.show : !state.showAddressForm
     };
-  case 'SELECT_ADDRESS':
-    return {
-      ...state,
-      selectedAddress: action.address
-    };
   case 'SEARCH_SUCCESS':
   case 'SELECT_VIEW_TAB':
     return {

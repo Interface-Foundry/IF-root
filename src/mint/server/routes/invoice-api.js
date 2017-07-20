@@ -374,12 +374,12 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id id of the invoice we are attaching a shipping address to
    * @apiParam {string} address id of address we are shipping to
    */
-  router.post('/invoice/:invoice_id/shipto', async (req, res) => {
+  router.post('/invoice/:invoice_id/shipto', async(req, res) => {
     if (!req.body.address) res.sendStatus(400)
-    var invoice = await db.Invoices.findOne({id: req.params.invoice_id})
-    invoice.address = req.body.address
+    var invoice = await db.Invoices.findOne({ id: req.params.invoice_id })
+    invoice.address = req.body.address.id
     await invoice.save()
-    res.send({id: invoice.address})
+    res.send(req.body.address)
   })
 
   /**

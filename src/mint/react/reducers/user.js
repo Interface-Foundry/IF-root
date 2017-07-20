@@ -28,9 +28,10 @@ export default (state = initialState, action) => {
       addresses: action.response
     };
   case 'SELECT_ADDRESS_SUCCESS':
+  console.log({ state, action })
     return {
       ...state,
-      selectedAddress: state.addresses.find(a => a.id === action.selectedAddress.id) || {} // select the address but don't return undef
+      selectedAddress: action.address
     };
   case 'UPDATE_ADDRESS_SUCCESS':
     return {
