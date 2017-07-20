@@ -84,10 +84,26 @@ class Invoice {
     return this.InvoiceInitializer(invoice)
   }
 
-  static async ChangeRefundStatus(invoiceId, newStatus) {
-    let invoice = await db.Invoices.findOne({cart: invoiceId})
-    invoice.refund_status = newStatus
+
+  /**
+   * change the status of a refund based on a key that uses authenticat links
+   *
+   * @class      ChangeRefundStatus (name)
+   * @param      {string}   refundKey  The refund key
+   * @param      {string}   newStatus  The new status
+   * @return     {Promise}  new status
+   */
+  static async ChangeRefundStatus(refundKey, newStatus) {
+    // dont populate link if you want to use link.invoice
+    const link = await db.AuthenticationLinks.findOne({ id: refundKey })
+    if (!link || !link.invoice) {
+      throw new Error('No authentication link exists for this Invoice Change Status thing')
+    }
+
+    const invoice = await db.Invoices.findOne({ id: link.invoice })
+    invoice.refund_ability = (newStatus === 'complete') ? false : newStatus
     await invoice.save()
+    return invoice
   }
 
 
@@ -126,6 +142,21 @@ class Invoice {
   async updateInvoice () {
     let cart = await Cart.GetById(this.cart.id)
     await cart.sync()
+  }
+
+
+  /**
+   * Creates a refund link for kip.
+   * use the link.id/:newstatus i.e. invoice/refund/sda4sdfa/false
+   *
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async createRefundLinkForKip() {
+    logging.info('created link to auth kip after we have created payment')
+    const link = await db.AuthenticationLinks.create({
+      invoice: this.id
+    })
+    return link
   }
 
   /**
@@ -221,9 +252,10 @@ class Invoice {
     var invoice = this
     var debts = await this.userPaymentAmounts(invoice)
 
-    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'http://kipthis.com'
-    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'http://localhost:3000'
-    else var baseUrl = 'http://mint-dev.kipthis.com'
+    var baseUrl
+    if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
+    else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
+    else baseUrl = 'http://mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: this.id}).populate('items').populate('members')
     var users = cart.members
@@ -244,8 +276,9 @@ class Invoice {
           template_name: 'collection'
         })
         // logging.info('created email')
-        if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] / 100 + ' at your earliest possible convenience.'
-        else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] / 100 + ' at your earliest possible convenience 😊'
+        var text
+        if (reminder) text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] / 100 + ' at your earliest possible convenience.'
+        else text = 'Thanks for using Kip! Please pay $' + debts[user_id] / 100 + ' at your earliest possible convenience 😊'
         // logging.info('about to template')
         await email.template('collection', {
           username: user.name,

@@ -108,7 +108,7 @@ describe('invoice tests', () => {
     assert.equal(refund.status, true)
   })
 
-  it.skip('mark refund as paid, change refund_status', async () => {
+  it.skip('mark refund as paid, change refund_ability', async () => {
     const refund = await request.get({
       uri: `${localhost}/invoice/refund`,
     })

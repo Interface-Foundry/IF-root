@@ -24,6 +24,9 @@ var authenticationLinksCollection = Waterline.Collection.extend({
     /** @type {reference} cart which item belongs to */
     cart: Waterline.isA('carts'),
 
+    /** @type {reference} which invoice if it belongs to invoice */
+    invoice: Waterline.isA('invoices'),
+
     redirect_url: 'string',
 
     code: 'string',

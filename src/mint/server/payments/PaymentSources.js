@@ -63,6 +63,7 @@ class PaymentSource {
       paymentStatus.amount = paymentsOnThisInvoice.amount
       return paymentStatus
     }
+    logging.info('total would be', invoice.total)
     const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
     logging.info('got debts', JSON.stringify(debts))
     paymentStatus.amount = debts[userId]
@@ -101,9 +102,9 @@ class PaymentSource {
     const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source').populate('invoice')
     logging.info('using payment.payment_source.payment_vendor',  payment.payment_source.payment_vendor)
 
-    logging.info('checking if invoice can be refunded:', payment.invoice.refund_status)
-    if (payment.invoice.refund_status === false) {
-      throw new Error('Cant refund when refund_status === false')
+    logging.info('checking if invoice can be refunded:', payment.invoice.refund_ability)
+    if (payment.invoice.refund_ability === false) {
+      throw new Error('Cant refund when refund_ability === false')
     }
 
     const PaymentSourceClass = paymentSourceHandlers[payment.payment_source.payment_vendor]

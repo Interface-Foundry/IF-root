@@ -17,7 +17,7 @@ const userPaymentAmountHandler = {
     const cartId = (_.get(invoice, 'cart.id')) ? invoice.cart.id : invoice.cart
     const cart = await db.Carts.findOne({id: cartId}).populate('members')
     const debts = {}
-    const perUser = invoice.total / (1.0 * cart.members.length)
+    const perUser = Math.round(invoice.total / (1.0 * cart.members.length))
     cart.members.map(function (user) {
       debts[user.id] = perUser
     })
@@ -69,7 +69,7 @@ async function paymentSourceTypes(invoice) {
  * @param      {<type>}   baseUrl  The base url
  * @return     {Promise}  { description_of_the_return_value }
  */
-async function sendInternalCheckoutEmail (invoice, baseUrl) {
+async function sendInternalCheckoutEmail (invoice, baseUrl, statusChange) {
   logging.info('all payments complete')
   var paidEmail = await db.Emails.create({
     recipients: 'hello@kipthis.com',
@@ -105,9 +105,12 @@ async function sendInternalCheckoutEmail (invoice, baseUrl) {
 
   paymentSourceTypes = await paymentSourceTypes(invoice)
 
+  const statusChangeUrl = `${baseUrl}/api/invoice/refund/${statusChange.id}/complete`
+
   await paidEmail.template('kip_order_process', {
     username: cart.leader.name || cart.leader.email_address,
     baseUrl: baseUrl,
+    changeStatusUrl: statusChangeUrl,
     id: cart.id,
     items: nestedItems.map(items => {
       return items.map(item => {
