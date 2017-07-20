@@ -99,10 +99,10 @@ export default class App extends Component {
     }
   }
 
-  componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname } }) {
+  componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname }, reward: newReward }) {
     const {
       _logPageView,
-      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id } }
+      props: { fetchCart, fetchMetrics, reward, location: { pathname }, user: { id }, toggleReward }
     } = this;
     const cartId = pathname.match(/cart\/(\w*)\/?/),
       nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
@@ -120,9 +120,13 @@ export default class App extends Component {
 
       _logPageView(pathname, nextId); //log initial load
     }
+
+    if(reward !== newReward) {
+      this.setTimeout = setTimeout(() => toggleReward(), 3000);
+    }
   }
 
-  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }) =>
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId, reward }) =>
     tab !== this.props.tab
     || loading !== this.props.loading
     || sidenav !== this.props.sidenav
@@ -131,9 +135,10 @@ export default class App extends Component {
     || location.search !== this.props.location.search
     || toast !== this.props.toast
     || selectedItemId !== this.props.selectedItemId
+    || reward !== this.props.reward
 
   render() {
-    const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
+    const { sidenav, popup, togglePopup, tab, match, toast, status, reward, loading, history: { replace }, location: { pathname } } = this.props;
 
     return (
       <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
@@ -158,7 +163,7 @@ export default class App extends Component {
           // no jittery fix for mobile
         }
         <div className='noJudder'>
-          <div className='reward__achieved'/>
+          { reward ? <div className='reward__achieved'/> : null }
           { tab === 'cart' || tab === 'invoice' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />

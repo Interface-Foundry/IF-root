@@ -12,7 +12,8 @@ import {
   navigateLeftResults,
   getMoreSearchResults,
   fetchInvoiceByCart,
-  setHeaderCheckout
+  setHeaderCheckout,
+  toggleReward
 } from '../actions';
 
 const mapStateToProps = (state, ownProps) => {
@@ -31,6 +32,7 @@ const mapStateToProps = (state, ownProps) => {
     sidenav: state.app.sidenav,
     query: state.search.query,
     page: state.search.page,
+    reward: state.app.reward,
     selectedItemId: state.search.selectedItemId,
     popup: state.app.popup,
     lazyLoading: state.search.lazyLoading
@@ -39,6 +41,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
   togglePopup: () => dispatch(togglePopup()),
+  toggleReward: () => dispatch(toggleReward()),
   toggleSidenav: () => dispatch(toggleSidenav()),
   fetchCart: (id) => dispatch(fetchCart(id)),
   fetchMetrics: (id) => dispatch(fetchMetrics(id)),

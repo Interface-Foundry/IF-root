@@ -18,6 +18,10 @@ export const togglePopup = () => ({
   type: 'TOGGLE_POPUP'
 });
 
+export const toggleReward = () => ({
+  type: 'TOGGLE_REWARD'
+});
+
 export const selectTab = tab => ({
   type: 'SELECT_VIEW_TAB',
   response: {
