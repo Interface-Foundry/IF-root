@@ -77,6 +77,16 @@ button {
     width: 100%;
     z-index: 9;
 
+    & > .reward__achieved {
+      position: fixed;
+      width: 100%;
+      height: $nav-height*2;
+      left: 0;
+      bottom: 90px;
+      background-image: url(//storage.googleapis.com/kip-random/social/bg/success_mint_once.gif);
+      background-size: cover;
+    }
+
     & > .tabs {
       position: fixed;
       bottom: 0;
@@ -304,3 +314,4 @@ input, select:focus, textarea {
 body::-webkit-scrollbar {
   display: none;
 }
+

@@ -32,7 +32,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
     .card {
       padding: 0;
-      background: url(//s-media-cache-ak0.pinimg.com/originals/66/04/8f/66048fae13597918a08cd93b22149b48.jpg) no-repeat center center;
+      background: url(//storage.googleapis.com/kip-random/social/bg/bg_paper2.png) no-repeat center center;
       background-size: cover;
       border-radius: 5px;
 
@@ -41,7 +41,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: $padding;
         border: 3px solid white;
         border-width: 3px 3px 1.5px 5px;
-        background: rgba(white, 0.7);
         border-radius: 5px 5px 0 0;
       }
 
@@ -273,7 +272,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: 5px 10px;
         border: 3px solid white;
         border-width: 1.5px 3px 3px 5px;
-        background: rgba(white, 0.7);
         border-radius: 0 0 5px 5px;
 
         .store {

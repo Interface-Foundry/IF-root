@@ -25,20 +25,24 @@ export default class Cart extends Component {
   }
 
   _getCompleteImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 10 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
   }
 
   _getIncompleteImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
+    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 10 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
   }
 
   _getLockedImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 10 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+  }
+
+  _getColor(memberNumber) {
+    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 9 ? 'red': 'yellow') : 'green') : '';
   }
 
   render() {
     const { cart, user, invoice, editId, updateItem } = this.props,
-      { _getCompleteImage, _getIncompleteImage, _getLockedImage } = this,
+      { _getCompleteImage, _getIncompleteImage, _getLockedImage, _getColor } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
@@ -64,7 +68,7 @@ export default class Cart extends Component {
           {
             userCarts.others.map((userCart, index) => {
               let memberNumber = userCarts.others.length - index;
-              const color = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
+              const color = _getColor(memberNumber);
               const imageSrc = memberNumber <= lastAward ? _getCompleteImage(memberNumber) :  _getIncompleteImage(memberNumber);
 
               if(achieveIndex[memberNumber]) {

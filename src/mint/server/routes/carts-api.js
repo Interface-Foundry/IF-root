@@ -550,6 +550,12 @@ module.exports = function (router) {
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
+    
+    var activeMembers = cart.items.map(item => item.added_by)
+    if (item.added_by !== cart.leader && activeMembers.indexOf(item.added_by) < 0) {
+      logging.info('member no longer has items in the cart')
+      cart.members.remove(item.added_by)
+    }
 
     yield cart.save()
 
@@ -1125,7 +1131,7 @@ module.exports = function (router) {
       type: 'COPY_ITEM_SUCCESS',
       response: clone
     })
-    
+
     res.send(clone)
   }))
 
