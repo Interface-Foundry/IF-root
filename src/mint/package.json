@@ -47,6 +47,7 @@
     "js-base64": "^2.1.9",
     "jschardet": "^1.4.2",
     "json-loader": "^0.5.4",
+    "letsencrypt-express": "^2.0.6",
     "loader-runner": "^2.3.0",
     "locale": "^0.1.0",
     "lodash": "^4.17.4",
