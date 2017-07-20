@@ -82,7 +82,7 @@ const invoiceCollection = Waterline.Collection.extend({
     /**
      * if an invoice can no longer be refunded (i.e. kip purchases stuff)
      */
-    refund_status: {
+    refund_ability: {
       type: 'boolean',
       defaultsTo: true
     },

@@ -16,6 +16,9 @@ _file_zip_mint="$_file_mint.tar.gz"
 # slack     is: mongodb-beta-server-1 - 10.142.0.13
 # mint      is: mongodb-beta-server-1 - 10.142.0.13
 
+mkdir ~/tmp_backups/
+cd ~/tmp_backups/
+
 mongo_fb="10.142.0.8"
 mongo_slack="10.142.0.13"
 mongo_mint="10.142.0.13"
@@ -43,4 +46,4 @@ gsutil cp $_file_zip_fb gs://kip-db-dump/latest/
 gsutil cp $_file_zip_slack gs://kip-db-dump/latest/
 gsutil cp $_file_zip_mint gs://kip-db-dump/latest/
 
-# cd .. && rm -r tmp_
+cd ~ && rm -r ~/tmp_backups
