@@ -1,6 +1,6 @@
 const Translate = require('@google-cloud/translate')
 
-module.exports.translateText = async function (s){
+module.exports.translateText = async function (s) {
 
 	//single string array to send for tranlsation
 	var t = []
@@ -36,8 +36,10 @@ module.exports.translateText = async function (s){
 		for (var i = 0; i < s.options.length; i++) {
 			if(s.options[i].original_name.value){
 				if(s.options[i].type == 'size'){
+					// logging.info('size option', t_map[0], '|', s.options[i].original_name.value)
 					s.options[i].name = s.options[i].original_name.value
 				}else {
+					// logging.info('other option: tmap', t_map[0], s.options[i].original_name.value)
 					s.options[i].name = t_map[0]
 					t_map.shift()
 				}
