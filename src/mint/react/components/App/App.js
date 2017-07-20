@@ -83,10 +83,11 @@ export default class App extends Component {
 
     const {
       props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout },
-      scroll: { scrollTop, containerHeight, clientHeight }
+      scroll: { scrollTop, scrollHeight, clientHeight }
     } = this;
+
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
-    if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
+    if (search && checkPageScroll(scrollTop, scrollHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
       getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
     } else if (scrollTop > 200 && (!search || !search.length) && !this.state.showCheckout) {

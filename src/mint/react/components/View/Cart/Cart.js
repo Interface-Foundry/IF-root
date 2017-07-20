@@ -11,6 +11,9 @@ import UserCart from './UserCart';
 import MyCart from './MyCart';
 import RewardCard from './RewardCard';
 
+// Youtube embed
+// <iframe width="1280" height="720" src="https://www.youtube.com/embed/EmwO1_IMrmY?ecver=1" frameborder="0" allowfullscreen></iframe>
+
 export default class Cart extends Component {
   static propTypes = {
     cart: PropTypes.object,
@@ -54,7 +57,9 @@ export default class Cart extends Component {
               title={`${achieveIndex[nextAward].discount}% OFF`}
               sub={`+${achieveIndex[nextAward].reqs - userCarts.others.length} MORE PEOPLE`}
               imageSrc={_getLockedImage(userCarts.others.length)}
-              classes='grey gradient'/>
+              classes='grey gradient'
+              cart={cart}
+              share={true}/>
           </tr>
           {
             userCarts.others.map((userCart, index) => {

@@ -122,6 +122,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .grey {
+    position: relative;
     color: rgba(#111, 0.5);
   }
 
@@ -203,6 +204,31 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     &.gradient {
       &:after {
         background: linear-gradient(to top, lighten(#333, 60%), #00cb7b 100%);
+      }
+    }
+    &.grey {
+      .card {
+        position: relative;
+        background: rgba(#fff, 0.3);
+        .share {
+          position: absolute;
+          right: 10px;
+          top: 10px;
+          height: 30px;
+          line-height: 30px;
+          padding: 0;
+          width: 85px;
+          font-weight: bold;
+          background: $secondaryColor;
+          border: 0;
+          border-radius: 5px;
+          color: white;
+          font-size: 14px;
+
+          svg {
+            margin: 0 $padding/2 $padding/3 0;
+          }
+        }
       }
     }
     .card {
