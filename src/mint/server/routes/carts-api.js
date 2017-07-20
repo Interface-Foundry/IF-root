@@ -516,7 +516,7 @@ module.exports = function (router) {
 
     // Remove the cart-item association
     cart.items.remove(item.id)
-    logging.info('ITEM DELENDUM', item)
+    // logging.info('ITEM DELENDUM', item)
 
     var activeMembers = cart.items.map(item => item.added_by)
     if (item.added_by !== cart.leader && activeMembers.indexOf(item.added_by) < 0) {
