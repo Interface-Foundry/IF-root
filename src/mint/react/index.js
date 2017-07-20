@@ -82,9 +82,7 @@ socket.on('ACTION', response => {
   store.dispatch(fetchCarts());
   store.dispatch(fetchMetrics(cartId))
   store.dispatch(fetchCart(cartId)).then((res) => {
-    console.log('res: ', res)
     let newMembers = res.response.members.length
-
     if(
       newMembers > members
       && (
