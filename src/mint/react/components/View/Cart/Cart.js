@@ -29,13 +29,18 @@ export default class Cart extends Component {
     return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
   }
 
+  _getLockedImage(memberNumber) {
+    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+  }
+
   render() {
     const { cart, user, invoice, editId, updateItem } = this.props,
-      { _getCompleteImage, _getIncompleteImage } = this,
+      { _getCompleteImage, _getIncompleteImage, _getLockedImage } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
-      lastAward = userCarts.others.length > 3 ? ( userCarts.others.length > 6 ? ( userCarts.others.length > 10 ?  10 : 6 ) : 3 ) : 0,
+      lastAward = userCarts.others.length > 3 ? ( userCarts.others.length > 6 ? ( userCarts.others.length >= 10 ?  10 : 6 ) : 3 ) : 0,
+      nextAward = userCarts.others.length > 3 ? ( userCarts.others.length > 6 ? ( userCarts.others.length >= 10 ?  10 : 10 ) : 6 ) : 3,
       achieveIndex = {10: { reqs: 10, discount: 70, color: 'red' }, 6: { reqs: 6, discount: 50, color: 'yellow'  }, 3: { reqs: 3, discount: 20, color: 'green' }};
 
     return (
@@ -44,6 +49,13 @@ export default class Cart extends Component {
           <MyCart myCart={myCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader}/>
         </thead>
         <tbody>
+          <tr className={`next grey`}>
+            <RewardCard 
+              title={`${achieveIndex[nextAward].discount}% OFF`}
+              sub={`+${achieveIndex[nextAward].reqs - userCarts.others.length} MORE PEOPLE`}
+              imageSrc={_getLockedImage(userCarts.others.length)}
+              classes='grey gradient'/>
+          </tr>
           {
             userCarts.others.map((userCart, index) => {
               let memberNumber = userCarts.others.length - index;
