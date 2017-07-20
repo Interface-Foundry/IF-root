@@ -21,8 +21,17 @@ export default class Cart extends Component {
     updateItem: PropTypes.func
   }
 
+  _getCompleteImage(memberNumber) {
+    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+  }
+
+  _getIncompleteImage(memberNumber) {
+    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
+  }
+
   render() {
     const { cart, user, invoice, editId, updateItem } = this.props,
+      { _getCompleteImage, _getIncompleteImage } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
@@ -39,16 +48,15 @@ export default class Cart extends Component {
             userCarts.others.map((userCart, index) => {
               let memberNumber = userCarts.others.length - index;
               const color = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
-              const imageSrc = memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+              const imageSrc = memberNumber <= lastAward ? _getCompleteImage(memberNumber) :  _getIncompleteImage(memberNumber);
 
               if(achieveIndex[memberNumber]) {
-                const rewardSrc = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
                 return (
                   <div className='double' key={userCart.id} >
                     <RewardCard 
                       title={`${achieveIndex[memberNumber].discount}% OFF`}
                       sub={`REWARD EARNED`}
-                      imageSrc={rewardSrc}
+                      imageSrc={imageSrc}
                       number={memberNumber}
                       classes={achieveIndex[memberNumber].color}/>
                     <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✔'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
