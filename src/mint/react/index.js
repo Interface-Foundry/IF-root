@@ -8,6 +8,9 @@ import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import ReactGA from 'react-ga';
+import io from 'socket.io-client';
+import getClientId from './socket/client_id';
+import remoteActionMiddleware from './socket/remote_action_middleware';
 
 import Reducers from './reducers';
 import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
@@ -16,6 +19,12 @@ import { AppContainer } from './containers';
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }
+
+const socket = io(`${location.protocol}//${location.hostname}:3000`);
+
+socket.on('state', state => {
+  console.log('inside socket')
+});
 
 const history = createHistory();
 history.listen((location, action) => {
@@ -41,7 +50,7 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
 }
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
 
-const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
+const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware,  remoteActionMiddleware(socket))));
 
 // Basically our initialization sequence
 // Check session

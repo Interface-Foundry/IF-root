@@ -12,7 +12,8 @@ const fs = require('fs'),
   _ = require('lodash'),
   co = require('co'),
   auth = require('basic-auth');
-  passport = require('passport')
+  passport = require('passport');
+  startSocket = require('./socket/socket').startSocket;
 
 // start any jobs
 if (process.env.NODE_ENV !== 'production') var dailyDealsJob = require('./deals/send-daily-deals-job')
@@ -248,9 +249,20 @@ app.use(function errorHandler(err, req, res, next) {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const http = require('http').Server(app);
+const io = require('socket.io').listen(http);
+
+startSocket(io);
+
+console.log('io:', io)
+
+http.listen(PORT, () => {
   console.log(`App listening at http://127.0.0.1:${PORT}`);
 });
+
+// app.listen(PORT, () => {
+//   console.log(`App listening at http://127.0.0.1:${PORT}`);
+// });
 
 function printNiceError(err) {
   if (!err) {

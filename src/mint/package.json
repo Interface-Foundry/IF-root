@@ -87,6 +87,7 @@
     "redux-undo": "^1.0.0-beta9-9-5",
     "sails-mongo": "^0.12.3",
     "soap": "^0.19.2",
+    "socket.io": "^2.0.3",
     "sockjs-client": "^1.1.2",
     "socks5-http-client": "^1.0.2",
     "socks5-https-client": "^1.2.1",
