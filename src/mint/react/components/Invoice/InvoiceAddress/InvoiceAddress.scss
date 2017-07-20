@@ -24,10 +24,12 @@
   ul {
     padding: $padding;
     li {
+      &.clickable {
+        cursor: pointer;
+      }
       border: 1px solid white;
       padding: $padding;
       margin-bottom: $padding;
-      cursor: pointer;
       display: flex;
       align-items: center;
 

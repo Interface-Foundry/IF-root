@@ -24,7 +24,8 @@ export default class Payment extends Component {
     fetchPaymentStatus: PropTypes.func,
     selectedAccordion: PropTypes.string,
     invoice: PropTypes.object,
-    userPaymentStatus: PropTypes.object
+    userPaymentStatus: PropTypes.object,
+    isLeader: PropTypes.bool
   }
 
   render = () => {
@@ -44,7 +45,7 @@ export default class Payment extends Component {
                       <ul>
                         {
                           this.paymentTypes.map(paymentType => (
-                            <li key={paymentType.type} className={invoice.split_type === paymentType.type? 'selected' : ''} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
+                            <li key={paymentType.type} className={`clickable ${invoice.split_type === paymentType.type? 'selected' : ''}`} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
                               <div className='circle'/>
                               <div className='text'>
                                 <h4>{paymentType.text}</h4>
@@ -58,7 +59,9 @@ export default class Payment extends Component {
                       <nav><h4>Payment Type</h4></nav>
                       <ul>
                         <li>
-                          <div className='text'><h4>{this.paymentTypes.find(p=>p.type===invoice.split_type).text}</h4></div>
+                          <div className='text'>
+                            <h4>{this.paymentTypes.find(p=>p.type===invoice.split_type).text}</h4>
+                          </div>
                         </li>
                       </ul>
                     </div>

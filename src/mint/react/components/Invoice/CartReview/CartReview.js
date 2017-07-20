@@ -31,7 +31,7 @@ export default class CartReview extends Component {
   }
 
   render() {
-    const { selectedAccordion, selectAccordion, cart } = this.props, { selectedIndex } = this.state;
+    const { selectedAccordion, selectAccordion, cart, isLeader } = this.props, { selectedIndex } = this.state;
 
     return (
       <div className='review accordion'>
@@ -70,8 +70,9 @@ export default class CartReview extends Component {
                 <h4>Delivery option</h4>
               </nav>
               {
-                shippingOptions.map((option, i) => (
-                  <li key={i} className={selectedIndex === i ? 'selected' : ''} onClick={() => this.setState({selectedIndex: i})}>
+               isLeader
+               ? shippingOptions.map((option, i) => (
+                  <li key={i} className={`clickable ${selectedIndex === i ? 'selected' : ''}`} onClick={() => this.setState({selectedIndex: i})}>
                       <div className='circle'/>
                       <div className='text'>
                         <h4>{option.name}</h4>
@@ -80,6 +81,13 @@ export default class CartReview extends Component {
                       </div>
                   </li>
                 ))
+                :
+                <li>
+                  <div className='text'>
+                    <h4>Fast </h4>
+                    <p>Delivered on 1/1/79</p>
+                  </div>
+                </li>
               }
             </ul>
           </div> : null

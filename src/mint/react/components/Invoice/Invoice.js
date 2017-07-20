@@ -34,7 +34,7 @@ export default class Invoice extends Component {
         <InvoiceInfo {...this.props} />
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
         <Payment {...this.props} isLeader={isLeader}/>
-        <CartReview {...this.props}/>
+        <CartReview {...this.props} isLeader={isLeader}/>
       </div>
     );
   }
