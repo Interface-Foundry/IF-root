@@ -7,9 +7,6 @@ import Stripe from './Stripe';
 
 export default class Payment extends Component {
 
-  state = {
-    selectedType: null
-  }
   paymentTypes = [{
     type: 'split_single',
     text: 'admin pay for all'
@@ -31,7 +28,8 @@ export default class Payment extends Component {
   }
 
   render = () => {
-    const { userPaymentStatus, selectAccordion, selectedAccordion, updateInvoice, invoice } = this.props, { selectedType } = this.state;
+    const { userPaymentStatus, selectAccordion, selectedAccordion, updateInvoice, invoice } = this.props;
+    console.log(invoice)
     return (
       <div className='payment accordion'>
         <nav className='clickable' onClick={() => selectAccordion('payment')}>
@@ -46,11 +44,8 @@ export default class Payment extends Component {
                 </nav>
                 <ul>
                   {
-                    this.paymentTypes.map((paymentType, i) => (
-                      <li key={i} className={selectedType === i ? 'selected' : ''} onClick={() => {
-                        this.setState({selectedType: i});
-                        updateInvoice(invoice.id, 'split_type', paymentType.type);
-                      }}>
+                    this.paymentTypes.map(paymentType => (
+                      <li key={paymentType.type} className={invoice.split_type === paymentType.type? 'selected' : ''} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
                       <div className='circle'/>
                       <div className='text'>
                         <h4>{paymentType.text}</h4>
