@@ -9,13 +9,13 @@ export default class Payment extends Component {
 
   paymentTypes = [{
     type: 'split_single',
-    text: 'admin pay for all'
+    text: 'Cart Creator Pays' //lets get names in here later
   }, {
     type: 'split_equal',
-    text: 'split equally amongst the people of kip!'
+    text: 'Everyone Pays Equally'
   }, {
     type: 'split_by_item',
-    text: 'split by item'
+    text: 'Everyone Pays for Their Own Items'
   }];
   static propTypes = {
     createPayment: PropTypes.func,
@@ -28,7 +28,7 @@ export default class Payment extends Component {
   }
 
   render = () => {
-    const { userPaymentStatus, selectAccordion, selectedAccordion, updateInvoice, invoice } = this.props;
+    const { userPaymentStatus, selectAccordion, selectedAccordion, updateInvoice, invoice, isLeader } = this.props;
     return (
       <div className='payment accordion'>
         <nav className='clickable' onClick={() => selectAccordion('payment')}>
@@ -37,36 +37,45 @@ export default class Payment extends Component {
         {
           selectedAccordion.includes('payment')
             ? <div>
-              <div>
-                <nav >
-                  <h4>Payment Type</h4>
+                {
+                  isLeader
+                  ? <div>
+                      <nav><h4>Payment Type</h4></nav>
+                      <ul>
+                        {
+                          this.paymentTypes.map(paymentType => (
+                            <li key={paymentType.type} className={invoice.split_type === paymentType.type? 'selected' : ''} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
+                              <div className='circle'/>
+                              <div className='text'>
+                                <h4>{paymentType.text}</h4>
+                              </div>
+                            </li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                  : <div>
+                      <nav><h4>Payment Type</h4></nav>
+                      <ul>
+                        <li>
+                          <div className='text'><h4>{this.paymentTypes.find(p=>p.type===invoice.split_type).text}</h4></div>
+                        </li>
+                      </ul>
+                    </div>
+                }
+                <nav>
+                  <h4>Your credit and debit cards</h4>
                 </nav>
                 <ul>
                   {
-                    this.paymentTypes.map(paymentType => (
-                      <li key={paymentType.type} className={invoice.split_type === paymentType.type? 'selected' : ''} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
-                      <div className='circle'/>
-                      <div className='text'>
-                        <h4>{paymentType.text}</h4>
+                    userPaymentStatus.paid ? <p> user has already paid </p> :
+                      <div>
+                        <PaymentSources {...this.props}/>
+                        <Stripe {...this.props}/>
                       </div>
-                      </li>
-                    ))
                   }
                 </ul>
-                </div>
-                    <nav>
-                      <h4>Your credit and debit cards</h4>
-                    </nav>
-                    <ul>
-                      {
-                        userPaymentStatus.paid ? <p> user has already paid </p> :
-                          <div>
-                            <PaymentSources {...this.props}/>
-                            <Stripe {...this.props}/>
-                          </div>
-                      }
-                    </ul>
-                </div>
+            </div>
             : null
           }
       </div>

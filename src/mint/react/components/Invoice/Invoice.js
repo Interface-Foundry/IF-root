@@ -33,7 +33,7 @@ export default class Invoice extends Component {
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
         <InvoiceInfo {...this.props} />
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
-        <Payment {...this.props}/>
+        <Payment {...this.props} isLeader={isLeader}/>
         <CartReview {...this.props}/>
       </div>
     );

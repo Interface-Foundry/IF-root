@@ -21,7 +21,7 @@ export default class InvoiceAddress extends Component {
     } = this.props;
 
     return (
-      <div className={`invoice accordion ${isLeader ? 'clickable' : ''}`} onClick={() => selectAccordion('changeinvoice')}>
+      <div className={`invoice accordion ${isLeader ? 'clickable' : ''}`} onClick={() => isLeader ?selectAccordion('changeinvoice') : null}>
         <nav className={isLeader ? 'clickable' : ''}>
           <h2>1. Shipping Address</h2>
         </nav>
