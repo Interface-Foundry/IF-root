@@ -181,8 +181,11 @@ class Invoice {
         return item.added_by === user.id
       })
 
+      logging.info('invoice.address', invoice.address)
+
       logging.info('invoice.cart', invoice.cart)
       await email.template('success', {
+        address: invoice.address,
         username: user.name,
         baseUrl: baseUrl,
         items: items.map(item => {
