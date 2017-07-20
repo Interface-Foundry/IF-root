@@ -94,7 +94,7 @@ export default class Details extends Component {
                     ))
                   }
                   <div className='store'>
-                    <Icon icon='Home'/>
+                    <Icon icon='Upload'/>
                     <h4><span>{getStoreName(store, store_locale)}</span></h4>
                   </div>
                 </div>
