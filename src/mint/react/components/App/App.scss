@@ -77,6 +77,20 @@ button {
     width: 100%;
     z-index: 9;
 
+    & > .reward__achieved {
+      position: fixed;
+      width: 100%;
+      height: $nav-height*2;
+      left: 0;
+      bottom: 90px;
+      background-image: url(//storage.googleapis.com/kip-random/social/success_mint_loop.gif);
+      background-size: cover;
+      animation: cssAnimation 0s ease-in 3s forwards;
+      -webkit-animation-fill-mode: forwards;
+      animation-fill-mode: forwards;
+      @include transition(all 0.33s $material-bezier);
+    }
+
     & > .tabs {
       position: fixed;
       bottom: 0;
@@ -303,4 +317,14 @@ input, select:focus, textarea {
 
 body::-webkit-scrollbar {
   display: none;
+}
+
+
+@keyframes cssAnimation {
+    to {
+        opacity: 0;
+        width:0;
+        height:0;
+        overflow:hidden;
+    }
 }

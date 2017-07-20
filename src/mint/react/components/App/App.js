@@ -151,7 +151,6 @@ export default class App extends Component {
           <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
 
-
         </div>
         { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
 
@@ -159,6 +158,7 @@ export default class App extends Component {
           // no jittery fix for mobile
         }
         <div className='noJudder'>
+          <div className='reward__achieved'/>
           { tab === 'cart' || tab === 'invoice' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />

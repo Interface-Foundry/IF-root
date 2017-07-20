@@ -76,7 +76,7 @@ store.dispatch(checkSession()).then(() => {
 });
 
 socket.on('ACTION', response => {
-  console.log(response);
+  // Currently not handling the response, but in the future just feed the response directly to store.dispatch(response)
   store.dispatch(fetchCart(cart_id[1]))
   store.dispatch(fetchMetrics(cart_id[1]));
   store.dispatch(fetchCarts());
