@@ -99,10 +99,10 @@ export default class App extends Component {
     }
   }
 
-  componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname }, reward: newReward }) {
+  componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname } }) {
     const {
       _logPageView,
-      props: { fetchCart, fetchMetrics, reward, location: { pathname }, user: { id }, toggleReward }
+      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id }, toggleReward }
     } = this;
     const cartId = pathname.match(/cart\/(\w*)\/?/),
       nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
@@ -120,13 +120,9 @@ export default class App extends Component {
 
       _logPageView(pathname, nextId); //log initial load
     }
-
-    if(reward !== newReward) {
-      this.setTimeout = setTimeout(() => toggleReward(), 3000);
-    }
   }
 
-  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId, reward }) =>
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId, reward, cart }) =>
     tab !== this.props.tab
     || loading !== this.props.loading
     || sidenav !== this.props.sidenav
@@ -136,6 +132,7 @@ export default class App extends Component {
     || toast !== this.props.toast
     || selectedItemId !== this.props.selectedItemId
     || reward !== this.props.reward
+    || cart.members.length !== this.props.cart.members.length
 
   render() {
     const { sidenav, popup, togglePopup, tab, match, toast, status, reward, loading, history: { replace }, location: { pathname } } = this.props;

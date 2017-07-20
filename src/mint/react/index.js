@@ -13,7 +13,7 @@ import getClientId from './socket/client_id';
 import remoteActionMiddleware from './socket/remote_action_middleware';
 
 import Reducers from './reducers';
-import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
+import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery, toggleReward } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
@@ -77,9 +77,28 @@ store.dispatch(checkSession()).then(() => {
 
 socket.on('ACTION', response => {
   // Currently not handling the response, but in the future just feed the response directly to store.dispatch(response)
-  store.dispatch(fetchCart(cart_id[1]))
-  store.dispatch(fetchMetrics(cart_id[1]));
+  let members = store.getState().cart.present.members.length
+  let cartId = store.getState().cart.present.id
   store.dispatch(fetchCarts());
+  store.dispatch(fetchMetrics(cartId))
+  store.dispatch(fetchCart(cartId)).then((res) => {
+    console.log('res: ', res)
+    let newMembers = res.response.members.length
+
+    if(
+      newMembers > members
+      && (
+        newMembers === 3 ||
+        newMembers === 6 ||
+        newMembers === 10
+      )
+    ) {
+      store.dispatch(toggleReward())
+      setTimeout(() => {
+        store.dispatch(toggleReward())
+      }, 3000);
+    } 
+  })
 });
 
 ReactDOM.render(
