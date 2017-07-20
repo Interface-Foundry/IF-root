@@ -42,7 +42,7 @@ export default class App extends Component {
     setHeaderCheckout: PropTypes.func
   }
 
-  _logPageView(path, userId) {
+  _logPageView = (path, userId) => {
     ReactGA.set({ userId });
     ReactGA.event({
       category: 'User',
@@ -50,21 +50,23 @@ export default class App extends Component {
     });
   }
 
-  componentDidMount() {
-    const { _logPageView } = this;
+  componentDidMount = () => {
+    const { _logPageView, _handleScroll, scroll } = this;
     _logPageView();
 
-    if (document.body.clientWidth > 600) this.scroll.addEventListener('scroll', ::this._handleScroll);
+    if (document.body.clientWidth > 600) scroll.addEventListener('scroll', _handleScroll);
 
   }
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
+
     if (document.body.clientWidth > 600) {
-      this.scroll.removeEventListener('scroll', ::this._handleScroll);
+      const { scroll, _handleScroll } = this;
+      scroll.removeEventListener('scroll', _handleScroll);
     }
   }
 
-  _handeKeyPress({ keyCode }) {
+  _handeKeyPress = ({ keyCode }) => {
     const { selectedItemId, navigateRightResults, navigateLeftResults } = this.props;
     if (selectedItemId) {
       switch (keyCode) {
@@ -78,17 +80,20 @@ export default class App extends Component {
     }
   }
 
-  _handleScroll() {
-    if (this.scroll && (this.scroll.scrollTop || this.scroll.scrollTop === 0)) {
-      const {
-        props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout, tab },
-        scroll: { scrollTop, containerHeight, clientHeight }
-      } = this;
+  _handleScroll = () => {
+    const {
+      props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout, tab },
+      scroll: { scrollTop, scrollHeight, clientHeight }
+    } = this;
+    if (search && checkPageScroll(scrollTop, scrollHeight, clientHeight) && !lazyLoading && query) {
+      // animate scroll, needs height of the container, and its distance from the top
+      getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
+    }
+    if (!!(this.scroll && (this.scroll.scrollTop || this.scroll.scrollTop === 0))) {
+
       // lazy loading for search. Could also hook up the scroll to top on every new search query.
-      if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
-        // animate scroll, needs height of the container, and its distance from the top
-        getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
-      } else if (scrollTop > 200 && tab === 'cart' && !this.state.showCheckout) {
+
+      if (scrollTop > 200 && tab === 'cart' && !this.state.showCheckout) {
         this.setState({ showCheckout: true }); // don't keep changing
         setHeaderCheckout(true);
       } else if (scrollTop < 200 && tab === 'cart' && this.state.showCheckout) {
@@ -98,7 +103,7 @@ export default class App extends Component {
     }
   }
 
-  componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname } }) {
+  componentWillReceiveProps = ({ user: { id: nextId }, location: { pathname: nextPathname } }) => {
     const {
       _logPageView,
       props: { fetchCart, fetchMetrics, location: { pathname }, user: { id } }
@@ -131,18 +136,18 @@ export default class App extends Component {
     || toast !== this.props.toast
     || selectedItemId !== this.props.selectedItemId
 
-  render() {
+  render = () => {
     const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
 
     return (
-      <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
+      <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={this._handeKeyPress}>
         { popup ? <LoginScreenContainer _toggleLoginScreen={togglePopup} /> : null }
         { loading ? <Loading/> : null}
         <ModalContainer />
         <Route path={'/'} component={HeaderContainer} />
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
-        <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
+        <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={scroll => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Display} />
           <Route path={'/newcart'} exact component={StoresContainer} />
@@ -152,7 +157,7 @@ export default class App extends Component {
 
 
         </div>
-        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
+        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }
 
         {
           // no jittery fix for mobile
@@ -162,7 +167,7 @@ export default class App extends Component {
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         </div>
-        
+
       </section>
     );
   }

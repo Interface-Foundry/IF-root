@@ -90,7 +90,7 @@
     "sockjs-client": "^1.1.2",
     "socks5-https-client": "^1.2.1",
     "spliddit": "^2.1.1",
-    "tapable": "^0.2.6",
+    "tapable": "^0.2.7",
     "thunkify": "^2.1.2",
     "tsv": "^0.2.0",
     "urlencode": "^1.1.0",

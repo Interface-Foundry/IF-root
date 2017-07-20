@@ -2,7 +2,7 @@
 
 import { connect } from 'react-redux';
 import { AddressForm } from '../components';
-import { addAddress, updateAddress, toggleAddressForm, deleteAddress, selectAddress } from '../actions';
+import { addAddress, updateAddress, toggleAddressForm } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
   name: state.user.selectedAddress.full_name,
