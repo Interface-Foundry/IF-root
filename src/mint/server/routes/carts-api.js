@@ -30,8 +30,6 @@ if (process.env.NODE_ENV !== 'production') {
   googl.setKey('AIzaSyCZ_lrnpJYBtjbfEcEf8kXBh1H8pJBx-bM')
 }
 
-const socket = require('../socket').getSocket()
-
 var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
@@ -267,6 +265,7 @@ module.exports = function (router) {
    * }
    */
   router.post('/cart/:cart_id/item', (req, res) => co(function* () {
+    const socket = require('../socket').getSocket()
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -345,7 +344,10 @@ module.exports = function (router) {
 
     var item = yield db.Items.findOne({id: item.id}).populate('options')
 
-    socket.emit('itemAdded', item)
+    socket.emit('ACTION', {
+      type: 'ADD_ITEM_SUCCESS',
+      response: item
+    })
 
     return res.send(item)
   }));
@@ -364,6 +366,8 @@ module.exports = function (router) {
    * }
    */
   router.put('/cart/:cart_id/item/:item_id/update', (req, res) => co(function* () {
+    const socket = require('../socket').getSocket()
+
     if (!_.get(req, 'body.new_item_id')) {
       throw new Error('Only accepting ids in new item at the moment')
     }
@@ -395,7 +399,12 @@ module.exports = function (router) {
     cart.dirty = true
     yield [newItem.save(), cart.save()]
 
-    socket.emit('itemUpdated', newItem)
+    socket.emit('ACTION', {
+      type: 'UPDATE_ITEM_SUCCESS',
+      response: {
+        item: newItem
+      }
+    })
 
     return res.send(newItem)
   }));
@@ -502,6 +511,7 @@ module.exports = function (router) {
    * DELETE https://mint.kipthis.com/api/cart/123456/item/998765
    */
   router.delete('/cart/:cart_id/item/:item_id', (req, res) => co(function* () {
+    const socket = require('../socket').getSocket()
 
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
@@ -543,7 +553,10 @@ module.exports = function (router) {
 
     yield cart.save()
 
-    socket.emit('itemDeleted', item)
+    socket.emit('ACTION', {
+      type: 'REMOVE_ITEM_SUCCESS',
+      response: item
+    })
 
     // Just say ok
     res.status(200)
@@ -566,6 +579,7 @@ module.exports = function (router) {
    * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
    */
   router.post('/cart/:cart_id', (req, res) => co(function* () {
+    const socket = require('../socket').getSocket()
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -605,7 +619,10 @@ module.exports = function (router) {
 
     cart = yield db.Carts.findOne({id: cart.id}).populate('leader', selectMembersWithoutEmail)
 
-    socket.emit('cartUpdated', cart)
+    socket.emit('ACTION', {
+      type: 'UPDATE_CART_SUCCESS',
+      response: cart
+    })
 
     res.send(cart)
   }))
@@ -720,6 +737,7 @@ module.exports = function (router) {
    * {"leader":"02a20ec6-edec-46b7-9c7c-a6f36370177e","createdAt":"2017-03-28T22:59:39.134Z","updatedAt":"2017-03-28T22:59:39.662Z","id":"289e5e60a855","name":"Office Party"}
    */
   router.post('/item/:item_id', (req, res) => co(function* () {
+    const socket = require('../socket').getSocket()
     // only available for logged-in Users
     if (!_.get(req, 'UserSession.user_account.id')) {
       throw new Error('Unauthorized')
@@ -755,7 +773,12 @@ module.exports = function (router) {
 
     var item = yield db.Items.findOne({id: item.id}).populate('options')
 
-    socket.emit('itemUpdated', item)
+    socket.emit('ACTION', {
+      type: 'UPDATE_ITEM_SUCCESS',
+      response: {
+        item: item
+      }
+    })
 
     res.send(item)
   }))
@@ -894,6 +917,7 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart receiving the like
    */
   router.post('/likes/:cart_id', (req, res) => co(function * () {
+    const socket = require('../socket').getSocket()
     var user_id = _.get(req, 'UserSession.user_account.id')
     if (!user_id) throw new Error('User not logged in')
     // user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
@@ -903,7 +927,12 @@ module.exports = function (router) {
     cart.likes.add(user_id)
     yield cart.save()
     var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
-    socket.emit('liked', modifiedCart.likes)
+
+    socket.emit('ACTION', {
+      type: 'LIKE_CART_SUCCESS',
+      response: modifiedCart.likes
+    })
+
     res.send(modifiedCart.likes)
   }))
 
@@ -914,8 +943,9 @@ module.exports = function (router) {
    * @apiParam {String} :cart_id the cart from which the like is being removed
    */
    router.put('/likes/:cart_id', (req, res) => co(function * () {
-     var user_id = _.get(req, 'UserSession.user_account.id')
-     if (!user_id) throw new Error('User not logged in')
+    const socket = require('../socket').getSocket()
+    var user_id = _.get(req, 'UserSession.user_account.id')
+    if (!user_id) throw new Error('User not logged in')
     //  user_id = '703d08f6-5b29-412e-a1d2-ee2ba39eed24'
     // user_id = '84d7bb7d-d5b8-4902-a8df-0e86a6f435ae'
 
@@ -925,8 +955,12 @@ module.exports = function (router) {
      yield cart.save()
 
      var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
-     socket.emit('unliked', modifiedCart.likes)
-     res.send(modifiedCart.likes)
+
+    socket.emit('ACTION', {
+      type: 'LIKE_CART_SUCCESS',
+      response: modifiedCart.likes
+    })
+    res.send(modifiedCart.likes)
    }))
 
   /**
@@ -1077,7 +1111,7 @@ module.exports = function (router) {
    * @apiParam :cart_id the cart we are adding it to
    */
   router.post('/item/:item_id/clone/:cart_id', (req, res) => co(function* () {
-
+    const socket = require('../socket').getSocket()
     var user_id = _.get(req, 'UserSession.user_account.id')
     if (!user_id) throw new Error('User not logged in')
 
@@ -1086,7 +1120,12 @@ module.exports = function (router) {
     var cart = yield db.Carts.findOne({id: req.params.cart_id})
     cart.members.add(user_id)
     yield cart.save()
-    socket.emit('itemCloned', clone)
+
+    socket.emit('ACTION', {
+      type: 'COPY_ITEM_SUCCESS',
+      response: clone
+    })
+    
     res.send(clone)
   }))
 

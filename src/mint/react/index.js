@@ -22,10 +22,6 @@ if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('
 
 const socket = io(`${location.protocol}//${location.hostname}:3000`);
 
-socket.on('state', state => {
-  console.log('inside socket')
-});
-
 const history = createHistory();
 history.listen((location, action) => {
   ReactGA.set({ path: location.pathname });
@@ -77,6 +73,13 @@ store.dispatch(checkSession()).then(() => {
   } else {
     store.dispatch(fetchCarts());
   }
+});
+
+socket.on('ACTION', response => {
+  console.log(response);
+  store.dispatch(fetchCart(cart_id[1]))
+  store.dispatch(fetchMetrics(cart_id[1]));
+  store.dispatch(fetchCarts());
 });
 
 ReactDOM.render(
