@@ -8,7 +8,7 @@ export default class AddressList extends Component {
     addresses: PropTypes.array,
     addAddress: PropTypes.func,
     fetchAddresses: PropTypes.func,
-    selectedAddress: PropTypes.object,
+    selectedAddress: PropTypes.string,
     invoiceAddress: PropTypes.string
   }
 
@@ -16,7 +16,6 @@ export default class AddressList extends Component {
 
   render = () => {
     const { props: { addresses = [], addAddress, invoiceAddress, selectedAddress }, props } = this;
-    console.log({ selectedAddress, invoiceAddress })
     return (
       <div>
         <ul>
