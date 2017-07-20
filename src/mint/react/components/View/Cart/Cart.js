@@ -36,17 +36,18 @@ export default class Cart extends Component {
         <tbody>
           {
             userCarts.others.map((userCart, index) => {
-              let memberNumber = userCarts.others.length - index;
-              let color = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
-              let imageSrc = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+              const memberNumber = userCarts.others.length - index;
+              const color = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? 'red': 'yellow') : 'green') : '';
+              const imageSrc = memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
 
               if(achieveIndex[memberNumber]) {
+                const rewardSrc = memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 7 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
                 return (
                   <div className='double' key={userCart.id} >
                     <RewardCard 
                       title={`${achieveIndex[memberNumber].discount}% OFF`}
                       sub={`REWARD EARNED`}
-                      imageSrc={imageSrc}
+                      imageSrc={rewardSrc}
                       number={memberNumber}
                       classes={achieveIndex[memberNumber].color}/>
                     <UserCart index={index} userCart={userCart} {...this.props} memberNumber={memberNumber} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
