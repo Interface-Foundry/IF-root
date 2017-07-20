@@ -44,7 +44,7 @@ const invoiceCollection = Waterline.Collection.extend({
     leader: Waterline.isA('user_accounts'),
 
     /** where the items are being delivered */
-    delivery_address: Waterline.isA('addresses'),
+    address: Waterline.isA('addresses'),
 
     /** enter documentation here */
     invoice_type: {

@@ -30,7 +30,7 @@ class Invoice {
    * @return     {Promise}  The invoice db object into class object
    */
   static async GetById (invoiceId) {
-    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart')
+    const invoice = await db.Invoices.findOne({id: invoiceId}).populate('leader').populate('cart').populate('address')
     if (_.get(invoice, 'id')) {
       return this.InvoiceInitializer(invoice)
     }
@@ -49,7 +49,7 @@ class Invoice {
    */
   static async GetByCartId (cartId) {
     logging.info('trying to get invoice by cartid', cartId)
-    const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart')
+    const invoice = await db.Invoices.findOne({cart: cartId}).populate('leader').populate('cart').populate('address')
     if (_.get(invoice, 'id')) {
       return this.InvoiceInitializer(invoice)
     }
@@ -161,7 +161,7 @@ class Invoice {
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
     else var baseUrl = 'mint-dev.kipthis.com'
 
-    logging.info('shipping address?????', invoice.delivery_address)
+    logging.info('shipping address?????', invoice.address)
 
     var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members')
 
