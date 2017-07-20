@@ -20,12 +20,29 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   tbody {
+    .double {
+      tr {
+        display: flex;
+      }
+
+      td,th {
+        margin: 0 !important;
+
+        .card {
+          margin-bottom: $padding !important;
+        }
+      }
+    }
     .card {
       .image {
         display: inline-block;
         background-size: cover;
         width: $nav-height - $padding;
         height: $nav-height - $padding;
+        line-height: $nav-height - $padding;
+        text-align: center;
+        color: white;
+        font-weight: bold;
       }
       .text {
         width: calc(100% - #{$nav-height});
@@ -86,39 +103,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .achievement {
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
-    width: 100%;
-    padding: 0 $padding/2;
-    z-index: 2;
-    margin-left: -16px;
-    & > p {
-      padding: 0 0 0 $padding*4;
-      font-size: 12px;
-    }
-    .icon {
-      position: relative;
-      padding: $padding/2;
-      display: inline-block;
-      border: 1px solid rgba(51, 51, 51, 0.2);
-      border-radius: 0 $padding/2 $padding/2 0;
-      z-index: 9;
-
-      svg {
-        height: 20px;
-        width: 20px;
-      }
-    }
-    .text {
-      display: inline-block;
-      padding: 0 $padding*2 $padding $padding;
-      p {
-        &:last-of-type {
-          font-size: 10px;
-        }
-      }
-    }
+    display: block;
+    padding: 0 0 $padding;
+    background: $thirdColor;
   }
 
   .grey {
@@ -162,6 +149,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   td, th {
     padding: 0 ($padding / 2);
+
+    @media only screen and (max-width: 600px) {
+      padding: 0 $padding $padding;
+    }
     &.green {
       .icon {
         background: $thirdColor;
@@ -201,9 +192,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         background: linear-gradient(to top, lighten(#333, 60%), #00cb7b 100%);
       }
     }
-    @media only screen and (max-width: 600px) {
-      padding: 0 $padding $padding;
-    }
     .card {
       position: relative;
       padding: $padding ($padding * 3);
@@ -211,12 +199,21 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       background: white;
       box-shadow: $card-box-shadow;
 
-      &.created {
-        background: $mainColor;
+      @media only screen and (max-width: 600px) {
+        padding: $padding $padding;
+      }
+
+      &.reward {
+        &.yellow {
+          background: $mainColor;
+        }
+
+        &.green {
+          background: $secondaryColor;
+        }
 
         .image {
           display: inline-block;
-          background: url(https://storage.googleapis.com/kip-random/social/new_cart.png);
           background-size: cover;
           width: $nav-height - $padding;
           height: $nav-height - $padding;
@@ -239,9 +236,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
       }
 
-      @media only screen and (max-width: 600px) {
-        padding: $padding $padding;
-      }
+
 
       nav {
         h1 {
@@ -278,7 +273,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       ul {
         border-radius: 5px;
-        padding: $padding 0;
+        padding: $padding 0 0;
         margin: $padding auto 0;
       }
 

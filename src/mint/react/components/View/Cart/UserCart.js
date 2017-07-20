@@ -15,7 +15,7 @@ export default class UserCart extends Component {
   }
 
   render() {
-    const { userCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
+    const { userCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem, imageSrc } = this.props,
           { open } = this.state;
 
     return (
@@ -23,7 +23,9 @@ export default class UserCart extends Component {
         <td colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
           <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
             <nav>
-              <div className='image' style={{backgroundImage: 'url(https://storage.googleapis.com/kip-random/social/complete_1.png)'}}/>
+              <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
+                { userCart.memberNumber }
+              </div>
               <div className='text'>
                 { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
                 <h1 className='date' onClick={() => this.setState({open: !open})}>
