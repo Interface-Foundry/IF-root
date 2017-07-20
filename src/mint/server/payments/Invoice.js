@@ -161,13 +161,13 @@ class Invoice {
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
     else var baseUrl = 'mint-dev.kipthis.com'
 
+    logging.info('shipping address?????', invoice.delivery_address)
+
     var cart = await db.Carts.findOne({id: invoice.cart.id}).populate('items').populate('members')
 
     var totalItems = cart.items.reduce(function (sum, item) {
       return sum + item.quantity
     }, 0)
-
-
 
     await cart.members.map(async function (user) {
       // var user = await db.UserAccounts.findOne({id: user_id})
@@ -181,7 +181,6 @@ class Invoice {
         return item.added_by === user.id
       })
 
-      // logging.info('cart link:', baseUrl + '/cart/' + cart.id)
       logging.info('invoice.cart', invoice.cart)
       await email.template('success', {
         username: user.name,
@@ -216,10 +215,8 @@ class Invoice {
    * @param      {boolean} reminder  Is this an initial collection email or a reminder?
    */
   async sendCollectionEmail (reminder) {
-    // logging.info('send collection email called')
     var invoice = this
     var debts = await this.userPaymentAmounts(invoice)
-    // logging.info('debts', debts)
 
     if (process.env.NODE_ENV.includes('production')) var baseUrl = 'http://kipthis.com'
     else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'http://localhost:3000'
@@ -232,8 +229,6 @@ class Invoice {
       return sum + item.quantity
     }, 0)
 
-    // logging.info('about to map over owing users')
-    logging.info('debita', debts)
     for (var i = 0; i < Object.keys(debts).length; i++) {
       var user_id = debts[Object.keys(debts)[i]]
       if (reminder || user_id !== cart.leader) {
