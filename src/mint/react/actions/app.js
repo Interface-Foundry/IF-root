@@ -30,13 +30,6 @@ export const selectTab = tab => ({
   }
 });
 
-// export const selectAddress = address => ({
-//   type: 'SELECT_ADDRESS',
-//   response: {
-//     address
-//   }
-// });
-
 export const selectAccordion = selectedAccordion => ({
   type: 'SELECT_INVOICE_ACCORDION',
   response: {

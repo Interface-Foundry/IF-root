@@ -2,7 +2,6 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import InvoiceOptions from './InvoiceOptions';
 
 export default class InvoiceInfo extends Component {
   static propTypes = {
@@ -14,9 +13,7 @@ export default class InvoiceInfo extends Component {
 
   render() {
 
-    const { selectAccordion, cart, user, invoice } = this.props;
-    //bc sometimes the backend doesn't feel like returning an object
-    const isLeader = user.id === cart.leader.id || user.id === cart.leader;
+    const { selectAccordion, invoice } = this.props;
 
     return (
       <div className='payment accordion'>
@@ -30,7 +27,6 @@ export default class InvoiceInfo extends Component {
               <text> leader: {invoice.leader.name ||invoice.leader}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
             </div>
         </nav>
-      { isLeader ? <InvoiceOptions {...this.props}/> : null }
       </div>
     );
   }

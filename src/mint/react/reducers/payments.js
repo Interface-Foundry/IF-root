@@ -63,11 +63,12 @@ export default function payments(state = initialState, action) {
       userPaymentStatus: action.response
     };
   case 'SELECT_ADDRESS_SUCCESS':
+  console.log({state, action})
     return {
       ...state,
       invoice: {
         ...state.invoice,
-        address: action.selectedAddress
+        address: action.address
       }
     };
   default:
