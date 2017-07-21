@@ -247,20 +247,24 @@ app.use(function errorHandler(err, req, res, next) {
   }
 })
 
-const http = require('http').Server(app);
-const io = require('socket.io').listen(http);
-startSocket(io);
 
 if (process.env.LETSENCRYPT_DOMAIN) {
-  require('letsencrypt-express').create({
+  const https = require('letsencrypt-express').create({
     server: 'staging',
     email: 'peter@interfacefoundry.com',
     agreeTos: true,
     approveDomains: [ process.env.LETSENCRYPT_DOMAIN ],
-    app: http
+    app: app
   }).listen(80, 443);
+
+  const io = require('socket.io').listen(https);
+  startSocket(io);
+
 } else {
   const PORT = process.env.PORT || 3000;
+  const http = require('http').Server(app);
+  const io = require('socket.io').listen(http);
+  startSocket(io);
   http.listen(PORT, () => {
     console.log(`App listening at http://127.0.0.1:${PORT}`);
   });
