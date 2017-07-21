@@ -197,10 +197,17 @@ module.exports = function (router) {
   router.get('/auth/facebook/callback',
     passport.authenticate('facebook', {
       successRedirect: '/api/facebook/login',
-      failureRedirect: '/failure',
+      failureRedirect: '/api/facebook/failure',
       scope: ['email']
     })
   )
+
+  /**
+   * @api {get} /api/facebook/failure
+   */
+  router.get('/facebook/failure', (req, res) => co(function * () {
+    res.send('kip is sad because you did not trust kip with your email address.')
+  }))
 
   /**
    * @api {get} /api/facebook/login
