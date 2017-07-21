@@ -17,11 +17,12 @@ export default class InvoiceAddress extends Component {
       selectedAccordion,
       selectAccordion,
       isLeader,
-      invoice: { address: { full_name, line_1, city } }
+      invoice = {}
     } = this.props;
-
+    const { address = {} } = invoice;
+    const { full_name = '', line_1 = '', city = '' } = address;
     return (
-      <div className={`invoice accordion ${isLeader ? 'clickable' : ''}`} onClick={() => isLeader ?selectAccordion('changeinvoice') : null}>
+      <div className={`invoice accordion ${isLeader ? 'clickable' : ''}`} onClick={() => isLeader ? selectAccordion('changeinvoice') : null}>
         <nav className={isLeader ? 'clickable' : ''}>
           <h2>1. Shipping Address</h2>
         </nav>
@@ -32,8 +33,11 @@ export default class InvoiceAddress extends Component {
                 <AddressListContainer />
               </div>
             : <div className='address-preview'>
-                <p>{full_name}, {line_1}, {city}</p>
-                {isLeader ? <span>Change</span> : null}
+              { !full_name && isLeader ?  <span>+ Add Address</span>
+                : <p>{`${full_name ? full_name + ',' : ''} ${line_1 ? line_1 + ',' : ''} ${city ? city : ''}`}</p>
+              }
+              {isLeader && full_name ? <span>Change</span> : null}
+
               </div>
           }
       </div>
