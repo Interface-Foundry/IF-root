@@ -202,7 +202,7 @@ module.exports = function (router) {
     passport.authenticate('facebook', {
       successRedirect: '/api/facebook/login',
       // failureRedirect: '/api/facebook/failure',
-      failureRedirect: '/newcart?toast=That didn\'t work :(&status=err'
+      failureRedirect: '/newcart?toast=That didn\'t work :(&status=err',
       scope: ['email']
     })
   )
