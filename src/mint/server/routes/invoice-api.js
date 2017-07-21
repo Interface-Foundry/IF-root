@@ -114,8 +114,8 @@ module.exports = function (router) {
 
     router.route('/invoice/refund/:refund_key/:refund_status')
       .get(async (req, res) => {
-        const newStatus = await Invoice.ChangeRefund(req.params.refund_key, req.params.refund_status)
-        return res.send(newStatus)
+        const newStatus = await Invoice.ChangeRefundStatus(req.params.refund_key, req.params.refund_status)
+        return res.send({'status': `successfully changed refund_ability to ${req.params.refund_status}`})
       })
 
   /**

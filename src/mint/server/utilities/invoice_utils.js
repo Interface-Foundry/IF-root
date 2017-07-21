@@ -59,8 +59,7 @@ async function paymentSourceTypes(invoice) {
     }).populate('payment_source')
     // logging.info('PAYMENT', payment)
     if (payment) {
-      // logging.info('payment source', payment.payment_source)
-      payment_types.push(payment.payment_source.payment_vendor)
+      payment_types.push(_.get(payment, 'payment_source.payment_vendor', 'stripe'))
     }
     else payment_types.push(null)
   }
@@ -77,9 +76,10 @@ async function paymentSourceTypes(invoice) {
  */
 async function sendInternalCheckoutEmail (invoice, baseUrl, statusChange) {
   logging.info('all payments complete')
+  const adminToEmail = (process.env.ADMIN_TO_EMAIL) ? process.env.ADMIN_TO_EMAIL : 'hello@kipthis.com'
   var paidEmail = await db.Emails.create({
-    recipients: 'hello@kipthis.com',
-    sender: 'hello@kipthis.com',
+    recipients: adminToEmail,
+    sender: adminToEmail,
     subject: 'Payment Collected',
     template_name: 'kip_order_process',
     cart: invoice.cart
@@ -109,14 +109,14 @@ async function sendInternalCheckoutEmail (invoice, baseUrl, statusChange) {
     return a + b.quantity
   }, 0)
 
-  paymentSourceTypes = await paymentSourceTypes(invoice)
+  const paymentSourceTypesArray = await paymentSourceTypes(invoice)
 
   const statusChangeUrl = `${baseUrl}/api/invoice/refund/${statusChange.id}/complete`
-
+  logging.info('trying to send items', nestedItems)
   await paidEmail.template('kip_order_process', {
     username: cart.leader.name || cart.leader.email_address,
     baseUrl: baseUrl,
-    changeStatusUrl: statusChangeUrl,
+    statusChangeUrl: statusChangeUrl,
     id: cart.id,
     items: nestedItems.map(items => {
       return items.map(item => {
@@ -128,7 +128,7 @@ async function sendInternalCheckoutEmail (invoice, baseUrl, statusChange) {
     total: '$' + (invoice.total / 100).toFixed(2),
     cart: cart,
     totalItems: totalItems,
-    paymentSourceTypes: paymentSourceTypes,
+    paymentSourceTypes: paymentSourceTypesArray,
     date: paidEmail.sent_at,
     users: cart.members,
     checkoutUrl: cart.affiliate_checkout_url || 'www.kipthis.com'

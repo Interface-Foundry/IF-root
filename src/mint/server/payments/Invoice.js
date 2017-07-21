@@ -118,14 +118,16 @@ class Invoice {
       invoice.refund_ability = false
 
       // send email
+      const adminToEmail = (process.env.ADMIN_TO_EMAIL) ? process.env.ADMIN_TO_EMAIL : 'hello@kipthis.com'
       const email = await db.Emails.create({
-        recipients: 'hello@kipthis.com',
+        recipients: adminToEmail,
         subject: 'someone at kip successfully purchased cart',
-        template_name: 'successfully_purchased_cart'
+        template_name: 'kip_successfully_purchased_cart'
       })
 
-      await email.template('successfully_purchased_cart', {
-        revertUrl: `${baseUrl}/api/invoice/refund/${refundKey}/revert`
+      await email.template(email.template_name, {
+        revertStatusUrl: `${baseUrl}/api/invoice/refund/${refundKey}/revert`,
+        invoiceId: invoice.id
       })
       await email.send();
     } else if (newStatus === 'revert') {
