@@ -4,10 +4,13 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import Default from './Default';
+import Trending from './Trending';
 import Selected from './Selected';
 import LoadingTile from './LoadingTile';
 import { numberOfItems, splitOptionsByType, getStoreName } from '../../../utils';
 import { EmptyContainer } from '../../../containers';
+
+import trendingData from './trending_data';
 
 const size = 3;
 
@@ -66,17 +69,36 @@ export default class Results extends Component {
       state: { myItems }
     } = this;
 
+    //for showing/hiding trending items for this store
+    let trendingMode = false  
+
     const isUrl = query.match(/(\b(https?):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig);
     // (for cheaters: https://stackoverflow.com/a/8943487)
 
-    if (!results.length && !(loading || lazyLoading)) return <EmptyContainer />; // don't bother with the loops if there aren't results
+    //show trending items for these stores only
+    if(!results.length && (cart.store == 'Lotte' || cart.store == 'Punyus' || cart.store == 'Muji')){
+      trendingMode = true
+    }
+    else if (!results.length && !(loading || lazyLoading)){
+      return <EmptyContainer />; // don't bother with the loops if there aren't results
+    } 
 
-    const displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
-      ? isUrl
-      ? [{ loading: true }]
-      : [...results, ...(new Array(10)).fill({ loading: true })]
-      : results;
+    let displayedResults    
 
+    //trending mode true, show trending
+    if(trendingMode){
+      const trending = trendingData.getTrending(cart.store);
+      displayedResults = trending;      
+    }
+    //not showing trending items, do normal operation
+    else {
+      displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
+        ? isUrl
+        ? [{ loading: true }]
+        : [...results, ...(new Array(10)).fill({ loading: true })]
+        : results;      
+    }
+    
     // best: O(n), worst O(n*m) where m is myItems.length
     const partitionResults = displayedResults.reduce((acc, result, i) => {
       if (i % size === 0) acc.push([]);
@@ -110,7 +132,9 @@ export default class Results extends Component {
                 {
                   loading
                   ? 'Loading...'
-                  : <p> Showing {results.length} results from {getStoreName(cart.store, cart.store_locale)} </p>
+                  : trendingMode
+                    ? <p><b> Trending {getStoreName(cart.store, cart.store_locale)} Items</b></p>
+                    : <p><b> Showing {results.length} results from {getStoreName(cart.store, cart.store_locale)} </b></p>
                 }
               </nav>
             </th>
@@ -129,6 +153,13 @@ export default class Results extends Component {
                           arrow={arrow}
                           item={item}
                           numResults={results.length}
+                          {...this.props}
+                        /> 
+                      : item.trending
+                        ? <Trending
+                          key={item.id}
+                          item={item}
+                          inCart={item.inCart}
                           {...this.props}
                         /> 
                         : <Default

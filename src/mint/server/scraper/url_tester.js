@@ -4,11 +4,12 @@ const scrape = require('./scrape_convert')
 //var uri = 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370476&allViewYn=N'
 //var uri = 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=396484359&infw_disp_no_sct_cd=78&infw_disp_no=5505566&allViewYn=N'
 
-//var uri = 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370475&allViewYn=N'
+var uri = 'https://www.muji.net/store/cmdty/detail/4549738459170'
 
-var uri = 'https://www.muji.net/store/cmdty/detail/4549738522508'
+//var uri = 'https://www.muji.net/store/cmdty/detail/4549738522508'
 //var domain = 'lotte.com'
 var domain = 'muji.net'
+//var domain = 'store.punyus.jp'
 //var story_country = 'KR'
 var story_country = 'JP'
 
