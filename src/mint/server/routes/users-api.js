@@ -211,7 +211,7 @@ module.exports = function (router) {
    */
   router.get('/facebook/failure', (req, res) => function () {
     res.send('kip is sad because you did not trust kip with your email address.')
-  }))
+  })
 
   /**
    * @api {get} /api/facebook/login
