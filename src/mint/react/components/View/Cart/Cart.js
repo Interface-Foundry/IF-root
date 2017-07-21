@@ -49,7 +49,16 @@ export default class Cart extends Component {
       lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ? ( userCarts.others.length > 12 ? 12 : 8 ) : 5 ) : 2 ) : 0,
       nextAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 2;
 
-    console.log(userCarts.others.length)
+    if(userCarts.others.length === 0) {
+      userCarts.others.push({
+        createdAt: user.createdAt,
+        email_address: user.email_address,
+        id: user.id + '_temp',
+        items: [],
+        name: user.name,
+        updateAt: user.updateAt
+      })
+    }
     return (
       <table className='cart'>
         <thead>
