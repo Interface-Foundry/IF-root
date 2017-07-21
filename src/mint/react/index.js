@@ -79,6 +79,7 @@ socket.on('ACTION', response => {
   // Currently not handling the response, but in the future just feed the response directly to store.dispatch(response)
   let members = store.getState().cart.present.members.length
   let cartId = store.getState().cart.present.id
+
   store.dispatch(fetchCarts());
   store.dispatch(fetchMetrics(cartId))
   store.dispatch(fetchCart(cartId)).then((res) => {
@@ -94,7 +95,7 @@ socket.on('ACTION', response => {
       store.dispatch(toggleReward())
       setTimeout(() => {
         store.dispatch(toggleReward())
-      }, 3000);
+      }, 2000);
     } 
   })
 });

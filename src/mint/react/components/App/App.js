@@ -102,7 +102,7 @@ export default class App extends Component {
   componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname } }) {
     const {
       _logPageView,
-      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id }, toggleReward }
+      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id }, toggleReward, reward }
     } = this;
     const cartId = pathname.match(/cart\/(\w*)\/?/),
       nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
@@ -119,6 +119,10 @@ export default class App extends Component {
       });
 
       _logPageView(pathname, nextId); //log initial load
+    }
+
+    if (reward) {
+      this.reward.src = '//storage.googleapis.com/kip-random/social/bg/success_mint_loop.gif';
     }
   }
 
@@ -160,7 +164,7 @@ export default class App extends Component {
           // no jittery fix for mobile
         }
         <div className='noJudder'>
-          { reward ? <div className='reward__achieved'/> : null }
+          { reward ? <img className='reward__achieved' ref={(reward) => this.reward = reward} src='//storage.googleapis.com/kip-random/social/bg/success_mint_once.gif'/> : null }
           { tab === 'cart' || tab === 'invoice' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
