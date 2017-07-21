@@ -94,7 +94,7 @@ class UrlStore extends Store {
     delete itemData.original_description
 
     // create conversion
-    itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
+    // itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
     itemData.original_price.type = original_currency
     var originalPrice = await db.Conversions.create(itemData.original_price)
     originalPrice.converted_value = itemData.price * 1.0
