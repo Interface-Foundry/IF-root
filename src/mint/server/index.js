@@ -248,7 +248,7 @@ app.use(function errorHandler(err, req, res, next) {
 
 if (process.env.LETSENCRYPT_DOMAIN) {
   require('letsencrypt-express').create({
-    server: 'staging',
+    server: 'production',
     email: 'peter@interfacefoundry.com',
     agreeTos: true,
     approveDomains: [ process.env.LETSENCRYPT_DOMAIN ],
