@@ -20,8 +20,8 @@ export default class UserCart extends Component {
 
     return (
       <td key={userCart.id} colSpan='100%' className={`${achievements[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
-        <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
-          <nav>
+        <div className={`card`}>
+          <nav onClick={() => this.setState({open: !open})}>
             <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
               { memberNumber === 'icon' ? <Icon icon='Check'/> : memberNumber }
             </div>
