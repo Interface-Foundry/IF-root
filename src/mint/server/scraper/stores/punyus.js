@@ -1,7 +1,8 @@
 var utils = require('../scrape_utils')
+var fx_currency = require('../foreign_exchange')
 
 module.exports = async function (s, $) {
-  logging.info('PUNYUS scraper function called')
+  // logging.info('PUNYUS scraper function called')
   //get product id
   s.product_id = await utils.urlValue(s.original_link,'detail',1)
   s.parent_id = s.product_id
@@ -21,7 +22,7 @@ module.exports = async function (s, $) {
     }
   })
 
-  logging.info('got images')
+  // logging.info('got images')
 
   s.original_name.value = $('.itemInfo').find('[itemprop=name]').text().trim()
   s.original_description.value = $('.itemInfo').find('[itemprop=description]').text().trim()
@@ -29,7 +30,7 @@ module.exports = async function (s, $) {
   var p = $('.price').text().trim().replace(/[^0-9.]/g, "")
   s.original_price.value = parseFloat(p)
 
-  logging.info('time for colorlist')
+  // logging.info('time for colorlist')
 
   $('.sku_colorList').each(function(i, elm) {
 
@@ -73,6 +74,6 @@ module.exports = async function (s, $) {
       })
     })
   })
-  logging.info('return s', s)
+  // logging.info('return s', s)
   return s
 }

@@ -1,3 +1,7 @@
+var url = require('url')
+var fx_currency = require('../foreign_exchange')
+var utils = require('../scrape_utils')
+
 module.exports = async function (s, $, processChildOptions, html) {
   //get product id
   var parsed = url.parse(s.original_link, true)
