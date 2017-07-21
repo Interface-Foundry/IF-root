@@ -29,7 +29,7 @@ export default class Cart extends Component {
   }
 
   _getIncompleteImage(memberNumber) {
-    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
+    return `//storage.googleapis.com/kip-random/social/progress/inprogress_${memberNumber}.png`
   }
 
   _getLockedImage(memberNumber) {
