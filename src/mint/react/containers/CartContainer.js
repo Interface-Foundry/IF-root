@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Cart } from '../components';
+import { push } from 'react-router-redux';
 import {
   submitQuery,
   editItem,
@@ -38,6 +39,7 @@ const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   selectCartItem: item_id => dispatch(selectCartItem(item_id)),
   editItem: item_id => dispatch(editItem(item_id)),
+  push: (url) => dispatch(push(url)),
   removeItem: (cart_id, item_id) => {
     dispatch(removeItem(cart_id, item_id));
     // clear history after 10 seconds

@@ -79,7 +79,6 @@ export default class Selected extends Component {
       }, ''),
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
     
-    console.log(options)
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
@@ -117,9 +116,9 @@ export default class Selected extends Component {
                   {
                     Object.keys(options).map((key, index) => {
                       const selected = options[key].selected || key;
-                      return <span className='selectBox'>
+                      return <span className='selectBox' key={key}>
                         <span className='type'>{key}</span>
-                        <select className={imageSrc.split(' ')[0] === key ? 'miniImage' : ''} key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)} style={{
+                        <select className={imageSrc.split(' ')[0] === key ? 'miniImage' : ''} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)} style={{
                           backgroundImage: `url(${imageSrc.split(' ')[0] === key ? imageSrc.split(' ')[1] : ''})`
                         }}>
                         {
