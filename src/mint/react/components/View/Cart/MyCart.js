@@ -15,7 +15,7 @@ export default class MyCart extends Component {
   }
 
   render() {
-    const { myCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
+    const { myCart, achievements, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
           { open } = this.state;
 
     return (

@@ -25,41 +25,40 @@ export default class Cart extends Component {
   }
 
   _getCompleteImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 10 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
   }
 
   _getIncompleteImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 10 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
+    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/inprogress_3.png': '//storage.googleapis.com/kip-random/social/inprogress_3.png') : '//storage.googleapis.com/kip-random/social/inprogress_2.png') : '//storage.googleapis.com/kip-random/social/inprogress_1.png';
   }
 
   _getLockedImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 6 ? ( memberNumber > 10 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
   }
 
   _getColor(memberNumber) {
-    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 9 ? 'red': 'yellow') : 'green') : '';
+    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? 'four': 'three') : 'two') : 'one';
   }
 
   render() {
-    const { cart, user, invoice, editId, updateItem } = this.props,
+    const { cart, user, invoice, editId, updateItem, achievements } = this.props,
       { _getCompleteImage, _getIncompleteImage, _getLockedImage, _getColor } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
-      lastAward = userCarts.others.length > 3 ? ( userCarts.others.length > 6 ? ( userCarts.others.length >= 10 ?  10 : 6 ) : 3 ) : 0,
-      nextAward = userCarts.others.length > 3 ? ( userCarts.others.length > 6 ? ( userCarts.others.length >= 10 ?  10 : 10 ) : 6 ) : 3,
-      achieveIndex = {10: { reqs: 10, discount: 70, color: 'red' }, 6: { reqs: 6, discount: 50, color: 'yellow'  }, 3: { reqs: 3, discount: 20, color: 'green' }};
+      lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length >= 8 ? 8 : 5 ) : 2 ) : 0,
+      nextAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length >= 12 ?  12 : 8 ) : 5 ) : 2;
 
     return (
       <table className='cart'>
         <thead>
-          <MyCart myCart={myCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader}/>
+          <MyCart myCart={myCart} {...this.props} {...this.state} achievements={achievements} isLeader={isLeader}/>
         </thead>
         <tbody>
           <tr className={`next grey`}>
             <RewardCard 
-              title={`${achieveIndex[nextAward].discount}% OFF`}
-              sub={`+${achieveIndex[nextAward].reqs - userCarts.others.length} MORE PEOPLE`}
+              title={achievements[nextAward].reward}
+              sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE PEOPLE`}
               imageSrc={_getLockedImage(userCarts.others.length)}
               classes='grey gradient'
               cart={cart}
@@ -71,16 +70,16 @@ export default class Cart extends Component {
               const color = _getColor(memberNumber);
               const imageSrc = memberNumber <= lastAward ? _getCompleteImage(memberNumber) :  _getIncompleteImage(memberNumber);
 
-              if(achieveIndex[memberNumber]) {
+              if(achievements[memberNumber]) {
                 return (
-                  <tr className={`double ${achieveIndex[memberNumber].color}`} key={userCart.id}>
+                  <tr className={`double ${achievements[memberNumber].color}`} key={userCart.id}>
                     <RewardCard 
-                      title={`${achieveIndex[memberNumber].discount}% OFF`}
-                      sub={`REWARD EARNED`}
+                      title={`${achievements[memberNumber].reqs}pp Joined!`}
+                      sub={achievements[memberNumber].reward}
                       imageSrc={imageSrc}
                       number={memberNumber}
-                      classes={achieveIndex[memberNumber].color}/>
-                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✓'} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={`gradient ${color}`} imageSrc={imageSrc}/>
+                      classes={achievements[memberNumber].color}/>
+                    <UserCart index={index} userCart={userCart} {...this.props} memberNumber={'✓'} {...this.state} achievements={achievements} isLeader={isLeader} color={`gradient ${color}`} imageSrc={imageSrc}/>
                   </tr>
                 )
               }
@@ -88,7 +87,7 @@ export default class Cart extends Component {
               if (memberNumber < lastAward) memberNumber = '✓'
               return (
                 <tr key={userCart.id}>
-                  <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achieveIndex={achieveIndex} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
+                  <UserCart key={userCart.id} index={index} memberNumber={memberNumber} userCart={userCart} {...this.props} {...this.state} achievements={achievements} isLeader={isLeader} color={color} imageSrc={imageSrc}/>
                 </tr>
               )
             })
@@ -98,7 +97,7 @@ export default class Cart extends Component {
               title={`${getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED`}
               sub={`By ${user.name} ${timeFromDate(cart.createdAt)}`}
               imageSrc='https://storage.googleapis.com/kip-random/social/new_cart.png'
-              classes='yellow'/>
+              classes='one'/>
           </tr>
         </tbody>
       </table>

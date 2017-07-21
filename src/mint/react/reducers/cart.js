@@ -1,5 +1,14 @@
 // react/reducers/cart.js
 
+const achievements = {
+  20: { reqs: 20, reward: '$5 off for everyone in their next order', color: 'six' },
+  12: { reqs: 12, reward: 'FREE Int. Shipping Upgrade', color: 'five' },
+  8: { reqs: 8, reward: 'FREE shipping insurance', color: 'four' },
+  5: { reqs: 5, reward: 'FREE packaging material', color: 'three'  }, 
+  2: { reqs: 2, reward: 'FREE domestic shipping', color: 'two' }
+};
+
+
 const initialState = {
   name: '',
   leader: {
@@ -9,6 +18,7 @@ const initialState = {
   store_locale: '',
   members: [],
   items: [],
+  achievements: achievements,
   checkouts: 0,
   clones: 0,
   views: 0,

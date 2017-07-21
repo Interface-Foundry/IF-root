@@ -15,11 +15,11 @@ export default class UserCart extends Component {
   }
 
   render() {
-    const { userCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem, imageSrc, memberNumber } = this.props,
+    const { userCart, achievements, color, isLeader, openCarts, index, cart, editId, user, updateItem, imageSrc, memberNumber } = this.props,
           { open } = this.state;
 
     return (
-      <td key={userCart.id} colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
+      <td key={userCart.id} colSpan='100%' className={`${achievements[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
         <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
           <nav>
             <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
