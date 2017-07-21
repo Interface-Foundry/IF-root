@@ -74,10 +74,10 @@ export default class CartReview extends Component {
               <nav>
                 <p>Subtotal:</p>
                 <p className='right price'>{subTotal}</p>
-                <h5 className='blue'>Achievements</h5>
+                {totalAchievements.length > 0 ? <h5 className='blue'>Achievements</h5> : null}
               </nav>
               {
-                totalAchievements.map((a, i) => (
+                totalAchievements.length > 0 ? totalAchievements.map((a, i) => (
                   <li key={i}>
                     <div className='achievement'>
                       <div className='icon'>
@@ -93,7 +93,7 @@ export default class CartReview extends Component {
                       </div>
                     </div>
                   </li>                
-                ))
+                )) : null
               }
             </ul>
           </div> : null

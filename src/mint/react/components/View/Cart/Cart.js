@@ -105,7 +105,7 @@ export default class Cart extends Component {
           <tr className={`double yellow bottom`}>
             <RewardCard 
               title={`${getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED`}
-              sub={`By ${user.name} ${timeFromDate(cart.createdAt)}`}
+              sub={`By ${cart.leader.name} ${timeFromDate(cart.createdAt)}`}
               imageSrc='https://storage.googleapis.com/kip-random/social/new_cart.png'
               classes='one'/>
           </tr>
