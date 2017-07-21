@@ -11,22 +11,74 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   height: auto;
   margin: 0 auto;
   border-collapse: collapse;  
+  padding: $padding;
 
-  th,td {
-    &:after {
-      content: '';
-      position: absolute;
-      height: 100%;
-      left: 12px;
-      top: 0px;
-      width: 2px;
-      background: lighten(#333, 60%);
-      z-index: 1;
+  thead {
+    .card {
+      border-radius: 5px;
     }
+  }
 
-    @media only screen and (max-width: 600px) {
-      position: relative;
-      padding: 0 10px;
+  tbody {
+    .double {
+      tr {
+        display: flex;
+      }
+
+      &.bottom {
+        td,th {
+          &:after {
+            height: 100%;
+          }   
+        }     
+      }
+
+      td,th {
+        margin: 0 !important;
+        display: block;
+
+        &:after {
+          height: calc(100% + #{$padding});
+        }
+
+        .card {
+          margin-bottom: $padding !important;
+        }
+      }
+    }
+    .card {
+      .image {
+        display: inline-block;
+        background-size: cover;
+        width: $nav-height - $padding;
+        height: $nav-height - $padding;
+        line-height: $nav-height - $padding;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+      }
+      .text {
+        width: calc(100% - #{$nav-height});
+        display: inline-block;
+        padding: 0 0 0 $padding;
+      }
+    }
+    th,td {
+      &:after {
+        content: '';
+        position: absolute;
+        height: 100%;
+        left: 12px;
+        top: 0px;
+        width: 3px;
+        background: lighten(#333, 60%);
+        z-index: 1;
+      }
+
+      @media only screen and (max-width: 600px) {
+        position: relative;
+        padding: 0 10px;
+      }
     }
   }
 
@@ -64,42 +116,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   }
 
   .achievement {
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
-    width: 100%;
-    padding: 0 $padding/2;
-    z-index: 2;
-    margin-left: -16px;
-    & > p {
-      padding: 0 0 0 $padding*4;
-      font-size: 12px;
-    }
-    .icon {
-      position: relative;
-      padding: $padding/2;
-      display: inline-block;
-      border: 1px solid rgba(51, 51, 51, 0.2);
-      border-radius: 0 $padding/2 $padding/2 0;
-      z-index: 9;
-
-      svg {
-        height: 20px;
-        width: 20px;
-      }
-    }
-    .text {
-      display: inline-block;
-      padding: 0 $padding*2 $padding $padding;
-      p {
-        &:last-of-type {
-          font-size: 10px;
-        }
-      }
-    }
+    display: block;
+    padding: 0 0 $padding;
+    background: $thirdColor;
   }
 
   .grey {
+    position: relative;
     color: rgba(#111, 0.5);
   }
 
@@ -140,48 +163,114 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   td, th {
     padding: 0 ($padding / 2);
-    &.green {
-      .icon {
-        background: $thirdColor;
-      }
-      &:after {
-        background: #00cb7b;
-      }
-    }
-    &.yellow {
-      .icon {
-        background: $mainColor;
-      }
-      &:after {
-        background: #ffdf4d;
-      }
-      &.gradient {
-        &:after {
-          background: linear-gradient(to top, #00cb7b, #ffdf4d 50%);
-        }
-      }
-    }
-    &.red {
-      .icon {
-        background: #f53f46;
-      }
-      &:after {
-        background: #f53f46;
-      }
-      &.gradient {
-        &:after {
-          background: linear-gradient(to top, #ffdf4d, #f53f46 50%);
-        }
-      }
-    }
-    &.gradient {
-      &:after {
-        background: linear-gradient(to top, lighten(#333, 60%), #00cb7b 100%);
-      }
-    }
+
     @media only screen and (max-width: 600px) {
       padding: 0 $padding $padding;
     }
+
+    &.grey {
+      .card {
+        position: relative;
+        background: rgba(#fff, 0.3);
+        .share {
+          position: absolute;
+          right: 5px;
+          bottom: 5px;
+          height: 20px;
+          line-height: 20px;
+          padding: 0;
+          width: 85px;
+          font-weight: bold;
+          background: $secondaryColor;
+          border: 0;
+          border-radius: 5px;
+          color: white;
+          font-size: 14px;
+
+          svg {
+            margin: 0 $padding/2 $padding/3 0;
+          }
+        }
+      }
+      &:after {
+        display: none
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #00aeef, #0061ed 50%);
+        }
+      }
+    }
+
+    &.one {
+      &:after {
+        background: #00aeef;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #00aeef, #0061ed 50%);
+        }
+      }
+    }
+
+    &.two {
+      &:after {
+        background: #0061ed;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #0061ed, #3636d6 50%);
+        }
+      }
+    }
+
+    &.three {
+      // background: #3636d6;
+      // color: white;
+      &:after {
+        background: #3636d6;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #3636d6, #6c43ff 50%);
+        }
+      }
+    }
+
+    &.four {
+      // background: #6c43ff;
+      // color: white;
+      &:after {
+        background: #6c43ff;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #6c43ff, #9638e8 50%);
+        }
+      }
+    }
+
+    &.five {
+      // background: #9638e8;
+      // color: white;
+      &:after {
+        background: #9638e8;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #9638e8, #db269f 50%);
+        }
+      }
+    }
+
+    &.five {
+      // background: #9638e8;
+      // color: white;
+      &:after {
+        background: #db269f;
+      }
+    }
+
     .card {
       position: relative;
       padding: $padding ($padding * 3);
@@ -193,40 +282,103 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: $padding $padding;
       }
 
-      & > h1 {
-        position: relative;
-        display: inline-block;
-        width: 50%;
-        overflow: hidden;
-        font-size: 16px;
-        line-height: 20px;
-        font-weight: 100;
+      &.reward {
 
-        span {
-          opacity: 0.3;
-          font-size: 12px;
+        &.one {
+          background: #00aeef;
+          color: white;
         }
 
-        &:last-of-type {
-          float: right;
-          font-size: 12px;
-          width: 25px;
-          text-align: center;
-          cursor: pointer;
+        &.two {
+          background: #0061ed;
+          color: white;
+        }
+
+        &.three {
+          background: #3636d6;
+          color: white;
+        }
+
+        &.four {
+          background: #6c43ff;
+          color: white;
+        }
+
+        &.five {
+          background: #9638e8;
+          color: white;
+        }
+
+        &.six {
+          background: #db269f;
+          color: white;
+        }
+
+        .image {
+          display: inline-block;
+          background-size: cover;
+          width: $nav-height - $padding;
+          height: $nav-height - $padding;
+        }
+
+        .text {
+          width: calc(100% - #{$nav-height});
+          display: inline-block;
+          padding: 0 $padding;
+          h1 {
+            font-size: 14px;
+            line-height: 20px;
+          }
+          p {
+            font-size: 12px;
+            line-height: 20px;
+            font-weight: bold;
+          }
         }
       }
 
-      & > h4 {
-        font-weight: 100;
 
-        z {
-          font-size: 15px;
+
+      nav {
+        h1 {
+          position: relative;
+          display: inline-block;
+          width: 80%;
+          overflow: hidden;
+          font-size: 16px;
+          line-height: 20px;
+          font-weight: 100;
+
+          svg {
+            vertical-align: top !important;
+          }
+
+          span {
+            opacity: 0.3;
+            font-size: 12px;
+          }
+
+          &:last-of-type {
+            float: right;
+            font-size: 12px;
+            width: 25px;
+            text-align: center;
+            cursor: pointer;
+          }
+        }
+
+        h4 {
+          font-weight: 100;
+
+          z {
+            font-size: 15px;
+          }
         }
       }
 
       ul {
         border-radius: 5px;
-        padding: $padding 0;
+        padding: $padding 0 0;
         margin: $padding auto 0;
       }
 

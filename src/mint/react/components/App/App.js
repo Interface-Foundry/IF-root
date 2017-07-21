@@ -83,10 +83,11 @@ export default class App extends Component {
 
     const {
       props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout },
-      scroll: { scrollTop, containerHeight, clientHeight }
+      scroll: { scrollTop, scrollHeight, clientHeight }
     } = this;
+
     // lazy loading for search. Could also hook up the scroll to top on every new search query.
-    if (search && checkPageScroll(scrollTop, containerHeight, clientHeight) && !lazyLoading && query) {
+    if (search && checkPageScroll(scrollTop, scrollHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
       getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
     } else if (scrollTop > 200 && (!search || !search.length) && !this.state.showCheckout) {
@@ -101,7 +102,7 @@ export default class App extends Component {
   componentWillReceiveProps({ user: { id: nextId }, location: { pathname: nextPathname } }) {
     const {
       _logPageView,
-      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id } }
+      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id }, toggleReward, reward }
     } = this;
     const cartId = pathname.match(/cart\/(\w*)\/?/),
       nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
@@ -119,9 +120,13 @@ export default class App extends Component {
 
       _logPageView(pathname, nextId); //log initial load
     }
+
+    if (reward) {
+      this.reward.src = '//storage.googleapis.com/kip-random/social/bg/success_mint_loop.gif';
+    }
   }
 
-  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId }) =>
+  shouldComponentUpdate = ({ tab, loading, sidenav, popup, location, toast, selectedItemId, reward, cart }) =>
     tab !== this.props.tab
     || loading !== this.props.loading
     || sidenav !== this.props.sidenav
@@ -130,9 +135,11 @@ export default class App extends Component {
     || location.search !== this.props.location.search
     || toast !== this.props.toast
     || selectedItemId !== this.props.selectedItemId
+    || reward !== this.props.reward
+    || cart.members.length !== this.props.cart.members.length
 
   render() {
-    const { sidenav, popup, togglePopup, tab, match, toast, status, loading, history: { replace }, location: { pathname } } = this.props;
+    const { sidenav, popup, togglePopup, tab, match, toast, status, reward, loading, history: { replace }, location: { pathname } } = this.props;
 
     return (
       <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
@@ -150,7 +157,6 @@ export default class App extends Component {
           <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
 
-
         </div>
         { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
 
@@ -158,6 +164,7 @@ export default class App extends Component {
           // no jittery fix for mobile
         }
         <div className='noJudder'>
+          { reward ? <img className='reward__achieved' ref={(reward) => this.reward = reward} src='//storage.googleapis.com/kip-random/social/bg/success_mint_once.gif'/> : null }
           { tab === 'cart' || tab === 'invoice' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />

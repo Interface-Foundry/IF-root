@@ -36,7 +36,6 @@ export default class CartHeader extends Component {
           </div>
         </Link>
         <SearchContainer />
-        <RefreshContainer />
       </span>
     );
   }

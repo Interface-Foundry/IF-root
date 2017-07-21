@@ -1,5 +1,14 @@
 // react/reducers/cart.js
 
+const achievements = {
+  20: { reqs: 20, reward: '$5 off for everyone in their next order', color: 'six' },
+  12: { reqs: 12, reward: 'FREE Int. Shipping Upgrade', color: 'five' },
+  8: { reqs: 8, reward: 'FREE shipping insurance', color: 'four' },
+  5: { reqs: 5, reward: 'FREE packaging material', color: 'three'  }, 
+  3: { reqs: 3, reward: 'FREE domestic shipping', color: 'two' }
+};
+
+
 const initialState = {
   name: '',
   leader: {
@@ -9,6 +18,7 @@ const initialState = {
   store_locale: '',
   members: [],
   items: [],
+  achievements: achievements,
   checkouts: 0,
   clones: 0,
   views: 0,
@@ -90,18 +100,21 @@ export const splitCartById = (state, props) => {
   // const badges = {2: { reqs: 8, discount: 100, color: 'red' }, 3: { reqs: 6, discount: 80, color: 'yellow'  }, 6: { reqs: 3, discount: 50, color: 'green' }}
 
   return state.cart.items.sort((a, b) => {
-        a = new Date(a.createdAt);
-        b = new Date(b.createdAt);
-        return a<b ? -1 : a>b ? 1 : 0;
+      a = new Date(a.createdAt);
+      b = new Date(b.createdAt);
+      return a>b ? -1 : a<b ? 1 : 0;
     }).reduce((acc, item, index) => {
       acc.quantity = acc.quantity + (item.quantity || 1);
       let linkedMember = getMemberById(state.cart, { id: item.added_by }) || {};
 
       if (id === item.added_by) {
         acc['my'].push(item);
-      } else if (acc.others.find(member => member.id === linkedMember.id)) {
+      } 
+
+      if (acc.others.find(member => member.id === linkedMember.id)) {
         const others = acc.others.filter(member => member.id !== linkedMember.id);
         let newMember = acc.others.find(member => member.id === linkedMember.id);
+        
         newMember = {
           ...newMember,
           createdAt: linkedMember.createdAt,
@@ -119,7 +132,6 @@ export const splitCartById = (state, props) => {
           name: linkedMember.name,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
-          memberNumber: acc.others.length + 2,
           items: [item]
         });
       }

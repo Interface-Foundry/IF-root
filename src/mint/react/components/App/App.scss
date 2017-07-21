@@ -77,6 +77,14 @@ button {
     width: 100%;
     z-index: 9;
 
+    & > .reward__achieved {
+      position: fixed;
+      width: 100%;
+      left: 0;
+      bottom: 0px;
+      background-size: cover;
+    }
+
     & > .tabs {
       position: fixed;
       bottom: 0;
@@ -93,6 +101,7 @@ button {
       background-repeat: no-repeat;
       display: flex;
       justify-content: space-around;
+      border-bottom: 0;
 
       @media only screen and (min-width: 600px) {
         display: none;
@@ -173,7 +182,6 @@ button {
             svg {
               height: 30px;
               width: 30px;
-              margin-bottom: 5px;
 
               &:last-of-type {
                 height: 20px;
@@ -304,3 +312,4 @@ input, select:focus, textarea {
 body::-webkit-scrollbar {
   display: none;
 }
+

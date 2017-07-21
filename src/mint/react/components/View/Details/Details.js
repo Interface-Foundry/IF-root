@@ -39,7 +39,7 @@ export default class Details extends Component {
         icon: 'Like',
         value: likes.length
       }],
-      likedList = likes.map((user) => user.id),
+      likedList = likes.map((id) => id),
       isAdmin = user.id === leader.id,
       nextAchievement = members.length > 2 ? ( members.length > 5 ? ( members.length > 7 ? [] : [{ reqs: 10, discount: 100 }] ) : [{ reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] ) :  [{ reqs: 3, discount: 30 }, { reqs: 6, discount: 80 }];
 
@@ -94,28 +94,13 @@ export default class Details extends Component {
                     ))
                   }
                   <div className='store'>
-                    <Icon icon='Home'/>
+                    <Icon icon='Upload'/>
                     <h4><span>{getStoreName(store, store_locale)}</span></h4>
                   </div>
                 </div>
               </div>
             </th>
           </tr>
-          {
-            nextAchievement.map((a, i) => (
-              <tr key={i}>
-                <td className='achievement'>
-                  <div className='icon'>
-                    <Icon icon='Person'/>
-                  </div>
-                  <div className='text'>
-                    <p>{a.reqs}pp Join</p>
-                    <p>{a.discount}% Discount!</p>
-                  </div>
-                </td>
-              </tr>
-            ))
-          }
           <tr>
             <td className='lineStart'>
               <nav>
@@ -124,8 +109,6 @@ export default class Details extends Component {
                   ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo</button></p></div>
                   : null
                 }
-                <p><span className='updated'>Created {timeFromDate(createdAt)} by <b>{leader.name}</b></span></p>
-                <p><b>{numberOfItems(items)} items saved </b><span className='updated'>• Updated {timeFromDate(updatedAt)}</span></p>
               </nav>
             </td>
           </tr>

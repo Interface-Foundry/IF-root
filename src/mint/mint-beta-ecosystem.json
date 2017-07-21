@@ -1,0 +1,25 @@
+{
+  "apps": [{
+    "name": "mint",
+    "cwd": ".",
+    "script": "./server/index.js",
+    "combine_logs": true,
+    "log_date_format" : "YYYY-MM-DD HH:mm Z",
+    "watch": false,
+    "env": {
+      "SEND_EMAILS": true,
+      "SENDGRID_WEBHOOK": "https://beta.kipthis.com/sg",
+      "NO_LIVE_RELOAD": true,
+      "NODE_ENV": "production",
+      "NO_LUMINATI": true,
+      "BASEURL": "https://beta.kipthis.com",
+      "LOGGING_MODE": "database",
+      "LOGGING_LEVEL": "info",
+      "BUILD_MODE": "prebuilt",
+      "YPO_ENABLED": true,
+      "BASIC_AUTH_PASSWORD": "cinna",
+      "STRIPE_SECRET": "sk_live_LsboW21QfCziFnE1DwCKOC8d",
+      "LETSENCRYPT_DOMAIN": "beta.kipthis.com"
+    }
+  }]
+}

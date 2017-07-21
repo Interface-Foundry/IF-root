@@ -9,26 +9,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   position: relative;
   width: 100%;
   height: auto;
-  margin: 0 auto;
+  margin: $padding auto 0;
   border-collapse: collapse;
-
-  th,td {
-    &:after {
-      content: '';
-      position: absolute;
-      height: 100%;
-      left: 12px;
-      top: 0px;
-      width: 2px;
-      background: lighten(#333, 60%);
-      z-index: 1;
-    }
-
-    @media only screen and (max-width: 600px) {
-      position: relative;
-      padding: 0 10px;
-    }
-  }
 
   @media only screen and (max-width: 600px) {
     overflow-x: auto;
@@ -50,21 +32,25 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
     .card {
       padding: 0;
-      background: url(//s-media-cache-ak0.pinimg.com/originals/66/04/8f/66048fae13597918a08cd93b22149b48.jpg) no-repeat center center;
+      background: url(//storage.googleapis.com/kip-random/social/bg/bg_paper2.png) no-repeat center center;
       background-size: cover;
+      border-radius: 5px;
 
       .cover {
         display: flex;
         padding: $padding;
         border: 3px solid white;
         border-width: 3px 3px 1.5px 5px;
-        background: rgba(white, 0.7);
-        border-radius: 0 5px 0 0;
+        border-radius: 5px 5px 0 0;
       }
 
       .left {
         flex: 1 1 auto;
         min-width: 270px;
+
+        @media only screen and (max-width: 600px) {
+          min-width: auto;
+        }
 
         .image {
           border-radius: 5px;
@@ -286,8 +272,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: 5px 10px;
         border: 3px solid white;
         border-width: 1.5px 3px 3px 5px;
-        background: rgba(white, 0.7);
-        border-radius: 0 0 5px 0;
+        border-radius: 0 0 5px 5px;
 
         .store {
           display: inline-block;

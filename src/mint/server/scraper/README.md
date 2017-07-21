@@ -19,3 +19,5 @@ _____🚋_🚗__🚕______
 🏡⁣🏥🏦  /   |🚖\ 🏠🌳🏡
 🏡🏡🏪 /    | 🚘\ 🏪🏨
 💒 🏨 /     |    \ 🏡🏩
+
+koh: export GOOGLE_APPLICATION_CREDENTIALS=/Users/koh/Documents/Development/IF-root/src/mint/server/scraper/secrets/secretKoh.json

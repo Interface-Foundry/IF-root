@@ -17,7 +17,7 @@ import {
   IoChevronUp,
   IoClose,
   IoEdit,
-  IoEmail,
+  IoIosEmailOutline,
   IoEye,
   IoGearA,
   IoHappy,
@@ -40,7 +40,9 @@ import {
   IoQrScanner,
   IoArrowRightB,
   IoSocialTwitter,
-  IoSocialPinterest
+  IoSocialPinterest,
+  IoPaperAirplane,
+  IoIosUploadOutline
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -74,7 +76,7 @@ export default class Icon extends Component {
     case 'Hamburger':
       return <IoNaviconRound/>;
     case 'Email':
-      return <IoEmail/>;
+      return <IoIosEmailOutline/>;
     case 'Clear':
       return <IoClose/>;
     case 'Up':
@@ -155,6 +157,10 @@ export default class Icon extends Component {
       return <IoSocialTwitter/>;
     case 'Pinterest':
       return <IoSocialPinterest/>;
+    case 'Send':
+      return <IoPaperAirplane/>;
+    case 'Upload':
+      return <IoIosUploadOutline/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

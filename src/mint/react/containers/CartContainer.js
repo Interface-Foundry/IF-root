@@ -29,7 +29,8 @@ const mapStateToProps = (state, ownProps) => ({
   query: state.search.query,
   user: state.user,
   invoice: state.payments.invoice,
-  paymentStatus: state.payments.status
+  paymentStatus: state.payments.status,
+  achievements: state.cart.present.achievements
 });
 
 const mapDispatchToProps = dispatch => ({

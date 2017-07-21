@@ -65,7 +65,7 @@ export default class Selected extends Component {
   }
 
   render() {
-    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation, selectOption } = this.props,
+    const { user, cart, item, numResults, inCart, selectItem, addItem, arrow, togglePopup, updateItem, navigateLeftResults, navigateRightResults, fetchItemVariation, selectOption, removeItem } = this.props,
       { options } = this.state,
       { _changeOption } = this,
       optionIds = Object.keys(options).map((key, index) => options[key].selected),

@@ -12,25 +12,20 @@ export default class InvoiceInfo extends Component {
     updateInvoice: PropTypes.func
   }
 
-  // shouldComponentUpdate = ({ invoice }) =>
-  //   invoice !== this.props.invoice
-
   render() {
 
     const { selectAccordion, cart, user, invoice, } = this.props;
     const isLeader = user.id === cart.leader.id;
 
     return (
-      <div className='payment accordion'>
+      <div className='delivery accordion'>
         <nav onClick={() => {
           //selectAccordion('invoiceinfo')// 
         }}>
-          <div>
-            <h3>Delivery</h3>
-          </div>
-          <div>
-
-          </div>
+          <h3>Delivery</h3>
+          <p>
+            906 Broadway <br/> New York, NY 10010
+          </p>
         </nav>
       </div>
     );

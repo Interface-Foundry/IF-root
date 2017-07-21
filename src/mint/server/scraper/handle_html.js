@@ -13,7 +13,7 @@ module.exports.tryHtml = async function (s,html) {
 
 	if(!s){
 		logging.error('nothing in scrape object!')
-		return 
+		return
 	}
 
 	switch(s.domain.name){
@@ -26,14 +26,14 @@ module.exports.tryHtml = async function (s,html) {
 				s.product_id = parsed.query.goods_no
 				s.parent_id = parsed.query.goods_no
 			}
-			
+
 			//name
 			if($('.group_tit').text().trim()){
 				s.original_name.value = $('.group_tit').text().trim()
 			}else if($('.pname').text().trim()){
 				s.original_name.value = $('.pname').text().trim()
 			}
-			
+
 			//descrip
 			s.original_description.value = $('.md_tip').text().trim()
 
@@ -47,7 +47,7 @@ module.exports.tryHtml = async function (s,html) {
 			if(p){
 				s.original_price.value = parseFloat(p)
 			}
-			
+
 
 			//image URL
 			if($('img','#fePrdImg01').attr('src')){
@@ -55,7 +55,7 @@ module.exports.tryHtml = async function (s,html) {
 			    s.main_image_url = $('img','#fePrdImg01').attr('src')
 			}else if ($('img','#prdImg').attr('src')){
 		    	s.thumbnail_url = $('img','#prdImg').attr('src')
-			    s.main_image_url = $('img','#prdImg').attr('src')			
+			    s.main_image_url = $('img','#prdImg').attr('src')
 			}
 
 			//get options type #1
@@ -64,16 +64,16 @@ module.exports.tryHtml = async function (s,html) {
 					s.options.push({
 						type: 'style', //style = top level option
 						original_name: {
-							value: $(this).text().trim() 
+							value: $(this).text().trim()
 						},
 					    product_id: $(this).attr('goods_no'),
 					    available: true //it's avail because it has a "loadurl" attribute in a href
-					})					
+					})
 				})
 				console.log(s)
 				return s
 			}
-			
+
 			//get options type #2
 
 			//html queries to do for options
@@ -94,7 +94,7 @@ module.exports.tryHtml = async function (s,html) {
 						opt_url: 'http://www.lotte.com'+opt_url,
 						type: 'style', //style = top level option
 						original_name: {
-							value: name 
+							value: name
 						},
 						original_price: {
 							value: price
@@ -105,11 +105,11 @@ module.exports.tryHtml = async function (s,html) {
 					    available: true //it's avail because it has a "loadurl" attribute in a href
 					})
 				}
-			})	
+			})
 
 			//srape all product option URLs checking for suboptions ~
 			var htmlQ = []
-			for (i = 0; i < optionQ.length; i++) { 
+			for (i = 0; i < optionQ.length; i++) {
 				htmlQ.push(utils.scrapeURL(optionQ[i].opt_url))
 			}
 			var results = await Promise.all(htmlQ)
@@ -117,7 +117,7 @@ module.exports.tryHtml = async function (s,html) {
 			//check html for child options
 			var optionResults = []
 			var rates = await fx_currency.getRates()
-			for (i = 0; i < optionQ.length; i++) { 
+			for (i = 0; i < optionQ.length; i++) {
 				optionResults.push(processChildOptions(s,optionQ[i],results[i],rates))
 			}
 
@@ -259,7 +259,7 @@ module.exports.tryHtml = async function (s,html) {
 		        var sizeText = $(this).text().trim()//.replace(/[^0-9a-z]/gi, "")
 		        sizeText = sizeText.split('').map(c => c.charCodeAt())
 		        sizeText = sizeText.filter(function (code) {
-		          return (code >= 48 && code <= 57) || (code >= 65313 && code <= 65370)
+		          return (code >= 48 && code <= 57) || (code >= 65281 && code <= 65370)
 		          // digits, and full-width latin characters
 		        })
 		        sizeText = sizeText.map(code => String.fromCharCode(code))
@@ -293,10 +293,21 @@ module.exports.tryHtml = async function (s,html) {
 					available = true
 				}
 
+				var text = $('img',this).attr('title')
+				text = text.split('').map(c => c.charCodeAt())
+				text = text.filter(function (code) {
+					return code !== 215
+					// cutting out those weird x's
+				})
+				text = text.map(code => String.fromCharCode(code))
+				text = text.join('')
+
+
 				s.options.push({
 					type: 'color',
 					original_name: {
-						value: $('img',this).attr('title') //get value inside img title in this
+						// value: $('img',this).attr('title') //get value inside img title in this
+						value: text
 					},
 					thumbnail_url: $('img',this).attr('src'),
 					main_image_url: $('img',this).attr('src'),
@@ -319,7 +330,7 @@ var processChildOptions = async function(s,parentOption,html,rates){
 	switch(s.domain.name){
 		case 'lotte.com':
 
-			//convert parent option prices 
+			//convert parent option prices
 			if(parentOption.original_price && parentOption.original_price.value){
 				var price = await fx_currency.foreignExchange(s.domain.currency,s.user.currency,parentOption.original_price.value,rates)
  				parentOption = await fx_currency.storeFx(rates[s.user.currency],price,parentOption)
@@ -346,9 +357,9 @@ var processChildOptions = async function(s,parentOption,html,rates){
 				    //product_id: product_id, //product ID of the size
 				    parent_id: parentOption.product_id, //product ID of the style
 
-				    //checking available if this option has an a link 
+				    //checking available if this option has an a link
 				    //---> (can't click option if it's unavail)
-				    available: ( $('a',this).attr('goodsno') ) ? true : false 
+				    available: ( $('a',this).attr('goodsno') ) ? true : false
 				})
 			})
 

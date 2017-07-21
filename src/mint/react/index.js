@@ -8,14 +8,19 @@ import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
 import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
 import ReactGA from 'react-ga';
+import io from 'socket.io-client';
+import getClientId from './socket/client_id';
+import remoteActionMiddleware from './socket/remote_action_middleware';
 
 import Reducers from './reducers';
-import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
+import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery, toggleReward } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
   module.hot.accept();
 }
+
+const socket = io(`${location.protocol}//${location.hostname}:3000`);
 
 const history = createHistory();
 history.listen((location, action) => {
@@ -41,7 +46,7 @@ if (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production')) {
 }
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; //apparently we should use in production? there's a bunch of posts (also it only loads if you have redux devtools)
 
-const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware)));
+const store = createStore(Reducers, composeEnhancers(applyMiddleware(...middleware,  remoteActionMiddleware(socket))));
 
 // Basically our initialization sequence
 // Check session
@@ -56,7 +61,7 @@ store.dispatch(checkSession()).then(() => {
     store.dispatch(fetchInvoiceByCart(cart_id[1]));
     store.dispatch(fetchCart(cart_id[1]))
       .then((res) => {
-        store.dispatch(fetchCategories(cart_id[1]));
+        // store.dispatch(fetchCategories(cart_id[1]));
         if (search && search[1]) {
           store.dispatch(updateQuery(decodeURIComponent(search[1])));
           store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale));
@@ -68,6 +73,33 @@ store.dispatch(checkSession()).then(() => {
   } else {
     store.dispatch(fetchCarts());
   }
+});
+
+socket.on('ACTION', response => {
+  // Currently not handling the response, but in the future just feed the response directly to store.dispatch(response)
+  let members = store.getState().cart.present.members.length
+  let cartId = store.getState().cart.present.id
+
+  store.dispatch(fetchCarts());
+  store.dispatch(fetchMetrics(cartId))
+  store.dispatch(fetchCart(cartId)).then((res) => {
+    let newMembers = res.response.members.length
+    if(
+      newMembers > members
+      && (
+        newMembers === 3 ||
+        newMembers === 5 ||
+        newMembers === 8 ||
+        newMembers === 12 ||
+        newMembers === 20 
+      )
+    ) {
+      store.dispatch(toggleReward())
+      setTimeout(() => {
+        store.dispatch(toggleReward())
+      }, 2000);
+    } 
+  })
 });
 
 ReactDOM.render(

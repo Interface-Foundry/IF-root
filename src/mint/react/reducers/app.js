@@ -5,7 +5,8 @@ const initialState = {
   selectedAccordion: 'review',
   viewTab: 'cart',
   showYpoCheckout: false,
-  showHeaderCheckout: false
+  showHeaderCheckout: false,
+  reward: false
 };
 
 export default (state = initialState, action = {}) => {
@@ -23,6 +24,11 @@ export default (state = initialState, action = {}) => {
       ...state,
       showHeaderCheckout: action.show
     };
+  case 'TOGGLE_REWARD' :
+    return  {
+      ...state,
+      reward: !state.reward
+    }
   case 'EDIT_ITEM':
     {
       return {
