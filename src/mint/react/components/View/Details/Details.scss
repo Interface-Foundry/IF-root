@@ -168,14 +168,14 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               span {
                 display: flex;
                 font-size: 12px;
-                font-weight: 100;
+                font-weight: 500;
                 align-self: bottom;
               }
 
               p {
                 flex: 1 1 auto;
                 font-size: 14px;
-                font-weight: 100;
+                font-weight: 500;
                 height: unset;
                 line-height: unset;
                 opacity: 1;
@@ -192,7 +192,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               }
 
               i {
-                font-weight: 100;
+                font-weight: 500;
                 font-size: 14px;
               }
 
@@ -226,7 +226,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
             span {
               display: inline-block;
-              font-weight: 100;
+              font-weight: 500;
               font-size: 12px;
               color: rgba(#333, 0.5);
             }
@@ -252,7 +252,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           h4 {
             font-size: 14px;
             height: 20px;
-            font-weight: 100;
+            font-weight: 500;
             line-height: 20px;
             opacity: 0.8;
 
@@ -268,7 +268,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           h5 {
             font-size: 12px;
             height: 0px;
-            font-weight: 100;
+            font-weight: 500;
             line-height: 17px;
             opacity: 0.5;
           }
@@ -344,7 +344,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
             p {
               padding: 0 0 0 ($padding / 2);
-              font-weight: 100;
+              font-weight: 500;
               color: rgba(#333, 0.6);
             }
 
@@ -359,7 +359,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             text-align: center;
 
             * {
-              font-weight: 100;
+              font-weight: 500;
               font-size: 12px;
               color: rgba(#333, 0.6);
             }
@@ -379,7 +379,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           .cart-description {
             .cart-description__text {
               color: white; // :shrug:
-           
+
             }
           }
         }

@@ -1,0 +1,42 @@
+// react/components/Modal/CheckoutModal/CheckoutModal.scss
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
+.checkout-modal {
+  font-family: $main-font;
+  p {
+    padding: $padding;
+  }
+  .checkout-buttons {
+    margin-top: 20px;
+    display: flex;
+
+    .spacer {
+      background: white;
+      width: 2px;
+    }
+    .checkout-button {
+      border: 0;
+      color: white;
+      flex-basis: 0;
+      flex-grow: 1;
+      padding: $padding / 2;
+
+      span {
+        font-size: 12px;
+      }
+      p {
+        font-size: 18px;
+        font-weight: 800;
+        padding: 0;
+      }
+      &:first-of-type {
+        background: $thirdColor;
+        border-bottom-left-radius: 5px;
+      }
+      &:last-of-type {
+        background: $secondaryColor;
+        border-bottom-right-radius: 5px;
+      }
+    }
+  }
+}

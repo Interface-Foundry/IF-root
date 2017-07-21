@@ -16,4 +16,4 @@ export Toast from './Toast';
 export View from './View';
 export { Feedback, Settings, Share, EditCart, ArchivedCarts } from './Display';
 export { Results, Cart, Empty } from './View';
-export { YPOCheckout, AddressForm } from './Modal';
+export { YPOCheckout, AddressForm, CheckoutModal } from './Modal';

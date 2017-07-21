@@ -2,26 +2,37 @@
 
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { YpoCheckoutContainer, AddressFormContainer } from '../../containers';
-
+import { YpoCheckoutContainer, AddressFormContainer, CheckoutModalContainer } from '../../containers';
+import { Icon } from '../../../react-common/components';
 
 export default class Modal extends Component {
   static propTypes = {
     showYpoCheckout: PropTypes.bool,
-    showAddressForm: PropTypes.bool
+    showAddressForm: PropTypes.bool,
+    showCheckoutModal: PropTypes.bool,
+    closeYpo: PropTypes.func,
+    closeAddress: PropTypes.func,
+    closeCheckout: PropTypes.func
   }
 
   state = {
     showModal: false
   }
 
+  _closeModal = () => {
+    const { closeYpo, closeAddress, closeCheckout } = this.props;
+    closeYpo();
+    closeAddress();
+    closeCheckout();
+  }
+
   // for more modals we can just do an or
   // e.g. {showModal: showYpoCheckout || showAmazonCheckout || ...}
-  componentWillReceiveProps = ({ showYpoCheckout, showAddressForm }) =>
-    this.setState({ showModal: showYpoCheckout || showAddressForm });
+  componentWillReceiveProps = ({ showYpoCheckout, showAddressForm, showCheckoutModal }) =>
+    this.setState({ showModal: showYpoCheckout || showAddressForm || showCheckoutModal });
 
   componentDidMount = () =>
-    this.setState({ showModal: this.props.showYpoCheckout || this.props.showAddressForm })
+    this.setState({ showModal: this.props.showYpoCheckout || this.props.showAddressForm || this.props.showCheckoutModal })
 
   shouldComponentUpdate = (_, { showModal }) =>
     showModal !== this.state.showModal
@@ -31,10 +42,13 @@ export default class Modal extends Component {
     ? (
       <div className='modal-overlay'>
             <div className='modal-box'>
-              <div className='modal-box__head'/>
+              <div className='modal-box__head'>
+                <a className='close' href='#' onClick={this._closeModal}><Icon icon='Clear'/></a>
+              </div>
               <div className='modal-box__content'>
                 { this.props.showYpoCheckout ? <YpoCheckoutContainer /> : null }
                 { this.props.showAddressForm ? <AddressFormContainer /> : null }
+                {this.props.showCheckoutModal ? <CheckoutModalContainer /> : null}
               </div>
           </div>
         </div>

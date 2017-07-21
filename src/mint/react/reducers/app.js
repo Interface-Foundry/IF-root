@@ -61,6 +61,11 @@ export default (state = initialState, action = {}) => {
       ...state,
       showAddressForm: action.show !== undefined ? action.show : !state.showAddressForm
     };
+  case 'TOGGLE_CHECKOUT_MODAL':
+    return {
+      ...state,
+      showCheckoutModal: action.show !== undefined ? action.show : !state.showCheckoutModal
+    };
   case 'SEARCH_SUCCESS':
   case 'SELECT_VIEW_TAB':
     return {

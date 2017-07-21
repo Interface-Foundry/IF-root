@@ -1,7 +1,6 @@
 // react/components/Modal/YPOCheckout/YPOCheckout.js
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { Icon } from '../../../../react-common/components';
 import { ButtonsContainer } from '../../../containers';
 
 export default class YPOCheckout extends Component {
@@ -36,12 +35,6 @@ export default class YPOCheckout extends Component {
       .then(() => window.location = `/api/cart/${cartId}/checkout`); // ¯\_(ツ)_/¯
   }
 
-  _toggleYpo = e => {
-    const { toggleYpoCheckout } = this.props;
-    e.preventDefault();
-    toggleYpoCheckout(false);
-  }
-
   componentWillReceiveProps = ({ orderNumber = '', accountNumber = '', deliveryMessage = '', voucherCode = '' }) =>
     this.setState({ orderNumber, accountNumber, deliveryMessage, voucherCode })
 
@@ -67,10 +60,9 @@ export default class YPOCheckout extends Component {
 
     return (
       <div className='ypo-checkout form-container'>
-        <a className='close' href='#' onClick={::this._toggleYpo}><Icon icon='Clear'/></a>
         <h1>Last Step!</h1>
         <p>Before you check out, we need a couple details from your YPO Account 😊</p>
-        <form onSubmit={::this._handleSubmit}>
+        <form onSubmit={this._handleSubmit}>
           <label>
             <div>
               YPO Account Number <i>Required</i>

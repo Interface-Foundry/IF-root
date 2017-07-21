@@ -5,7 +5,8 @@ export {
   selectTab,
   selectAccordion,
   toggleYpoCheckout,
-  setHeaderCheckout
+  setHeaderCheckout,
+  toggleCheckoutModal
 }
 from './app';
 

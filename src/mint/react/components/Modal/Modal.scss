@@ -7,6 +7,7 @@
   background: rgba(0, 0, 0, 0.5);
   bottom: 0;
   display: flex;
+  font-family: $secondary-font;
   justify-content: center;
   left: 0;
   overflow: auto;
@@ -14,7 +15,6 @@
   right: 0;
   top: $nav-height;
   z-index: 100;
-  font-family: $secondary-font;
 
   .modal-box {
     background: $color-white;
@@ -26,6 +26,11 @@
       border-radius: ($padding / 2) ($padding / 2) 0 0;
       border-top: 8px solid $secondaryColor;
       width: 100%;
+      display: flex;
+
+      .close {
+        padding: 5px 10px;
+      }
     }
 
     .modal-box__content {

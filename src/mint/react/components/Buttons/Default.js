@@ -17,7 +17,8 @@ export default class Default extends Component {
     selectTab: PropTypes.func,
     user: PropTypes.object,
     toggleYpoCheckout: PropTypes.func,
-    checkoutOnly: PropTypes.bool
+    checkoutOnly: PropTypes.bool,
+    toggleCheckoutModal: PropTypes.func
   }
 
   _handleShare = () => {
@@ -50,12 +51,16 @@ export default class Default extends Component {
   }
 
   _orderCart = (e) => {
-    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart } = this.props;
-    if (store === 'YPO') toggleYpoCheckout(true);
-    else if (locked) reorderCart(id);
+    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
 
     if (leader.id === user.id) updateCart({ id, locked: true });
-    if (store !== 'YPO') window.open(`/api/cart/${id}/checkout`);
+
+    if (store === 'YPO') toggleYpoCheckout();
+    else if (displayInvoice) toggleCheckoutModal(true);
+    else {
+      if (locked) reorderCart(id);
+      window.open(`/api/cart/${id}/checkout`);
+    }
   }
 
   render() {
@@ -102,7 +107,7 @@ export default class Default extends Component {
                     </span>
                   </button>
                 }
-              {displayInvoice && !checkoutOnly && (cart.items.length > 0)? <button className='teal sub' onClick={this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null }
+              {/*displayInvoice && !checkoutOnly && (cart.items.length > 0)? <button className='teal sub' onClick={this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null */}
               {!checkoutOnly ? <button className='blue' onClick={this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }

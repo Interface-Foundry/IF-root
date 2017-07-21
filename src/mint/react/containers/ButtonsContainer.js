@@ -10,6 +10,7 @@ import {
   selectAccordion,
   createInvoice,
   toggleYpoCheckout,
+  toggleCheckoutModal,
   fetchInvoiceByCart
 } from '../actions';
 
@@ -30,7 +31,8 @@ const mapDispatchToProps = dispatch => ({
   fetchInvoiceByCart: (cart_id) => dispatch(fetchInvoiceByCart(cart_id)),
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
-  toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show))
+  toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show)),
+  toggleCheckoutModal: (show) => dispatch(toggleCheckoutModal(show))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);

@@ -5,6 +5,7 @@ export AppContainer from './AppContainer';
 export ArchiveContainer from './ArchiveContainer';
 export ButtonsContainer from './ButtonsContainer';
 export CartContainer from './CartContainer';
+export CheckoutModalContainer from './CheckoutModalContainer';
 export EditCartContainer from './EditCartContainer';
 export EmptyContainer from './EmptyContainer';
 export FeedbackContainer from './FeedbackContainer';
