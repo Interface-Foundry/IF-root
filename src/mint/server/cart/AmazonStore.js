@@ -461,7 +461,7 @@ class AmazonStore extends Store {
     const results = await this.opHelper.execute('CartCreate', amazonParams);
     const amazonErrors = getErrorsFromAmazonCartCreate(results.result.CartCreateResponse.Cart)
     const amazonCart = results.result.CartCreateResponse.Cart
-    cart.subtotal = amazonCart.SubTotal.Amount
+    cart.subtotal = parseInt(amazonCart.SubTotal.Amount)
     cart.amazon_cartid = amazonCart.CartId
     cart.amazon_hmac = amazonCart.HMAC
     cart.amazon_purchase_url = amazonCart.PurchaseURL

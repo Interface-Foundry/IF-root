@@ -27,9 +27,8 @@ export default class Selected extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { fetchSearchItem, item } = this.props;
-    
+
     if (nextProps.item.id !== item.id) {
-      console.log('this never gets hit right')
       fetchSearchItem(nextProps.item.id);
     }
   }

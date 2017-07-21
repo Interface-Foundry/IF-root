@@ -84,10 +84,60 @@ class Invoice {
     return this.InvoiceInitializer(invoice)
   }
 
-  static async ChangeRefundStatus(invoiceId, newStatus) {
-    let invoice = await db.Invoices.findOne({cart: invoiceId})
-    invoice.refund_status = newStatus
+
+  /**
+   * change the status of a refund based on a key that uses authenticat links
+   *
+   * @class      ChangeRefundStatus (name)
+   * @param      {string}   refundKey  The refund key
+   * @param      {string}   newStatus  The new status
+   * @return     {Promise}  new status
+   */
+  static async ChangeRefundStatus(refundKey, newStatus) {
+    // dont populate link if you want to use link.invoice
+    const link = await db.AuthenticationLinks.findOne({ id: refundKey })
+    if (!link || !link.invoice) {
+      throw new Error('No authentication link exists for this Invoice Change Status thing')
+    }
+
+    const invoice = await db.Invoices.findOne({ id: link.invoice })
+
+    /*
+     We need a URL route for the kip team to be able to open a link that marks the
+     cart as purchased (on Kip's side). If success, it sends a new email to
+     hello@kipthis.com saying the cart is purchased by Kip. Then there's another
+     URL inside this email to undo marking the cart purchased.
+    */
+
+    if (newStatus === 'complete') {
+      let baseUrl
+      if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
+      else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
+      else baseUrl = 'http://mint-dev.kipthis.com'
+
+      invoice.refund_ability = false
+
+      // send email
+      const adminToEmail = (process.env.ADMIN_TO_EMAIL) ? process.env.ADMIN_TO_EMAIL : 'hello@kipthis.com'
+      const email = await db.Emails.create({
+        recipients: adminToEmail,
+        subject: 'someone at kip successfully purchased cart',
+        template_name: 'kip_successfully_purchased_cart'
+      })
+
+      await email.template(email.template_name, {
+        revertStatusUrl: `${baseUrl}/api/invoice/refund/${refundKey}/revert`,
+        invoiceId: invoice.id
+      })
+      await email.send();
+    } else if (newStatus === 'revert') {
+      invoice.refund_ability = true
+    } else {
+      invoice.refund_ability = newStatus
+    }
+
     await invoice.save()
+    return invoice
   }
 
 
@@ -126,6 +176,28 @@ class Invoice {
   async updateInvoice () {
     let cart = await Cart.GetById(this.cart.id)
     await cart.sync()
+    if (this.total !== parseInt(cart.SubTotal.Amount)) {
+      logging.info('we should update the subtotal', this.total, typeof this.total)
+      logging.info('we should update the subtotal', cart.SubTotal.Amount, typeof cart.SubTotal.Amount)
+      const invoice = await db.Invoices.findOne({id: this.id})
+      invoice.total = cart.SubTotal.Amount
+      this.total = cart.SubTotal.Amount
+      await invoice.save()
+    }
+  }
+
+  /**
+   * Creates a refund link for kip.
+   * use the link.id/:newstatus i.e. invoice/refund/sda4sdfa/false
+   *
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async createRefundLinkForKip() {
+    logging.info('created link to auth kip after we have created payment')
+    const link = await db.AuthenticationLinks.create({
+      invoice: this.id
+    })
+    return link
   }
 
   /**
@@ -221,9 +293,10 @@ class Invoice {
     var invoice = this
     var debts = await this.userPaymentAmounts(invoice)
 
-    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'http://kipthis.com'
-    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'http://localhost:3000'
-    else var baseUrl = 'http://mint-dev.kipthis.com'
+    var baseUrl
+    if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
+    else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
+    else baseUrl = 'http://mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: this.id}).populate('items').populate('members')
     var users = cart.members
@@ -244,8 +317,9 @@ class Invoice {
           template_name: 'collection'
         })
         // logging.info('created email')
-        if (reminder) var text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] / 100 + ' at your earliest possible convenience.'
-        else var text = 'Thanks for using Kip! Please pay $' + debts[user_id] / 100 + ' at your earliest possible convenience 😊'
+        var text
+        if (reminder) text = 'Thanks for using Kip! Remember, you still owe $' + debts[user_id] / 100 + ' at your earliest possible convenience.'
+        else text = 'Thanks for using Kip! Please pay $' + debts[user_id] / 100 + ' at your earliest possible convenience 😊'
         // logging.info('about to template')
         await email.template('collection', {
           username: user.name,

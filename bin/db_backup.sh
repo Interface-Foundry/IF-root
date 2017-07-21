@@ -19,24 +19,24 @@ _file_zip_mint="$_file_mint.tar.gz"
 mkdir ~/tmp_backups/
 cd ~/tmp_backups/
 
-mongo_fb="10.142.0.8"
-mongo_slack="10.142.0.13"
-mongo_mint="10.142.0.13"
+mongo_fb="10.142.0.7"
+mongo_slack="10.142.0.14"
+mongo_mint="10.142.0.14"
 # mongo_fb="35.185.13.168"
 # mongo_slack="104.196.21.133"
 
 # mongodump -h 10.142.0.8 --db=foundry --out=$_file
 
 # copy prod fb mongodb
-mongodump -h $mongo_fb --db=foundry --out=$_file_fb
+mongodump --host=$mongo_fb --db=foundry --out=$_file_fb
 tar -zcf $_file_zip_fb $_file_fb
 
 # copy prod slack mongodb
-mongodump -h $mongo_slack --db=foundry --out=$_file_slack
+mongodump --host=$mongo_slack --db=foundry --out=$_file_slack
 tar -zcf $_file_zip_slack $_file_slack
 
 # copy prod mint mongodb
-mongodump -h $mongo_mint --db=mint --out=$_file_mint
+mongodump --host=$mongo_mint --db=mint --out=$_file_mint
 tar -zcf $_file_zip_mint $_file_mint
 
 # moves old and puts latest in latest

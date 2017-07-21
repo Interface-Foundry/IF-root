@@ -28,7 +28,6 @@ export default (state = initialState, action) => {
       addresses: action.response
     };
   case 'SELECT_ADDRESS_SUCCESS':
-  console.log({ state, action })
     return {
       ...state,
       selectedAddress: action.address
@@ -41,7 +40,7 @@ export default (state = initialState, action) => {
   case 'DELETE_ADDRESS_SUCCESS':
     return {
       ...state,
-      addresses: action.addresses
+      addresses: state.addresses.filter(a => a.id !== action.address_id)
     };
   case 'ADD_ADDRESS_SUCCESS':
     return {

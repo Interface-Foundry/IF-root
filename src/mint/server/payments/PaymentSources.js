@@ -63,6 +63,7 @@ class PaymentSource {
       paymentStatus.amount = paymentsOnThisInvoice.amount
       return paymentStatus
     }
+    logging.info('total would be', invoice.total)
     const debts = await userPaymentAmountHandler[invoice.split_type](invoice)
     logging.info('got debts', JSON.stringify(debts))
     paymentStatus.amount = debts[userId]
@@ -101,9 +102,9 @@ class PaymentSource {
     const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source').populate('invoice')
     logging.info('using payment.payment_source.payment_vendor',  payment.payment_source.payment_vendor)
 
-    logging.info('checking if invoice can be refunded:', payment.invoice.refund_status)
-    if (payment.invoice.refund_status === false) {
-      throw new Error('Cant refund when refund_status === false')
+    logging.info('checking if invoice can be refunded:', payment.invoice.refund_ability)
+    if (payment.invoice.refund_ability === false) {
+      throw new Error('Cant refund when refund_ability === false')
     }
 
     const PaymentSourceClass = paymentSourceHandlers[payment.payment_source.payment_vendor]
@@ -125,6 +126,11 @@ class PaymentSource {
 }
 
 
+/**
+ * Class for stripe payment source.
+ *
+ * @class      StripePaymentSource (name)
+ */
 class StripePaymentSource extends PaymentSource {
   constructor(args) {
     super('stripe')
@@ -191,8 +197,40 @@ class StripePaymentSource extends PaymentSource {
   }
 }
 
+/**
+ * Class for paypal payment source.
+ * notes:
+ *  https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/advanced-payments-api/create-express-checkout-payments/
+ * @class      PaypalPaymentSource (name)
+ */
+class PaypalPaymentSource extends PaymentSource {
+
+  constructor(args) {
+    super('paypal')
+    Object.assign(this, args)
+  }
+
+  static get name() {
+    return 'paypal'
+  }
+
+  // need to do these for paypal stuff
+  async createPaymentSource (paymentInfo) {
+    //todo
+  }
+
+  async pay (invoice) {
+    //todo
+  }
+
+  static async refundPayment (payment) {
+    //todo
+  }
+}
+
 const paymentSourceHandlers = {
-  [StripePaymentSource.name]: StripePaymentSource
+  [StripePaymentSource.name]: StripePaymentSource,
+  [PaypalPaymentSource.name]: PaypalPaymentSource
 }
 
 module.exports = PaymentSource

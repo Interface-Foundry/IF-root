@@ -178,6 +178,7 @@
                                                             </td>
                                                         </tr>
                                                     </table>
+                                                    <a href="<%=statusChangeUrl%>" target="_blank" style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; font-weight: bold; color: #4f4d4c; text-decoration: none; background-color: #ffe94d; border-top: 15px solid #ffe94d; border-bottom: 15px solid #ffe94d; border-left: 25px solid #ffe94d; border-right: 25px solid #ffe94d; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px; display: inline-block;" class="mobile-button">CHANGE STATUS TO COMPLETE &rarr;</a></td>
                                                  </td>
                                              </tr>
                                           </table>
@@ -199,7 +200,7 @@
                                                              <%=items[i][j].option_string%> <br/><br/>
                                                              <%=items[i][j].original_link%> <br/><br/>
                                                              Qty: <%=items[i][j].quantity%>   Price: $<%=items[i][j].price.toFixed(2)%><br>
-                                                             Original Price: <%=items[i][j].price_conversion.value / 100%> <%=items[i][j].price_conversion.type%><br><br>
+                                                             Original Price: <%=items[i][j].price%><br><br>
                                                              <%=(paymentSourceTypes[i] ? 'Paid with ' + paymentSourceTypes[i] : '')%>
                                                            </span><br/><br/>
                                                         <% } %>

@@ -64,7 +64,7 @@ const invoiceCollection = Waterline.Collection.extend({
 
     /** total of order */
     total: {
-      type: 'float'
+      type: 'integer'
     },
 
     /**

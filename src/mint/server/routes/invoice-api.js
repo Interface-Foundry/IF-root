@@ -112,6 +112,12 @@ module.exports = function (router) {
       }
     })
 
+    router.route('/invoice/refund/:refund_key/:refund_status')
+      .get(async (req, res) => {
+        const newStatus = await Invoice.ChangeRefundStatus(req.params.refund_key, req.params.refund_status)
+        return res.send({'status': `successfully changed refund_ability to ${req.params.refund_status}`})
+      })
+
   /**
    * invoice routes related to payments for an invoice (collecting/getting payments,)
    */
@@ -271,7 +277,8 @@ module.exports = function (router) {
 
       const done = await invoice.paidInFull()
       if (done) {
-        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        const changeStatusLink = await invoice.createRefundLinkForKip()
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'), changeStatusLink)
         await invoice.sendSuccessEmail(invoice)
       }
 
@@ -305,7 +312,8 @@ module.exports = function (router) {
       // If this invoice has been fully paid, fire off whatever emails
       var done = await invoice.paidInFull()
       if (done) {
-        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'))
+        const changeStatusLink = await invoice.createRefundLinkForKip()
+        await utils.sendInternalCheckoutEmail(invoice, 'http://' + (req.get('host') || 'mint-dev.kipthis.com'), changeStatusLink)
         await invoice.sendSuccessEmail(invoice)
       }
       else {

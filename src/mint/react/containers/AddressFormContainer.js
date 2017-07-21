@@ -13,6 +13,7 @@ const mapStateToProps = (state, ownProps) => ({
   code: state.user.selectedAddress.code,
   country: state.user.selectedAddress.country,
   addressId: state.user.selectedAddress.id,
+  phone: state.user.selectedAddress.phone_number,
   userId: state.user.id
 });
 
