@@ -7,11 +7,6 @@ var handler = createHandler({ path: '/', secret: 'Hvjw1Oa2lA4GpJPu' })
 var _ = require('lodash')
 require('colors')
 
-if (process.env.NODE_ENV !== 'development' || os.hostname() !== 'mint-dev') {
-  console.error('Run this with NODE_ENV=development on the mint-dev vm')
-  process.exit(1)
-}
-
 const branch = 'refs/heads/mint'
 const channel = 'D1GGV0CMU'
 const PORT = 7777
