@@ -5,7 +5,7 @@ import { replace } from 'react-router-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem,  updateQuery } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart, sleep } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -31,6 +31,9 @@ const mapDispatchToProps = dispatch => ({
   submitQuery: (query, store, locale) => {
     if (!isUrl(query)) addSearchHistory(query);
     return dispatch(submitQuery(query, store, locale));
+  },
+  updateQuery: (query) => {
+    dispatch(updateQuery(query));
   },
   addItem: (cart_id, item_id, option_ids) => {
     ReactGA.event({

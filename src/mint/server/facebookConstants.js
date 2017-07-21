@@ -16,6 +16,13 @@ const mintdev = {
   baseUrl: 'http://mint-dev.kipthis.com'
 }
 
-if (process.env.NODE_ENV === 'production') module.exports = production
-else if (process.env.NODE_ENV === 'development_chris') module.exports = dev
-else module.exports = mintdev
+const beta = {
+  clientID: 1979388312295927,
+  clientSecret: 'f3c7171a4d6c960551e264127188a773',
+  baseUrl: 'http://beta.kipthis.com'
+}
+
+// if (process.env.NODE_ENV === 'production') module.exports = production
+// else if (process.env.NODE_ENV === 'development_chris') module.exports = dev
+// else module.exports = mintdev
+module.exports = beta
