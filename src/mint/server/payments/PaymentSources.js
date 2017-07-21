@@ -192,8 +192,33 @@ class StripePaymentSource extends PaymentSource {
   }
 }
 
+class PaypalPaymentSource extends PaymentSource {
+  constructor(args) {
+    super('paypal')
+    Object.assign(this, args)
+  }
+
+  static get name() {
+    return 'paypal'
+  }
+
+  // need to do these for paypal stuff
+  async createPaymentSource (paymentInfo) {
+    //todo
+  }
+
+  async pay (invoice) {
+    //todo
+  }
+
+  static async refundPayment (payment) {
+    //todo
+  }
+}
+
 const paymentSourceHandlers = {
-  [StripePaymentSource.name]: StripePaymentSource
+  [StripePaymentSource.name]: StripePaymentSource,
+  [PaypalPaymentSource.name]: PaypalPaymentSource
 }
 
 module.exports = PaymentSource
