@@ -294,10 +294,8 @@ module.exports.tryHtml = async function (s,html) {
 				}
 
 				var text = $('img',this).attr('title')
-				logging.info('OPTION TEXT', text)
 				text = text.split('').map(c => c.charCodeAt())
 				text = text.filter(function (code) {
-					logging.info('code:', code)
 					return code !== 215
 					// cutting out those weird x's
 				})
