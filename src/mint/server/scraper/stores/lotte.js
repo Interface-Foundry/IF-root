@@ -23,8 +23,12 @@ module.exports = async function (s, $, processChildOptions, html) {
   //price
   if($('.after_price').text()){
     var p = $('.after_price').text().trim().replace(/[^0-9.]/g, "")
+    logging.info('first p', p)
+  } else if ($('.price').find('.big')) { //on sale
+    var p = $('.price').find('.big').text().trim().replace(/[^0-9.]/g, "")
   }else if($('.big').text()){
     var p = $('.big').text().trim().replace(/[^0-9.]/g, "")
+    logging.info('second p', p)
   }
 
   if(p){

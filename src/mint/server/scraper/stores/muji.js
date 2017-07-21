@@ -1,3 +1,9 @@
+var url = require('url')
+
+//scraper stuff
+var fx_currency = require('../foreign_exchange')
+var utils = require('../scrape_utils')
+
 module.exports = async function (s, $) {
   //get product id
   s.product_id = await utils.urlValue(s.original_link,'detail',1)
