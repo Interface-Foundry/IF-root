@@ -19,7 +19,8 @@ passport.use(new FacebookStrategy({
 }, async function (accessToken, refreshToken, profile, done) {
   //create an account for our facebook user if one does not already exist
   if (!profile.emails || !profile.emails.length) {
-    done('no email address received from facebook')
+    throw new Error('your facebook account sucks')
+    // return done('no email address received from facebook')
   }
   var email = profile.emails[0].value
   var name = profile.name.givenName + ' ' + profile.name.familyName
