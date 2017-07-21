@@ -26,7 +26,7 @@ export default class UserCart extends Component {
               { memberNumber }
             </div>
             <div className='text'>
-              { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Send'/></a></h1> : <h1>{userCart.name}</h1> }
+              { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
               <h1 className='date' onClick={() => this.setState({open: !open})}>
                 <Icon icon={open ? 'Up' : 'Down'}/>
               </h1>
