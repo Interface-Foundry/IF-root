@@ -81,7 +81,7 @@
     "react-share": "^1.15.0",
     "react-stripe-checkout": "^2.6.1",
     "react-stripe-elements": "^0.0.5",
-    "react-transition-group": "^2.1.0",
+    "react-transition-group": "^2.2.0",
     "react-typist": "^1.1.1",
     "redux": "^3.7.2",
     "redux-form": "^7.0.1",

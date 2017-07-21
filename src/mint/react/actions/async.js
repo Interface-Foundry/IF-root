@@ -68,12 +68,12 @@ export const del = (url, type, cb) => {
   return async dispatch => {
     dispatch(loading(type));
     try {
-     const res = await fetch(url, {
+      await fetch(url, {
         method: 'DELETE',
         credentials: 'same-origin'
       });
 
-      return dispatch(cb(type, await res.json()));
+      return dispatch(cb(type));
     } catch (error) {
       return dispatch({
         type: `${type}_FAIL`,

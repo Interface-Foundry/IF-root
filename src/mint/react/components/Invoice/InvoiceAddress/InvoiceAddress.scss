@@ -73,6 +73,9 @@
         span {
           padding: 0 $padding;
           color: $secondaryColor;
+          span {
+            cursor: pointer;
+          }
         }
       }
     }
