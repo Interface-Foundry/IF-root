@@ -11,20 +11,15 @@ export default class Stores extends Component {
     togglePopup: PropTypes.func,
     user: PropTypes.object
   }
-  componentWillReceiveProps(nextProps) {
-    const { stores, togglePopup } = this.props;
-
-    if (stores.length !== nextProps.stores.length && !nextProps.user.id) {
-      togglePopup();
-    }
-  }
+  componentWillReceiveProps = ({ stores, togglePopup }) =>
+    stores.length !== this.props.stores.length && !this.props.user.id ? togglePopup() : null;
 
   render = () => {
     const { stores = [] } = this.props;
-    const globalDirect = process.env.NODE_ENV !== 'production' ? stores.filter(store => store.global_direct) : [],
+    const
       normal = stores.filter(store => !store.global_direct),
       firstStore = [normal.shift() || []],
-      suggested = firstStore.concat(globalDirect),
+      suggested = firstStore.concat(stores.filter(store => store.global_direct)),
       otherStores = normal.slice() || [];
 
     return (
