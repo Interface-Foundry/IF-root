@@ -19,7 +19,7 @@ export default class InvoiceInfo extends Component {
       <div className='payment accordion'>
         <nav onClick={() => selectAccordion('invoiceinfo')}>
           <div>
-            <h3> Invoice Info</h3>
+            <h3> Invoice Info - Note: Adding Flat $10.00 Kip Fee to All orders for time being</h3>
           </div>
             <div>
              {

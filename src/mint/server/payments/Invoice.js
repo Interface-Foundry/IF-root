@@ -174,8 +174,15 @@ class Invoice {
   async updateInvoice () {
     let cart = await Cart.GetById(this.cart.id)
     await cart.sync()
+    if (this.total !== parseInt(cart.SubTotal.Amount)) {
+      logging.info('we should update the subtotal', this.total, typeof this.total)
+      logging.info('we should update the subtotal', cart.SubTotal.Amount, typeof cart.SubTotal.Amount)
+      const invoice = await db.Invoices.findOne({id: this.id})
+      invoice.total = cart.SubTotal.Amount
+      this.total = cart.SubTotal.Amount
+      await invoice.save()
+    }
   }
-
 
   /**
    * Creates a refund link for kip.

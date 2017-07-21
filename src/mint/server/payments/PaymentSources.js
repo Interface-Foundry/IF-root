@@ -126,6 +126,11 @@ class PaymentSource {
 }
 
 
+/**
+ * Class for stripe payment source.
+ *
+ * @class      StripePaymentSource (name)
+ */
 class StripePaymentSource extends PaymentSource {
   constructor(args) {
     super('stripe')
@@ -192,7 +197,14 @@ class StripePaymentSource extends PaymentSource {
   }
 }
 
+/**
+ * Class for paypal payment source.
+ * notes:
+ *  https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/advanced-payments-api/create-express-checkout-payments/
+ * @class      PaypalPaymentSource (name)
+ */
 class PaypalPaymentSource extends PaymentSource {
+
   constructor(args) {
     super('paypal')
     Object.assign(this, args)
