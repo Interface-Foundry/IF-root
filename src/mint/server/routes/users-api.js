@@ -186,7 +186,7 @@ module.exports = function (router) {
   router.get('/auth/facebook', passport.authenticate('facebook', {
     scope: ['email'],
     successRedirect: '/',
-    failureRedirect: '/api/facebook/failure'
+    failureRedirect: '/newcart?toast=You couldn\'t log in :(&status=err'
   }))
 
   /**
@@ -201,7 +201,8 @@ module.exports = function (router) {
   router.get('/auth/facebook/callback',
     passport.authenticate('facebook', {
       successRedirect: '/api/facebook/login',
-      failureRedirect: '/api/facebook/failure',
+      // failureRedirect: '/api/facebook/failure',
+      failureRedirect: '/newcart?toast=That didn\'t work :(&status=err'
       scope: ['email']
     })
   )
