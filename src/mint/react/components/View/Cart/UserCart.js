@@ -23,7 +23,7 @@ export default class UserCart extends Component {
         <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
           <nav>
             <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
-              { memberNumber }
+              { memberNumber === 'icon' ? <Icon icon='Check'/> : memberNumber }
             </div>
             <div className='text'>
               { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
