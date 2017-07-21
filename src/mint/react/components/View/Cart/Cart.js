@@ -59,6 +59,7 @@ export default class Cart extends Component {
         updateAt: user.updateAt
       })
     }
+    
     return (
       <table className='cart'>
         <thead>
@@ -68,7 +69,7 @@ export default class Cart extends Component {
           <tr className={`next grey`}>
             <RewardCard 
               title={achievements[nextAward].reward}
-              sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE PEOPLE`}
+              sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE ${achievements[nextAward].reqs - userCarts.others.length === 1 ? 'PERSON' : 'PEOPLE' }`}
               imageSrc={_getLockedImage(userCarts.others.length)}
               classes='grey gradient'
               cart={cart}

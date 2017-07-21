@@ -69,19 +69,20 @@ export default class Selected extends Component {
       { options } = this.state,
       { _changeOption } = this,
       optionIds = Object.keys(options).map((key, index) => options[key].selected),
+      imageSrc = Object.keys(options).reduce((acc, key, index) => {
+        options[key].map((option, i) => {
+          if (options[key].selected === option.id && option.main_image_url) {
+            acc = `${key} ${option.main_image_url}`
+          }
+        })
+        return acc;
+      }, ''),
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
     
+    console.log(options)
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
-          <div className='navigation'>
-            <button className='left' onClick={() => { navigateLeftResults(); }}>
-              <Icon icon='LeftChevron'/>
-            </button>
-            <button className='right' onClick={() => { navigateRightResults(); }}>
-              <Icon icon='RightChevron'/>
-            </button>
-          </div>
           <button className='close' onClick={() => selectItem(null)}>
             <Delete/>
           </button>
@@ -107,7 +108,7 @@ export default class Selected extends Component {
               }
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
               { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id, optionIds)}><span>✔ Save to Cart</span></button> : null}
+              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id, optionIds)}><span><Icon icon='Check'/> Save to Cart</span></button> : null}
               { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
@@ -116,14 +117,17 @@ export default class Selected extends Component {
                   {
                     Object.keys(options).map((key, index) => {
                       const selected = options[key].selected || key;
-                      return <select key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)}>
-                        <option key={key} value={key} disabled={true}>{key}</option>
+                      return <span className='selectBox'>
+                        <span className='type'>{key}</span>
+                        <select className={imageSrc.split(' ')[0] === key ? 'miniImage' : ''} key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)} style={{
+                          backgroundImage: `url(${imageSrc.split(' ')[0] === key ? imageSrc.split(' ')[1] : ''})`
+                        }}>
                         {
                           options[key].map((option) => (
                             <option key={option.id} value={option.id}>{option.name}</option>
                           ))
                         }
-                      </select>;
+                      </select></span>;
                     })
                   }
                 </div>

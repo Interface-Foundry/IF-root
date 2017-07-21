@@ -47,7 +47,8 @@ import {
   IoIosWorldOutline
 } from 'react-icons/lib/io';
 import {
-  FaExternalLink
+  FaExternalLink,
+  FaWhatsapp
 } from 'react-icons/lib/fa';
 import {
   Facebook,
@@ -96,7 +97,7 @@ export default class Icon extends Component {
     case 'Sms':
       return <Sms/>;
     case 'Whatsapp':
-      return <Whatsapp/>;
+      return <FaWhatsapp style={{fill: '#25d366'}}/>;
     case 'Camera':
       return <IoCamera/>;
     case 'Locked':
