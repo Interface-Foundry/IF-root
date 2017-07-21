@@ -273,7 +273,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         border: 3px solid white;
         border-width: 1.5px 3px 3px 5px;
         border-radius: 0 0 5px 5px;
-
+        .right {
+          float: right;
+          text-align: right;
+        }
         .store {
           display: inline-block;
           svg {
@@ -286,7 +289,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             display: inline-block;
             line-height: $nav-height/2;
             margin: 0;
-            width: 50%;
             b {
               display: inline-block !important;
             }
