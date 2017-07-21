@@ -83,7 +83,7 @@ export default class Search extends Component {
         <input 
           onFocus={()=>toggleHistory(true)} 
           onBlur={()=>toggleHistory(false)} 
-          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : 'Search or Paste URL'} 
+          placeholder={store.length > 0 ? `Paste ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} URL` : 'Paste Item URL'} 
           value={query} 
           onChange={(e) => updateQuery(e.currentTarget.value)} 
           autoComplete="off" 
