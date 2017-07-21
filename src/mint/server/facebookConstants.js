@@ -22,6 +22,7 @@ const beta = {
   baseUrl: 'http://beta.kipthis.com'
 }
 
-if (process.env.NODE_ENV === 'production') module.exports = production
-else if (process.env.NODE_ENV === 'development_chris') module.exports = dev
-else module.exports = mintdev
+// if (process.env.NODE_ENV === 'production') module.exports = production
+// else if (process.env.NODE_ENV === 'development_chris') module.exports = dev
+// else module.exports = mintdev
+module.exports = beta
