@@ -187,7 +187,7 @@ module.exports = function (router) {
     scope: ['email'],
     successRedirect: '/',
     failureRedirect: '/newcart?toast=You couldn\'t log in :(&status=err'
-  }))
+  })) //not the one
 
   /**
    * @api {get} /api/facebook/auth/callback
@@ -202,7 +202,7 @@ module.exports = function (router) {
     passport.authenticate('facebook', {
       successRedirect: '/api/facebook/login',
       // failureRedirect: '/api/facebook/failure',
-      failureRedirect: '/newcart?toast=That didn\'t work :(&status=err',
+      failureRedirect: '/newcart?toast=Facebook couldn\'t log you in&status=err',
       scope: ['email']
     })
   )
