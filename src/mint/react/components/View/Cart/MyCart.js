@@ -15,7 +15,7 @@ export default class MyCart extends Component {
   }
 
   render() {
-    const { myCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
+    const { myCart, achievements, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
           { open } = this.state;
 
     return (
@@ -23,9 +23,9 @@ export default class MyCart extends Component {
         <th colSpan='100%'>
           {
             myCart.length
-            ? <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
-                <nav>
-                { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Send'/></a></h1> : <h1>{user.name}</h1> }
+            ? <div className={`card`}>
+                <nav onClick={() => this.setState({open: !open})}>
+                { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
                 <h1 className='date' onClick={() => this.setState({open: !open})}>
                   <Icon icon={open ? 'Up' : 'Down'}/>
                 </h1>

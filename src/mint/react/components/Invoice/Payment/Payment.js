@@ -23,6 +23,8 @@ export default class Payment extends Component {
           // selectAccordion('payment')
         }}>
           <h3>Payment</h3>
+          <div className='image visa'/>
+          <p>Visa ending in 2231</p>
         </nav>
       </div>
     );

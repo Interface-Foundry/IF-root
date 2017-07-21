@@ -15,18 +15,18 @@ export default class UserCart extends Component {
   }
 
   render() {
-    const { userCart, achieveIndex, color, isLeader, openCarts, index, cart, editId, user, updateItem, imageSrc, memberNumber } = this.props,
+    const { userCart, achievements, color, isLeader, openCarts, index, cart, editId, user, updateItem, imageSrc, memberNumber } = this.props,
           { open } = this.state;
 
     return (
-      <td key={userCart.id} colSpan='100%' className={`${achieveIndex[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
-        <div className={`card`} onClick={() => !open ? this.setState({open: !open}) : null}>
-          <nav>
+      <td key={userCart.id} colSpan='100%' className={`${achievements[userCart.memberNumber] ? 'gradient' : ''} ${color}`}>
+        <div className={`card`}>
+          <nav onClick={() => this.setState({open: !open})}>
             <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
-              { memberNumber }
+              { memberNumber === 'icon' ? <Icon icon='Check'/> : memberNumber }
             </div>
             <div className='text'>
-              { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Send'/></a></h1> : <h1>{userCart.name}</h1> }
+              { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
               <h1 className='date' onClick={() => this.setState({open: !open})}>
                 <Icon icon={open ? 'Up' : 'Down'}/>
               </h1>

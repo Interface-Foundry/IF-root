@@ -247,20 +247,28 @@ app.use(function errorHandler(err, req, res, next) {
   }
 })
 
-const PORT = process.env.PORT || 3000;
 
-const http = require('http').Server(app);
-const io = require('socket.io').listen(http);
+if (process.env.LETSENCRYPT_DOMAIN) {
+  const https = require('letsencrypt-express').create({
+    server: 'production',
+    email: 'peter@interfacefoundry.com',
+    agreeTos: true,
+    approveDomains: [ process.env.LETSENCRYPT_DOMAIN ],
+    app: app
+  }).listen(80, 443);
 
-startSocket(io);
+  const io = require('socket.io').listen(https);
+  startSocket(io);
 
-http.listen(PORT, () => {
-  console.log(`App listening at http://127.0.0.1:${PORT}`);
-});
-
-// app.listen(PORT, () => {
-//   console.log(`App listening at http://127.0.0.1:${PORT}`);
-// });
+} else {
+  const PORT = process.env.PORT || 3000;
+  const http = require('http').Server(app);
+  const io = require('socket.io').listen(http);
+  startSocket(io);
+  http.listen(PORT, () => {
+    console.log(`App listening at http://127.0.0.1:${PORT}`);
+  });
+}
 
 function printNiceError(err) {
   if (!err) {

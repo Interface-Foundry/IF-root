@@ -17,7 +17,7 @@ import {
   IoChevronUp,
   IoClose,
   IoEdit,
-  IoEmail,
+  IoIosEmailOutline,
   IoEye,
   IoGearA,
   IoHappy,
@@ -76,7 +76,7 @@ export default class Icon extends Component {
     case 'Hamburger':
       return <IoNaviconRound/>;
     case 'Email':
-      return <IoEmail/>;
+      return <IoIosEmailOutline/>;
     case 'Clear':
       return <IoClose/>;
     case 'Up':

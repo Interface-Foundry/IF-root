@@ -167,55 +167,17 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     @media only screen and (max-width: 600px) {
       padding: 0 $padding $padding;
     }
-    &.green {
-      .icon {
-        background: $thirdColor;
-      }
-      &:after {
-        background: #00cb7b;
-      }
-    }
-    &.yellow {
-      .icon {
-        background: $mainColor;
-      }
-      &:after {
-        background: #ffdf4d;
-      }
-      &.gradient {
-        &:after {
-          background: linear-gradient(to top, #00cb7b, #ffdf4d 50%);
-        }
-      }
-    }
-    &.red {
-      .icon {
-        background: #f53f46;
-      }
-      &:after {
-        background: #f53f46;
-      }
-      &.gradient {
-        &:after {
-          background: linear-gradient(to top, #ffdf4d, #f53f46 50%);
-        }
-      }
-    }
-    &.gradient {
-      &:after {
-        background: linear-gradient(to top, lighten(#333, 60%), #00cb7b 100%);
-      }
-    }
+
     &.grey {
       .card {
         position: relative;
         background: rgba(#fff, 0.3);
         .share {
           position: absolute;
-          right: 10px;
-          top: 10px;
-          height: 30px;
-          line-height: 30px;
+          right: 5px;
+          bottom: 5px;
+          height: 20px;
+          line-height: 20px;
           padding: 0;
           width: 85px;
           font-weight: bold;
@@ -230,7 +192,85 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           }
         }
       }
+      &:after {
+        display: none
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #00aeef, #0061ed 50%);
+        }
+      }
     }
+
+    &.one {
+      &:after {
+        background: #00aeef;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #00aeef, #0061ed 50%);
+        }
+      }
+    }
+
+    &.two {
+      &:after {
+        background: #0061ed;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #0061ed, #3636d6 50%);
+        }
+      }
+    }
+
+    &.three {
+      // background: #3636d6;
+      // color: white;
+      &:after {
+        background: #3636d6;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #3636d6, #6c43ff 50%);
+        }
+      }
+    }
+
+    &.four {
+      // background: #6c43ff;
+      // color: white;
+      &:after {
+        background: #6c43ff;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #6c43ff, #9638e8 50%);
+        }
+      }
+    }
+
+    &.five {
+      // background: #9638e8;
+      // color: white;
+      &:after {
+        background: #9638e8;
+      }
+      &.gradient {
+        &:after {
+          background: linear-gradient(to top, #9638e8, #db269f 50%);
+        }
+      }
+    }
+
+    &.five {
+      // background: #9638e8;
+      // color: white;
+      &:after {
+        background: #db269f;
+      }
+    }
+
     .card {
       position: relative;
       padding: $padding ($padding * 3);
@@ -243,12 +283,34 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       &.reward {
-        &.yellow {
-          background: $mainColor;
+
+        &.one {
+          background: #00aeef;
+          color: white;
         }
 
-        &.green {
-          background: $thirdColor;
+        &.two {
+          background: #0061ed;
+          color: white;
+        }
+
+        &.three {
+          background: #3636d6;
+          color: white;
+        }
+
+        &.four {
+          background: #6c43ff;
+          color: white;
+        }
+
+        &.five {
+          background: #9638e8;
+          color: white;
+        }
+
+        &.six {
+          background: #db269f;
           color: white;
         }
 

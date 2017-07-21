@@ -39,7 +39,7 @@ export default class Details extends Component {
         icon: 'Like',
         value: likes.length
       }],
-      likedList = likes.map((user) => user.id),
+      likedList = likes.map((id) => id),
       isAdmin = user.id === leader.id,
       nextAchievement = members.length > 2 ? ( members.length > 5 ? ( members.length > 7 ? [] : [{ reqs: 10, discount: 100 }] ) : [{ reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] ) :  [{ reqs: 3, discount: 30 }, { reqs: 6, discount: 80 }];
 
