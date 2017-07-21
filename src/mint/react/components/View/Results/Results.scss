@@ -105,6 +105,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       cursor: pointer;
       background: white;
       border: 1px solid $border-color-light;
+      background-size: $nav-height/2;
+      background-repeat: no-repeat;
+      background-position: $padding 50%;
+
+      &.miniImage {
+        padding: $padding ($padding * 5);
+      }
 
       @media only screen and (max-width: 600px) {
         width: 100%;
@@ -441,7 +448,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           @media only screen and (max-width: 600px) {
             padding: $padding 0 ($padding / 2);
             font-size: 12px;
-            height: 55px;
+            min-height: 0;
+            height: auto;
+            max-height: 55px;
           }
 
           &:after {
@@ -550,6 +559,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             line-height: 20px;
             min-height: 65px;
 
+            @media only screen and (max-width: 600px) {
+              min-height: 0px;
+            }
+
             &:after {
               content: none;
             }
@@ -638,6 +651,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
               @media only screen and (max-width: 865px) {
                 display: inline-block;
                 width: auto;
+                line-height: $nav-height / 2;
               }
             }
 

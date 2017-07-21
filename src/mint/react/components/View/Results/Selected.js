@@ -69,8 +69,17 @@ export default class Selected extends Component {
       { options } = this.state,
       { _changeOption } = this,
       optionIds = Object.keys(options).map((key, index) => options[key].selected),
+      imageSrc = Object.keys(options).reduce((acc, key, index) => {
+        options[key].map((option, i) => {
+          if (options[key].selected === option.id && option.main_image_url) {
+            acc = `${key} ${option.main_image_url}`
+          }
+        })
+        return acc;
+      }, ''),
       afterClass = !arrow ? 'left' : (arrow === 1 ? 'middle' : 'right');
     
+    console.log(imageSrc)
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
@@ -108,8 +117,9 @@ export default class Selected extends Component {
                   {
                     Object.keys(options).map((key, index) => {
                       const selected = options[key].selected || key;
-                      return <select key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)}>
-                        <option key={key} value={key} disabled={true}>{key}</option>
+                      return <select className={imageSrc.split(' ')[0] === key ? 'miniImage' : ''} key={key} value={selected} onChange={(e) => _changeOption(e.currentTarget.value, key)} style={{
+                          backgroundImage: `url(${imageSrc.split(' ')[0] === key ? imageSrc.split(' ')[1] : ''})`
+                        }}>
                         {
                           options[key].map((option) => (
                             <option key={option.id} value={option.id}>{option.name}</option>

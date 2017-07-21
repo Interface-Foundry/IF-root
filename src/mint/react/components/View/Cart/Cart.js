@@ -59,6 +59,7 @@ export default class Cart extends Component {
         updateAt: user.updateAt
       })
     }
+    
     return (
       <table className='cart'>
         <thead>
