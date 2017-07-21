@@ -19,7 +19,7 @@ export default class Stores extends Component {
     }
   }
 
-  render() {
+  render = () => {
     const { stores = [] } = this.props;
     const globalDirect = process.env.NODE_ENV !== 'production' ? stores.filter(store => store.global_direct) : [],
       normal = stores.filter(store => !store.global_direct),

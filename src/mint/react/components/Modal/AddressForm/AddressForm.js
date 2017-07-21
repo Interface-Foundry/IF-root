@@ -54,13 +54,6 @@ export default class AddressForm extends Component {
     const { state: { name, addressLine1, addressLine2, city, region, code, country, phone }, props: { userId, updateAddress, addressId } } = this;
     updateAddress({ name, addressLine1, addressLine2, city, region, code, country, phone, userId, addressId });
   }
-
-  _toggleAddress = e => {
-    const { toggleAddressForm } = this.props;
-    e.preventDefault();
-    toggleAddressForm(false);
-  }
-
   componentWillReceiveProps = ({ name = '', addressLine1 = '', addressLine2 = '', city = '', region = '', code = '', country = '', phone = '' }) =>
     this.setState({ name, addressLine1, addressLine2, city, region, code, country, phone });
 
@@ -77,7 +70,6 @@ export default class AddressForm extends Component {
 
   render = () =>
     <div className='address-form form-container'>
-      <a className='close' href='#' onClick={this._toggleAddress}><Icon icon='Clear'/></a>
       <h1>{this.props.addressId ? 'Update' : 'Add'} an Address</h1>
       <p>Enter your information Below</p>
       <form onSubmit={this._handleSubmit}>

@@ -14,6 +14,11 @@ export const toggleYpoCheckout = show => ({
   show
 });
 
+export const toggleCheckoutModal = show => ({
+  type: 'TOGGLE_CHECKOUT_MODAL',
+  show
+});
+
 export const toggleAddressForm = show => ({
   type: 'TOGGLE_ADDRESS_FORM',
   show
