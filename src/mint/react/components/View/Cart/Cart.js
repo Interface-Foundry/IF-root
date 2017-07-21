@@ -25,7 +25,7 @@ export default class Cart extends Component {
   }
 
   _getCompleteImage(memberNumber) {
-    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
   }
 
   _getIncompleteImage(memberNumber) {
@@ -33,11 +33,11 @@ export default class Cart extends Component {
   }
 
   _getLockedImage(memberNumber) {
-    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
   }
 
   _getColor(memberNumber) {
-    return memberNumber > 2 ? ( memberNumber > 5 ? ( memberNumber > 8 ? 'four': 'three') : 'two') : 'one';
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? 'four': 'three') : 'two') : 'one';
   }
 
   render() {
@@ -46,8 +46,8 @@ export default class Cart extends Component {
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
-      lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ? ( userCarts.others.length > 12 ? 12 : 8 ) : 5 ) : 2 ) : 0,
-      nextAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 2;
+      lastAward = userCarts.others.length > 3 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ? ( userCarts.others.length > 12 ? 12 : 8 ) : 5 ) : 3 ) : 0,
+      nextAward = userCarts.others.length > 3 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 3;
 
     if(userCarts.others.length === 0) {
       userCarts.others.push({
