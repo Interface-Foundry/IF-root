@@ -74,14 +74,6 @@ export default class Selected extends Component {
     return (
       <td key={item.id} colSpan='100%' className='selected'>
         <div className={`card ${inCart ? 'incart' : ''} ${afterClass}`}>
-          <div className='navigation'>
-            <button className='left' onClick={() => { navigateLeftResults(); }}>
-              <Icon icon='LeftChevron'/>
-            </button>
-            <button className='right' onClick={() => { navigateRightResults(); }}>
-              <Icon icon='RightChevron'/>
-            </button>
-          </div>
           <button className='close' onClick={() => selectItem(null)}>
             <Delete/>
           </button>
@@ -107,7 +99,7 @@ export default class Selected extends Component {
               }
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
               { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id, optionIds)}><span>✔ Save to Cart</span></button> : null}
+              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id, optionIds)}><span><Icon icon='Check'/> Save to Cart</span></button> : null}
               { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
