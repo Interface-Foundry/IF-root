@@ -23,7 +23,8 @@ const mapStateToProps = (state, ownProps) => {
     invoice: state.payments.invoice,
     paymentSources: state.payments.paymentSources,
     userPaymentStatus: state.payments.userPaymentStatus,
-    payment: state.payments.payment
+    payment: state.payments.payment,
+    achievements: state.cart.present.achievements
   };
 };
 

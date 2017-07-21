@@ -31,10 +31,20 @@ export default class CartReview extends Component {
     selectedIndex: null
   }
 
+  _getCompleteImage(memberNumber) {
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+  }
+
   render() {
-    const { selectedAccordion, selectAccordion, cart } = this.props, { selectedIndex } = this.state,
-      subTotal = displayCost(calculateItemTotal(cart.items), cart.store_locale),
-      Achievements = cart.members.length > 2 ? ( cart.members.length > 5 ? ( cart.members.length > 7 ? [{ reqs: 3, discount: 50 }, { reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] : [{ reqs: 3, discount: 50 }, { reqs: 6, discount: 80 }] ) : [{ reqs: 3, discount: 50 }] ) :  [];     
+    const { selectedAccordion, selectAccordion, cart, achievements } = this.props, { selectedIndex } = this.state,
+      subTotal = displayCost(calculateItemTotal(cart.items), cart.store_locale);
+
+    const totalAchievements = Object.keys(achievements).reduce((acc, key, i) => {
+        if(cart.members.length > achievements[key].reqs) acc.push(achievements[key])
+
+        return acc
+      }, []);
+
 
     return (
       <div className='review accordion'>
@@ -67,16 +77,19 @@ export default class CartReview extends Component {
                 <h5 className='blue'>Achievements</h5>
               </nav>
               {
-                Achievements.map((a, i) => (
+                totalAchievements.map((a, i) => (
                   <li key={i}>
                     <div className='achievement'>
                       <div className='icon'>
-                        <Icon icon='Person'/>
+                        <div className={'image'} style={{
+                          backgroundImage: `url(//storage.googleapis.com/kip-random/social/complete_${i + 1}.png)`
+                        }}>
+                          {a.reqs}
+                        </div>
                       </div>
                       <div className='text'>
                         <p>{a.reqs}pp in Cart</p>
-                        <span className='sub'>{a.discount}% Discount</span>
-                        <p className='right'>-{displayCost(calculateItemTotal(cart.items) * (1/a.discount), cart.store_locale)}</p>
+                        <span className='sub'>{a.reward}</span>
                       </div>
                     </div>
                   </li>                

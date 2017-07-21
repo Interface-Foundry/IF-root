@@ -76,6 +76,16 @@
 				.achievement {
           position: relative;
 
+          .image {
+            width: $nav-height - $padding;
+            height: $nav-height - $padding;
+
+            color: white;
+            text-align: center;
+            line-height: $nav-height - $padding;
+            font-weight: bold;
+          }
+
           p {
             line-height: $nav-height - $padding;
             display: inline-block;

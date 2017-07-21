@@ -88,8 +88,10 @@ socket.on('ACTION', response => {
       newMembers > members
       && (
         newMembers === 3 ||
-        newMembers === 6 ||
-        newMembers === 10
+        newMembers === 5 ||
+        newMembers === 8 ||
+        newMembers === 12 ||
+        newMembers === 20 
       )
     ) {
       store.dispatch(toggleReward())
