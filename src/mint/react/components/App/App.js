@@ -139,7 +139,7 @@ export default class App extends Component {
     || cart.members.length !== this.props.cart.members.length
 
   render() {
-    const { sidenav, popup, togglePopup, tab, match, toast, status, reward, loading, history: { replace }, location: { pathname } } = this.props;
+    const { sidenav, popup, togglePopup, tab, user, match, toast, status, reward, loading, history: { replace }, location: { pathname } } = this.props;
 
     return (
       <section className={`app ${sidenav ? 'sidenavOpen' : ''}`} onKeyDown={::this._handeKeyPress}>
@@ -165,7 +165,7 @@ export default class App extends Component {
         }
         <div className='noJudder'>
           { reward ? <img className='reward__achieved' ref={(reward) => this.reward = reward} src='//storage.googleapis.com/kip-random/social/bg/success_mint_once.gif'/> : null }
-          { tab === 'cart' || tab === 'invoice' ? <ButtonsContainer /> : null }
+          { (tab === 'cart' || tab === 'invoice') && user.id ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/invoice'} exact component={TabsContainer} />

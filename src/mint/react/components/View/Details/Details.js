@@ -95,7 +95,7 @@ export default class Details extends Component {
                   }
                   <div className='store'>
                     <Icon icon='Upload'/>
-                    <h4><span>{getStoreName(store, store_locale)}</span></h4>
+                    <h4><a href={`//${store.toLowerCase()}.${store_locale.toLowerCase()}`}><span>{getStoreName(store, store_locale)}</span></a></h4>
                   </div>
                 </div>
               </div>
