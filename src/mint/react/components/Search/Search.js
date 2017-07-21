@@ -78,7 +78,7 @@ export default class Search extends Component {
     return (
       <form onSubmit={::this._processSearch} className='search'>
         <button type='submit' className='submit'>
-            <Icon icon='Search'/>
+            <Icon icon='World'/>
         </button>
         <input 
           onFocus={()=>toggleHistory(true)} 

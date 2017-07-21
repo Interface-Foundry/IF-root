@@ -101,17 +101,6 @@ export default class Details extends Component {
               </div>
             </th>
           </tr>
-          <tr>
-            <td className='lineStart'>
-              <nav>
-                {
-                  showUndo
-                  ? <div className='undo__button' onClick={() => undoRemove(cart, oldCart)}><p>The item was removed from your cart. <button >Undo</button></p></div>
-                  : null
-                }
-              </nav>
-            </td>
-          </tr>
         </tbody>
       </table>
     );

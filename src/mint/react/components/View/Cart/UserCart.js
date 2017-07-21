@@ -26,7 +26,7 @@ export default class UserCart extends Component {
               { memberNumber === 'icon' ? <Icon icon='Check'/> : memberNumber }
             </div>
             <div className='text'>
-              { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
+              { isLeader && userCart.id !== user.id ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
               <h1 className='date' onClick={() => this.setState({open: !open})}>
                 <Icon icon={open ? 'Up' : 'Down'}/>
               </h1>

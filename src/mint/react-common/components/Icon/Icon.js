@@ -43,7 +43,8 @@ import {
   IoSocialPinterest,
   IoPaperAirplane,
   IoIosUploadOutline,
-  IoAndroidOpen
+  IoAndroidOpen,
+  IoIosWorldOutline
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -162,6 +163,8 @@ export default class Icon extends Component {
       return <IoPaperAirplane/>;
     case 'Upload':
       return <IoAndroidOpen/>;
+    case 'World':
+      return <IoIosWorldOutline/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }
