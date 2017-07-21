@@ -33,7 +33,7 @@ export default class InvoiceAddress extends Component {
                 <AddressListContainer />
               </div>
             : <div className='address-preview'>
-              { !full_name && isLeader ?  <span>+ Add Address</span>
+              { !full_name && isLeader ?  <span>Choose an Address</span>
                 : <p>{`${full_name ? full_name + ',' : ''} ${line_1 ? line_1 + ',' : ''} ${city ? city : ''}`}</p>
               }
               {isLeader && full_name ? <span>Change</span> : null}
