@@ -20,7 +20,7 @@ if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('
   module.hot.accept();
 }
 
-const socket = io(`${location.protocol}//${location.hostname}:3000`);
+const socket = io(`${location.protocol}//${location.hostname}${location.hostname === 'localhost' ? ':3000' : ''}`);
 
 const history = createHistory();
 history.listen((location, action) => {

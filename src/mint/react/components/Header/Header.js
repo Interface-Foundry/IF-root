@@ -81,10 +81,10 @@ export default class Header extends Component {
         </TransitionGroup>
         <div className='header__right'>
             {!userName ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}
-            <div className='navbar__icon' onClick={_toggleSidenav}>
+            {userName ?<div className='navbar__icon' onClick={_toggleSidenav}>
               <Icon icon='Hamburger'/>
                {/* showAlert ? <AlertBubble top={13} right={25} /> : null */}
-            </div>
+            </div> : null }
         </div>
       </nav>
     );
