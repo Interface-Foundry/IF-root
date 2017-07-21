@@ -18,29 +18,28 @@ export default class Toast extends Component {
     showToast: false
   }
 
-  componentWillMount() {
+  componentWillMount = () => {
     const { status, toast } = this.props;
-    if (toast && status)::this._showToast(status, toast);
+    if (toast && status) this._showToast(status, toast);
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps = ({ toast: newToast, status: newStatus, loc: { pathname: newPath } }) => {
     const { toast, status, loc: { pathname: path } } = this.props;
-    const { toast: newToast, status: newStatus, loc: { pathname: newPath } } = nextProps;
-    if ((newToast && newStatus) && (toast !== newToast || status !== newStatus))::this._showToast(newStatus, newToast);
-    else if (newPath !== path)::this._cancelRedirect();
+    if ((newToast && newStatus) && (toast !== newToast || status !== newStatus)) this._showToast(newStatus, newToast);
+    else if (newPath !== path) this._cancelRedirect();
   }
 
-  _cancelRedirect() {
+  _cancelRedirect = () => {
     this.setState({ toast: null, status: null, showToast: false });
     clearTimeout(this.redirect);
     this.redirect = null;
   }
 
-  _showToast(status, toast) {
+  _showToast = (status, toast) => {
     setTimeout(() => this.setState({ status, toast, showToast: true }), 1);
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
-      ::this._clearParams();
+      this._clearParams();
     }, 4000);
   }
 
@@ -49,24 +48,25 @@ export default class Toast extends Component {
     clearTimeout(this.redirect);
     this.setState({ showToast: false });
     let cleanSearch = loc.search
-      .replace(/toast=.*?&status=.*?($|&)/, '')
+      .replace(/toast=.*?($|&)/, '')
+      .replace(/status=.*?($|&)/, '')
       .replace(/(&*|\?*)$/, ''); // remove toast stuff from the url, then clean out any trailing &s or ?s
     replace(loc.pathname + cleanSearch);
   }
 
-  render() {
+  render = () => {
     const { props: { status, toast }, state: { showToast } } = this;
     return (
       <TransitionGroup>
         {
-          showToast 
+          showToast
             ? <CSSTransition
                key={toast.length}
                classNames='toastTransition'
                timeout={990}
               >
                 <div className={`${status} toast`} key={toast}>
-                  {toast}
+                  {toast.split('\\n').map((l,i) => <p key={i}>{l}</p> )}
                 </div>
               </CSSTransition>
             : null

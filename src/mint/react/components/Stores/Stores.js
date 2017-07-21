@@ -16,8 +16,7 @@ export default class Stores extends Component {
 
   render = () => {
     const { stores = [] } = this.props;
-    const
-      normal = stores.filter(store => !store.global_direct),
+    const normal = stores.filter(store => !store.global_direct),
       firstStore = [normal.shift() || []],
       suggested = firstStore.concat(stores.filter(store => store.global_direct)),
       otherStores = normal.slice() || [];
