@@ -46,9 +46,10 @@ export default class Cart extends Component {
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
-      lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length >= 8 ? 8 : 5 ) : 2 ) : 0,
-      nextAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length >= 12 ?  12 : 8 ) : 5 ) : 2;
+      lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length >= 8 ? ( userCarts.others.length > 12 ? 12 : 8 ) : 5 ) : 2 ) : 0,
+      nextAward = userCarts.others.length > 2 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 2;
 
+    console.log(userCarts.others.length)
     return (
       <table className='cart'>
         <thead>
