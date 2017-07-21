@@ -293,10 +293,21 @@ module.exports.tryHtml = async function (s,html) {
 					available = true
 				}
 
+				var text = $('img',this).attr('title')
+				text = text.split('').map(c => c.charCodeAt())
+				text = text.filter(function (code) {
+					return code !== 215
+					// cutting out those weird x's
+				})
+				text = text.map(code => String.fromCharCode(code))
+				text = text.join('')
+
+
 				s.options.push({
 					type: 'color',
 					original_name: {
-						value: $('img',this).attr('title') //get value inside img title in this
+						// value: $('img',this).attr('title') //get value inside img title in this
+						value: text
 					},
 					thumbnail_url: $('img',this).attr('src'),
 					main_image_url: $('img',this).attr('src'),
