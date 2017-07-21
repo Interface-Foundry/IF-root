@@ -38,11 +38,15 @@ module.exports.tryHtml = async function (s,html) {
 			s.original_description.value = $('.md_tip').text().trim()
 
 			//price
-			if($('.after_price').text()){
-				var p = $('.after_price').text().trim().replace(/[^0-9.]/g, "")
-			}else if($('.big').text()){
-				var p = $('.big').text().trim().replace(/[^0-9.]/g, "")
-			}
+		  if($('.after_price').text()){
+		    var p = $('.after_price').text().trim().replace(/[^0-9.]/g, "")
+		    logging.info('first p', p)
+		  } else if ($('.price').find('.big')) { //on sale
+		    var p = $('.price').find('.big').text().trim().replace(/[^0-9.]/g, "")
+		  }else if($('.big').text()){
+		    var p = $('.big').text().trim().replace(/[^0-9.]/g, "")
+		    logging.info('second p', p)
+		  }
 
 			if(p){
 				s.original_price.value = parseFloat(p)
