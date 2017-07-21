@@ -29,19 +29,21 @@ var stores = [{
   }
 ]
 
-var urlStores = require('./UrlStoreTypes')
+if (process.env.NODE_ENV !== 'production') {
+  var urlStores = require('./UrlStoreTypes')
 
-Object.keys(urlStores).map(store => {
-  stores.push({
-    store_img: urlStores[store].image,
-    store_type: store + '_' + urlStores[store].locale,
-    store_name: store,
-    store_domain: urlStores[store].domain,
-    store_countries: [urlStores[store].locale],
-    default_image: urlStores[store].default_image,
-    global_direct: true
+  Object.keys(urlStores).map(store => {
+    stores.push({
+      store_img: urlStores[store].image,
+      store_type: store + '_' + urlStores[store].locale,
+      store_name: store,
+      store_domain: urlStores[store].domain,
+      store_countries: [urlStores[store].locale],
+      default_image: urlStores[store].default_image,
+      global_direct: true
+    })
   })
-})
+}
 
 const countryCoordinates = {
   'US': [37.0902, -95.7129],
