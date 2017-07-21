@@ -19,5 +19,17 @@ module.exports = {
     domain: 'lotte.com',
     image: 'https://storage.googleapis.com/kip-random/kip_stores/lotte_kr.png',
     default_image: 'https://storage.googleapis.com/kip-random/kip_stores/cart_images/lotte_kr.png'
+  },
+  Waitrose: {
+    locale: 'GB',
+    domain: 'waitrose.com',
+    image: 'https://storage.googleapis.com/kip-random/kip_stores/punyus_jp.png',
+    default_image: 'https://storage.googleapis.com/kip-random/kip_stores/cart_images/muji_jp.png'
+  },
+  "Tokyu": {
+    locale: 'JP',
+    domain: 'hands.net',
+    image: 'https://storage.googleapis.com/kip-random/kip_stores/punyus_jp.png',
+    default_image: 'https://storage.googleapis.com/kip-random/kip_stores/cart_images/muji_jp.png'
   }
 }
