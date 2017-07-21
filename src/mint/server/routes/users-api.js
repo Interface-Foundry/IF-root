@@ -19,8 +19,8 @@ passport.use(new FacebookStrategy({
 }, async function (accessToken, refreshToken, profile, done) {
   //create an account for our facebook user if one does not already exist
   if (!profile.emails || !profile.emails.length) {
-    throw new Error('your facebook account sucks')
-    // return done('no email address received from facebook')
+    // throw new Error('your facebook account sucks')
+    return done(null, false)
   }
   var email = profile.emails[0].value
   var name = profile.name.givenName + ' ' + profile.name.familyName
@@ -186,7 +186,7 @@ module.exports = function (router) {
   router.get('/auth/facebook', passport.authenticate('facebook', {
     scope: ['email'],
     successRedirect: '/',
-    failureRedirect: '/'
+    failureRedirect: '/api/facebook/failure'
   }))
 
   /**
@@ -209,7 +209,7 @@ module.exports = function (router) {
   /**
    * @api {get} /api/facebook/failure
    */
-  router.get('/facebook/failure', (req, res) => co(function * () {
+  router.get('/facebook/failure', (req, res) => function () {
     res.send('kip is sad because you did not trust kip with your email address.')
   }))
 
