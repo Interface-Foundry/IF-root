@@ -41,7 +41,7 @@ export default class Toast extends Component {
     setTimeout(() => {
       this.setState({ toast: null, status: null, showToast: false });
       ::this._clearParams();
-    }, 4000);
+    }, 2200);
   }
 
   _clearParams() {

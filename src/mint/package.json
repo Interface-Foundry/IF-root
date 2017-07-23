@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "@google-cloud/logging-winston": "^0.5.0",
+    "@google-cloud/storage": "^1.2.1",
     "@google-cloud/translate": "^1.0.0",
     "@google/cloud-debug": "^0.9.3",
     "@google/cloud-trace": "^0.6.3",
