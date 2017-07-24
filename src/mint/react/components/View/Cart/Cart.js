@@ -76,6 +76,17 @@ export default class Cart extends Component {
               share={true}/>
           </tr>
           {
+            cart.locked ? <tr className={`checkedout`}>
+              <RewardCard 
+                title={`${cart.name} CHECKED OUT!`}
+                sub={`${userCarts.others.length} members in order`}
+                classes='yellow'
+                imageSrc={_getCompleteImage(lastAward)}
+                number={'icon'}
+                cart={cart}/>
+            </tr> : null
+          }
+          {
             userCarts.others.map((userCart, index) => {
               let memberNumber = userCarts.others.length - index;
               const color = _getColor(memberNumber);
@@ -103,7 +114,7 @@ export default class Cart extends Component {
               )
             })
           }
-          <tr className={`double yellow bottom`}>
+          <tr className={`double bottom`}>
             <RewardCard 
               title={`${getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED`}
               sub={`By ${cart.leader.name} ${timeFromDate(cart.createdAt)}`}

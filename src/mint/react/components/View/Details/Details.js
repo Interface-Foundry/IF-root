@@ -41,6 +41,7 @@ export default class Details extends Component {
       }],
       likedList = likes.map((id) => id),
       isAdmin = user.id === leader.id,
+      storeUrl = store === 'Lotte' || store === 'Muji' ? `//www.${store.toLowerCase()}.com` : `//${store.toLowerCase()}.${store_locale.toLowerCase()}`,
       nextAchievement = members.length > 2 ? ( members.length > 5 ? ( members.length > 7 ? [] : [{ reqs: 10, discount: 100 }] ) : [{ reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] ) :  [{ reqs: 3, discount: 30 }, { reqs: 6, discount: 80 }];
 
     return (
@@ -48,7 +49,7 @@ export default class Details extends Component {
         <tbody>
           <tr>
             <th colSpan='100%'>
-              <div className={`card ${locked ? 'locked' : ''}`}>
+              <div className={`card`}>
                 <div className='cover'>
                   <div className='left'>
                     <div className={'image'} style={{
@@ -57,16 +58,12 @@ export default class Details extends Component {
                     <div className='text'>
                       <h1>
                         {
-                          locked ? <div className='locked'>
-                            <Icon icon='Locked'/>
+                          isAdmin ? <Link to={`/cart/${id}/m/edit`}>
                             {name}
-                          </div> : ( isAdmin ? <Link to={`/cart/${id}/m/edit`}>
-                              {name}
-                              <Icon icon='Settings'/>
-                            </Link> : <div className='locked'>
-                              {name}
-                            </div>
-                          )
+                            <Icon icon='Settings'/>
+                          </Link> : <div className='locked'>
+                            {name}
+                          </div>
                         }
                       </h1>
                       <CartDescription {...this.props} />
@@ -95,7 +92,7 @@ export default class Details extends Component {
                   }
                   <div className='store right'>
                     <Icon icon='Upload'/>
-                    <h4><a href={`//${store.toLowerCase()}.${store_locale.toLowerCase()}`}><span>{getStoreName(store, store_locale)}</span></a></h4>
+                    <h4><a target='_blank' href={storeUrl}><span>{getStoreName(store, store_locale)}</span></a></h4>
                   </div>
                 </div>
               </div>

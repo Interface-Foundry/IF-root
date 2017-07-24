@@ -49,7 +49,7 @@ export default class UserCart extends Component {
                       <h1>{item.name}</h1>
                       <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                       {
-                        !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
+                        user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
                           <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                           <p>{ item.quantity }</p>
                           <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>

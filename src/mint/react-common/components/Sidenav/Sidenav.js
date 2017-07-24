@@ -83,8 +83,7 @@ export default class Sidenav extends Component {
                     <SideNavLink to={`/cart/${c.id}`}>
                       <p>
                         {c.name}
-                        {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
-                        {!c.locked ? <span><br/>{c.store} {c.store_locale}</span> : null}
+                        <span><br/>{c.store} {c.store_locale}</span>
                       </p>
                     </SideNavLink>
                   </li>

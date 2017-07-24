@@ -17,6 +17,7 @@ const mapStateToProps = (state, props) => {
   return {
     cart: state.cart.present,
     user: state.user,
+    tab: state.app.viewTab,
     invoice: state.payments.invoice
   };
 };

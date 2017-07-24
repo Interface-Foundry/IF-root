@@ -15,7 +15,7 @@ export default class RewardCard extends Component {
       <th colSpan='100%' className={classes}>
         <div className={`card reward ${classes}`}>
           <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
-            { number }
+            { number === 'icon' ? <Icon icon='Check'/> : number }
           </div>
           <div className='text'>
             <h1>{title}</h1>
