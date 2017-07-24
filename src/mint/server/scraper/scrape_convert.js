@@ -12,6 +12,7 @@ var utils = require('./scrape_utils')
 var handle_html = require('./handle_html')
 var fx_currency = require('./foreign_exchange')
 var translate = require('./text_translation')
+var images = require('./store_images')
 
 //come here and get localized
 var getLocale = function (url,user_country,user_locale,store_country,domain){
@@ -73,6 +74,8 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
  		s = await fx_currency.storeFx(rates[s.user.currency],price,s)
 
 		s = await translate.translateText(s)
+
+		s = await images.processImages(s)
 
     	//save RAW HTML here
  	  	var raw = await db.RawHtml.create({

@@ -56,9 +56,22 @@ function validate(itemData) {
 
 var start = async function () {
 	// console.log(itemData)
-	var urls = await fs.readFile('./server/scraper/urls.txt', 'utf8')
-	urls = urls.split('\n')
-	logging.info('FILE', urls)
+	
+	// var urls = await fs.readFile('./server/scraper/urls.txt', 'utf8')
+	// urls = urls.split('\n')
+	// logging.info('FILE', urls)
+
+	var urls = [
+	// 'https://www.muji.net/store/cmdty/detail/4549738478638?searchno=4'
+	// https://www.muji.net/store/cmdty/detail/4549738496939?searchno=1
+	// https://www.muji.net/store/cmdty/detail/4549738522508
+	// http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370476&allViewYn=N
+	// http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=396484359&infw_disp_no_sct_cd=78&infw_disp_no=5505566&allViewYn=N
+	// http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370475&allViewYn=N
+	// https://store.punyus.jp/detail/PN17SS-008/
+	// https://store.punyus.jp/detail/PN17SS-142/
+		'https://store.punyus.jp/detail/PN17SS-194-1/'
+	]
 
 	for (var i = 0; i < urls.length; i++) {
 		var uri = urls[i]

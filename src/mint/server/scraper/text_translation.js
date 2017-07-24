@@ -65,13 +65,14 @@ module.exports.translateText = async function (s){
  	// // multiple texts.
    	return translate.translate(text, target)
      .then((results) => {
-       translations = results[0]
-       translations = Array.isArray(translations) ? translations : [translations];
- 			translations = pg(translations)
- 			return translations
+		translations = results[0]
+		translations = Array.isArray(translations) ? translations : [translations];
+		translations = pg(translations)
+		return translations  	
      })
      .catch((err) => {
        logging.error('ERROR:', err);
+       return null
      });
      // return translations
  }

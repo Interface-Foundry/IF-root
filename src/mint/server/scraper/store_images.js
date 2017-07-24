@@ -11,68 +11,113 @@ const bucketName = 'kip-product-images'
 
 // Reference an existing bucket. 
 var bucket = gcs.bucket(bucketName)
+
+
+module.exports.processImages = async function (s){
+
+	console.log(s.main_image_url)
+
+	if(s.main_image_url){
+		s.main_image_url = await storeImage(s.main_image_url)
+		s.thumbnail_url = s.main_image_url
+	}
+
+
+	//WE'll eventually make a promise.all here for parallel runnign all images
+	// var imageQ = []
+
+	// for (i = 0; i < optionQ.length; i++) {
+	// 	htmlQ.push(utils.scrapeURL(optionQ[i].opt_url))
+	// }
+	// var results = await Promise.all(htmlQ)
+
+	// if(s.)
+
+	return s
+
+}
+
  
+//pass an image url and it will download from the site, upload to google cloud and return the cloud image URL
+var storeImage = async function (uri){
 
+	var imgURL
+	var fileType = path.extname(uri).substring(1)
+	var MIMEType
+	//get MIME type
+	switch(fileType){
+		case 'jpg':
+		case 'jpeg':
+			MIMEType = 'image/jpeg' //can someone explain why it's the same MIME type wtf
+		break
+		case 'png':
+			MIMEType = 'image/png'
+		break
+		case 'gif':
+			MIMEType = 'image/gif'
+		break
+	}
 
+	if(fileType !== 'jpg' && fileType !== 'png' && fileType !== 'jpeg' && fileType !== 'gif'){
+		logging.error('NOT CORRECT FILE TYPE')
+		return uri //keep the path as is
+	}
 
-var uri = 'http://image.lotte.com/goods/51/22/75/62/3/362752251_1_550.jpg'
+	console.log('FILE TYPE ',fileType)
+	console.log('MIME ',MIMEType)
 
-var fileType = path.extname(uri).substring(1)
+	//unique name for this image
+	const fileId = uniqid()
 
-console.log('fileType ',fileType)
+	var options = {
+	    uri: uri,
+	    encoding: null
+	}
+	await request(options, function(error, response, body) {
+	    if (error || response.statusCode !== 200) { 
+	        logging.error("failed to get image ",error);
+	    } else {
 
-if(fileType !== 'jpg'){
-	console.log('NOT CORRECT FILE TYPE')
-	return uri //keep the path as is
+	    	console.log('🐧1')
+	    	//pass buffer into new file on gcloud
+			var bufferStream = new stream.PassThrough();
+			bufferStream.end(new Buffer(body));
+
+			//new bucket file
+			var file = bucket.file(fileId+'.'+fileType);
+
+			console.log('🐧2')
+			//pipe bufferStream into file.createWriteStream 
+			bufferStream.pipe(file.createWriteStream({
+			    metadata: {
+			      contentType: MIMEType,
+			      metadata: {
+			        custom: 'metadata'
+			      }
+			    },
+			    public: true,
+			    validation: "md5"
+			  }))
+			  .on('error', function(err) {
+			  	logging.error('stream to google cloud storage failed')
+			  })
+			  .on('finish', function() {
+			  	console.log('🐧3')
+
+			    imgURL = 'https://storage.googleapis.com/'+bucketName+'/'+fileId+'.'+fileType
+			});
+
+			 console.log('🐧4')
+	    }   
+	})
+
+	//just return the original if we failed at uploading an image
+	if(!imgURL){
+		console.log('NOPE')
+		imgURL = uri
+	}
+
+	console.log('RETURNING ',imgURL)
+	return imgURL
 }
-
-//unique name for this image
-const fileId = uniqid()
-
-//download image 
-//
-//generate image ID
-//
-var options = {
-    uri: uri,
-    encoding: null
-}
-
-request(options, function(error, response, body) {
-    if (error || response.statusCode !== 200) { 
-        console.log("failed to get image");
-        console.log(error);
-    } else {
-
-		var bufferStream = new stream.PassThrough();
-		bufferStream.end(new Buffer(body));
-
-		//new bucket file
-		var file = bucket.file(fileId+'.jpg');
-
-		//pipe bufferStream into file.createWriteStream 
-		bufferStream.pipe(file.createWriteStream({
-		    metadata: {
-		      contentType: 'image/jpeg',
-		      metadata: {
-		        custom: 'metadata'
-		      }
-		    },
-		    public: true,
-		    validation: "md5"
-		  }))
-		  .on('error', function(err) {
-		  	console.log('stream to google cloud storage failed')
-		  })
-		  .on('finish', function() {
-		    // The file upload is complete.
-		    console.log('https://storage.googleapis.com/'+bucketName+'/'+fileId+'.png')
-
-		});
-    }   
-});
-
-
-
-
 
