@@ -26,7 +26,7 @@ module.exports = {
     image: 'https://storage.googleapis.com/kip-random/kip_stores/punyus_jp.png',
     default_image: 'https://storage.googleapis.com/kip-random/kip_stores/cart_images/muji_jp.png'
   },
-  "Tokyu": {
+  "Hands": {
     locale: 'JP',
     domain: 'hands.net',
     image: 'https://storage.googleapis.com/kip-random/kip_stores/punyus_jp.png',

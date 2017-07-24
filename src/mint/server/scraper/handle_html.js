@@ -5,6 +5,7 @@ var lotte = require('./stores/lotte')
 var punyus = require('./stores/punyus')
 var muji = require('./stores/muji')
 var waitrose = require('./stores/waitrose')
+var hands = require('./stores/hands')
 
 //scraper stuff
 var fx_currency = require('./foreign_exchange')
@@ -36,6 +37,9 @@ module.exports.tryHtml = async function (s,html) {
 
 		case 'waitrose.com':
 			return await waitrose(s, $)
+
+		case 'hands.net':
+			return await hands(s, $)
 
 		default:
 			return logging.error('error no domain found for store')

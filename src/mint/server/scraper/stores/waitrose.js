@@ -20,6 +20,5 @@ module.exports = async function (s, $) {
   //get price
   s.original_price.value = $('.price').find('input').attr('value')
 
-  console.log('sssssss', s)
   return s
 }
