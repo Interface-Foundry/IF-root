@@ -318,6 +318,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           background: $mainColor;
         }
 
+        &.video {
+          .vid__container {
+            padding: $padding 0;
+          }
+        }
+
         .image {
           display: inline-block;
           background-size: cover;

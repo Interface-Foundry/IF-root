@@ -76,6 +76,23 @@ export default class Cart extends Component {
               share={true}/>
           </tr>
           {
+            cart.locked ? <tr className={``}>
+              <th colSpan='100%' className={``}>
+                <div className={`card reward video`}>
+                  <div className='image' style={{backgroundImage: `url(//storage.googleapis.com/kip-random/social/new_cart.png)`}}>
+                  </div>
+                  <div className='text'>
+                    <h1>Lotte Unboxing Video ❤️</h1>
+                    <p>Added 5 days ago</p>
+                  </div>
+                  <div className='vid__container'>
+                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/2dq6pgMdNn4?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
+                  </div>
+                </div>
+              </th>
+            </tr> : null
+          }
+          {
             cart.locked ? <tr className={`checkedout`}>
               <RewardCard 
                 title={`${cart.name} CHECKED OUT!`}
@@ -118,7 +135,7 @@ export default class Cart extends Component {
             <RewardCard 
               title={`${getStoreName(cart.store, cart.store_locale) ? getStoreName(cart.store, cart.store_locale).toUpperCase() : null} CART CREATED`}
               sub={`By ${cart.leader.name} ${timeFromDate(cart.createdAt)}`}
-              imageSrc='https://storage.googleapis.com/kip-random/social/new_cart.png'
+              imageSrc='//storage.googleapis.com/kip-random/social/new_cart.png'
               classes='one'/>
           </tr>
         </tbody>
