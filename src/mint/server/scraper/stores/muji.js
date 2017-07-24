@@ -45,7 +45,7 @@ module.exports = async function (s, $) {
   })
 
   //CHECK FOR SIZES
-      console.log('SIZE STUFF')
+      // console.log('SIZE STUFF')
   $('#size').find('dd').each(function(i, elm) {
     //did user select?
         // console.log('text:', $(this).text().trim())

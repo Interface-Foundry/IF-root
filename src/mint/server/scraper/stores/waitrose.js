@@ -10,7 +10,7 @@ module.exports = async function (s, $) {
   s.name = $('h1').text().split('\n')[0].trim()
 
   //get product description
-  s.description = $('.product-info').find('p').first().text()
+  s.description = $('.product-info').children('p').text()
   // console.log('d e s c r i p t i o n', description)
 
   //get images
