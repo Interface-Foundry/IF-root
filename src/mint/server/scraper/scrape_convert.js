@@ -72,7 +72,7 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
  		var price = await fx_currency.foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,rates)
  		s = await fx_currency.storeFx(rates[s.user.currency],price,s)
 
-		s = await translate.translateText(s)
+		if (!s.description && !s.name) s = await translate.translateText(s)
 
     	//save RAW HTML here
  	  	var raw = await db.RawHtml.create({
