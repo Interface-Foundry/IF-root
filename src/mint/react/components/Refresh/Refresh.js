@@ -17,18 +17,23 @@ class Refresh extends Component {
     loading: false
   }
 
-  _resetLoading = () => this.setState({ loading: false })
-
   _update = () => {
-    const { props: { refresh, cartId, userId, createTimeout }, _resetLoading } = this;
+    const { props: { refresh, cartId, userId, createTimeout } } = this;
     this.setState({ loading: true });
-    createTimeout(() => _resetLoading, 2000);
+    createTimeout(() => {
+      this.setState({ loading: false })
+    }, 2000);
     refresh(cartId, userId);
   }
+  // shouldComponentUpdate = (_, { loading }) => this.state.loading !== loading
 
-  render = () =>
-    <div className={`refresh${this.state.loading? ' rotating':''}`} onClick={this._update}>
-      <div className='wrapper'><Icon icon='Refresh'/></div>
-    </div>
+  render = () => {
+    const { state: { loading }, _update } = this;
+    return (
+      <div className={`refresh ${loading? 'rotating':''}`} onClick={_update}>
+        <div className='wrapper'><Icon icon='Refresh'/></div>
+      </div>
+    );
+  }
 }
 export default Timeout(Refresh);

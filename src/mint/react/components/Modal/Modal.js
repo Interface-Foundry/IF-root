@@ -40,8 +40,8 @@ export default class Modal extends Component {
   render = () =>
     this.state.showModal
     ? (
-      <div className='modal-overlay'>
-            <div className='modal-box'>
+      <div className='modal-overlay' onClick={this._closeModal}>
+            <div className='modal-box' onClick={(e) => e.stopPropagation()}>
               <div className='modal-box__head'>
                 <a className='close' href='#' onClick={this._closeModal}><Icon icon='Clear'/></a>
               </div>

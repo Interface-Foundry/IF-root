@@ -2,8 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { AddressListContainer } from '../../../containers';
-// import PaymentTypes from './PaymentTypes';
+import { AddressListContainer } from '../../../../containers';
 
 export default class InvoiceAddress extends Component {
   static propTypes = {

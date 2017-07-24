@@ -17,6 +17,7 @@ export RefreshContainer from './RefreshContainer';
 export ResultsContainer from './ResultsContainer';
 export SearchContainer from './SearchContainer';
 export SettingsContainer from './SettingsContainer';
+export ShareContainer from './ShareContainer';
 export SidenavContainer from './SidenavContainer';
 export StoresContainer from './StoresContainer';
 export TabsContainer from './TabsContainer';

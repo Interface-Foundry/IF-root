@@ -6,8 +6,7 @@ import { updateUser, fetchCart, fetchCarts, fetchMetrics } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
   cartId: state.cart.present.id,
-  userId: state.user.id,
-  loading: state.loading.loading
+  userId: state.user.id
 });
 
 const mapDispatchToProps = dispatch => ({

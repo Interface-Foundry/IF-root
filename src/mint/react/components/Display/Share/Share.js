@@ -37,7 +37,7 @@ const shareIconsForMobile = [{
 const shareIconsForDesktop = [{
     icon: 'Facebook',
     label: 'Facebook',
-    link: 'https://www.facebook.com/dialog/share?app_id='+encodeURIComponent(1401271990193674)+'&display='
+    link: 'https://www.facebook.com/dialog/share?app_id=' + encodeURIComponent(1401271990193674) + '&display='
   },
   {
     icon: 'Twitter',
@@ -54,12 +54,20 @@ const shareIconsForDesktop = [{
     label: 'Email',
     link: 'mailto:?subject=KipCart&body='
   }
-]
+];
 // IOS, for facebook
 export default class Share extends Component {
   static propTypes = {
-    location: PropTypes.object
+    location: PropTypes.object,
+    setTab: PropTypes.func,
+    tab: PropTypes.string
   }
+
+  componentDidMount() {
+    const { setTab, tab } = this.props;
+    if (tab !== 'share') setTab('share');
+  }
+
   openFailedHandler = () => {
     if (navigator.userAgent.toLowerCase()
       .indexOf('android') > -1) {
@@ -85,7 +93,7 @@ export default class Share extends Component {
     shareUrl = shareUrl ? shareUrl[1] : `http://kipthis.com/cart/${pathname.match(/cart\/((\d|\w)+)/)[1]}`;
     const linkedIcons = addLinkToDeepLink(shareIconsForMobile, shareUrl);
     const desktopIcons = addLinkToDesktop(shareIconsForDesktop, shareUrl);
-    
+
     return (
       <div className='share'>
         <div className='share__message'>
@@ -106,7 +114,7 @@ export default class Share extends Component {
             ? linkedIcons.map((icon, i) => {
                 if(icon.icon === 'Facebook') return (
                     <FacebookShareButton
-                      key={i} 
+                      key={i}
                       url={shareUrl}
                       title='Share Cart'
                       picture='//storage.googleapis.com/kip-random/head_smaller.png'
@@ -115,7 +123,7 @@ export default class Share extends Component {
                       <label>{icon.label}</label>
                     </FacebookShareButton>
                   );
-                return ( 
+                return (
                    <a href={icon.deepLink} key={i} className='share__icons__icon' onClick={() => tryToOpen(icon.icon)}>
                       <Icon icon={icon.icon}/>
                       <label>{icon.label}</label>
@@ -128,8 +136,8 @@ export default class Share extends Component {
                             <Icon icon={icon.icon}/>
                             <label>{icon.label}</label>
                           </a>
-                        )
-              })               
+                        );
+              })
           }
         </div>
       </div>

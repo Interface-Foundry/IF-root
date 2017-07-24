@@ -23,7 +23,6 @@ class Tabs extends Component {
 
   clearHightlight = null
 
-
   _getTabs = ({ invoice, numItems, id, query, highlight = false }) => {
     const tabs = [{
       id: 1,
@@ -46,7 +45,13 @@ class Tabs extends Component {
       display: 'Share'
     }];
     if (invoice && invoice.display) {
-      tabs.push({ id: 4, tab: 'invoice', display: 'Invoice', icon: 'PriceTag' });
+      tabs.push({
+        id: 4,
+        tab: 'invoice',
+        display: 'Invoice',
+        icon: 'PriceTag',
+        url: `/cart/${id}/m/invoice`
+      });
     }
     return tabs;
   }
