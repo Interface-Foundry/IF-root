@@ -5,7 +5,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Route } from 'react-router';
+import { Route, Switch } from 'react-router';
 import ReactGA from 'react-ga';
 
 import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginScreenContainer, SidenavContainer, StoresContainer, ModalContainer } from '../../containers';
@@ -147,7 +147,10 @@ export default class App extends Component {
         { loading ? <Loading/> : null}
         <ModalContainer />
         <Route path={'/'} component={HeaderContainer} />
-        <Route path={'/cart/:cart_id*'} exact component={TabsContainer} />
+        <Switch>
+          <Route path={'/cart/:cart_id/m/edit'} exact component={null} />
+          <Route path={'/cart/:cart_id*'} exact component={TabsContainer} />
+        </Switch>
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={scroll => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Display} />
@@ -156,7 +159,7 @@ export default class App extends Component {
           <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
         </div>
-        { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }
+        { sidenav ? <SidenavContainer large={match.url.includes('/newcart')}/> : null }
 
         {
         // no jittery fix for mobile

@@ -20,7 +20,7 @@ export default class Stores extends Component {
       firstStore = [normal.shift() || []],
       suggested = firstStore.concat(stores.filter(store => store.global_direct)),
       otherStores = normal.slice() || [];
-
+    console.log([...suggested.map(s => s.store_type), ...otherStores.map(s => s.store_type)])
     return (
       <section>
         <div className='cart_store'>

@@ -21,7 +21,7 @@ export default class InvoiceAddress extends Component {
     const { address = {} } = invoice;
     const { full_name = '', line_1 = '', city = '' } = address;
     return (
-      <div className={`invoice accordion ${isLeader ? 'clickable' : ''}`} onClick={() => isLeader ? selectAccordion('changeinvoice') : null}>
+      <div className={`address accordion ${isLeader ? 'clickable' : ''}`} onClick={() => isLeader ? selectAccordion('changeinvoice') : null}>
         <nav className={isLeader ? 'clickable' : ''}>
           <h2>1. Shipping Address</h2>
         </nav>

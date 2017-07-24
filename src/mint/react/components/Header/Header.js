@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-import { Route } from 'react-router';
+import { Route, Switch } from 'react-router';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import CartHeader from './CartHeader';
 import SettingsHeader from './SettingsHeader';
@@ -40,29 +40,30 @@ export default class Header extends Component {
     return (
       <nav className='navbar'>
         <div className='header__left'>
-          <Route path={'/cart/:cart_id*'} exact component={() =><CartHeader {...props}/> } />
+          <Switch>
+            <Route path={'/cart/:cart_id/m/edit'} exact component={() =>
+                <SettingsHeader text='Edit Cart Settings' icon="Settings" {...props}/>
+              }
+            />
 
-          <Route path={'/cart/:cart_id/m/edit'} exact component={() =>
-              <SettingsHeader text='Edit Cart Settings' icon="Settings" {...props}/>
-            }
-          />
-
-          <Route path={'/newcart'} exact component={() =>
-              <SettingsHeader text='Select Store' icon="Settings" {...props}/>
-            }
-          />
-          <Route path={'/m/settings'} exact component={() =>
-              <SettingsHeader text='Edit My Settings' icon="Settings" {...props}/>
-            }
-          />
-          <Route path={'/m/archive'} exact component={() =>
-              <SettingsHeader text='My Locked Carts' icon='Locked' {...props}/>
-            }
-          />
-          <Route path={'/m/feedback'} exact component={() =>
-              <SettingsHeader text='Feedback' icon="Email" {...props}/>
-            }
-          />
+            <Route path={'/newcart'} exact component={() =>
+                <SettingsHeader text='Select Store' icon="Settings" {...props}/>
+              }
+            />
+            <Route path={'/m/settings'} exact component={() =>
+                <SettingsHeader text='Edit My Settings' icon="Settings" {...props}/>
+              }
+            />
+            <Route path={'/m/archive'} exact component={() =>
+                <SettingsHeader text='My Locked Carts' icon='Locked' {...props}/>
+              }
+            />
+            <Route path={'/m/feedback'} exact component={() =>
+                <SettingsHeader text='Feedback' icon="Email" {...props}/>
+              }
+            />
+            <Route path={'/cart/:cart_id*'} exact component={() =><CartHeader {...props}/> } />
+          </Switch>
         </div>
         <div className='header__buttons'>
         <Route path={'/cart/:cart_id'} exact component={RefreshContainer} />

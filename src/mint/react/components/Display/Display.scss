@@ -1,12 +1,11 @@
 // react/components/Display/Display.scss
-
 @import '../../../react-common/styles/Constants';
 @import '../../../react-common/styles/Animations';
 
 .display {
   background: white;
   bottom: 0;
-  height: 100%;
+  height: calc(100% - 50px);
   left: 0;
   margin: 0 auto;
   max-width: 900px;
@@ -16,13 +15,8 @@
   text-align: center;
   top: 0;
   z-index: 100;
-
-  // * > span {
-  //   display: none;
-  // }
-
   @media only screen and (max-width: 600px) {
-    height: calc(100% - 50px);
+
     padding: 0;
     top: $nav-height;
   }
@@ -30,13 +24,13 @@
   @media (min-width: 900px) {
     border-radius: 0px 0px 5px 5px;
     box-shadow: $card-box-shadow;
-    height: 99%;
+
   }
 
   .display__form {
     padding: $padding ($padding * 2) ($padding * 2) ($padding * 2);
 
-    & > div {
+    &>div {
       position: relative;
     }
 

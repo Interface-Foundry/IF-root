@@ -7,6 +7,9 @@
 
   ul {
     padding: $padding;
+    .payment-methods {
+      display: flex;
+    }
     li {
       border: 1px solid white;
       padding: $padding;

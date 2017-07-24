@@ -32,18 +32,20 @@ export default class PaymentSources extends Component {
       <div>
         {
           paymentSources.map((payment, i) => (
-            <li key={i} className={selectedCardIndex === i ? 'selected' : ''} onClick={() => this.setState({selectedCardIndex: i})}>
+            <li key={i} className={(selectedCardIndex === i ? 'selected' : '') + ' clickable'} onClick={() => this.setState({selectedCardIndex: i})}>
               <div className='circle'/>
               <div className='text'>
                   <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
                   <p>Exp: {moment().month(payment.exp_month).year(payment.exp_year).format('MM/YYYY')}</p>
-                  <button onClick={()=> deletePaymentSource(payment.id)}>~Delete This~</button>
+                  <button className='delete__button' onClick={()=> deletePaymentSource(payment.id)}>Remove Card</button>
               </div>
             </li>
           ))
         }
       {
-        (paymentSources.length > 0) ? <button onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}> pay </button> : <h1> you need to add a card </h1>
+        (paymentSources.length > 0 && selectedCardIndex !== null)
+          ? <button className='pay__button' onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}>Pay With Selected Card</button>
+          : null
       }
       </div>
     );
