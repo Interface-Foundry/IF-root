@@ -28,7 +28,7 @@ export default class CartHeader extends Component {
             backgroundImage: 'url(//storage.googleapis.com/kip-random/website/logo_for_blue_bg.svg)'
           }}>
             <span className='beta'>beta</span>
-          </div> 
+          </div>
           <div className={'image mobile'} style={{
             backgroundImage: 'url(//storage.googleapis.com/kip-random/headtrans.png)'
           }}>
@@ -36,7 +36,6 @@ export default class CartHeader extends Component {
           </div>
         </Link>
         <SearchContainer />
-        <RefreshContainer />
       </span>
     );
   }

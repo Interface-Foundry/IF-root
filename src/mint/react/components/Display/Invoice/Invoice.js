@@ -14,16 +14,20 @@ export default class Invoice extends Component {
     cart: PropTypes.object,
     user: PropTypes.object,
     selectedAccordion: PropTypes.string,
-    fetchInvoiceByCart: PropTypes.func
+    fetchInvoiceByCart: PropTypes.func,
+    tab: PropTypes.string,
+    setTab: PropTypes.func
   }
 
   componentDidMount() {
-    const { cart, fetchInvoiceByCart } = this.props;
+    const { cart, fetchInvoiceByCart, tab, setTab } = this.props;
+    if (tab !== 'invoice') setTab();
     fetchInvoiceByCart(cart.id);
+
   }
 
   componentWillReceiveProps = ({ cart, fetchInvoiceByCart }) =>
-    cart.id !== this.props.cart.id ? fetchInvoiceByCart(cart.id) : null;
+    (cart.id !== this.props.cart.id) ? fetchInvoiceByCart(cart.id) : null
 
   render() {
     const { selectedAccordion, user, cart } = this.props;

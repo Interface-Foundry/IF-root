@@ -147,8 +147,7 @@ export default class App extends Component {
         { loading ? <Loading/> : null}
         <ModalContainer />
         <Route path={'/'} component={HeaderContainer} />
-        <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
-        <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
+        <Route path={'/cart/:cart_id*'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={scroll => this.scroll = scroll}>
           <Toast toast={toast} status={status} loc={location} replace={replace}/>
           <Route path={'/cart/:cart_id/m/*'} component={Display} />
@@ -156,20 +155,17 @@ export default class App extends Component {
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
           <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
-
-
         </div>
         { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }
 
         {
-          // no jittery fix for mobile
-        }
+        // no jittery fix for mobile
         <div className='noJudder'>
           { tab === 'cart' ? <ButtonsContainer /> : null }
           <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
           <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         </div>
-
+        }
       </section>
     );
   }

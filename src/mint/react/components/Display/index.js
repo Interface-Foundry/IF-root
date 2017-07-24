@@ -8,5 +8,6 @@ export EditCart from './EditCart';
 export Feedback from './Feedback';
 export Settings from './Settings';
 export Share from './Share';
+export Invoice from './Invoice';
 
 export default Display;

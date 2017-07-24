@@ -4,11 +4,12 @@
 import React, { Component } from 'react';
 
 export default Composition => class Timeout extends Component {
-
   timeouts = [];
 
-  createTimeout() {
-    this.timeouts.push(setTimeout.apply(null, arguments));
+  constructor(props) {
+    super(props);
+    const self = this;
+    this.createTimeout = function () { self.timeouts.push(setTimeout.apply(null, arguments)) };
   }
 
   clearTimeouts = () =>

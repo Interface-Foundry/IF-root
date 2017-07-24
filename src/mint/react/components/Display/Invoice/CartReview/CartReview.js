@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 
-import { displayCost, numberOfItems } from '../../../utils';
+import { displayCost, numberOfItems } from '../../../../utils';
 
 const shippingOptions = [{
     name: 'Fast',

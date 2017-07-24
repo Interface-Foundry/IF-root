@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import PaymentSources from './PaymentSources';
 import Stripe from './Stripe';
-import Paypal from './Paypal'
+import Paypal from './Paypal';
 
 export default class Payment extends Component {
 
@@ -77,14 +77,15 @@ export default class Payment extends Component {
                     userPaymentStatus.paid ? <p> user has already paid </p> :
                       <div>
                         <PaymentSources {...this.props}/>
-                        <Stripe {...this.props}/>
+                        <Stripe {...this.props} />
+                        <Paypal {...this.props} />
                       </div>
                   }
                 </ul>
             </div>
             : null
           }
-          <Paypal key='asdfsdaf' {...this.props}/>
+
       </div>
     );
   }

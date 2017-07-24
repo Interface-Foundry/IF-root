@@ -1,7 +1,8 @@
-@import '../../../react-common/styles/Constants';
-@import '../../../react-common/styles/Animations';
+@import '../../../../react-common/styles/Constants';
+@import '../../../../react-common/styles/Animations';
 
 .invoice {
+  text-align: left;
   position: relative;
   margin-top: $padding*1.5;
   background: white;
