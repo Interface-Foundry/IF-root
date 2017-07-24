@@ -64,7 +64,8 @@ module.exports.storeFx = async function(rates,price,s){
 	s.original_price.fx_rate = rates
     s.original_price.fx_rate_src = 'fixer.io'
     s.original_price.fx_on =  new Date()
-    s.original_price.fx_spread = currencySpread
+    s.original_price.fx_spread = currencySpread,
+		s.original_price.fx_to = s.user.currency
 	s.price = price
 	return s
 }

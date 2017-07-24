@@ -209,21 +209,6 @@ router.get('/newcart/:store', (req, res) => co(function * () {
     cart.thumbnail_url = chosen_store.default_image
   }
   else throw new Error('Cannot create new cart for store ' + req.params.store)
-  // if (!req.params.store) {
-  //   cart.store = 'Amazon'
-  //   cart.store_locale = 'US'
-  // } else if (req.params.store === 'YPO') {
-  //   cart.store = 'YPO'
-  //   cart.store_locale = 'GB'
-  // } else if (req.params.store.includes('Amazon')) {
-  //   cart.store = 'Amazon'
-  //   cart.store_locale = req.params.store.split('_')[1]
-  // } else if (req.params.store.includes('Muji')) {
-  //   cart.store = 'Muji'
-  //   cart.store_locale = 'JP'
-  // } else {
-  //   throw new Error('Cannot create new cart for store ' + req.params.store)
-  // }
 
   // figure out what country the user is in
   var geo = geolocation(req) || geolocation.default
