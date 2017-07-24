@@ -4,11 +4,12 @@
 .invoice {
   text-align: left;
   position: relative;
-  margin-top: $padding*1.5;
   background: white;
   border-radius: $padding/2;
   width: 100%;
   padding: $padding $padding*2;
+  height: 100%;
+  overflow-y: auto;
 
   .deletebutton {
     position: relative;
