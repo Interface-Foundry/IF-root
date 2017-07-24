@@ -1,20 +1,21 @@
 var fs = require('fs')
+var thunkify = require('thunkify')
 var request = require('request-promise')
 var stream = require('stream')
 var uniqid = require('uniqid')
 var path = require('path')
 
 //update your README google ugh, make sure to include the () at the end of:
-var gcs = require('@google-cloud/storage')() 
+var gcs = require('@google-cloud/storage')()
 
 const bucketName = 'kip-product-images'
 
-// Reference an existing bucket. 
+// Reference an existing bucket.
 var bucket = gcs.bucket(bucketName)
 
 
 module.exports.processImages = async function (s){
-
+	console.log('processImages')
 	console.log(s.main_image_url)
 
 	if(s.main_image_url){
@@ -23,7 +24,7 @@ module.exports.processImages = async function (s){
 	}
 
 
-	//WE'll eventually make a promise.all here for parallel runnign all images
+	//WE'll eventually make a promise.all here for parallel running all images
 	// var imageQ = []
 
 	// for (i = 0; i < optionQ.length; i++) {
@@ -37,7 +38,7 @@ module.exports.processImages = async function (s){
 
 }
 
- 
+
 //pass an image url and it will download from the site, upload to google cloud and return the cloud image URL
 var storeImage = async function (uri){
 
@@ -73,12 +74,13 @@ var storeImage = async function (uri){
 	    uri: uri,
 	    encoding: null
 	}
-	await request(options, function(error, response, body) {
-	    if (error || response.statusCode !== 200) { 
+	await request(options,
+		function(error, response, body) {
+	    if (error || response.statusCode !== 200) {
 	        logging.error("failed to get image ",error);
 	    } else {
 
-	    	console.log('🐧1')
+	    	console.log('#1')
 	    	//pass buffer into new file on gcloud
 			var bufferStream = new stream.PassThrough();
 			bufferStream.end(new Buffer(body));
@@ -86,30 +88,34 @@ var storeImage = async function (uri){
 			//new bucket file
 			var file = bucket.file(fileId+'.'+fileType);
 
-			console.log('🐧2')
-			//pipe bufferStream into file.createWriteStream 
-			bufferStream.pipe(file.createWriteStream({
-			    metadata: {
-			      contentType: MIMEType,
-			      metadata: {
-			        custom: 'metadata'
-			      }
-			    },
-			    public: true,
-			    validation: "md5"
-			  }))
-			  .on('error', function(err) {
-			  	logging.error('stream to google cloud storage failed')
-			  })
-			  .on('finish', function() {
-			  	console.log('🐧3')
+			console.log('#2')
+			//pipe bufferStream into file.createWriteStream
 
-			    imgURL = 'https://storage.googleapis.com/'+bucketName+'/'+fileId+'.'+fileType
-			});
-
-			 console.log('🐧4')
-	    }   
+			imgURL = new Promise((resolve, reject) => {
+				bufferStream.pipe(file.createWriteStream({
+				    metadata: {
+				      contentType: MIMEType,
+				      metadata: {
+				        custom: 'metadata'
+				      }
+				    },
+				    public: true,
+				    validation: "md5"
+				  }))
+				  .on('error', function(err) {
+				  	logging.error('stream to google cloud storage failed')
+						reject()
+				  })
+				  .on('finish', function() {
+				  	console.log('#3')
+				    resolve('https://storage.googleapis.com/'+bucketName+'/'+fileId+'.'+fileType)
+				});
+			})
+	    }
 	})
+
+	await imgURL;
+	console.log('#4')
 
 	//just return the original if we failed at uploading an image
 	if(!imgURL){
@@ -120,4 +126,3 @@ var storeImage = async function (uri){
 	console.log('RETURNING ',imgURL)
 	return imgURL
 }
-
