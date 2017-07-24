@@ -35,7 +35,7 @@ export default class Stripe extends Component {
         allowRememberMe={false}
         amount={amount}
       >
-        <button>+ add card with stripe</button>
+        <button>+ Add a Card with Stripe</button>
       </StripeCheckout>
     );
   }

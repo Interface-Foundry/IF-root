@@ -77,8 +77,10 @@ export default class Payment extends Component {
                     userPaymentStatus.paid ? <p> user has already paid </p> :
                       <div>
                         <PaymentSources {...this.props}/>
-                        <Stripe {...this.props} />
-                        <Paypal {...this.props} />
+                        <span className='payment-methods'>
+                          <Stripe {...this.props} />
+                          <Paypal {...this.props} />
+                        </span>
                       </div>
                   }
                 </ul>
