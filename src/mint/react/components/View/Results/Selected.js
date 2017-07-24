@@ -61,7 +61,7 @@ export default class Selected extends Component {
           }}/>
           <div className='text'>
             <h1>{item.name}</h1>
-            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+            <h4> Price: <span className='price'>{displayCost(item.price, cart.price_locale)}</span> </h4>
             <div className='action'>
               {
                 !cart.locked && user.id ? <div className={`update ${inCart ? 'grey' : ''}`}>

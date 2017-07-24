@@ -78,7 +78,7 @@ export default class Default extends Component {
                 <span className='inner-button'>
                   <Icon icon='Cart'/>
                   <p className='checkout-button-text'>Checkout</p>
-                  <p className='checkout-button-text'>{displayCost(total, cart.store_locale)}</p>
+                  <p className='checkout-button-text'>{displayCost(total, cart.price_locale)}</p>
                   <Icon icon='RightChevron'/>
                 </span>
               </button>
@@ -95,14 +95,14 @@ export default class Default extends Component {
                 cart.items.length === 0
                 ?
                   <button className='yellow sub' disabled={true}>
-                    Checkout <span>{displayCost(total, cart.store_locale)}</span>
+                    Checkout <span>{displayCost(total, cart.price_locale)}</span>
                   </button>
                 :
                   <button className='yellow sub' onClick={this._orderCart}>
                     <span className='inner-button'>
                       <Icon icon='Cart'/>
                       <p className='checkout-button-text'>Checkout</p>
-                      <p className='checkout-button-text'>{displayCost(total, cart.store_locale)}</p>
+                      <p className='checkout-button-text'>{displayCost(total, cart.price_locale)}</p>
                       <Icon icon='RightChevron'/>
                     </span>
                   </button>

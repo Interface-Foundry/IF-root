@@ -28,10 +28,10 @@ export default class Default extends Component {
           <div className={'image'} style={{
             backgroundImage: `url(${item.main_image_url})`
           }}/>
-          <div className='text'> 
+          <div className='text'>
             <h1>{item.name}</h1>
-            <h4> <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
-          </div> 
+            <h4> <span className='price'>{displayCost(item.price, cart.price_locale)}</span> </h4>
+          </div>
           <div className='action'>
             { !inCart ? <button className='more' onClick={() => { selectItem(item.id); fetchSearchItem(item.id); }}>More info</button> : null }
             { !user.id  ? <button onClick={() => togglePopup()}>Login to Save</button> : null }

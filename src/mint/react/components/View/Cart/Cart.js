@@ -68,7 +68,7 @@ export default class Cart extends Component {
                   </h4>
                   <h4>
                   <z>
-                    Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.store_locale)}</span> &nbsp;
+                    Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.price_locale)}</span> &nbsp;
                   </z>
                   </h4>
                   { !openCarts.includes(user.id) ? <ul>
@@ -79,9 +79,9 @@ export default class Cart extends Component {
                             backgroundImage: `url(${item.main_image_url})`
                           }}/>
                           <div className='text'>
-                            <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                            <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.price_locale)}</a></span>
                             <h1>{item.name}</h1>
-                            <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+                            <h4> Price: <span className='price'>{displayCost(item.price, cart.price_locale)}</span> </h4>
                             {
                               !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
                                 <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
@@ -94,7 +94,7 @@ export default class Cart extends Component {
                             editId === item.id ? (
                               <div className='extra'>
                                 <div className='text__expanded'>
-                                  <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                                  <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.price_locale)}</a></span>
                                   <div>
                                     {item.description}
                                   </div>
@@ -123,7 +123,7 @@ export default class Cart extends Component {
                       <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
                     </h1>
                     <h4>
-                      <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.store_locale)}</span> &nbsp;
+                      <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.price_locale)}</span> &nbsp;
                       <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
                     </h4>
 
@@ -136,9 +136,9 @@ export default class Cart extends Component {
                                 backgroundImage: `url(${item.main_image_url})`
                               }}/>
                               <div className='text'>
-                                <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+                                <span><a href={item.original_link} target="_blank">View on {getStoreName(cart.store, cart.price_locale)}</a></span>
                                 <h1>{item.name}</h1>
-                                <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
+                                <h4> Price: <span className='price'>{displayCost(item.price, cart.price_locale)}</span> </h4>
                                 {
                                   !cart.locked && user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
                                     <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>

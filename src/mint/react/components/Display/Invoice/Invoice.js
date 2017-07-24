@@ -23,7 +23,6 @@ export default class Invoice extends Component {
     const { cart, fetchInvoiceByCart, tab, setTab } = this.props;
     if (tab !== 'invoice') setTab();
     fetchInvoiceByCart(cart.id);
-
   }
 
   componentWillReceiveProps = ({ cart, fetchInvoiceByCart }) =>
