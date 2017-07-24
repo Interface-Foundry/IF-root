@@ -99,16 +99,15 @@ export default class Selected extends Component {
             <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
             <div className='action'>
               {
-                !cart.locked && user.id ? <div className={`update ${inCart ? 'grey' : ''}`}>
+                user.id ? <div className={`update ${inCart ? 'grey' : ''}`}>
                   <button onClick={() => item.quantity === 1 ? null : updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                   <p>{ item.quantity }</p>
                   <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
                 </div> : null
               }
               { !user.id  ? <button className='sticky' onClick={() => togglePopup()}>Login to Save to Cart</button> : null }
-              { cart.locked && user.id ? <button disabled={true}><Icon icon='Locked'/></button> : null }
-              { !cart.locked && user.id && !inCart ? <button className='sticky' onClick={() => addItem(cart.id, item.id, optionIds)}><span><Icon icon='Check'/> Save to Cart</span></button> : null}
-              { !cart.locked && user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
+              { user.id && !inCart ? <button className='sticky' onClick={() => {addItem(cart.id, item.id, optionIds); selectItem(null)}}><span><Icon icon='Check'/> Save to Cart</span></button> : null}
+              { user.id && inCart ?<button className='sticky warn' onClick={(e) => {removeItem(cart.id, item.id);}}>Remove from Cart</button>: null}
             </div>
             {
               options ? (

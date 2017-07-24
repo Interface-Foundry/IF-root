@@ -19,7 +19,6 @@ export default class Default extends Component {
   render() {
     const { user, cart, item, inCart, togglePopup, fetchSearchItem, submitQuery, updateQuery } = this.props;
 
-    console.log(this.props)
     return (
       <td>
         <div className={`card ${inCart ? 'incart' : ''}`}>

@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { Buttons } from '../components';
-import { push } from 'react-router-redux';
+import { push, replace } from 'react-router-redux';
 
 import {
   togglePopup,
@@ -10,7 +10,8 @@ import {
   selectAccordion,
   createInvoice,
   toggleYpoCheckout,
-  fetchInvoiceByCart
+  fetchInvoiceByCart,
+  toggleReward
 } from '../actions';
 
 const mapStateToProps = (state, props) => {
@@ -31,7 +32,14 @@ const mapDispatchToProps = dispatch => ({
   fetchInvoiceByCart: (cart_id) => dispatch(fetchInvoiceByCart(cart_id)),
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
-  toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show))
+  toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show)),
+  toggleReward: () => {
+    dispatch(toggleReward())
+    dispatch(replace(`${location.pathname}?toast=Purchase Successful&status=success`))
+    setTimeout(() => {
+      dispatch(toggleReward())
+    }, 2000);
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);

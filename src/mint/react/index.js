@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import { Route } from 'react-router';
 import createHistory from 'history/createBrowserHistory';
 import thunkMiddleware from 'redux-thunk';
-import { ConnectedRouter, routerMiddleware } from 'react-router-redux';
+import { ConnectedRouter, routerMiddleware, replace } from 'react-router-redux';
 import ReactGA from 'react-ga';
 import io from 'socket.io-client';
 import getClientId from './socket/client_id';
@@ -97,6 +97,7 @@ socket.on('ACTION', response => {
       store.dispatch(toggleReward())
       setTimeout(() => {
         store.dispatch(toggleReward())
+        store.dispatch(replace(`${location.pathname}?toast=Achievement Unlocked&status=success`))
       }, 2000);
     } 
   })

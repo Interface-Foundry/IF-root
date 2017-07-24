@@ -1,11 +1,11 @@
 // react/containers/SettingsContainer.js
 
 import { connect } from 'react-redux';
-import { replace } from 'react-router-redux';
+import { replace, push } from 'react-router-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem,  updateQuery } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, selectTab, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem,  updateQuery } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart, sleep } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -40,7 +40,10 @@ const mapDispatchToProps = dispatch => ({
       category: 'Cart',
       action: 'Item Added'
     });
-    return dispatch(addItem(cart_id, item_id, option_ids));
+    return dispatch(addItem(cart_id, item_id, option_ids)).then(() => {
+      dispatch(push(`/cart/${cart_id}`))
+      dispatch(selectTab('cart'))
+    });
   },
   selectItem: (item_id) => {
     ReactGA.event({
