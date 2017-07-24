@@ -298,16 +298,25 @@ module.exports = function (router) {
     .post(async (req, res) => {
       const userId = req.UserSession.user_account.id
       const paymentSourceId = req.params.paymentsource_id
-      const paymentSource = await PaymentSource.GetById(paymentSourceId)
-
-      if (paymentSource.user !== userId) {
-        throw new Error('UserId and paymentSource user must match')
-      }
-
       const invoice = await Invoice.GetById(req.body.invoice_id)
-      logging.info('creating payment with previously used card')
-      const payment = await paymentSource.pay(invoice)
-      logging.info('paid')
+      let payment
+
+      // we dont save info or precreate for
+      if (paymentSourceId === 'paypal') {
+        logging.info('creating payment for non paymentsource thing')
+        payment = await PaymentSource.CreatePaymentWithoutSource(paymentSourceId, userId, req.body.invoice_id, req.body.amount, req.body.payment_data)
+        logging.info('got payment')
+      } else {
+        logging.info('creating payment with previously used card')
+        const paymentSource = await PaymentSource.GetById(paymentSourceId)
+
+        if (paymentSource.user !== userId) {
+          throw new Error('UserId and paymentSource user must match')
+        }
+
+        payment = await paymentSource.pay(invoice)
+        logging.info('paid')
+      }
 
       // If this invoice has been fully paid, fire off whatever emails
       var done = await invoice.paidInFull()

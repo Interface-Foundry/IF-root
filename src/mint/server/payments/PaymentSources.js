@@ -51,6 +51,19 @@ class PaymentSource {
     return payments
   }
 
+  static async CreatePaymentWithoutSource(paymentSource, userId, invoiceId, amount, data) {
+
+    const payment = await db.Payments.create({
+      user: userId,
+      invoice: invoiceId,
+      amount: parseInt(amount),
+      payment_vendor: paymentSource,
+      data: data
+    })
+
+    return payment
+  }
+
 
   /**
    * create the payment objects that we update once a user has submitted payment/cancelled etc.

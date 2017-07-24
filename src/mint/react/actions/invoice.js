@@ -62,10 +62,10 @@ export const createPayment = (paymentsource_id, invoice_id) => post(
   })
 );
 
-export const createPaymentWithoutSource = (amount, payment_source, payment_data, invoice) => post(
-  '/api/payment',
+export const createPaymentWithoutSource = (amount, payment_data, payment_source, invoice) => post(
+  `/api/payment/${payment_source}`,
   'CREATE_PAYMENT_WITHOUT_SOURCE',
-  {'paypal': true, 'amount': amount, 'invoice_id': invoice, 'payment_data': payment_data, 'payment_source': payment_source},
+  {'amount': amount, 'invoice_id': invoice, 'payment_data': payment_data},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
