@@ -34,19 +34,24 @@ function validate(itemData) {
 	logging.info('itemData', itemData)
 	var valid = true
 
-	valid = valid && itemData.original_link
-	valid = valid && itemData.original_name && itemData.original_name.value
-	valid = valid && itemData.original_description && itemData.original_description.value
-	valid = valid && itemData.original_price && itemData.original_price.value
+	valid = valid && !!itemData.original_link
+	valid = valid && !!itemData.original_name && !!itemData.original_name.value
+	console.log('original_name', JSON.stringify(valid))
+
+	valid = valid && !!itemData.original_price && !!itemData.original_price.value
+	console.log('original_price', valid)
 
 	itemData.options.map(op => {
-		valid = valid && op.name
+		valid = valid && !!op.name
 	})
+	console.log('item options', JSON.stringify(valid))
 
-	valid = valid && itemData.product_id
-	valid = valid && itemData.main_image_url
-	valid = valid && itemData.price
-	valid = valid && itemData.raw_html
+	valid = valid && !!itemData.product_id
+	valid = valid && !!itemData.main_image_url
+	console.log('main_image_url', JSON.stringify(valid))
+
+	valid = valid && !!itemData.price
+	valid = valid && !!itemData.raw_html
 
 	return valid
 }
