@@ -62,6 +62,17 @@ export const createPayment = (paymentsource_id, invoice_id) => post(
   })
 );
 
+export const createPaymentWithoutSource = (amount, payment_source, payment_data, invoice) => post(
+  '/api/payment',
+  'CREATE_PAYMENT_WITHOUT_SOURCE',
+  {'paypal': true, 'amount': amount, 'invoice_id': invoice, 'payment_data': payment_data, 'payment_source': payment_source},
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
 export const createPaymentSource = (amount, payment_data, payment_source, invoice) => post(
   '/api/payment',
   'CREATE_PAYMENTSOURCE',
@@ -82,7 +93,6 @@ export const deletePaymentSource = (paymentsource_id) => del(
     receivedAt: Date.now()
   })
 );
-
 
 export const sendPaymentCollectionEmails = invoice_id => post(
   `/api/invoice/${invoice_id}`,
