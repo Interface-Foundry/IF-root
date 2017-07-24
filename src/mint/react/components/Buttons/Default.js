@@ -58,7 +58,7 @@ export default class Default extends Component {
     // if (store !== 'YPO') window.open(`/api/cart/${id}/checkout`);
 
     selectTab('cart')
-    toggleReward()
+    toggleReward(id)
   }
 
   render() {

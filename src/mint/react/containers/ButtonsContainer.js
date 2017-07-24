@@ -11,7 +11,8 @@ import {
   createInvoice,
   toggleYpoCheckout,
   fetchInvoiceByCart,
-  toggleReward
+  toggleReward,
+  fetchMetrics
 } from '../actions';
 
 const mapStateToProps = (state, props) => {
@@ -33,11 +34,12 @@ const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
   toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show)),
-  toggleReward: () => {
+  toggleReward: (cart_id) => {
     dispatch(toggleReward())
     dispatch(replace(`${location.pathname}?toast=Purchase Successful&status=success`))
     setTimeout(() => {
       dispatch(toggleReward())
+      dispatch(fetchMetrics(cart_id))
     }, 2000);
   }
 });
