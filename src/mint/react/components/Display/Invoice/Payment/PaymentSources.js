@@ -37,7 +37,7 @@ export default class PaymentSources extends Component {
               <div className='text'>
                   <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
                   <p>Exp: {moment().month(payment.exp_month).year(payment.exp_year).format('MM/YYYY')}</p>
-                  <button onClick={()=> deletePaymentSource(payment.id)}>~Delete This~</button>
+                  <button className='delete__button' onClick={()=> deletePaymentSource(payment.id)}>Remove Card</button>
               </div>
             </li>
           ))

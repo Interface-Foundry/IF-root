@@ -2,6 +2,7 @@
 
 import { connect } from 'react-redux';
 import { CheckoutModal } from '../components';
+import { push } from 'react-router-redux';
 import { toggleCheckoutModal, reorderCart, createInvoice, selectTab } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -17,8 +18,9 @@ const mapDispatchToProps = dispatch => ({
   },
   createInvoice: (cart) => {
     dispatch(createInvoice(cart.id, 'mint', 'split_by_item'));
-    dispatch(selectTab('invoice'));
+
     dispatch(toggleCheckoutModal(false));
+    dispatch(push(`/cart/${cart.id}/m/invoice`));
   }
 });
 

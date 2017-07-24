@@ -22,9 +22,22 @@
     padding: $padding 0;
 
     button {
+      font-family: $main-font;
       background: transparent;
-      border: 0;
+      border: 1px solid $secondaryColor;
+      border-radius: 5px;
+      margin: $padding / 2;
+      padding: $padding / 1.5;
       color: $secondaryColor;
+      font-size: 16px;
+      &.delete__button {
+        color: $fourthColor;
+        border-color: $fourthColor;
+        margin: 0 5px;
+        font-size: 10px;
+        padding: 2px;
+        letter-spacing: 0.75px;
+      }
     }
 
     nav {
