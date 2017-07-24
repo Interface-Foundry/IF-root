@@ -47,7 +47,7 @@ export default class Cart extends Component {
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
       lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 4 ? ( userCarts.others.length > 7 ? ( userCarts.others.length > 11 ? 12 : 8 ) : 5 ) : 3 ) : 0,
-      nextAward = userCarts.others.length > 3 ? ( userCarts.others.length > 5 ? ( userCarts.others.length > 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 3;
+      nextAward = userCarts.others.length >= 3 ? ( userCarts.others.length >= 5 ? ( userCarts.others.length >= 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 3;
 
     if(userCarts.others.length === 0) {
       userCarts.others.push({

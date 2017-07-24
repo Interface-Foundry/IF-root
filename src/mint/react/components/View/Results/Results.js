@@ -92,7 +92,6 @@ export default class Results extends Component {
     }
     //not showing trending items, do normal operation
     else {
-      console.log(results)
       displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
         ? isUrl
         ? [{ loading: true }]
