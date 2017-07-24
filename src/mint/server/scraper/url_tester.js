@@ -70,7 +70,19 @@ var start = async function () {
 	// http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=303964888&infw_disp_no_sct_cd=20&infw_disp_no=5370475&allViewYn=N
 	// https://store.punyus.jp/detail/PN17SS-008/
 	// https://store.punyus.jp/detail/PN17SS-142/
-		'https://store.punyus.jp/detail/PN17SS-194-1/'
+	'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=379178639&infw_disp_no_sct_cd=20&infw_disp_no=5021982&allViewYn=N'
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=208463377&infw_disp_no_sct_cd=10&infw_disp_no=5406545&allViewYn=Y&tclick=SMALL_shop_19',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=387963014&infw_disp_no_sct_cd=10&infw_disp_no=0&conr_no=48861&tracking=BIGCT_1676186_DEALGOODS_01&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=353847429&infw_disp_no_sct_cd=10&infw_disp_no=5406545&allViewYn=Y&tclick=SMALL_shop_19',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=396528273&infw_disp_no_sct_cd=20&infw_disp_no=5385125&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=269624429&infw_disp_no_sct_cd=20&infw_disp_no=5407940&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=392004200&infw_disp_no_sct_cd=20&infw_disp_no=5378431&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=396604212&infw_disp_no_sct_cd=20&infw_disp_no=5411774&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=356181082&infw_disp_no_sct_cd=10&infw_disp_no=0&conr_no=48861&tracking=BIGCT_1481413_DEALGOODS_05&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=379178639&infw_disp_no_sct_cd=20&infw_disp_no=5021982&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=372961334&infw_disp_no_sct_cd=10&infw_disp_no=0&conr_no=48861&tracking=BIGCT_5211738_DEALGOODS_07&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=280220224&infw_disp_no_sct_cd=10&infw_disp_no=1670756&conr_no=48866&tracking=BIGCT_1670756_BESTBRAND01_G02&allViewYn=N',
+	 // 'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=260030354&infw_disp_no_sct_cd=20&infw_disp_no=5409481&allViewYn=N'
 	]
 
 	for (var i = 0; i < urls.length; i++) {

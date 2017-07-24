@@ -13,16 +13,12 @@ const bucketName = 'kip-product-images'
 // Reference an existing bucket.
 var bucket = gcs.bucket(bucketName)
 
-
 module.exports.processImages = async function (s){
-	console.log('processImages')
-	console.log(s.main_image_url)
 
 	if(s.main_image_url){
 		s.main_image_url = await storeImage(s.main_image_url)
 		s.thumbnail_url = s.main_image_url
 	}
-
 
 	//WE'll eventually make a promise.all here for parallel running all images
 	// var imageQ = []
@@ -32,16 +28,12 @@ module.exports.processImages = async function (s){
 	// }
 	// var results = await Promise.all(htmlQ)
 
-	// if(s.)
-
 	return s
-
 }
 
 
 //pass an image url and it will download from the site, upload to google cloud and return the cloud image URL
 var storeImage = async function (uri){
-
 	var imgURL
 	var fileType = path.extname(uri).substring(1)
 	var MIMEType
@@ -64,9 +56,6 @@ var storeImage = async function (uri){
 		return uri //keep the path as is
 	}
 
-	console.log('FILE TYPE ',fileType)
-	console.log('MIME ',MIMEType)
-
 	//unique name for this image
 	const fileId = uniqid()
 
@@ -80,7 +69,6 @@ var storeImage = async function (uri){
 	        logging.error("failed to get image ",error);
 	    } else {
 
-	    	console.log('#1')
 	    	//pass buffer into new file on gcloud
 			var bufferStream = new stream.PassThrough();
 			bufferStream.end(new Buffer(body));
@@ -88,9 +76,7 @@ var storeImage = async function (uri){
 			//new bucket file
 			var file = bucket.file(fileId+'.'+fileType);
 
-			console.log('#2')
 			//pipe bufferStream into file.createWriteStream
-
 			imgURL = new Promise((resolve, reject) => {
 				bufferStream.pipe(file.createWriteStream({
 				    metadata: {
@@ -115,14 +101,11 @@ var storeImage = async function (uri){
 	})
 
 	await imgURL;
-	console.log('#4')
 
 	//just return the original if we failed at uploading an image
 	if(!imgURL){
-		console.log('NOPE')
 		imgURL = uri
 	}
 
-	console.log('RETURNING ',imgURL)
 	return imgURL
 }
