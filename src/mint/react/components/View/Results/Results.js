@@ -83,15 +83,16 @@ export default class Results extends Component {
       return <EmptyContainer />; // don't bother with the loops if there aren't results
     } 
 
-    let displayedResults    
+    let displayedResults = [];  
 
     //trending mode true, show trending
     if(trendingMode){
       const trending = trendingData.getTrending(cart.store);
-      displayedResults = trending;      
+      displayedResults = trending || [];      
     }
     //not showing trending items, do normal operation
     else {
+      console.log(results)
       displayedResults = (loading || lazyLoading) // best: O(1)(just copying) worst: O(2n)(filling and then mapping)
         ? isUrl
         ? [{ loading: true }]
