@@ -19,6 +19,7 @@ module.exports = {
       'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.GA': JSON.stringify(true || process.env.GA),
       'process.env.STRIPE_KEY': JSON.stringify('pk_live_0LCJqLkmMCFKYDwbPCrhQknH'),
+      'process.env.PAYPAL_KEY': JSON.stringify('AVr0hZHU5vDLj1MVHlVchyeDCOrcmFPCT2pxv3A0zLjntjmiwT4wP-pH1K92jwlShkZj5IDYX08FYfbX'),
       'process.env.KIP_PAY_ENABLED': JSON.stringify(process.env.KIP_PAY_ENABLED)
     }),
     new webpack.optimize.OccurrenceOrderPlugin(),

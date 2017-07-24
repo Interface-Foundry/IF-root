@@ -7,6 +7,19 @@ const stripeConstants = {
   productionId: 'sk_live_LsboW21QfCziFnE1DwCKOC8d'
 }
 
+const paypalConstants = {
+  // probably should sign up for real one but using
+  // sandbox_account: graham.annett-facilitator@gmail.com
+  sandbox: {
+    'client_id': 'AW4Qaa3xF5SKI1Ysz6kTkFWq0c7AGBtpUXlJEkkO8SMhMO5Kn--MiEjVvhG6fwTkj0cuhTbmJMlF7_om',
+    'secret': 'ENb66BTZvmHDCWW7dLvH-bjfQOgTHXKOmRgqxhQQj6OGE2VDh4bLrd3lguyu0lgwaDcq2sc3swMw1RXM'
+  },
+  live: {
+    'client_id': 'AVr0hZHU5vDLj1MVHlVchyeDCOrcmFPCT2pxv3A0zLjntjmiwT4wP-pH1K92jwlShkZj5IDYX08FYfbX',
+    'secret': 'EP_RKjhxgdqrCDFlPzngORDECznYGTYdgzV0IyivLdiD5B6Hp22OJ5oniv5O3IZUjdEqra4o_thsz5tV'
+  },
+}
+
 /**
   public keys to put into site for easy availability:
     - production: 'pk_live_0LCJqLkmMCFKYDwbPCrhQknH'

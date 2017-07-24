@@ -70,6 +70,7 @@
     "react-html5video": "^2.1.0",
     "react-icons": "^2.2.3",
     "react-motion": "^0.5.0",
+    "react-paypal-express-checkout": "^1.0.1",
     "react-progressive-image": "^0.1.2",
     "react-redux": "^5.0.4",
     "react-router": "^4.1.2",
