@@ -12,6 +12,8 @@ import search from './search';
 import user from './user';
 import payments from './payments';
 
+import loading from './loading';
+
 export default combineReducers({
   app,
   cart: undoable(cart, {
@@ -23,7 +25,8 @@ export default combineReducers({
   search,
   user,
   routing,
-  payments
+  payments,
+  loading
 });
 
 // export selectors

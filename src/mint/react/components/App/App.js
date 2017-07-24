@@ -83,8 +83,10 @@ export default class App extends Component {
   _handleScroll = () => {
     const {
       props: { location: { search }, query, cart, page, getMoreSearchResults, lazyLoading, setHeaderCheckout, tab },
-      scroll: { scrollTop, scrollHeight, clientHeight }
+      scroll = {}
     } = this;
+    const { scrollTop = null, scrollHeight = null, clientHeight = null } = scroll; // in case scroll is undefined
+    if (!(scrollTop && scrollHeight && clientHeight)) return;
     if (search && checkPageScroll(scrollTop, scrollHeight, clientHeight) && !lazyLoading && query) {
       // animate scroll, needs height of the container, and its distance from the top
       getMoreSearchResults(query, cart.store, cart.store_locale, page + 1);
