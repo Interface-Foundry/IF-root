@@ -199,12 +199,11 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   var cart = {}
 
   // Figure out what store they are shopping at and in what locale
-  console.log('req.params.store', req.params) //TODO dynamically
   if (!req.params.store) throw new Error('No store provided for cart creation')
   var chosen_store = stores.find(function (s) {
-    return req.params.store.includes(s.store_name.split(' ')[0])
+    return req.params.store === s.store_type
   })
-  if (chosen_store) {
+  if (chosen_store) { //chosen store is amazon_US
     cart.store = chosen_store.store_name.split(' ')[0]
     cart.store_locale = chosen_store.store_countries[0]
     cart.thumbnail_url = chosen_store.default_image
