@@ -31,7 +31,6 @@ module.exports = function (router) {
       * @apiParam {object} { refund_type: refund_id }, refund type either invoice_id or payment_id, and then respective payment/invoice id
       */
     .post(async (req, res) => {
-      logging.info('in invoice/refund~~~~~')
       // refund all for invoice
       if (_.get(req, 'body.invoice_id')) {
         logging.info('using invoice_id')
@@ -54,11 +53,6 @@ module.exports = function (router) {
         const refund = await PaymentSource.RefundPaymentId(req.body.payment_id)
         return res.send(refund)
       }
-    })
-
-    router.get('/invoice/asdf/', async (req, res) => {
-      const refund = await PaymentSource.RefundPaymentId('dbe62ce9-f40f-4c96-a126-ed042be748f5')
-      return res.send(refund)
     })
 
     router.route('/invoice/refund/:refund_key/:refund_status')
