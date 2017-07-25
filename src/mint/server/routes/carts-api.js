@@ -522,7 +522,7 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
-    const cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    var cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
     if (!cart) {
       throw new Error('Cart not found')
     }
@@ -547,11 +547,14 @@ module.exports = function (router) {
 
     // Remove the cart-item association
     cart.items.remove(item.id)
+    yield cart.save()
+    cart = yield db.Carts.findOne({id: cart.id})
+    // delete cart.items[item.id] //delete on our local json so that the next part works
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
-    
     var activeMembers = cart.items.map(item => item.added_by)
+    logging.info('activeMembers', activeMembers)
     if (item.added_by !== cart.leader && activeMembers.indexOf(item.added_by) < 0) {
       logging.info('member no longer has items in the cart')
       cart.members.remove(item.added_by)

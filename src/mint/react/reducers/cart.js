@@ -35,7 +35,12 @@ export default function cart(state = initialState, action) {
   case 'CART_SUCCESS':
     return {
       ...initialState,
-      ...action.response
+      ...action.response,
+      achievements: state.achievements,
+      checkouts: state.checkouts,
+      clones: state.clones,
+      views: state.views,
+      likes: state.likes
     };
   case 'CART_FAIL':
     return {

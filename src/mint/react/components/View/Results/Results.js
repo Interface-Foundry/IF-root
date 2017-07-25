@@ -142,36 +142,36 @@ export default class Results extends Component {
           {
             partitionResults.map((itemrow, i) => (
             <tr key={i} >
-                {
-                  itemrow.map((item, i) => 
-                    item.loading
-                      ? <LoadingTile key={i}/>
-                      : item.selected
-                        ? <Selected
-                          key={item.id}
-                          inCart={item.inCart}
-                          arrow={arrow}
+              {
+                itemrow.map((item, i) => 
+                  item.loading
+                    ? <LoadingTile key={i}/>
+                    : item.selected
+                      ? <Selected
+                        key={item.id}
+                        inCart={item.inCart}
+                        arrow={arrow}
+                        item={item}
+                        numResults={results.length}
+                        {...this.props}
+                      /> 
+                    : item.trending
+                      ? <Trending
+                        key={i}
+                        item={item}
+                        inCart={item.inCart}
+                        {...this.props}
+                      /> 
+                      : <Default
+                          key={i}
                           item={item}
-                          numResults={results.length}
-                          {...this.props}
-                        /> 
-                      : item.trending
-                        ? <Trending
-                          key={item.id}
-                          item={item}
                           inCart={item.inCart}
                           {...this.props}
-                        /> 
-                        : <Default
-                            key={item.id}
-                            item={item}
-                            inCart={item.inCart}
-                            {...this.props}
-                          />
+                        />
                   )
                 }
               </tr>
-          ))
+            ))
           }
         </tbody>
         {

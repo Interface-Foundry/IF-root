@@ -72,8 +72,8 @@ export default class Default extends Component {
       <div className='default'>
         <span>
             {
-              cart.items.length === 0
-              ?
+              cart.leader.id === user.id ? (
+                cart.items.length === 0 ?
                 <button className='yellow sub' disabled={true}>
                   Checkout <span>{displayCost(total, cart.store_locale)}</span>
                 </button>
@@ -95,7 +95,8 @@ export default class Default extends Component {
                     </a>
                   </button>
                 )
-              }
+              ) : null
+            }
             {!checkoutOnly ? <button className='blue' onClick={::this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
           </span>
       </div>

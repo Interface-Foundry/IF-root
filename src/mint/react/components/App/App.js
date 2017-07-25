@@ -150,7 +150,7 @@ export default class App extends Component {
         <Route path={'/cart/:cart_id'} exact component={TabsContainer} />
         <Route path={'/cart/:cart_id/m/share'} exact component={TabsContainer} />
         <div className={`app__view ${sidenav ? 'squeeze' : ''} ${pathname.includes('/m/') ? 'displayOpen' : ''}`} ref={(scroll) => this.scroll = scroll}>
-          <Toast toast={toast} status={status} loc={location} replace={replace}/>
+          { toast ? <Toast toast={toast} status={status} loc={location} replace={replace}/> : null }
           <Route path={'/cart/:cart_id/m/*'} component={Display} />
           <Route path={'/newcart'} exact component={StoresContainer} />
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />

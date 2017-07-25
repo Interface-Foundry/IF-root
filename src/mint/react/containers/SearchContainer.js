@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 
 import { Search } from '../components';
-import { updateQuery, toggleHistory, submitQuery } from '../actions';
+import { updateQuery, toggleHistory, submitQuery, clearSearchResults } from '../actions';
 import { isUrl, addSearchHistory, sleep } from '../utils';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -22,7 +22,8 @@ toggleHistory: (show) => sleep(100).then(()=>dispatch(toggleHistory(show))),
     if (!isUrl(query)) addSearchHistory(query);
     dispatch(push(`?q=${query}`));
     return dispatch(submitQuery(encodeURIComponent(query), store, locale));
-  }
+  },
+  clearSearchResults: () => dispatch(clearSearchResults())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Search);

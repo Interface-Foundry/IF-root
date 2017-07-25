@@ -58,8 +58,13 @@ class UrlStore extends Store {
         // logging.info('new option')
         var option = itemData.options[i]
 
+        // make sure this isn't a duplicate size
+        if (option.type === 'size') {
+          options = options.filter(o => {
+            return o.type !== 'size' || o.name != option.original_name.value
+          })
+        }
 
-        // logging.info('OPTION:', option) //the
         // create translations
         var original_name = await db.Translations.create(option.original_name)
         original_name.translated_value = option.name
@@ -89,6 +94,7 @@ class UrlStore extends Store {
       delete itemData.options
     }
     logging.info('created options')
+
     // create the item translations
     var itemName  = await db.Translations.create(itemData.original_name)
     itemName.translated_value = itemData.name

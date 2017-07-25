@@ -97,6 +97,7 @@ export {
   fetchCategories,
   navigateRightResults,
   navigateLeftResults,
-  getMoreSearchResults
+  getMoreSearchResults,
+  clearSearchResults
 }
 from './search';

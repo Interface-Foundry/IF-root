@@ -20,6 +20,10 @@ export const toggleHistory = show => ({
   history: show
 });
 
+export const clearSearchResults = () => ({
+  type: 'CLEAR_SEARCH'
+})
+
 export const updateQuery = query => ({
   type: 'UPDATE_QUERY',
   response: {

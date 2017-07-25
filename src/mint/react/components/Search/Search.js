@@ -74,7 +74,7 @@ export default class Search extends Component {
   }
 
   render() {
-    const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
+    const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery, clearSearchResults } = this.props, { selectedQuery } = this.state;
     return (
       <form onSubmit={::this._processSearch} className='search'>
         <button type='submit' className='submit'>
@@ -91,7 +91,7 @@ export default class Search extends Component {
           onKeyDown={::this._handeKeyPress}
           ref={(searchInput) => this.searchInput = searchInput}
           />
-        <button className='cancel' type='button' disabled={!query.length} onClick={(e) => {updateQuery(''); this.searchInput.focus();}}>
+        <button className='cancel' type='button' disabled={!query.length} onClick={(e) => {updateQuery(''); this.searchInput.focus(); clearSearchResults()}}>
             <Delete />
         </button>
         { showHistory ? <History {...this.props} selectedQuery={selectedQuery} /> : null }
