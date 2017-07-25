@@ -34,6 +34,15 @@ const stripe = require('stripe')(stripeSecret)
 const userPaymentAmountHandler = require('../utilities/invoice_utils').userPaymentAmountHandler
 
 
+const paypal = require('paypal-rest-sdk');
+
+paypal.configure({
+  'mode': 'sandbox',
+  'client_id': paypalConstants.sandbox.client_id,
+  'client_secret': paypalConstants.sandbox.client_secret
+});
+
+
 class PaymentSource {
   constructor(paymentSource, args = {}) {
     this.paymentSource = paymentSource
@@ -126,17 +135,19 @@ class PaymentSource {
    */
   static async RefundPaymentId (paymentId) {
     const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source').populate('invoice')
-    logging.info('using payment.payment_source.payment_vendor',  payment.payment_source.payment_vendor)
+
+    const paymentVendor = _.get(payment, 'payment_vendor') ? payment.payment_vendor : payment.payment_source.payment_vendor
+    logging.info('using payment.payment_vendor', paymentVendor)
 
     logging.info('checking if invoice can be refunded:', payment.invoice.refund_ability)
     if (payment.invoice.refund_ability === false) {
       throw new Error('Cant refund when refund_ability === false')
     }
 
-    const PaymentSourceClass = paymentSourceHandlers[payment.payment_source.payment_vendor]
-    PaymentSourceClass.refundPayment(payment)
+    const PaymentSourceClass = paymentSourceHandlers[paymentVendor]
+    const refund = await PaymentSourceClass.refundPayment(payment)
 
-    return
+    return refund
   }
 
   static async DeletePaymentSource(userId, paymentsourceId) {
@@ -240,16 +251,31 @@ class PaypalPaymentSource extends PaymentSource {
     return 'paypal'
   }
 
+  static async refundPayment (payment) {
+    logging.info('refunding paypal payment')
+
+    const adminToEmail = (process.env.ADMIN_TO_EMAIL) ? process.env.ADMIN_TO_EMAIL : 'hello@kipthis.com'
+    const email = await db.Emails.create({
+      recipients: adminToEmail,
+        subject: 'Need to manually refund a paypal payment',
+        template_name: 'kip_paypal_refund'
+      })
+
+      await email.template(email.template_name, {
+        paymentId: payment.id,
+        amount: payment.amount / 100,
+        invoiceId: payment.invoice.id
+      })
+
+      await email.send();
+  }
+
   // need to do these for paypal stuff
   async createPaymentSource (paymentInfo) {
     //todo
   }
 
   async pay (invoice) {
-    //todo
-  }
-
-  static async refundPayment (payment) {
     //todo
   }
 }
