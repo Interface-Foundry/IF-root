@@ -264,6 +264,7 @@ module.exports = function (router) {
    *   user_id: '123456y'
    * }
    */
+
   router.post('/cart/:cart_id/item', (req, res) => co(function* () {
     const socket = require('../socket').getSocket()
     // only available for logged-in Users
@@ -892,6 +893,7 @@ module.exports = function (router) {
    * @apiParam :cart_id the cart we are adding it to
    */
   router.post('/item/:item_id/clone/:cart_id', (req, res) => co(function* () {
+    const socket = require('../socket').getSocket()
     var user_id = _.get(req, 'UserSession.user_account.id')
     if (!user_id) throw new Error('User not logged in')
     var clone = yield cloning_utils.cloneItem(req.params.item_id, user_id, req.params.cart_id)
@@ -899,6 +901,10 @@ module.exports = function (router) {
     cart.members.add(user_id)
     cart.items.add(clone.id)
     yield cart.save()
+    socket.emit('ACTION', {
+      type: 'CLONE_ITEM_SUCCESS',
+      response: clone
+    })
     res.send(clone)
   }))
 
