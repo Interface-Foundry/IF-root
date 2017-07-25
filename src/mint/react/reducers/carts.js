@@ -9,14 +9,15 @@ export default function otherCarts(state = initialState, action) {
   switch (action.type) {
   case 'CARTS_SUCCESS':
     return {
-      ...state,
-      ...action.response
+      carts: action.response.filter(c => !c.locked),
+      archivedCarts: action.response.filter(c => c.locked)
     };
   case 'DELETE_CART_SUCCESS':
     return {
       ...state,
-      carts: state.present.carts.filter(c => c.id !== action.response),
-      archivedCarts: [...state.present.carts.filter(c => c.id === action.response), ...state.archivedCarts]
+      carts: state.carts
+        .filter(c => c.id !== action.response),
+      archivedCarts: [...state.carts.filter(c => c.id === action.response), ...state.archivedCarts]
     };
   default:
     return state;

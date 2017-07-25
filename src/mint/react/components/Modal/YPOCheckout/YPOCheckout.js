@@ -9,7 +9,7 @@ export default class YPOCheckout extends Component {
     accountNumber: PropTypes.string,
     deliveryMessage: PropTypes.string,
     voucherCode: PropTypes.string,
-    cartId: PropTypes.string,
+    cart: PropTypes.string,
     submitYpoData: PropTypes.func,
     toggleYpoCheckout: PropTypes.func,
     leader: PropTypes.object,
@@ -29,10 +29,10 @@ export default class YPOCheckout extends Component {
   _updateDeliveryMessage = e => this.setState({ deliveryMessage: e.target.value })
 
   _handleSubmit = e => {
-    const { props: { submitYpoData, cartId, leader, userId }, state: { orderNumber, accountNumber, deliveryMessage, voucherCode } } = this;
+    const { props: { submitYpoData, cart, leader, userId }, state: { orderNumber, accountNumber, deliveryMessage, voucherCode } } = this;
     e.preventDefault();
-    submitYpoData({ cartId, orderNumber, accountNumber, deliveryMessage, voucherCode, lock: leader.id === userId })
-      .then(() => window.location = `/api/cart/${cartId}/checkout`); // ¯\_(ツ)_/¯
+    submitYpoData({ cart, orderNumber, accountNumber, deliveryMessage, voucherCode, lock: leader.id === userId })
+      .then(() => window.location = `/api/cart/${cart.id}/checkout`); // ¯\_(ツ)_/¯
   }
 
   componentWillReceiveProps = ({ orderNumber = '', accountNumber = '', deliveryMessage = '', voucherCode = '' }) =>

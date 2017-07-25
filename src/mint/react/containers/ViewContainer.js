@@ -61,7 +61,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(updateQuery(query));
     dispatch(submitQuery(encodeURIComponent(query), store, locale));
   },
-  updateCart: cart => dispatch(updateCart(cart))
+  updateCart: cart => dispatch(updateCart(cart)).then(() => dispatch(fetchCarts()))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(View);

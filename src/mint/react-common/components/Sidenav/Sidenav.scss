@@ -44,9 +44,7 @@
     li {
       padding: 0 $padding 0 0;
 
-      &.currentCart {
-        background: #f6f6f6;
-      }
+
 
       h4 {
         text-align: right;
@@ -56,12 +54,12 @@
           padding: ($padding / 2) $padding ($padding * 2);
           color: #4a9ff1;
           text-indent: underline;
+          cursor: pointer;
 
           svg {
             @include animation(bounceDownSmall 2s);
 
             animation-iteration-count: 3; // too much twitching
-
           }
         }
       }
@@ -149,28 +147,32 @@
         }
 
         li {
+          transition: background-color 0.66s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.66s cubic-bezier(0.4, 0, 0.2, 1);
+
+          background-color: $color-white;
+          border-radius: 5px 0 0 5px;
+          border: 1px solid transparent;
           display: flex;
           flex-direction: row;
-          border-radius: 5px 0 0 5px;
+          height: 50px;
           margin: 5px 0 0 5%;
           width: 95%;
 
-
-
-          @include transition(background 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+          &.currentCart {
+            background: #f6f6f6;
+          }
 
           .image {
             @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
             border-radius: 5px 0 0 5px;
-            width: $nav-height - $padding * 2;
+            width: 50px;
             height: 100%;
-            margin: $padding;
-            min-height: $nav-height - $padding * 2;
           }
 
           &:hover {
-            background: rgba($secondaryColor, 0.5);
+            background-color: rgba($secondaryColor, 0.5);
+            border-color: rgba($secondaryColor, 0.5);
           }
         }
 
@@ -229,7 +231,6 @@
             text-align: center;
             padding: 0;
             font-size: 12px;
-
           }
 
           svg {

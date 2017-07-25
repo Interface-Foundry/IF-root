@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { YPOCheckout } from '../components';
 import { toggleYpoCheckout } from '../actions/app';
-import { updateCart } from '../actions/cart';
+import { updateCart, fetchCarts } from '../actions/cart';
 
 const mapStateToProps = (state, ownProps) => ({
   showYpoCheckout: state.app.showYpoCheckout,
@@ -13,15 +13,16 @@ const mapStateToProps = (state, ownProps) => ({
   accountNumber: state.cart.present.account_number,
   voucherCode: state.cart.present.voucher_code,
   deliveryMessage: state.cart.present.delivery_message,
-  cartId: state.cart.present.id,
+  cart: state.cart.present,
   leader: state.cart.present.leader,
   userId: state.user.id
 });
 
 const mapDispatchToProps = dispatch => ({
   toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show)),
-  submitYpoData: ({ cartId, orderNumber, accountNumber, voucherCode, deliveryMessage, lock }) =>
-    dispatch(updateCart({ id: cartId, order_number: orderNumber, account_number: accountNumber, voucher_code: voucherCode, delivery_message: deliveryMessage, locked: lock })).then(() => dispatch(toggleYpoCheckout(false)))
+  submitYpoData: ({ cart, cartId, orderNumber, accountNumber, voucherCode, deliveryMessage, lock }) =>
+    dispatch(updateCart({ ...cart, order_number: orderNumber, account_number: accountNumber, voucher_code: voucherCode, delivery_message: deliveryMessage, locked: lock })).then(() => dispatch(toggleYpoCheckout(false))).then(() => dispatch(fetchCarts()))
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(YPOCheckout);
