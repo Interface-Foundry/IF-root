@@ -106,6 +106,13 @@ export default (state = initialState, action) => {
         }]
         : [...acc, item], [])
     };
+  case 'CLEAR_SEARCH':
+    return {
+      ...state,
+      selectedItemId: '',
+      page: 0,
+      results: []
+    }
   default:
     return state;
   }
