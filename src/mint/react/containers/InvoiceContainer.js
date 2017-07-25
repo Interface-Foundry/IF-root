@@ -12,6 +12,7 @@ import {
   fetchPaymentStatus,
   fetchPaymentSources,
   createPaymentSource,
+  createPaymentWithoutSource,
   deletePaymentSource,
   selectTab
 } from '../actions';
@@ -37,6 +38,7 @@ const mapDispatchToProps = dispatch => ({
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
   fetchInvoiceByCart: (cart_id) => dispatch(fetchInvoiceByCart(cart_id)),
   createPaymentSource: (payment_amount, payment_data, payment_source, invoice_id) => dispatch(createPaymentSource(payment_amount, payment_data, payment_source, invoice_id)),
+  createPaymentWithoutSource: (payment_amount, payment_data, payment_source, invoice_id) => dispatch(createPaymentWithoutSource(payment_amount, payment_data, payment_source, invoice_id)),
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),
   deletePaymentSource: (paymentsource_id) => dispatch(deletePaymentSource(paymentsource_id)),
   updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data)),

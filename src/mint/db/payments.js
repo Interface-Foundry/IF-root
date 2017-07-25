@@ -41,6 +41,12 @@ const paymentsCollection = Waterline.Collection.extend({
      */
     payment_source: Waterline.isA('payment_sources'),
 
+
+    /**
+     * if we arent using a payment source it means we arent creating a customer/card or anything
+     */
+    payment_vendor: 'string',
+
     /** amount user paid */
     amount: 'integer',
 
