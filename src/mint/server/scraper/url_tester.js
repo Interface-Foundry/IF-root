@@ -62,22 +62,22 @@ var start = async function () {
 	// logging.info('FILE', urls)
 
 	var urls = [
-	'https://www.muji.net/store/cmdty/detail/4549738501534?searchno=1',
-	'https://www.muji.net/store/cmdty/detail/4547315057184',
-	'https://www.muji.net/store/cmdty/detail/4549738509837',
-	'https://www.muji.net/store/cmdty/detail/4547315252411?searchno=9',
-	'https://www.muji.net/store/cmdty/detail/4549738970330',
-	'https://www.muji.net/store/cmdty/detail/4548718158812?searchno=22',
-	'https://www.muji.net/store/cmdty/detail/4549738970699?searchno=3',
-	'https://www.muji.net/store/cmdty/detail/4549738474265',
-	'https://www.muji.net/store/cmdty/detail/4934761863207?searchno=4',
-	'https://www.muji.net/store/cmdty/detail/4550002071240?searchno=18',
-	'https://www.muji.net/store/cmdty/detail/4549738722557',
-	'https://www.muji.net/store/cmdty/detail/4934761512570?searchno=5',
-	'https://www.muji.net/store/cmdty/detail/4549337318946?searchno=4',
-	'https://www.muji.net/store/cmdty/detail/4549738327608',
-	'https://www.muji.net/store/cmdty/detail/4549738557302?searchno=6'
-
+	// 'https://www.muji.net/store/cmdty/detail/4549738501534?searchno=1',
+	// 'https://www.muji.net/store/cmdty/detail/4547315057184',
+	// 'https://www.muji.net/store/cmdty/detail/4549738509837',
+	// 'https://www.muji.net/store/cmdty/detail/4547315252411?searchno=9',
+	// 'https://www.muji.net/store/cmdty/detail/4549738970330',
+	// 'https://www.muji.net/store/cmdty/detail/4548718158812?searchno=22',
+	// 'https://www.muji.net/store/cmdty/detail/4549738970699?searchno=3',
+	// 'https://www.muji.net/store/cmdty/detail/4549738474265',
+	// 'https://www.muji.net/store/cmdty/detail/4934761863207?searchno=4',
+	// 'https://www.muji.net/store/cmdty/detail/4550002071240?searchno=18',
+	// 'https://www.muji.net/store/cmdty/detail/4549738722557',
+	// 'https://www.muji.net/store/cmdty/detail/4934761512570?searchno=5',
+	// 'https://www.muji.net/store/cmdty/detail/4549337318946?searchno=4',
+	// 'https://www.muji.net/store/cmdty/detail/4549738327608',
+	// 'https://www.muji.net/store/cmdty/detail/4549738557302?searchno=6'
+	'http://www.lotte.com/goods/viewGoodsDetail.lotte?goods_no=42864692&infw_disp_no_sct_cd=50&infw_disp_no=5406607&tracking=Search_Result&allViewYn=N'
 	// 'https://www.muji.net/store/cmdty/detail/4549738478638?searchno=4'
 	// https://www.muji.net/store/cmdty/detail/4549738496939?searchno=1
 	// https://www.muji.net/store/cmdty/detail/4549738522508
