@@ -25,7 +25,7 @@ export default class Cart extends Component {
   }
 
   _getCompleteImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/complete_3.png': '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? ( memberNumber > 12 ? '//storage.googleapis.com/kip-random/social/complete_5.png': '//storage.googleapis.com/kip-random/social/complete_4.png'): '//storage.googleapis.com/kip-random/social/complete_3.png') : '//storage.googleapis.com/kip-random/social/complete_2.png') : '//storage.googleapis.com/kip-random/social/complete_1.png';
   }
 
   _getIncompleteImage(memberNumber) {
@@ -33,11 +33,11 @@ export default class Cart extends Component {
   }
 
   _getLockedImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? '//storage.googleapis.com/kip-random/social/locked_3.png': '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? ( memberNumber > 12 ? '//storage.googleapis.com/kip-random/social/locked_5.png' : '//storage.googleapis.com/kip-random/social/locked_4.png') : '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
   }
 
   _getColor(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? 'four': 'three') : 'two') : 'one';
+    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? ( memberNumber > 12 ? 'five': 'four') : 'three') : 'two') : 'one';
   }
 
   render() {
@@ -45,10 +45,7 @@ export default class Cart extends Component {
       { _getCompleteImage, _getIncompleteImage, _getLockedImage, _getColor } = this,
       userCarts = splitCartById(this.props, user),
       leaderCart = splitCartById(this.props, cart.leader).my,
-      myCart = userCarts.my,
-      isLeader = user.id === cart.leader.id,
-      lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 4 ? ( userCarts.others.length > 7 ? ( userCarts.others.length > 11 ? 12 : 8 ) : 5 ) : 3 ) : 0,
-      nextAward = userCarts.others.length >= 3 ? ( userCarts.others.length >= 5 ? ( userCarts.others.length >= 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 3;
+       myCart = userCarts.my;
 
     if(userCarts.others.length === 0 || leaderCart.length === 0) {
       userCarts.others.push({
@@ -60,6 +57,10 @@ export default class Cart extends Component {
         updateAt: cart.leader.updateAt
       })
     }
+
+    const isLeader = user.id === cart.leader.id,
+      lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 4 ? ( userCarts.others.length > 7 ? ( userCarts.others.length > 11 ? 12 : 8 ) : 5 ) : 3 ) : 0,
+      nextAward = userCarts.others.length >= 3 ? ( userCarts.others.length >= 5 ? ( userCarts.others.length >= 8 ?  ( userCarts.others.length >= 12 ? 20 : 12 )  : 8 ) : 5 ) : 3;
     
     return (
       <table className='cart'>
@@ -95,19 +96,22 @@ export default class Cart extends Component {
                 cart={cart}/>
             </tr> : null
           }
-          <tr className={`next grey`}>
-            <RewardCard 
-              title={achievements[nextAward].reward}
-              sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE ${achievements[nextAward].reqs - userCarts.others.length === 1 ? 'PERSON' : 'PEOPLE' }`}
-              imageSrc={_getLockedImage(userCarts.others.length)}
-              classes='grey gradient noLine'
-              cart={cart}
-              share={true}/>
-          </tr>
+          {
+            userCarts.others.length < 20 ? <tr className={`next grey`}>
+              <RewardCard 
+                title={achievements[nextAward].reward}
+                sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE ${achievements[nextAward].reqs - userCarts.others.length === 1 ? 'PERSON' : 'PEOPLE' }`}
+                imageSrc={_getLockedImage(userCarts.others.length)}
+                classes='grey gradient noLine'
+                cart={cart}
+                share={true}/>
+            </tr> : null
+          }
           {
             userCarts.others.map((userCart, index) => {
               let memberNumber = userCarts.others.length - index;
               const color = _getColor(memberNumber);
+
               const imageSrc = memberNumber <= lastAward ? _getCompleteImage(memberNumber) :  _getIncompleteImage(memberNumber);
 
               if(achievements[memberNumber]) {
