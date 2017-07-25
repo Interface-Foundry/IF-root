@@ -60,10 +60,9 @@ class UrlStore extends Store {
 
         // make sure this isn't a duplicate size
         if (option.type === 'size') {
-          var matches = options.filter(o => {
-            return o.type === 'size' && o.original_name.value == option.original_name.value
+          options = options.filter(o => {
+            return o.type !== 'size' || o.name != option.original_name.value
           })
-          if (matches.length) logging.info('option:', option, " | matches:", matches)
         }
 
         // create translations
