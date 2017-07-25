@@ -7092,9 +7092,9 @@ pause-stream@0.0.11:
   dependencies:
     through "~2.3"
 
-paypal-checkout@^4.0.95:
-  version "4.0.95"
-  resolved "https://registry.yarnpkg.com/paypal-checkout/-/paypal-checkout-4.0.95.tgz#fa2eecb71263efc14aa1632b3d3714b204e479e7"
+paypal-checkout@^4.0.96:
+  version "4.0.96"
+  resolved "https://registry.yarnpkg.com/paypal-checkout/-/paypal-checkout-4.0.96.tgz#8a6b5524b52ab43a7adbe77217af9b045784f8e5"
   dependencies:
     Base64 "^1.0.0"
     beaver-logger "^3.0.6"
