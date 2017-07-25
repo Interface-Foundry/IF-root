@@ -192,14 +192,14 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   const user_id = _.get(req, 'UserSession.user_account.id')
   //FOR TESTING
   // const user_id = '0f3cebf3-602b-4dc4-9f7f-6df88ab413fd'
-  // if (!user_id) throw new Error('must be logged in to create a cart')
-  // req.UserSession.user_account = yield db.UserAccounts.findOne({id: user_id})
+  if (!user_id) throw new Error('must be logged in to create a cart')
+  req.UserSession.user_account = yield db.UserAccounts.findOne({id: user_id})
 
   // cart body, used in db.Carts.create(cart) later
   var cart = {}
 
   // Figure out what store they are shopping at and in what locale
-  console.log('req.params.store', req.params) //TODO dynamically
+  console.log('req.params.store', req.params)
   if (!req.params.store) throw new Error('No store provided for cart creation')
   var chosen_store = stores.find(function (s) {
     return req.params.store.includes(s.store_name.split(' ')[0])
@@ -240,6 +240,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // const user_id = _.get(req, 'UserSession.user_account.id')
   // if (user_id) {
     cart.leader = user_id
+    cart.members = [user_id]
   // }
 
   var date = new Date()
