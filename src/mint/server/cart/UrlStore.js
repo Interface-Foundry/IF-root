@@ -59,7 +59,14 @@ class UrlStore extends Store {
       for (var i = 0; i < itemData.options.length; i++) {
         // logging.info('new option')
         var option = itemData.options[i]
-        // logging.info('OPTION:', option) //the
+
+        // make sure this isn't a duplicate size
+        if (option.type === 'size') {
+          options = options.filter(o => {
+            return o.type !== 'size' || o.name != option.original_name.value
+          })
+        }
+
         // create translations
         var original_name = await db.Translations.create(option.original_name)
         original_name.translated_value = option.name
