@@ -224,6 +224,7 @@ router.get('/newcart/:store', (req, res) => co(function * () {
   // const user_id = _.get(req, 'UserSession.user_account.id')
   // if (user_id) {
     cart.leader = user_id
+    cart.members = [user_id]
   // }
 
   var date = new Date()
