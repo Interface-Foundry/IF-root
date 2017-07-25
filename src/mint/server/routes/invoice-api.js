@@ -358,16 +358,10 @@ module.exports = function (router) {
   router.get('/invoice/cart/:cart_id', async (req, res) => {
     var invoice = await Invoice.GetByCartId(req.params.cart_id)
     if (invoice) {
-      logging.info('this is the inoice', invoice)
+      logging.info('this is the invoice', invoice)
       await invoice.updateInvoice()
       return res.send(invoice)
     }
-    else {
-      logging.info('error getting invoice getbycartId -- creating new invoice')
-      invoice = await Invoice.CreateByCartId(req.params.cart_id)
-      if (invoice) return res.send(invoice)
-    }
-
     return res.send({display: false})
   })
 
@@ -392,7 +386,7 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id id of the invoice we are attaching a shipping address to
    * @apiParam {string} address id of address we are shipping to
    */
-  router.post('/invoice/:invoice_id/shipto', async(req, res) => {
+  router.post('/invoice/:invoice_id/shipto', async (req, res) => {
     if (!req.body.address) res.sendStatus(400)
     var invoice = await db.Invoices.findOne({ id: req.params.invoice_id })
     invoice.address = req.body.address.id
