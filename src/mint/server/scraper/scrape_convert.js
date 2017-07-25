@@ -63,6 +63,7 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		var html = await utils.scrapeURL(url)
 		if (!html) html = await utils.scrapeURL(url, true)
 		s = await handle_html.tryHtml(s,html)
+		console.log('scraped:', s)
 
 		if(!s){
 			return logging.error('no s object found!')

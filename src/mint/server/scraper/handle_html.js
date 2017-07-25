@@ -37,9 +37,11 @@ module.exports.tryHtml = async function (s,html) {
 
 		case 'waitrose.com':
 			return await waitrose(s, $)
+			break
 
 		case 'hands.net':
 			return await hands(s, $)
+			break
 
 		default:
 			return logging.error('error no domain found for store')
