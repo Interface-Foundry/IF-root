@@ -5,7 +5,8 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 
-const displayInvoice = (process.env.NODE_ENV === 'development') || process.env.KIP_PAY_ENABLED ? true : false;
+const displayInvoice = (!PRODUCTION) || KIP_PAY_ENABLED;
+
 
 export default class Default extends Component {
   static propTypes = {
@@ -52,7 +53,7 @@ export default class Default extends Component {
 
   _orderCart = (e) => {
     const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
-
+    console.log({ displayInvoice, env: NODE_ENV, enabled: KIP_PAY_ENABLED })
     if (leader.id === user.id) updateCart({ id, locked: true });
 
     if (store === 'YPO') toggleYpoCheckout();

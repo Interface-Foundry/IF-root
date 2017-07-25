@@ -117,7 +117,7 @@ export default class App extends Component {
       fetchMetrics(nextCartId[1]);
     }
 
-    if (!id && nextId && process.env.GA) {
+    if (!id && nextId && GA_ENABLED) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextId

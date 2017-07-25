@@ -3,7 +3,7 @@
 import { connect } from 'react-redux';
 import { CheckoutModal } from '../components';
 import { push } from 'react-router-redux';
-import { toggleCheckoutModal, reorderCart, createInvoice, selectTab } from '../actions';
+import { toggleCheckoutModal, reorderCart, createInvoice } from '../actions';
 
 const mapStateToProps = (state, ownProps) => ({
   cart: state.cart.present,

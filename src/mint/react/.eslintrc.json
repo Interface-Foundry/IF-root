@@ -1,7 +1,12 @@
 {
   "parser": "babel-eslint",
   "globals": {
-    "expect": true
+    "expect": true,
+    "PRODUCTION": true,
+    "KIP_PAY_ENABLED": true,
+    "STRIPE_KEY": true,
+    "PAYPAL_KEY": true,
+    "GA_ENABLED": true
   },
   "rules": {
     "strict": 0,

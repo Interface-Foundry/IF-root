@@ -16,6 +16,7 @@
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
+
   p {
     overflow: hidden;
   }
@@ -60,7 +61,7 @@
             @include animation(bounceDownSmall 2s);
 
             animation-iteration-count: 3; // too much twitching
-         
+
           }
         }
       }
@@ -154,7 +155,9 @@
           margin: 5px 0 0 5%;
           width: 95%;
 
-          @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
+
+
+          @include transition(background 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
           .image {
             @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));

@@ -25,11 +25,7 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.ProgressPlugin(),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development'),
-      'process.env.STRIPE_KEY': JSON.stringify('pk_test_8bnLnE2e1Ch7pu87SmQfP8p7'),
-      'process.env.PAYPAL_KEY': JSON.stringify('AW4Qaa3xF5SKI1Ysz6kTkFWq0c7AGBtpUXlJEkkO8SMhMO5Kn--MiEjVvhG6fwTkj0cuhTbmJMlF7_om')
-    })
+    new webpack.DefinePlugin(require('./settings'))
   ],
   module: {
     rules: [{
