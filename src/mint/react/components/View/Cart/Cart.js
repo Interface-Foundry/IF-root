@@ -33,7 +33,7 @@ export default class Cart extends Component {
   }
 
   _getLockedImage(memberNumber) {
-    return memberNumber > 3 ? ( memberNumber > 5 ? ( memberNumber > 8 ? ( memberNumber > 12 ? '//storage.googleapis.com/kip-random/social/locked_5.png' : '//storage.googleapis.com/kip-random/social/locked_4.png') : '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
+    return memberNumber >= 3 ? ( memberNumber >= 5 ? ( memberNumber >= 8 ? ( memberNumber >= 12 ? '//storage.googleapis.com/kip-random/social/locked_5.png' : '//storage.googleapis.com/kip-random/social/locked_4.png') : '//storage.googleapis.com/kip-random/social/locked_3.png') : '//storage.googleapis.com/kip-random/social/locked_2.png') : '//storage.googleapis.com/kip-random/social/locked_1.png';
   }
 
   _getColor(memberNumber) {
