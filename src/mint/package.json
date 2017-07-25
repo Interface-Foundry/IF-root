@@ -71,7 +71,7 @@
     "react-html5video": "^2.1.0",
     "react-icons": "^2.2.3",
     "react-motion": "^0.5.0",
-    "react-paypal-express-checkout": "https://github.com/grahamannett/react-paypal-express-checkout",
+    "react-paypal-express-checkout": "git+https://github.com/grahamannett/react-paypal-express-checkout.git",
     "react-progressive-image": "^0.1.2",
     "react-redux": "^5.0.4",
     "react-router": "^4.1.2",
