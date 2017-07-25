@@ -51,6 +51,10 @@ module.exports.tryHtml = async function (s,html) {
 			if(p){
 				s.original_price.value = parseFloat(p)
 			}
+			else {
+				//TEMP JUST FOR DEMO!!! if no price just make one up (prevents sold out issue)
+				s.original_price.value = 8370
+			}
 
 
 			//image URL

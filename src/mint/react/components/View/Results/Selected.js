@@ -137,7 +137,7 @@ export default class Selected extends Component {
               </div> : null
             }
             <div className='text__expanded'>
-              <span><a href={`/api/item/${item.id}/clickthrough`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
+              <span><a href={`${item.original_link}`} target="_blank">View on {getStoreName(cart.store, cart.store_locale)}</a></span>
               <div>
                 {item.description}
               </div>
