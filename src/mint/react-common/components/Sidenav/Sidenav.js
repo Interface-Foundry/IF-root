@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import FlipMove from 'react-flip-move';
 import LinkClass from './LinkClass';
-import moment from 'moment';
+import CartListItem from './CartListItem';
 import { Icon } from '..';
 import { moveToFront } from '../../utils';
 
@@ -73,31 +73,40 @@ export default class Sidenav extends Component {
               <br></br>
               { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
             </div>
-            <FlipMove typeName="ul" duration={350} easing="ease">
+            <FlipMove typeName="ul" duration={350} staggerDurationBy={30} easing="cubic-bezier(0.4, 0, 0.2, 1)"  enterAnimation="elevator" leaveAnimation="elevator">
               {
                 leaderCarts.map((c, i) =>
-                  <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink}/>)
+                  (i > 3 && show !== 'me')
+                  ? null
+                  : <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink} isLeader={true}/>)
+              }
+              {
+                leaderCarts.length >= 4
+                 ? (<h4 className='show__more' key='show_more_leader'
+                      onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
+                      <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
+                      &nbsp; {show === 'me' ? 'Less' : 'More'}
+                  </h4>)
+                : null
               }
             </FlipMove>
-            {
-              // leaderCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
-              // <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
-              //   &nbsp; {show === 'me' ? 'Less' : 'More'}
-              // </h4> : null
-            }
+
             { memberCarts.length ? <h4>Other Kip Carts</h4> : null }
-            <FlipMove typeName="ul" duration={350} easing="ease">
+            <FlipMove typeName="ul" duration={350} staggerDurationBy={30} easing="cubic-bezier(0.4, 0, 0.2, 1)"  enterAnimation="elevator" leaveAnimation="elevator">
               {
                 memberCarts.map((c, i) =>
-                  <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink}/>)
+                (i > 3 && show !== 'other')
+                 ? null
+                 : <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink} isLeader={false}/>)
+              }
+              {
+                memberCarts.length >= 4 ? <h4 className='show__more' key='show_more_member' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
+                <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
+                  &nbsp; {show === 'other' ? 'Less' : 'More'}
+                </h4> : null
               }
             </FlipMove>
-            {
-              // memberCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
-              // <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
-              //   &nbsp; {show === 'other' ? 'Less' : 'More'}
-              // </h4> : null
-            }
+
           </li>
           <li className='sidenav__list__actions'>
             {
@@ -124,26 +133,6 @@ export default class Sidenav extends Component {
           </footer>
         </ul>
       </div>
-    );
-  }
-}
-
-class CartListItem extends Component {
-  render = () => {
-    const { cart: { id, thumbnail_url, name, locked, updatedAt, store, store_locale }, currentCartId, SideNavLink } = this.props;
-    return (
-      <li key={id} className={`sidenav__list__leader ${id === currentCartId ? 'currentCart' : ''}`} >
-        <div className={'image'} style={{
-          backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/head_smaller.png'})`
-        }}/>
-        <SideNavLink to={`/cart/${id}`}>
-          <p>
-            {name}
-            {locked ? <span><br/>{moment(updatedAt).format('L')}</span> : null}
-            {!locked ? <span><br/>{store} {store_locale}</span> : null}
-          </p>
-        </SideNavLink>
-      </li>
     );
   }
 }

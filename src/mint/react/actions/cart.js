@@ -25,10 +25,7 @@ export const fetchCarts = () => get(
 
     return {
       type: `${type}_SUCCESS`,
-      response: {
-        archivedCarts: carts.filter(cart => cart.locked).reverse(),
-        carts: carts.filter(cart => !cart.locked).reverse()
-      },
+      response: carts,
       receivedAt: Date.now()
     };
   }

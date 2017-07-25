@@ -52,9 +52,8 @@ export default class Default extends Component {
   }
 
   _orderCart = (e) => {
-    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
-    console.log({ displayInvoice, env: NODE_ENV, enabled: KIP_PAY_ENABLED })
-    if (leader.id === user.id) updateCart({ id, locked: true });
+    const { cart, cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
+    if (leader.id === user.id) updateCart({ ...cart, locked: true });
 
     if (store === 'YPO') toggleYpoCheckout();
     else if (displayInvoice) toggleCheckoutModal(true);
