@@ -548,7 +548,7 @@ module.exports = function (router) {
     // Remove the cart-item association
     cart.items.remove(item.id)
     yield cart.save()
-    cart = yield db.Carts.findOne({id: cart.id})
+    cart = yield db.Carts.findOne({id: cart.id}).populate('items')
     // delete cart.items[item.id] //delete on our local json so that the next part works
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
