@@ -12,6 +12,7 @@ const mapStateToProps = (state, ownProps) => {
     tab: state.app.viewTab,
     search: state.search,
     cart: state.cart.present,
+    user: state.user, 
     invoice: state.payments.invoice
   };
 };
