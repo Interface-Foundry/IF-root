@@ -39,7 +39,7 @@ class UrlStore extends Store {
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
-    logging.info('ITEM DATA(((((())))))', itemData)
+    // logging.info('ITEM DATA(((((())))))', itemData)
 
     //we're getting an array from the generic search and will never process more than one item
     var itemData = itemData[0]

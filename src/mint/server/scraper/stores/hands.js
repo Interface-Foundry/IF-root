@@ -19,17 +19,24 @@ module.exports = async function (s, $) {
   console.log('price:', price)
   s.original_price.value = price
 
-  //make the options
-  var options = []
-  $('#relativeItem').find('li').map(function (i, elem) {
-    var op = {}
-    // op.original_name.value = $(this).find('.name').text()
-    // op.original_price.value = $(this).find('.price').text().replace(/[^\d]/g, '')
-    // op.url = $(this).find('a').first().attr('href')
-    options.push(op)
-  })
-  s.options = options
+  // //make the options
+  // var options = []
+  // $('#relativeItem').find('li').map(function (i, elem) {
+  //   console.log('IS THIS correct?', $(this).html())
+  //   if ($(this).find('a').first().attr('href') !== '#') {
+  //     var op = {
+  //       type: 'Options'
+  //       original_name: {},
+  //       original_price: {}
+  //     }
+  //     op.original_name.value = $(this).find('.name').text()
+  //     op.original_price.value = $(this).find('.price').text().replace(/[^\d]/g, '')
+  //     op.url = $(this).find('a').first().attr('href')
+  //     options.push(op)
+  //   }
+  // })
+  // s.options = options
 
-  console.log('sssssS!', s)
+  // console.log('sssssS!', s)
   return s
 }
