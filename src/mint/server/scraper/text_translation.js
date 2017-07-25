@@ -55,6 +55,9 @@ module.exports.translateText = async function (s){
  * @returns {object} A list of currencies with corresponding rates
  */
  var translate = async function (text, target) {
+
+ 	console.log('INCOMING TEXT ',text)
+ 	console.log('INCOMING TARGET ',target)
    	// Instantiates a client
  	// return [text]
  	logging.info('translate called')
@@ -68,11 +71,14 @@ module.exports.translateText = async function (s){
 		translations = results[0]
 		translations = Array.isArray(translations) ? translations : [translations];
 		translations = pg(translations)
+
+		console.log('SUCCESS TRANSLATION ',translations)
 		return translations  	
      })
      .catch((err) => {
        logging.error('ERROR:', err);
-       return null
+       console.log('ERROR TRANSLATION ',Array.isArray(text) ? text : [text])
+       return Array.isArray(text) ? text : [text];
      });
      // return translations
  }

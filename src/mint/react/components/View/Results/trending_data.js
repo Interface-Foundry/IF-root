@@ -133,13 +133,153 @@ module.exports.getTrending = function (store) {
 			return [
 			{  
 				"trending":true,
-				"original_link":"https://www.muji.net/store/cmdty/detail/4549738814115?portaltop=newItem2",
-				"asin":"4549738814115",
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738501534?searchno=1",
+				"asin":"4549738501534",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3b4d.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3b4d.jpg",
 			    "store":"Muji",
-			    "name":"T-shirt with organic cotton gazette gentleman S · gray",   
-			    "price":1990,
-			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx295j5ihfhig.jpg",
-			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx295j5ihfhig.jpg"
+			    "price":1840,
+			    "name":"Organic Cotton Print T Shirt (Adult Gentleman Size)"
+			},
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4547315057184",
+				"asin":"4547315057184",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3fkg.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3fkg.jpg",
+			    "store":"Muji",
+			    "price":5455,
+			    "name":"Porcelain ultrasonic aroma diffuser"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738509837",
+				"asin":"4549738509837",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3j6d.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3j6d.jpg",
+			    "store":"Muji",
+			    "price":835,
+			    "name":"Daily Children\'s Clothing Organic Cotton Slab Polka Dot Camisole Dress (Baby) Baby 80 · Salmon Pink"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4547315252411",
+				"asin":"4547315252411",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3mnm.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3mnm.jpg",
+			    "store":"Muji",
+			    "price":2589,
+			    "name":"Organic moisturizing cosmetic liquid (large capacity) 400 ml"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738970330",
+				"asin":"4549738970330",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3q3h.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3q3h.jpg",
+			    "store":"Muji",
+			    "price":915,
+			    "name":"Brittany seaweed conditioner (refill) 350g"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4548718158812",
+				"asin":"4548718158812",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3tj1.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3tj1.jpg",
+			    "store":"Muji",
+			    "price":175,
+			    "name":"Hair clip · large · black about 120 mm"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738970699",
+				"asin":"4549738970699",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3xkg.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju3xkg.jpg",
+			    "store":"Muji",
+			    "price":878,
+			    "name":"UV base control color · yellow SPF 50 + · PA +++ 30 mL"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738474265",
+				"asin":"4549738474265",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju41sw.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju41sw.jpg",
+			    "store":"Muji",
+			    "price":4613,
+			    "name":"Raffia Koma knitting capellin 56 ~ 57.5 cm · Generate"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4934761863207",
+				"asin":"4934761863207",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju45dd.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju45dd.jpg",
+			    "store":"Muji",
+			    "price":10540,
+			    "name":"Overlapping acrylic case with two lids Lid with drawer 6 pieces Set about 175 × 130 × height 95 mm"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4550002071240",
+				"asin":"4550002071240",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju48q6.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju48q6.jpg",
+			    "store":"Muji",
+			    "price":3689,
+			    "name":"Organic cotton three-quarter sleeve tunic lady ONE SIZE · dark navy"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738722557",
+				"asin":"4549738722557",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4bt6.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4bt6.jpg",
+			    "store":"Muji",
+			    "price":176,
+			    "name":"Fruit juice 100% Honey jelly pink Grapefruit 161 g (23 g × 7 pieces)"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4934761512570",
+				"asin":"4934761512570",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4f5i.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4f5i.jpg",
+			    "store":"Muji",
+			    "price":388,
+			    "name":"Colored pencils 12 colors"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549337318946",
+				"asin":"4549337318946",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4inx.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4inx.jpg",
+			    "store":"Muji",
+			    "price":555,
+			    "name":"Manual pencil sharpening small · about W55 × H103 × D 106 mm"
+			},			
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738327608",
+				"asin":"4549738327608",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4lqg.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4lqg.jpg",
+			    "store":"Muji",
+			    "price":2117,
+			    "name":"Approximately 4L of Jouro"
+			},
+			{  
+				"trending":true,
+				"original_link":"https://www.muji.net/store/cmdty/detail/4549738557302",
+				"asin":"4549738557302",
+			    "thumbnail_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4p3v.jpg",
+			    "main_image_url":"https://storage.googleapis.com/kip-product-images/plvvx8ctj5ju4p3v.jpg",
+			    "store":"Muji",
+			    "price":3231,
+			    "name":"Organic cotton stretch denim salopette pants lady S · indigo blue"
 			}
 			]
 		break;

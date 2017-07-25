@@ -43,6 +43,7 @@ const mapDispatchToProps = dispatch => ({
     return dispatch(addItem(cart_id, item_id, option_ids)).then(() => {
       dispatch(push(`/cart/${cart_id}`))
       dispatch(selectTab('cart'))
+      dispatch(updateQuery(''))
     });
   },
   selectItem: (item_id) => {

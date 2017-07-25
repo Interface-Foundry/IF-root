@@ -44,7 +44,7 @@ export default class Results extends Component {
     || query !== this.props.query
 
   componentWillReceiveProps = ({ results, replace, loading, cart: { items }, user: { id } }) => {
-    if (results.length === 0 && !loading && this.props.loading !== loading) replace(`${location.pathname}${location.search}&toast=No Results Found! 😥&status=warn`);
+    if (results.length === 0 && !loading && this.props.loading !== loading) replace(`${location.pathname}${location.search}&toast=Please Paste an Item URL 😊&status=warn`);
 
     if ((items && numberOfItems(items) !== numberOfItems(this.props.cart.items)) || (items && !this.state.myItems.length)) {
       // do only when the number of items in the cart changes, instead of on rerender
