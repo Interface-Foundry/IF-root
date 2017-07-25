@@ -522,7 +522,7 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
-    const cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    const cart = yield db.Carts.findOne({ id: req.params.cart_id }).populate('items')
     if (!cart) {
       throw new Error('Cart not found')
     }
@@ -550,7 +550,6 @@ module.exports = function (router) {
 
     // Mark the cart as dirty (needs to be resynced with amazon or whatever store)
     cart.dirty = true
-    
     var activeMembers = cart.items.map(item => item.added_by)
     if (item.added_by !== cart.leader && activeMembers.indexOf(item.added_by) < 0) {
       logging.info('member no longer has items in the cart')
