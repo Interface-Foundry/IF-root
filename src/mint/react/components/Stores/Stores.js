@@ -21,15 +21,23 @@ export default class Stores extends Component {
 
   render() {
     const { stores } = this.props;
-    const otherStores = stores.slice() || [];
-    const suggested = otherStores.shift() || [];
+    const otherStores = stores.filter((s) => {
+      return s.store_name === 'Amazon UK' || s.store_name === 'Amazon Canada' || s.store_name === 'YPO'
+    });
+    const suggested = stores.filter((s) => {
+      return s.store_name === 'Muji' || s.store_name === 'Punyus' || s.store_name === 'Lotte' || s.store_name === 'Amazon US'
+    });
 
     return (
       <section>
         <div className='cart_store'> 
           <h3>Suggested For You</h3>
           <ul className='cart_store__list suggested'>
-            <Store key={suggested.store_type} {...suggested} />
+            {
+              suggested.map(store => 
+                <Store key={store.store_type} {...store} />
+              )
+            }
           </ul>
         </div>
         <div className='cart_store'> 
