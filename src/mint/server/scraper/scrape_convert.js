@@ -69,8 +69,8 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		}
 
 		var rates = await fx_currency.getRates()
- 		var price = await fx_currency.foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,rates)
- 		s = await fx_currency.storeFx(rates[s.user.currency],price,s)
+ 	// 	var price = await fx_currency.foreignExchange(s.domain.currency,s.user.currency,s.original_price.value,rates)
+ 	// 	s = await fx_currency.storeFx(rates[s.user.currency],price,s)
 
 		if (!s.description && !s.name) s = await translate.translateText(s)
 
