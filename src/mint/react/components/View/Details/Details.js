@@ -41,7 +41,7 @@ export default class Details extends Component {
       }],
       likedList = likes.map((id) => id),
       isAdmin = user.id === leader.id,
-      storeUrl = store === 'Lotte' || store === 'Muji' ? `//www.${store.toLowerCase()}.com` : `//${store.toLowerCase()}.${store_locale.toLowerCase()}`,
+      storeUrl = store === 'Lotte' || store === 'Muji' ? `//www.${store.toLowerCase()}.com` : `//store.${store.toLowerCase()}.${store_locale.toLowerCase()}`,
       nextAchievement = members.length > 2 ? ( members.length > 5 ? ( members.length > 7 ? [] : [{ reqs: 10, discount: 100 }] ) : [{ reqs: 6, discount: 80 }, { reqs: 10, discount: 100 }] ) :  [{ reqs: 3, discount: 30 }, { reqs: 6, discount: 80 }];
 
     return (

@@ -35,7 +35,7 @@ class Tabs extends Component {
     }, {
       id: 2,
       tab: 'search',
-      icon: 'Search',
+      icon: 'World',
       url: `/cart/${id}?q=${query}`,
       display: 'Save'
     }, {
