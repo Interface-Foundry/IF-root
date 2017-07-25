@@ -160,6 +160,7 @@ export default class Results extends Component {
                         key={i}
                         item={item}
                         inCart={item.inCart}
+                        loading={loading}
                         {...this.props}
                       /> 
                       : <Default

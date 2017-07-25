@@ -26,7 +26,7 @@ export default class Stores extends Component {
     });
     const suggested = stores.filter((s) => {
       return s.store_name === 'Muji' || s.store_name === 'Punyus' || s.store_name === 'Lotte' || s.store_name === 'Amazon US'
-    });
+    }).reverse();
 
     return (
       <section>
