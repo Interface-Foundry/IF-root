@@ -67,19 +67,10 @@ export default class Cart extends Component {
           <MyCart myCart={myCart} {...this.props} {...this.state} achievements={achievements} isLeader={isLeader}/>
         </thead>
         <tbody>
-          <tr className={`next grey`}>
-            <RewardCard 
-              title={achievements[nextAward].reward}
-              sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE ${achievements[nextAward].reqs - userCarts.others.length === 1 ? 'PERSON' : 'PEOPLE' }`}
-              imageSrc={_getLockedImage(userCarts.others.length)}
-              classes='grey gradient'
-              cart={cart}
-              share={true}/>
-          </tr>
-          {
-            cart.locked ? <tr className={``}>
-              <th colSpan='100%' className={``}>
-                <div className={`card reward video`}>
+        {
+            cart.locked ? <tr className={`noLine`}>
+              <th colSpan='100%' className={`noLine`}>
+                <div className={`card reward video noLine`}>
                   <div className='image' style={{backgroundImage: `url(//storage.googleapis.com/kip-random/social/new_cart.png)`}}>
                   </div>
                   <div className='text'>
@@ -98,12 +89,21 @@ export default class Cart extends Component {
               <RewardCard 
                 title={`${cart.name} CHECKED OUT!`}
                 sub={`${userCarts.others.length} members in order`}
-                classes='yellow'
+                classes='yellow noLine'
                 imageSrc={_getCompleteImage(lastAward)}
                 number={'icon'}
                 cart={cart}/>
             </tr> : null
           }
+          <tr className={`next grey`}>
+            <RewardCard 
+              title={achievements[nextAward].reward}
+              sub={`+${achievements[nextAward].reqs - userCarts.others.length} MORE ${achievements[nextAward].reqs - userCarts.others.length === 1 ? 'PERSON' : 'PEOPLE' }`}
+              imageSrc={_getLockedImage(userCarts.others.length)}
+              classes='grey gradient noLine'
+              cart={cart}
+              share={true}/>
+          </tr>
           {
             userCarts.others.map((userCart, index) => {
               let memberNumber = userCarts.others.length - index;

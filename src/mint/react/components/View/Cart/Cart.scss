@@ -164,8 +164,20 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
   td, th {
     padding: 0 ($padding / 2);
 
+    &.noLine {
+      &:after {
+        display: none
+      }
+    }
+
     @media only screen and (max-width: 600px) {
       padding: 0 $padding $padding;
+    }
+
+    &.noLine {
+      &:after {
+        display: none
+      }
     }
 
     &.grey {
@@ -191,9 +203,6 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             margin: 0 $padding/2 $padding/3 0;
           }
         }
-      }
-      &:after {
-        display: none
       }
       &.gradient {
         &:after {
