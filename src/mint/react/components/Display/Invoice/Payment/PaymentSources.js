@@ -22,12 +22,17 @@ export default class PaymentSources extends Component {
     fetchPaymentSources();
   }
 
+  // auto select a payment if its the only one
+  componentWillReceiveProps = ({ paymentSources }) =>
+    (paymentSources.length === 1) ? this.setState({ selectedCardIndex: 0 }) : this.state.selectedCardIndex
+
   render() {
 
     const {
       props: { invoice, createPayment, paymentSources, deletePaymentSource },
       state: { selectedCardIndex }
     } = this;
+
     return (
         <div>
           {
@@ -43,11 +48,12 @@ export default class PaymentSources extends Component {
               </li>
             : null ))
           }
-        {
-          (paymentSources.length > 0 && selectedCardIndex !== null)
-            ? <button className='pay__button' onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}>Pay With Selected Card</button>
-            : null
-        }
+          { paymentSources.length ? 'Select a card to pay with' : null}
+          {
+            (paymentSources.length > 0 && selectedCardIndex !== null)
+              ? <button className='pay__button' onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}>Pay With Selected Card</button>
+              : null
+          }
         </div>
     );
   }

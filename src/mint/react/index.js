@@ -14,6 +14,7 @@ import Reducers from './reducers';
 import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery } from './actions';
 import { AppContainer } from './containers';
 
+
 if (module.hot && !PRODUCTION) {
   module.hot.accept();
 }
@@ -25,6 +26,7 @@ history.listen((location, action) => {
 });
 const historyMiddleware = routerMiddleware(history);
 let middleware = [thunkMiddleware, historyMiddleware];
+
 if (!PRODUCTION) {
   const { createLogger } = require('redux-logger');
   const loggerMiddleware = createLogger({

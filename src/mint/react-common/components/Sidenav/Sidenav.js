@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import FlipMove from 'react-flip-move';
 import LinkClass from './LinkClass';
 import moment from 'moment';
 import { Icon } from '..';
@@ -41,7 +42,7 @@ export default class Sidenav extends Component {
     }
   }
 
-  render() {
+  render = () => {
     const {
       props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, large },
       state: { show }
@@ -68,55 +69,34 @@ export default class Sidenav extends Component {
           </li>
           <li className='sidenav__list__view'>
             <div className='sidenav__list__title'>
-              { user_account.name ? <h4 className='name'> <Link to={'/m/settings'}><span>{user_account.name}</span></Link> </h4> : '' } 
+              { user_account.name ? <h4 className='name'> <Link to={'/m/settings'}><span>{user_account.name}</span></Link> </h4> : '' }
               <br></br>
               { leaderCarts.length ? <h4>My Kip Carts</h4> : null }
             </div>
-            <ul>
-              {leaderCarts.map((c, i) => {
-                if(i > 2 && show !== 'me') return null;
-                return ( 
-                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} >
-                    <div className={'image'} style={{
-                      backgroundImage: `url(${c.thumbnail_url || '//storage.googleapis.com/kip-random/head_smaller.png'})`
-                    }}/>
-                    <SideNavLink to={`/cart/${c.id}`}>
-                      <p>
-                        {c.name}
-                        {c.locked ? <span><br/>{moment(c.updatedAt).format('L')}</span> : null}
-                        {!c.locked ? <span><br/>{c.store} {c.store_locale}</span> : null}
-                      </p>
-                    </SideNavLink>
-                  </li>
-                );
-              })}
-            </ul>
+            <FlipMove typeName="ul" duration={350} easing="ease">
+              {
+                leaderCarts.map((c, i) =>
+                  <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink}/>)
+              }
+            </FlipMove>
             {
-              leaderCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
-              <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
-                &nbsp; {show === 'me' ? 'Less' : 'More'}
-              </h4> : null
+              // leaderCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
+              // <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
+              //   &nbsp; {show === 'me' ? 'Less' : 'More'}
+              // </h4> : null
             }
             { memberCarts.length ? <h4>Other Kip Carts</h4> : null }
-            <ul>
-              {memberCarts.map((c, i) => {
-                if(i > 2 && show !== 'other') return null;
-                return (
-                  <li key={i} className={`sidenav__list__leader ${c.id === cart_id ? 'currentCart' : ''}`} >
-                    <div className='icon'>
-                    </div>
-                    <SideNavLink to={`/cart/${c.id}`}>
-                      <p>{c.name}</p>
-                    </SideNavLink>
-                  </li>
-                );
-              })}
-            </ul>
+            <FlipMove typeName="ul" duration={350} easing="ease">
+              {
+                memberCarts.map((c, i) =>
+                  <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink}/>)
+              }
+            </FlipMove>
             {
-              memberCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
-              <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
-                &nbsp; {show === 'other' ? 'Less' : 'More'}
-              </h4> : null
+              // memberCarts.length >= 4 ? <h4 className='show__more' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
+              // <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
+              //   &nbsp; {show === 'other' ? 'Less' : 'More'}
+              // </h4> : null
             }
           </li>
           <li className='sidenav__list__actions'>
@@ -129,10 +109,10 @@ export default class Sidenav extends Component {
             <SideNavLink className='mail' to={'/m/feedback'}><Icon  icon='Email'/><h4>Feedback</h4></SideNavLink>
           </li>
           <footer className='sidenav__footer'>
-            <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); ::this._handleShare();}}>
+            <a href={`/cart/${cart_id}/m/share`} onClick={(e)=> {e.preventDefault(); _toggleSidenav(); this._handleShare();}}>
               <button className='side__share'>
                 <Icon icon='Person'/>
-                <p>Add Others To Cart</p> 
+                <p>Add Others To Cart</p>
               </button>
             </a>
             <a href={'/newcart'}>
@@ -144,6 +124,26 @@ export default class Sidenav extends Component {
           </footer>
         </ul>
       </div>
+    );
+  }
+}
+
+class CartListItem extends Component {
+  render = () => {
+    const { cart: { id, thumbnail_url, name, locked, updatedAt, store, store_locale }, currentCartId, SideNavLink } = this.props;
+    return (
+      <li key={id} className={`sidenav__list__leader ${id === currentCartId ? 'currentCart' : ''}`} >
+        <div className={'image'} style={{
+          backgroundImage: `url(${thumbnail_url || '//storage.googleapis.com/kip-random/head_smaller.png'})`
+        }}/>
+        <SideNavLink to={`/cart/${id}`}>
+          <p>
+            {name}
+            {locked ? <span><br/>{moment(updatedAt).format('L')}</span> : null}
+            {!locked ? <span><br/>{store} {store_locale}</span> : null}
+          </p>
+        </SideNavLink>
+      </li>
     );
   }
 }

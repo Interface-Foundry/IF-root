@@ -74,7 +74,7 @@ export default class Payment extends Component {
 
                 <ul>
                   {
-                    userPaymentStatus.paid ? <p> user has already paid </p> :
+                    userPaymentStatus.paid ? <p> Thanks for Paying! </p> :
                       <div>
                         <PaymentSources {...this.props}/>
                         <span className='payment-methods'>

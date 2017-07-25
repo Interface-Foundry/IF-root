@@ -12,8 +12,6 @@ import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginS
 import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
-console.log('testing', testing1, testing2, testing3, testing4)
-
 export default class App extends Component {
   state = {
     showCheckout: false
