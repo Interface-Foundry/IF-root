@@ -1,3 +1,4 @@
+const LRU = require('lru-cache')
 const Store = require('./Store')
 const scrape = require('../scraper/scrape_convert')
 const Invoice = require('../payments/Invoice')
@@ -13,29 +14,57 @@ dbReady.then((models) => {
  * UrlStore class to build a store for any retailers
  * we have not integrated with, but are just scraping URLs for
  */
-class UrlStore extends Store {
-  constructor(name, domain, country) {
-    super(name)
-    this.country = country
-    this.domain = domain
-    this.global_direct = true
-  }
+ class UrlStore extends Store {
+   constructor(name, domain, country) {
+     super(name)
+     this.country = country
+     this.domain = domain
+     this.global_direct = true
 
-  getSearchType () {
-    return 'urlSearch'
-  }
+     // copied from amazonStore
+     this.urlCache = LRU({
+       max: 500, // the number of ASIN's to store
+       maxAge: 1000 * 60 * 60 * 24, // refresh items every day
+       length: function () {
+         return 1
+       } // every document just has length 1
+     })
 
-  async urlSearch (options) {
-    var uri = options.text
-    // make sure this is a url from the right merchant
-    if (!uri || !uri.match(new RegExp(this.domain))) {
-      throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
-    }
-    // get tentative item data from the scraper
-    // uri, user country, user locale, store country, domain
-    var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
-    return itemData
-  }
+     this.queryCache = LRU({
+       max: 500, // the number of ASIN's to store
+       maxAge: 1000 * 60 * 60 * 24, // refresh items every day
+       length: function () {
+         return 1
+       } // every document just has length 1
+     })
+   }
+
+   getSearchType () {
+     return 'urlSearch'
+   }
+
+   async urlSearch (options) {
+     var uri = options.text
+     // make sure this is a url from the right merchant
+     if (!uri || !uri.match(new RegExp(this.domain))) {
+       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
+     }
+
+     // check to see if we've cached our thing
+     const cachedValue = this.urlCache.get(uri)
+     if (cachedValue) {
+       return [JSON.parse(cachedValue)]
+     }
+
+     // get tentative item data from the scraper
+     // uri, user country, user locale, store country, domain
+     var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
+
+     // cache the itemData
+     this.urlCache.set(uri, JSON.stringify(itemData))
+
+     return itemData
+   }
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
