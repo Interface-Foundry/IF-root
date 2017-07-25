@@ -71,7 +71,7 @@ export default class Cart extends Component {
             cart.locked ? <tr className={`noLine`}>
               <th colSpan='100%' className={`noLine`}>
                 <div className={`card reward video noLine`}>
-                  <div className='image' style={{backgroundImage: `url(//storage.googleapis.com/kip-random/social/new_cart.png)`}}>
+                  <div className='image' style={{backgroundImage: `url(//storage.googleapis.com/kip-random/social/media.png)`}}>
                   </div>
                   <div className='text'>
                     <h1>Lotte Unboxing Video ❤️</h1>

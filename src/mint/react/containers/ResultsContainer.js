@@ -5,7 +5,7 @@ import { replace, push } from 'react-router-redux';
 import { ActionCreators } from 'redux-undo';
 
 import { Results } from '../components';
-import { toggleHistory, submitQuery, addItem, selectItem, togglePopup, selectTab, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem,  updateQuery } from '../actions';
+import { toggleHistory, submitQuery, addItem, selectItem, clearSearchResults, togglePopup, selectTab, updateItem, navigateRightResults, navigateLeftResults, getMoreSearchResults, fetchSearchItem, fetchItemVariation, removeItem,  updateQuery } from '../actions';
 import { isUrl, addSearchHistory, splitAndMergeSearchWithCart, sleep } from '../utils';
 import ReactGA from 'react-ga';
 
@@ -43,6 +43,8 @@ const mapDispatchToProps = dispatch => ({
     return dispatch(addItem(cart_id, item_id, option_ids)).then(() => {
       dispatch(push(`/cart/${cart_id}`))
       dispatch(selectTab('cart'))
+      dispatch(clearSearchResults())
+      dispatch(updateQuery(''))
     });
   },
   selectItem: (item_id) => {
