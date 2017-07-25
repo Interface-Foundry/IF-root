@@ -12,6 +12,8 @@ import { HeaderContainer, TabsContainer, ViewContainer, ButtonsContainer, LoginS
 import { ErrorPage, Display, Toast, Loading } from '..';
 import { checkPageScroll } from '../../utils';
 
+console.log('testing', testing1, testing2, testing3, testing4)
+
 export default class App extends Component {
   state = {
     showCheckout: false
@@ -117,7 +119,7 @@ export default class App extends Component {
       fetchMetrics(nextCartId[1]);
     }
 
-    if (!id && nextId && process.env.GA) {
+    if (!id && nextId && GA_ENABLED) {
       ReactGA.initialize('UA-51752546-10', {
         gaOptions: {
           userId: nextId

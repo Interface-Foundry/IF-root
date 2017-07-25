@@ -27,7 +27,7 @@ export default class Stripe extends Component {
     return (
       <StripeCheckout
         token={(stripe_data) => createPaymentSource(amount, stripe_data, 'stripe', invoiceId)}
-        stripeKey={process.env.STRIPE_KEY}
+        stripeKey={STRIPE_KEY}
         email={user.email_address}
         name="Kip"
         description="Mint"

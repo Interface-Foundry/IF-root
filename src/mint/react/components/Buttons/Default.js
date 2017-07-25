@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 
-const displayInvoice = (process.env.NODE_ENV === 'development') || process.env.KIP_PAY_ENABLED ? true : false;
+const displayInvoice = (!PRODUCTION) || KIP_PAY_ENABLED;
 
 export default class Default extends Component {
   static propTypes = {
