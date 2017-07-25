@@ -52,7 +52,7 @@ export default class Paypal extends Component {
         onSuccess={onSuccess}
         onCancel={onCancel}
         currency={'USD'}
-        total={10000 / 100}
+        total={amount / 100}
       />
     );
   }

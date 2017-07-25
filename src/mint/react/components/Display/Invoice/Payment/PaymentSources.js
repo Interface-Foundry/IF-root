@@ -29,25 +29,26 @@ export default class PaymentSources extends Component {
       state: { selectedCardIndex }
     } = this;
     return (
-      <div>
+        <div>
+          {
+            paymentSources.map((payment, i) => (
+              (payment !== null) ?
+                <li key={i} className={(selectedCardIndex === i ? 'selected' : '') + ' clickable'} onClick={() => this.setState({selectedCardIndex: i})}>
+                <div className='circle'/>
+                <div className='text'>
+                    <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
+                    <p>Exp: {moment().month(payment.exp_month).year(payment.exp_year).format('MM/YYYY')}</p>
+                    <button className='delete__button' onClick={()=> deletePaymentSource(payment.id)}>Remove Card</button>
+                </div>
+              </li>
+            : null ))
+          }
         {
-          paymentSources.map((payment, i) => (
-            <li key={i} className={(selectedCardIndex === i ? 'selected' : '') + ' clickable'} onClick={() => this.setState({selectedCardIndex: i})}>
-              <div className='circle'/>
-              <div className='text'>
-                  <h4>{payment.brand} <span>ending in {payment.last4}</span></h4>
-                  <p>Exp: {moment().month(payment.exp_month).year(payment.exp_year).format('MM/YYYY')}</p>
-                  <button className='delete__button' onClick={()=> deletePaymentSource(payment.id)}>Remove Card</button>
-              </div>
-            </li>
-          ))
+          (paymentSources.length > 0 && selectedCardIndex !== null)
+            ? <button className='pay__button' onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}>Pay With Selected Card</button>
+            : null
         }
-      {
-        (paymentSources.length > 0 && selectedCardIndex !== null)
-          ? <button className='pay__button' onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}>Pay With Selected Card</button>
-          : null
-      }
-      </div>
+        </div>
     );
   }
 }
