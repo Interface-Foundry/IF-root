@@ -44,19 +44,20 @@ export default class Cart extends Component {
     const { cart, user, invoice, editId, updateItem, achievements } = this.props,
       { _getCompleteImage, _getIncompleteImage, _getLockedImage, _getColor } = this,
       userCarts = splitCartById(this.props, user),
+      leaderCart = splitCartById(this.props, cart.leader).my,
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id,
       lastAward = userCarts.others.length > 2 ? ( userCarts.others.length > 4 ? ( userCarts.others.length > 7 ? ( userCarts.others.length > 11 ? 12 : 8 ) : 5 ) : 3 ) : 0,
       nextAward = userCarts.others.length >= 3 ? ( userCarts.others.length >= 5 ? ( userCarts.others.length >= 8 ?  ( userCarts.others.length > 12 ? 20 : 12 )  : 8 ) : 5 ) : 3;
 
-    if(userCarts.others.length === 0) {
+    if(userCarts.others.length === 0 || leaderCart.length === 0) {
       userCarts.others.push({
-        createdAt: user.createdAt,
-        email_address: user.email_address,
-        id: user.id + '_temp',
+        createdAt: cart.leader.createdAt,
+        email_address: cart.leader.email_address,
+        id: cart.leader.id + '_temp',
         items: [],
-        name: user.name,
-        updateAt: user.updateAt
+        name: cart.leader.name,
+        updateAt: cart.leader.updateAt
       })
     }
     
