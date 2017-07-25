@@ -1,6 +1,7 @@
 const Store = require('./Store')
 const scrape = require('../scraper/scrape_convert')
 const Invoice = require('../payments/Invoice')
+const LRU = require('lru-cache')
 
 // get the waterline mint database
 var db
@@ -19,6 +20,23 @@ class UrlStore extends Store {
     this.country = country
     this.domain = domain
     this.global_direct = true
+
+    // copied from amazonStore
+    this.urlCache = LRU({
+      max: 500, // the number of ASIN's to store
+      maxAge: 1000 * 60 * 60 * 24, // refresh items every day
+      length: function () {
+        return 1
+      } // every document just has length 1
+    })
+
+    this.queryCache = LRU({
+      max: 500, // the number of ASIN's to store
+      maxAge: 1000 * 60 * 60 * 24, // refresh items every day
+      length: function () {
+        return 1
+      } // every document just has length 1
+    })
   }
 
   getSearchType () {
@@ -31,17 +49,30 @@ class UrlStore extends Store {
     if (!uri || !uri.match(new RegExp(this.domain))) {
       throw new Error(`Can only handle uris from "${this.domain}" but got "${uri}"`)
     }
+
+    // check to see if we've cached our thing
+    const cachedValue = this.urlCache.get(uri)
+    if (cachedValue) {
+      return [JSON.parse(cachedValue)]
+    }
+
     // get tentative item data from the scraper
     // uri, user country, user locale, store country, domain
     var itemData = await scrape(uri, options.user_country, options.user_locale, this.country, this.domain)
+
+    // cache the itemData
+    this.urlCache.set(uri, JSON.stringify(itemData))
+
     return itemData
   }
 
   async processSearchItems (itemData) {
     logging.info('process search items called')
+    // logging.info('itemData', itemData)
 
     //we're getting an array from the generic search and will never process more than one item
     var itemData = itemData[0]
+
     delete itemData.domain
     delete itemData.user
 
@@ -93,7 +124,7 @@ class UrlStore extends Store {
 
       delete itemData.options
     }
-    logging.info('created options')
+    // logging.info('created options')
 
     // create the item translations
     var itemName  = await db.Translations.create(itemData.original_name)
@@ -106,21 +137,27 @@ class UrlStore extends Store {
     await itemDescription.save()
     delete itemData.original_description
 
+    // logging.info('created translations')
+
     // create conversion
     itemData.original_price.fx_rate = itemData.original_price.fx_rate[itemData.original_price.fx_to]
     var originalPrice = await db.Conversions.create(itemData.original_price)
-    originalPrice.converted_value = itemData.price * 1.0
+    // logging.info('prequel')
+    originalPrice.converted_value = itemData.price * 1.0;
+    // logging.info('ummm')
     delete itemData.original_price
     await originalPrice.save()
+    // logging.info('sequel')
     if (!Number(itemData.price)) {
       delete itemData.price
     }
-
+    // logging.info('created conversion')
     // convert price to cents
     itemData.price = itemData.price * 100
 
     //create item & associate it w details objects
     var item = await db.Items.create(itemData)
+    // logging.info('created item in db')
     item.original_name = itemName.id
     item.original_description = itemDescription.id
     item.price_conversion = originalPrice.id
@@ -128,7 +165,7 @@ class UrlStore extends Store {
       item.options.add(op.id)
     })
     await item.save()
-    logging.info('about to create item')
+    // logging.info('about to get item')
     item = await db.Items.findOne({id: item.id}).populate('options').populate('original_description')
 
     return [item];
