@@ -75,7 +75,6 @@ export default class Cart extends Component {
                 sub={`Tracking Number: ${cart.trackingNum}`}
                 classes='one noLine'
                 imageSrc='//storage.googleapis.com/kip-random/social/new_cart.png'
-                number={'icon'}
                 cart={cart}/>
             </tr> : null
           }
@@ -87,7 +86,7 @@ export default class Cart extends Component {
                   </div>
                   <div className='text'>
                     <h1>Lotte Unboxing Video ❤️</h1>
-                    <p>Added 1 month ago</p>
+                    <p>Added 26 days ago</p>
                   </div>
                   <div className='vid__container'>
                     <iframe width="100%" height="100%" src={cart.video} frameBorder="0" allowFullScreen></iframe>

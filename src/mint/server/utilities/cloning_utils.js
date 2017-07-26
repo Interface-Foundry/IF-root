@@ -40,12 +40,17 @@ var clone = function * (cart_id, user_id, reorder) {
   delete originalJson.parent_clone
   delete originalJson.parent_reorder
   delete originalJson.address
+  delete originalJson.likes
+  delete originalJson.invoices
+  delete originalJson.clones
+  delete originalJson.editId //??? what is that?
 
   // create new cart
   var clone = yield db.Carts.create(originalJson)
 
   // change leader
   clone.leader = user_id
+  clone.members.add(user_id)
   clone.dirty = false;
 
   // clone items in the cart
@@ -60,12 +65,15 @@ var clone = function * (cart_id, user_id, reorder) {
     delete itemJson.added_by
     delete itemJson.cart
     delete itemJson.details
+    // delete itemJson.original_name
+    // delete itemJson.original_description
+    // delete itemJson.original_price
 
     //create new item
     var clonedItem = yield db.Items.create(itemJson)
     clonedItem.cart = clone.id
     clonedItem.added_by = user_id
-    clonedItem.details = item.details.id
+    if (item.details) clonedItem.details = item.details.id
     yield clonedItem.save()
     clone.items.add(clonedItem.id)
   })

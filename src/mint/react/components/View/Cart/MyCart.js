@@ -23,7 +23,7 @@ export default class MyCart extends Component {
         <th colSpan='100%'>
           {
             myCart.length
-            ? <div className={`card`}>
+            ? <div className={`card mine`}>
                 <nav onClick={() => this.setState({open: !open})}>
                 <h1>{user.name}</h1>
                 <h1 className='date' onClick={() => this.setState({open: !open})}>
