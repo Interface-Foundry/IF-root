@@ -9,11 +9,11 @@ import { Link } from 'react-router-dom';
 export default class RewardCard extends Component {
 
   render() {
-    const { title, sub, imageSrc, classes, number, share, cart } = this.props;
+    const { title, sub, imageSrc, classes, number, share, cart, navigateSrc } = this.props;
 
     return (
       <th colSpan='100%' className={classes}>
-        <div className={`card reward ${classes}`}>
+        <div className={`card reward ${classes}`} onClick={() => navigateSrc ? window.open(navigateSrc, '_blank') : null}>
           <div className='image' style={{backgroundImage: `url(${imageSrc})`}}>
             { number === 'icon' ? <Icon icon='Check'/> : number }
           </div>

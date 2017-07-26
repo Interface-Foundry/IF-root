@@ -79,6 +79,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         z-index: 1;
       }
 
+      .navigate {
+        display: block;
+      }
+
       @media only screen and (max-width: 600px) {
         position: relative;
         padding: 0 10px;

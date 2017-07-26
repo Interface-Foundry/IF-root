@@ -75,6 +75,7 @@ export default class Cart extends Component {
                 sub={`Tracking Number: ${cart.trackingNum}`}
                 classes='one noLine'
                 imageSrc='//storage.googleapis.com/kip-random/social/new_cart.png'
+                navigateSrc={cart.trackingURL}
                 cart={cart}/>
             </tr> : null
           }
