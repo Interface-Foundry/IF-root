@@ -141,6 +141,42 @@ module.exports = function (router) {
       }
     }
 
+    var demoCart = 'b80612954905'
+
+    //FOR DEMOING ONLY /!\ /!\
+    if (cart && cart.id == demoCart){
+
+      //member time travel
+      if(cart.members && cart.members.length > 0){
+        for (var i = 0; i < cart.members.length; i++) {
+          var z = new Date(cart.members[i].createdAt)
+          cart.members[i].createdAt = z.setDate(z.getDate()-45)
+          var x = new Date(cart.members[i].updatedAt)
+          cart.members[i].updatedAt = x.setDate(x.getDate()-45)
+        }
+      }
+      //item time travel
+      if(cart.items && cart.items.length > 0){
+        for (var i = 0; i < cart.items.length; i++) {
+          var z = new Date(cart.items[i].createdAt)
+          cart.items[i].createdAt = z.setDate(z.getDate()-45)
+          var x = new Date(cart.items[i].updatedAt)
+          cart.items[i].updatedAt = x.setDate(x.getDate()-45)
+        }        
+      }
+      //cart time travel
+      var a = new Date(cart.createdAt)
+      cart.createdAt = a.setDate(a.getDate()-45)
+      var b = new Date(cart.updatedAt)
+      cart.updatedAt = b.setDate(b.getDate()-45)
+
+      //extra params
+      cart.video = 'https://www.youtube.com/embed/2dq6pgMdNn4?rel=0&amp;showinfo=0'
+      cart.shippedDate = '06/21/2017'
+      cart.trackingNum = 'EG206300848KR'
+      cart.trackingURL = 'https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=EG206300848KR'
+    }
+
     if (cart) {
       res.send(cart);
     } else {
