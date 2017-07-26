@@ -35,7 +35,7 @@ export default class Cart extends Component {
   }
 
   render = () => {
-    const { cart, user, invoice } = this.props, { openCarts } = this.state, { _toggleCart } = this,
+    const { cart, user } = this.props, { openCarts } = this.state, { _toggleCart } = this,
       userCarts = moveToFront(splitCartById(this.props, user), user.id) || [],
       isLeader = user.id === cart.leader.id;
 
@@ -48,8 +48,7 @@ export default class Cart extends Component {
                 <td colSpan='100%'>
                   <div className='card' onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                     <MemberHead
-                      user={userCart}
-                      invoice={invoice}
+                      {...this.props}
                       openCarts={openCarts}
                       memberItems={userCart.items}
                       isLeader={isLeader}
