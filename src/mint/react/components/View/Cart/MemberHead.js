@@ -7,7 +7,6 @@ import { ItemPaidButtonContainer } from '../../../containers';
 export default class MemberHead extends Component {
   static propTypes = {
     user: PropTypes.object,
-    invoice: PropTypes.object,
     openCarts: PropTypes.array,
     memberItems: PropTypes.array,
     isLeader: PropTypes.bool,
@@ -15,7 +14,7 @@ export default class MemberHead extends Component {
     _toggleCart: PropTypes.func
   }
   render = () => {
-    const { user, invoice, openCarts, memberItems, isLeader, isCurrentMember, _toggleCart } = this.props;
+    const { user, openCarts, memberItems, isLeader, isCurrentMember, _toggleCart } = this.props;
     return (
       <div className='card-head'>
         {
@@ -30,7 +29,7 @@ export default class MemberHead extends Component {
           )
           : <h1 className='item-owner'>{user.name}</h1>
         }
-        <ItemPaidButtonContainer />
+        { isCurrentMember ? <ItemPaidButtonContainer /> : null }
         <h1 className='toggle-items' onClick={() => _toggleCart(user.id)}>
           <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
         </h1>

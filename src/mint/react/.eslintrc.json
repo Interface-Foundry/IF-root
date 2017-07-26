@@ -6,7 +6,8 @@
     "KIP_PAY_ENABLED": true,
     "STRIPE_KEY": true,
     "PAYPAL_KEY": true,
-    "GA_ENABLED": true
+    "GA_ENABLED": true,
+    "SHIPPING_OPTIONS_ENABLED": true
   },
   "rules": {
     "strict": 0,
