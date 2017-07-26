@@ -68,18 +68,29 @@ export default class Cart extends Component {
           <MyCart myCart={myCart} {...this.props} {...this.state} achievements={achievements} isLeader={isLeader}/>
         </thead>
         <tbody>
-        {
-            cart.locked ? <tr className={`noLine`}>
+          {
+            cart.video ? <tr className={`checkedout`}>
+              <RewardCard 
+                title={`SHIPPED ${cart.shippedDate}`}
+                sub={`Tracking Number: ${cart.trackingNum}`}
+                classes='one noLine'
+                imageSrc='//storage.googleapis.com/kip-random/social/new_cart.png'
+                number={'icon'}
+                cart={cart}/>
+            </tr> : null
+          }
+          {
+            cart.video ? <tr className={`noLine`}>
               <th colSpan='100%' className={`noLine`}>
                 <div className={`card reward video noLine`}>
                   <div className='image' style={{backgroundImage: `url(//storage.googleapis.com/kip-random/social/media.png)`}}>
                   </div>
                   <div className='text'>
                     <h1>Lotte Unboxing Video ❤️</h1>
-                    <p>Added 5 days ago</p>
+                    <p>Added 1 month ago</p>
                   </div>
                   <div className='vid__container'>
-                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/2dq6pgMdNn4?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
+                    <iframe width="100%" height="100%" src={cart.video} frameBorder="0" allowFullScreen></iframe>
                   </div>
                 </div>
               </th>
