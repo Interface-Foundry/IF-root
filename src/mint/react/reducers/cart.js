@@ -87,38 +87,20 @@ export default function cart(state = initialState, action) {
 export const getMemberById = (state, props) => [...state.members, state.leader].find(member => member.id === props.id);
 
 export const splitCartById = (state, props) => {
-  const id = props ? props.id : null;
-
   return state.cart.items.reduce((acc, item) => {
-    acc.quantity = acc.quantity + (item.quantity || 1);
     let linkedMember = getMemberById(state.cart, { id: item.added_by }) || {};
-
-    if (id === item.added_by) {
-      acc['my'].push(item);
-    } else if (acc.others.find(member => member.id === linkedMember.id)) {
-      const others = acc.others.filter(member => member.id !== linkedMember.id);
-      let newMember = acc.others.find(member => member.id === linkedMember.id);
-      newMember = {
-        ...newMember,
-        items: [...newMember.items, item]
-      };
-      acc = {
-        ...acc,
-        others: [...others, newMember]
-      };
+    if (acc.find(member => member.id === linkedMember.id)) {
+      return acc.map(member => member.id === linkedMember.id ? {
+        ...member,
+        items: [...member.items, item]
+      } : member);
     } else {
-      acc.others.push({
+      return [...acc, {
         id: item.added_by,
         email_address: linkedMember.email_address,
         name: linkedMember.name,
         items: [item]
-      });
+      }];
     }
-
-    return acc;
-  }, {
-    my: [],
-    others: [],
-    quantity: 0
-  });
+  }, []);
 };

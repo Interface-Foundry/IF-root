@@ -42,6 +42,7 @@
   .buttons {
     height: 40px;
     padding: 0;
+    display: flex;
 
     &.checkoutButton-enter {
       @include animation(fadeInHeaderButtons 0.5s);
