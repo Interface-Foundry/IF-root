@@ -5,6 +5,7 @@ const archive = require('./cold_storage');
 
 var cart_types = require('../server/cart/cart_types').stores
 cart_types = cart_types.map(store => store.store_type.split('_')[0])
+console.log('fucking cart Types', cart_types)
 
 /**
  * Session collection is the database side of the node-client-session cookie
