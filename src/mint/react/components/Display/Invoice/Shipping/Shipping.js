@@ -18,7 +18,7 @@ const shippingOptions = [{
   }
 ];
 
-export default class CartReview extends Component {
+export default class Shipping extends Component {
 
   static propTypes = {
     selectedAccordion: PropTypes.string,
@@ -48,7 +48,7 @@ export default class CartReview extends Component {
           selectedAccordion.includes('review') ? <div>
             <ul className='items'>
               <nav>
-                <h4>Cart Review</h4>
+                <h4>Items</h4>
               </nav>
               {
                 cart.items.map((item) => (
@@ -67,7 +67,7 @@ export default class CartReview extends Component {
             </ul>
             <ul className='delivery'>
               <nav>
-                <h4>Delivery option</h4>
+                <h4>Choose your delivery option</h4>
               </nav>
               {
                isLeader

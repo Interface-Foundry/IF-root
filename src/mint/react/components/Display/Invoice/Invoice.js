@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import Payment from './Payment';
 import InvoiceAddress from './InvoiceAddress';
 import InvoiceInfo from './InvoiceInfo';
-import CartReview from './CartReview';
+import Shipping from './Shipping';
 import Forms from './Forms';
 
 export default class Invoice extends Component {
@@ -37,7 +37,7 @@ export default class Invoice extends Component {
         <InvoiceInfo {...this.props} />
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
         <Payment {...this.props} isLeader={isLeader}/>
-        <CartReview {...this.props} isLeader={isLeader}/>
+        <Shipping {...this.props} isLeader={isLeader}/>
       </div>
     );
   }
