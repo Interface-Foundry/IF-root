@@ -21,8 +21,8 @@
       width: $nav-height;
       height: $nav-height;
       border-radius: 100%;
-      background: white;
-      border: 1px solid #eae7e4;
+      background: $color-white;
+      border: 1px solid $border-color-light;
       margin: 0 auto;
       * {
         display: block;
@@ -60,4 +60,3 @@
     }
   }
 }
-

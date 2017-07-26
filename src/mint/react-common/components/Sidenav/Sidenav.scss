@@ -10,7 +10,7 @@
   right: 0;
   z-index: 100;
   width: 100%;
-  background: rgba($secondaryColor, 0.3);
+  background: rgba($blue-header, 0.3);
   border-left: 1px solid $border-color-light;
 
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
@@ -52,7 +52,7 @@
 
         &.show__more {
           padding: ($padding / 2) $padding ($padding * 2);
-          color: #4a9ff1;
+          color: $blue-header;
           text-indent: underline;
           cursor: pointer;
 
@@ -111,7 +111,7 @@
               display: inline-block;
 
               span {
-                border-bottom: 3px solid $mainColor;
+                border-bottom: 3px solid $yellow-checkout;
               }
             }
           }
@@ -128,7 +128,7 @@
             border-radius: 5px 0 0 5px;
 
             &:hover {
-              background: darken($secondaryColor, 5%);
+              background: darken($blue-header, 5%);
             }
           }
 
@@ -162,17 +162,18 @@
             background: #f6f6f6;
           }
 
-          .image {
+          .cart-image {
             @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
 
+            background-size: cover;
             border-radius: 5px 0 0 5px;
             width: 50px;
             height: 100%;
           }
 
           &:hover {
-            background-color: rgba($secondaryColor, 0.5);
-            border-color: rgba($secondaryColor, 0.5);
+            background-color: rgba($blue-header, 0.5);
+            border-color: rgba($blue-header, 0.5);
           }
         }
 
@@ -211,19 +212,19 @@
 
           &.lock {
             svg {
-              color: $fifthColor;
+              color: $orange-caution;
             }
           }
 
           &.settings {
             svg {
-              color: $thirdColor;
+              color: $green-accent;
             }
           }
 
           &.mail {
             svg {
-              color: $secondaryColor;
+              color: $blue-header;
             }
           }
 
@@ -282,7 +283,7 @@
         cursor: pointer;
         border-radius: 5px;
         background: white;
-        background: $mainColor;
+        background: $yellow-checkout;
         border: 1px solid $border-color-light;
         font-weight: 600;
         width: 100%;
@@ -315,17 +316,17 @@
 
         &.side__share {
           height: unset;
-          background: $secondaryColor;
+          background: $blue-header;
           color: white;
         }
 
         &.side__new_cart {
           height: unset;
-          background: $mainColor;
+          background: $yellow-checkout;
           color: black;
 
           @media (min-width: 900px) {
-            background-color: $thirdColor;
+            background-color: $green-accent;
             color: white;
           }
         }

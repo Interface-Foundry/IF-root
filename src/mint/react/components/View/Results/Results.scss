@@ -27,7 +27,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     position: absolute;
     display: block;
     width: 100%;
-    border-top: 3px solid $secondaryColor;
+    border-top: 3px solid $blue-header;
     bottom: -30px;
     color: white;
     text-align: center;
@@ -40,7 +40,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       cursor: pointer;
       position: absolute;
       font-size: 10px;
-      background: $secondaryColor;
+      background: $blue-header;
       padding: ($padding / 2) $padding;
       border-radius: $padding / 2;
       margin-top: -15px;
@@ -138,7 +138,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
     & button {
       border: 0;
-      background: $mainColor;
+      background: $yellow-checkout;
       height: 28px;
       line-height: 25px;
       font-size: 14px;
@@ -146,7 +146,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       border-radius: 5px;
 
       &.warn {
-        background-color: $warningColor;
+        background-color: $red-warning-bright;
         color: white;
       }
 
@@ -176,7 +176,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       &.more {
         background: white;
-        color: $secondaryColor;
+        color: $blue-header;
         padding: 0;
         font-weight: bold;
       }
@@ -374,7 +374,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       .link {
         font-size: 10px;
-        color: $secondaryColor;
+        color: $blue-header;
         padding: 0 0 $padding;
 
         @media only screen and (min-width: 600px) {
@@ -390,7 +390,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           position: absolute;
           top: -$padding;
           right: $padding;
-          background: $thirdColor;
+          background: $green-accent;
           color: white;
           padding: ($padding / 2) $padding;
           border-radius: 5px;
@@ -489,7 +489,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       .card {
         opacity: 1 !important;
         padding: $padding ($padding * 2);
-        border-top: 3px solid $secondaryColor;
+        border-top: 3px solid $blue-header;
         box-shadow: $card-box-shadow !important;
         height: unset;
 
@@ -500,7 +500,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           right: 0;
           height: $nav-height - $padding;
           line-height: $nav-height - $padding;
-          background: $secondaryColor;
+          background: $blue-header;
           color: white;
           text-align: center;
           display: none;
@@ -534,7 +534,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           }
 
           svg {
-            fill: $warningColor;
+            fill: $red-warning-bright;
 
             @media only screen and (max-width: 865px) {
               fill: white;
@@ -563,7 +563,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             font-weight: 400;
 
             span {
-              color: $secondaryColor;
+              color: $blue-header;
               padding: $padding 0;
               font-size: 10px;
             }
@@ -699,7 +699,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           width: 0;
           height: 0;
           border-right: 13px solid transparent;
-          border-bottom: 15px solid $secondaryColor;
+          border-bottom: 15px solid $blue-header;
           border-left: 13px solid transparent;
         }
 

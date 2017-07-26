@@ -51,12 +51,15 @@ export default class Sidenav extends Component {
     const SideNavLink = (window.location.pathname.includes('/cart') || window.location.pathname.includes('/m/') || window.location.pathname.includes('/newcart') || window.location.pathname.includes('/404')) ? Link : LinkClass;
 
     let leaderCarts = moveToFront(
-        carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
+        carts
+        .filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id))
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
         cart_id),
       memberCarts = moveToFront(
-        carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
+        carts
+        .filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id))
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
         cart_id);
-
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={() => _toggleSidenav()}>

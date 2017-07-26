@@ -99,9 +99,9 @@ export default class Popup extends Component {
     return (
       <section className='popup' onClick={(e) => {if(e.target.className === 'popup' && !window.location.href.includes('newcart')) _toggleLoginScreen();}}>
         <form className={`popup__card ${success ? 'codemode':''}`} onSubmit={!success ? _enterMail : _enterCode}>
-          
+
           {
-            window.location.href.includes('newcart') 
+            window.location.href.includes('newcart')
             ? null
             : (<div className='popup__card-icon' onClick={() =>  _toggleLoginScreen()}>
                 <Icon icon='Clear'/>
@@ -114,7 +114,7 @@ export default class Popup extends Component {
           }
           {
             error
-              ? <span style={{color: '#ff6961'}}>{error}</span>
+              ? <span className='error-msg'>{error}</span>
               : null
           }
           {

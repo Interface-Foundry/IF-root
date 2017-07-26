@@ -39,7 +39,7 @@
 
     &.selected {
       span {
-        border-bottom: 4px solid $secondaryColor;
+        border-bottom: 4px solid $blue-header;
         height: $nav-height - $padding - 1px;
       }
 
@@ -47,9 +47,9 @@
 
     &.highlight {
       span, svg {
-        color: $thirdColor;
+        color: $green-accent;
         // @include animation(glowText 1s linear infinite);
-        
+
       }
 
     }

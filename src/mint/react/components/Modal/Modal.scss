@@ -7,7 +7,7 @@
   background: rgba(0, 0, 0, 0.5);
   bottom: 0;
   display: flex;
-  font-family: $secondary-font;
+  font-family: $raleway-font;
   justify-content: center;
   left: 0;
   overflow: auto;
@@ -24,7 +24,7 @@
 
     .modal-box__head {
       border-radius: ($padding / 2) ($padding / 2) 0 0;
-      border-top: 8px solid $secondaryColor;
+      border-top: 8px solid $blue-header;
       width: 100%;
       display: flex;
 
@@ -139,7 +139,7 @@
 
               input, textarea {
                 border: 0;
-                font-family: $main-font;
+                font-family: $arial-font;
                 font-size: 16px;
                 font-weight: 400;
                 min-height: 30px;

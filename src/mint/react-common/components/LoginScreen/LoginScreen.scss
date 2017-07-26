@@ -9,7 +9,7 @@
   right: 0;
   z-index: 1001;
   padding: ($padding * 10) ($padding * 2) 0;
-  background: rgba($secondaryColor, 0.3);
+  background: rgba($blue-header, 0.3);
 
   @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 0.33s);
   @include transition(all 0.33s cubic-bezier(0.4, 0, 0.2, 1));
@@ -20,7 +20,7 @@
     max-width: 500px;
     margin: 0 auto;
     border: 1px solid $border-color-light;
-    border-top: 5px solid $secondaryColor;
+    border-top: 5px solid $blue-header;
     background: white;
     border-radius: $padding / 2;
     box-shadow: 0 1px 5px -2px grey;
@@ -29,6 +29,10 @@
     &.codemode {
       @include animation(fadeIn cubic-bezier(0.4, 0, 0.2, 1) 1s);
       @include transition(all 1s cubic-bezier(0.4, 0, 0.2, 1));
+    }
+
+    .error-msg {
+      color: $red-warning;
     }
 
     @media (min-width: 900px) {
@@ -94,13 +98,13 @@
     }
 
     h2 {
-      color: $thirdColor;
+      color: $green-accent;
       padding: 10px 0 0 0;
     }
 
     input {
       border: none;
-      border-bottom: 3px solid $color-blue;
+      border-bottom: 3px solid $blue-header;
       background: transparent;
       width: 75%;
       text-align: center;
@@ -123,7 +127,7 @@
         font-size: 20px;
 
         &:invalid {
-          border-color: $fifthColor;
+          border-color: $orange-caution;
         }
 
         &:required {
@@ -131,21 +135,21 @@
         }
 
         &:active, &:focus {
-          border-color: $thirdColor;
+          border-color: $green-accent;
         }
 
         &.empty {
-          border-color: $color-blue;
+          border-color: $blue-header;
         }
 
         &:valid {
-          border-color: $thirdColor;
+          border-color: $green-accent;
         }
       }
     }
 
     button {
-      background: $warningColor;
+      background: $red-warning-bright;
       border: 0;
       margin: ($padding * 4) 0 $padding;
       padding: $padding ($padding * 5);

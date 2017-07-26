@@ -84,7 +84,7 @@
     "react-select": "^1.0.0-rc.3",
     "react-share": "^1.15.0",
     "react-stripe-checkout": "2.5.0",
-    "react-stripe-elements": "^0.0.5",
+    "react-stripe-elements": "^0.0.6",
     "react-transition-group": "^2.2.0",
     "react-typist": "^1.1.1",
     "redux": "^3.7.2",
@@ -176,7 +176,7 @@
     "sass-lint": "^1.10.2",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.18.2",
-    "webpack": "^3.4.0",
+    "webpack": "^3.4.1",
     "webpack-dev-middleware": "^1.11.0",
     "webpack-dev-server": "^2.6.1",
     "webpack-hot-middleware": "^2.18.2"

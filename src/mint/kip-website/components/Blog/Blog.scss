@@ -15,7 +15,7 @@
 		width: 100%;
 		z-index: 1;
 		background: white;
-		border-bottom: 3px solid mix(white, $thirdColor, 85%);
+		border-bottom: 3px solid mix(white, $green-accent, 85%);
 
 		& > div {
 			display: table;
@@ -55,7 +55,7 @@
 						left: 0;
 						bottom: -3px;
 						border-radius: 500px;
-						background: $thirdColor;
+						background: $green-accent;
 						@include transition(all 0.33s $material-bezier);
 					}
 				}
@@ -116,7 +116,7 @@
 			h2 {
 				height: $ribbonHeight/2;
 				margin-bottom: $padding;
-				color: $thirdColor;
+				color: $green-accent;
 				max-width: 500px;
 			}
 			p {
@@ -125,7 +125,7 @@
 			svg {
 				width: $ribbonHeight;
 				height: $ribbonHeight/1.3;
-				fill: $thirdColor;
+				fill: $green-accent;
 				@include animation(bounceDownSmall 3s infinite);
 			}
 		}

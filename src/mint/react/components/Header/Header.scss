@@ -3,7 +3,7 @@
 @import '../../../react-common/styles/Animations';
 
 .navbar {
-  background: $secondaryColor;
+  background: $blue-header;
   color: $color-white;
   display: flex;
   font-family: 'Raleway';
@@ -143,9 +143,9 @@
 
       .beta {
         background: $color-white;
-        border: 1px solid $secondaryColor;
+        border: 1px solid $blue-header;
         border-radius: 3px;
-        color: $secondaryColor;
+        color: $blue-header;
         display: block;
         font-size: 8px;
         font-weight: 900;
@@ -263,7 +263,7 @@
       cursor: pointer;
 
       span {
-        border-bottom: 3px solid $mainColor;
+        border-bottom: 3px solid $yellow-checkout;
       }
 
       &.name {
@@ -274,7 +274,7 @@
     }
 
     a {
-      border-bottom: 3px solid $mainColor;
+      border-bottom: 3px solid $yellow-checkout;
     }
 
     .navbar__icon {

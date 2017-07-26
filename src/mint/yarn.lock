@@ -8120,9 +8120,9 @@ react-stripe-checkout@2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/react-stripe-checkout/-/react-stripe-checkout-2.5.0.tgz#6a6f612f99e3e2bf787b88aed98b5f86a87b81dd"
 
-react-stripe-elements@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-0.0.5.tgz#dae84792777b25bbfafab5c0c8b31f2a132b6469"
+react-stripe-elements@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-0.0.6.tgz#cb4d2fb3f30eeca0c8f7c1e2a27962867387d001"
   dependencies:
     prop-types "^15.5.8"
 
@@ -10027,9 +10027,9 @@ webpack-sources@^1.0.1:
     source-list-map "^2.0.0"
     source-map "~0.5.3"
 
-webpack@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.4.0.tgz#e9465b660ad79dd2d33874d968b31746ea9a8e63"
+webpack@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.4.1.tgz#4c3f4f3fb318155a4db0cb6a36ff05c5697418f4"
   dependencies:
     acorn "^5.0.0"
     acorn-dynamic-import "^2.0.0"

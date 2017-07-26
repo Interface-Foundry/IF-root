@@ -33,18 +33,16 @@ export default class Cart extends Component {
   _toggleCart(id) {
     const { openCarts } = this.state;
 
-    if(openCarts.includes(id)) {
+    if (openCarts.includes(id)) {
       const index = openCarts.indexOf(id);
-      this.setState({openCarts: [...openCarts.slice(0, index), ...openCarts.slice(index + 1)]});
+      this.setState({ openCarts: [...openCarts.slice(0, index), ...openCarts.slice(index + 1)] });
     } else {
-      this.setState({openCarts: [...openCarts, id]});
+      this.setState({ openCarts: [...openCarts, id] });
     }
   }
 
   render() {
-    const { cart, user, invoice, editId, updateItem } = this.props,
-      { openCarts } = this.state,
-      { _toggleCart } = this,
+    const { cart, user, invoice, editId, updateItem } = this.props, { openCarts } = this.state, { _toggleCart } = this,
       userCarts = splitCartById(this.props, user),
       myCart = userCarts.my,
       isLeader = user.id === cart.leader.id;
@@ -58,19 +56,21 @@ export default class Cart extends Component {
                 myCart.length
 
                 ? <div className={`card`} onClick={() => openCarts.includes(user.id) ? _toggleCart(user.id) : null}>
-                  { isLeader ? <h1><a href={`mailto:${user.email_address}?subject=KipCart&body=`}>{user.name} <Icon icon='Email'/></a></h1> : <h1>{user.name}</h1> }
-                  { invoice.display ? <ItemPaidButton {...this.props}/> : null}
-                  <h1 className='date' onClick={() => _toggleCart(user.id)}>
-                    <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
-                  </h1>
-                  <h4>
-                    <span className='grey'>{numberOfItems(myCart)} items • Updated {timeFromDate(myCart[0].updatedAt)}</span>
-                  </h4>
-                  <h4>
-                  <z>
-                    Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.price_locale)}</span> &nbsp;
-                  </z>
-                  </h4>
+                  <div className='card-head'>
+                    <h1 className='item-owner'>{user.name}</h1>
+                    { invoice.display ? <ItemPaidButton {...this.props}/> : null}
+                    <h1 className='toggle-items' onClick={() => _toggleCart(user.id)}>
+                      <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
+                    </h1>
+                    <h4>
+                      <span className='grey'>{numberOfItems(myCart)} items • Updated {timeFromDate(myCart[0].updatedAt)}</span>
+                    </h4>
+                    <h4>
+                      <span className='my-price'>
+                        Total: <span className='price'>{displayCost(calculateItemTotal(myCart), cart.price_locale)}</span> &nbsp;
+                      </span>
+                    </h4>
+                  </div>
                   { !openCarts.includes(user.id) ? <ul>
                     {
                       myCart.map((item) => {
@@ -117,15 +117,17 @@ export default class Cart extends Component {
             userCarts.others.map((userCart, i) => (
               <tr key={userCart.id}>
                 <td colSpan='100%'>
-                  <div className={`card`} onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
-                    { isLeader ? <h1><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1>{userCart.name}</h1> }
-                    <h1 className='date' onClick={() => _toggleCart(userCart.id)}>
-                      <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
-                    </h1>
-                    <h4>
-                      <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.price_locale)}</span> &nbsp;
-                      <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
-                    </h4>
+                  <div className='card' onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
+                    <div className='card-head'>
+                      { isLeader ? <h1 className='item-owner'><a href={`mailto:${userCart.email_address}?subject=KipCart&body=`}>{userCart.name} <Icon icon='Email'/></a></h1> : <h1 className='item-owner'>{userCart.name}</h1> }
+                      <h1 className='toggle-items' onClick={() => _toggleCart(userCart.id)}>
+                        <Icon icon={openCarts.includes(userCart.id) ? 'Up' : 'Down'}/>
+                      </h1>
+                      <h4>
+                        <span className='price'>{displayCost(calculateItemTotal(userCart.items), cart.price_locale)}</span> &nbsp;
+                        <span className='grey'>({numberOfItems(userCart.items)} items) • Updated {timeFromDate(userCart.updatedAt)}</span>
+                      </h4>
+                    </div>
 
                     {
                       !openCarts.includes(userCart.id) ? <ul>

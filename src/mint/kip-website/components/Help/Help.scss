@@ -58,7 +58,7 @@
       &:first-of-type {
         button {
           margin-right: $padding * 2;
-          background: $warningColor;
+          background: $red-warning-bright;
           color: white;
 
           @media only screen and (max-width: 600px) {
@@ -73,7 +73,7 @@
   .tutorial {
     position: relative;
     text-align: center;
-    background: mix(white, $secondaryColor, 85%);
+    background: mix(white, $blue-header, 85%);
     padding: $padding ($padding * 2);
     overflow: hidden;
 
@@ -82,11 +82,11 @@
     }
 
     &.secondary {
-      background: mix(white, $secondaryColor, 85%);
+      background: mix(white, $blue-header, 85%);
     }
 
     &.third {
-      background: mix(white, $thirdColor, 85%);
+      background: mix(white, $green-accent, 85%);
     }
 
     @media only screen and (max-width: 870px) {
@@ -120,11 +120,11 @@
         }
 
         .secondary {
-          color: $secondaryColor;
+          color: $blue-header;
         }
 
         .third {
-          color: $thirdColor;
+          color: $green-accent;
         }
       }
 
@@ -255,18 +255,18 @@
         }
 
         &.secondary {
-          color: mix(white, $secondaryColor, 35%);
+          color: mix(white, $blue-header, 35%);
 
           .bubble {
-            border: 3px solid mix(white, $secondaryColor, 35%);
+            border: 3px solid mix(white, $blue-header, 35%);
           }
         }
 
         &.third {
-          color: mix(white, $thirdColor, 35%);
+          color: mix(white, $green-accent, 35%);
 
           .bubble {
-            border: 3px solid mix(white, $thirdColor, 35%);
+            border: 3px solid mix(white, $green-accent, 35%);
           }
         }
 

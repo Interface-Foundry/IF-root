@@ -77,11 +77,11 @@
 
       &:hover {
         .cart__choice {
-          border-color: $thirdColor;
+          border-color: $green-accent;
         }
 
         .choice__select {
-          background: $thirdColor;
+          background: $green-accent;
           color: white;
 
           &:before {
