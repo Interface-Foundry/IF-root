@@ -19,6 +19,15 @@ if (module.hot && !PRODUCTION) {
   module.hot.accept();
 }
 
+console.log({
+  PRODUCTION: PRODUCTION,
+  GA_ENABLED: GA_ENABLED,
+  SHIPPING_OPTIONS_ENABLED: SHIPPING_OPTIONS_ENABLED,
+  KIP_PAY_ENABLED: KIP_PAY_ENABLED,
+  STRIPE_KEY: STRIPE_KEY,
+  PAYPAL_KEY: PAYPAL_KEY
+})
+
 const history = createHistory();
 history.listen((location, action) => {
   ReactGA.set({ path: location.pathname });

@@ -5,9 +5,6 @@ import React, { Component } from 'react';
 import { Icon } from '../../../react-common/components';
 import { calculateItemTotal, displayCost } from '../../utils';
 
-const displayInvoice = (!PRODUCTION) || KIP_PAY_ENABLED;
-
-
 export default class Default extends Component {
   static propTypes = {
     push: PropTypes.func,
@@ -56,7 +53,7 @@ export default class Default extends Component {
     if (leader.id === user.id) updateCart({ ...cart, locked: true });
 
     if (store === 'YPO') toggleYpoCheckout();
-    else if (displayInvoice) toggleCheckoutModal(true);
+    else if (KIP_PAY_ENABLED) toggleCheckoutModal(true);
     else {
       if (locked) reorderCart(id);
       window.open(`/api/cart/${id}/checkout`);
@@ -107,7 +104,6 @@ export default class Default extends Component {
                     </span>
                   </button>
                 }
-              {/*displayInvoice && !checkoutOnly && (cart.items.length > 0)? <button className='teal sub' onClick={this._handleInvoiceButton}>INVOICE/LOVE TO STYLE CSS</button> : null */}
               {!checkoutOnly ? <button className='blue' onClick={this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }

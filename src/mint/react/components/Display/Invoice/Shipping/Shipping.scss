@@ -39,6 +39,9 @@
         &.clickable {
           cursor: pointer;
         }
+        &.disabled {
+          color: rgba(0,0,0,0.4)
+        }
 
         &.selected {
           border: 1px solid $blue-header;
