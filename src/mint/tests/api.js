@@ -131,18 +131,10 @@ describe('api', function () {
     err.response.body.should.startWith('Unauthorized')
   }))
 
-  it('GET /api/cart/[Bad Id] should return 500 for a DNE cart', () => co(function * () {
-    var err
+  it('GET /api/cart/[Bad Id] should return a message for a DNE cart', () => co(function * () {
     var res
-    try {
-      res = yield get('/api/cart/12345')
-    } catch (e) {
-      err = e
-    }
-
-    assert(err)
-    assert.equal(err.statusCode, 500)
-    err.response.body.should.startWith('Cart not found')
+    res = yield get('/api/cart/12345')
+    assert.equal(res.info, "CART NOT FOUND")
   }))
 
   it('GET /api/session should return the user_account if signed in', () => co(function * () {
@@ -219,7 +211,7 @@ describe('api', function () {
     assert.equal(carts.length, 2, 'should have two carts')
     assert.equal(carts[0].id, mcTesty.cart_id)
     assert(carts[0].leader)
-    assert.equal(carts[0].leader.email_address, mcTesty.email)
+    assert.equal(carts[0].leader.name, mcTesty.name)
   }))
 
   it('POST /api/carts/cart_id/item should let McTesty add an item to the cart, returning the item', () => co(function * () {
@@ -425,8 +417,8 @@ describe('api', function () {
     assert(result.user_account === mcTesty.id)
   }))
 
-  it('GET /api/user/address should get all of the addresses associated with the user', () => co(function * () {
-    var addresses = yield get('/api/user/address')
+  it('GET /api/user/addresses should get all of the addresses associated with the user', () => co(function * () {
+    var addresses = yield get('/api/user/addresses')
     assert(Array.isArray(addresses))
     assert(addresses[0].user_account === mcTesty.id)
   }))

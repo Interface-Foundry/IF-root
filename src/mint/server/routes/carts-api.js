@@ -308,7 +308,7 @@ module.exports = function (router) {
       item = yield db.Items.findOne({ id: req.body.item_id })
     } else {
       // Create an item from the url
-      if (cart.store.includes('amazon') || cart.store.includes('YPO')) {
+      if (cart.store.includes('Amazon') || cart.store.includes('YPO')) {
         item = yield cartUtils.addItem(req.body, cart, 1)
       }
       else throw new Error('item does not exist')
@@ -491,7 +491,7 @@ module.exports = function (router) {
     const userId = req.UserSession.user_account.id
 
     // Make sure the cart exists
-    const cart = yield db.Carts.findOne({ id: req.params.cart_id })
+    var cart = yield db.Carts.findOne({ id: req.params.cart_id })
     if (!cart) {
       throw new Error('Cart not found')
     }
