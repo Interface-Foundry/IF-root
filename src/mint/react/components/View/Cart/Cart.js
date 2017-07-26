@@ -76,7 +76,7 @@ export default class Cart extends Component {
                   </div>
                   <div className='text'>
                     <h1>Lotte Unboxing Video ❤️</h1>
-                    <p>Added 5 days ago</p>
+                    <p>Added 26 days ago</p>
                   </div>
                   <div className='vid__container'>
                     <iframe width="100%" height="100%" src="https://www.youtube.com/embed/2dq6pgMdNn4?rel=0&amp;showinfo=0" frameBorder="0" allowFullScreen></iframe>
