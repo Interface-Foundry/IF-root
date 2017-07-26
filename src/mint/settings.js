@@ -5,16 +5,24 @@
 const production = process.env.NODE_ENV === 'production'
 
 const settings = {
-  PRODUCTION: JSON.stringify(production),
-  KIP_PAY_ENABLED: JSON.stringify(flag(process.env.KIP_PAY_ENABLED)),
-  STRIPE_KEY: JSON.stringify(testOrProd('pk_test_8bnLnE2e1Ch7pu87SmQfP8p7', 'pk_live_0LCJqLkmMCFKYDwbPCrhQknH')),
-  PAYPAL_KEY: JSON.stringify(testOrProd('AW4Qaa3xF5SKI1Ysz6kTkFWq0c7AGBtpUXlJEkkO8SMhMO5Kn', 'AVr0hZHU5vDLj1MVHlVchyeDCOrcmFPCT2pxv3A0zLjntjmiwT4wP')),
-  GA_ENABLED: JSON.stringify(flag(testOrProd(process.env.GA, true)))
+  PRODUCTION: production,
+  KIP_PAY_ENABLED: (!production) || flag(process.env.KIP_PAY_ENABLED),
+  STRIPE_KEY: testOrProd('pk_test_8bnLnE2e1Ch7pu87SmQfP8p7', 'pk_live_0LCJqLkmMCFKYDwbPCrhQknH'),
+  PAYPAL_KEY: testOrProd('AW4Qaa3xF5SKI1Ysz6kTkFWq0c7AGBtpUXlJEkkO8SMhMO5Kn', 'AVr0hZHU5vDLj1MVHlVchyeDCOrcmFPCT2pxv3A0zLjntjmiwT4wP'),
+  GA_ENABLED: flag(testOrProd(process.env.GA, true)),
+  SHIPPING_OPTIONS_ENABLED: false
 }
 
-console.log(settings)
+/**
+ * JSON stringify everything
+ * @type {[type]}
+ */
+module.exports = Object.keys(settings).reduce((o, k) => {
+  o[k] = JSON.stringify(settings[k])
+  return o
+}, {});
 
-module.exports = settings;
+console.log(module.exports)
 
 function testOrProd(test, prod) {
   if (production) return prod
