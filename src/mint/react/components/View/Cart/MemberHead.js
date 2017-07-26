@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from '../../../../react-common/components';
 import { calculateItemTotal, displayCost, timeFromDate, numberOfItems } from '../../../utils';
-import ItemPaidButton from './ItemPaidButton';
+import { ItemPaidButtonContainer } from '../../../containers';
 
 export default class MemberHead extends Component {
   static propTypes = {
@@ -28,8 +28,9 @@ export default class MemberHead extends Component {
               </a>
             </h1>
           )
-          : <h1 className='item-owner'>{user.name}</h1> }
-        { invoice.display && isCurrentMember ? <ItemPaidButton {...this.props}/> : null}
+          : <h1 className='item-owner'>{user.name}</h1>
+        }
+        <ItemPaidButtonContainer />
         <h1 className='toggle-items' onClick={() => _toggleCart(user.id)}>
           <Icon icon={openCarts.includes(user.id) ? 'Up' : 'Down'}/>
         </h1>

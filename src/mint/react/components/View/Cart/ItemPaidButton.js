@@ -9,14 +9,22 @@ export default class ItemPaidButton extends Component {
     user: PropTypes.object,
     goToInvoice: PropTypes.func,
     selectAccordion: PropTypes.func,
-    cart: PropTypes.object
+    cart: PropTypes.object,
+    paid: PropTypes.bool
   }
   render() {
-    const { goToInvoice, cart, selectAccordion } = this.props;
+    const { goToInvoice, cart, selectAccordion, paid } = this.props;
     return (
-      <div className='pay-button'>
-        <button onClick={()=> {goToInvoice(cart.id); selectAccordion('payments');}}> Pay Now </button>
-      </div>
+      paid
+      ? (
+        <div className='pay-button paid'>
+          <button disabled> ✔︎ Paid! </button>
+        </div>
+      ) : (
+        <div className='pay-button'>
+          <button onClick={()=> {goToInvoice(cart.id); selectAccordion('payments');}}> Pay Now </button>
+        </div>
+      )
     );
   }
 }

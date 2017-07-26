@@ -2,7 +2,6 @@
 
 import { connect } from 'react-redux';
 import { ActionCreators } from 'redux-undo';
-import { push } from 'react-router-redux';
 import { Cart } from '../components';
 import {
   submitQuery,
@@ -13,8 +12,6 @@ import {
   togglePopup,
   fetchItem,
   selectCartItem,
-  selectTab,
-  selectAccordion,
   fetchPaymentStatus
 } from '../actions';
 
@@ -33,12 +30,6 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  goToInvoice: (cart_id) => {
-    dispatch(push(`/cart/${cart_id}/m/invoice`));
-    dispatch(selectTab('invoice'));
-
-  },
-  selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   selectCartItem: item_id => dispatch(selectCartItem(item_id)),
   editItem: item_id => dispatch(editItem(item_id)),
   removeItem: (cart_id, item_id) => {

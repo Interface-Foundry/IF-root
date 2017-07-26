@@ -60,7 +60,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       position: relative;
       padding: $padding ($padding * 3);
       text-align: left;
-      background: white;
+      background: $color-white;
       border-radius: 5px;
       box-shadow: $card-box-shadow;
 
@@ -75,6 +75,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             font-size: 18px;
             border-radius: 5px;
             padding: $padding / 3;
+          }
+          &.paid {
+            button {
+              background-color: $green-accent;
+              border-color: $green-accent;
+              cursor: default;
+            }
           }
         }
 

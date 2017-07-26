@@ -7,3 +7,4 @@ export default View;
 export Results from './Results';
 export Cart from './Cart';
 export Empty from './Empty';
+export { ItemPaidButton } from './Cart';

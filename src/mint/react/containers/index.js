@@ -11,6 +11,7 @@ export EmptyContainer from './EmptyContainer';
 export FeedbackContainer from './FeedbackContainer';
 export HeaderContainer from './HeaderContainer';
 export InvoiceContainer from './InvoiceContainer';
+export ItemPaidButtonContainer from './ItemPaidButtonContainer';
 export LoginScreenContainer from './LoginScreenContainer';
 export ModalContainer from './ModalContainer';
 export RefreshContainer from './RefreshContainer';

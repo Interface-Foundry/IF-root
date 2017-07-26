@@ -14,5 +14,5 @@ export Tabs from './Tabs';
 export Toast from './Toast';
 export View from './View';
 export { Feedback, Settings, Share, EditCart, ArchivedCarts, Invoice } from './Display';
-export { Results, Cart, Empty } from './View';
+export { Results, Cart, Empty, ItemPaidButton } from './View';
 export { YPOCheckout, AddressForm, CheckoutModal } from './Modal';
