@@ -1,5 +1,15 @@
 import { get, post, put, del } from './async';
 
+export const dummyCheckout = (cart_id) => get(
+  `/api/cart/${cart_id}/test`,
+  'CHECKOUT',
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+)
+
 export const createInvoice = (cart_id, invoice_type, split_type) => post(
   `/api/invoice/${invoice_type}/${cart_id}`,
   'CREATE_INVOICE',

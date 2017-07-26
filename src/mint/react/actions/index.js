@@ -46,7 +46,9 @@ export {
   // payment sources
   fetchPaymentSources,
   createPaymentSource,
-  deletePaymentSource
+  deletePaymentSource,
+  // dummy
+  dummyCheckout
 }
 from './invoice';
 

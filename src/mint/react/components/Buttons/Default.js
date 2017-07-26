@@ -50,7 +50,7 @@ export default class Default extends Component {
   }
 
   _orderCart = (e) => {
-    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, selectTab, toggleReward } = this.props;
+    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, selectTab, toggleReward, dummyCheckout } = this.props;
     // if (store === 'YPO') toggleYpoCheckout(true);
     // else if (locked) reorderCart(id);
 
@@ -59,6 +59,7 @@ export default class Default extends Component {
 
     selectTab('cart')
     toggleReward(id)
+    dummyCheckout(id)
   }
 
   render() {

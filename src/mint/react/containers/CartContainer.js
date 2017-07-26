@@ -53,7 +53,7 @@ const mapDispatchToProps = dispatch => ({
   copyItem: (cart_id, item_id) => dispatch(copyItem(cart_id, item_id)),
   fetchItem: (item_id) => dispatch(fetchItem(item_id)),
 
-  updateItem: (item_id, updatedValues) => dispatch(updateItem(item_id, updatedValues)),
+  updateItem: (item_id, updatedValues, option_ids) => dispatch(updateItem(item_id, updatedValues, option_ids)),
   fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id))
 });
 

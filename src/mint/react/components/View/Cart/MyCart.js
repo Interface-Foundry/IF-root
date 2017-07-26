@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import { Icon } from '../../../../react-common/components';
-import { calculateItemTotal, displayCost, timeFromDate, numberOfItems, getStoreName } from '../../../utils';
+import { calculateItemTotal, displayCost, timeFromDate, numberOfItems, getStoreName, splitOptionsByType } from '../../../utils';
 
 import CartButtons from './CartButtons';
+import CartOptions from './CartOptions';
 
 export default class MyCart extends Component {
 
@@ -41,6 +42,8 @@ export default class MyCart extends Component {
               { open ? <ul>
                 {
                   myCart.map((item) => {
+                    const itemOptions = splitOptionsByType(item.options)
+
                     return <li key={item.id} className={editId === item.id ? 'edit' : ''}>
                       <div className={'image'} style={{
                         backgroundImage: `url(${item.main_image_url})`
@@ -66,6 +69,7 @@ export default class MyCart extends Component {
                                 {item.description}
                               </div>
                             </div>
+                            <CartOptions {...this.props} item={item} itemOptions={itemOptions}/>
                           </div>
                         ) : null
                       }

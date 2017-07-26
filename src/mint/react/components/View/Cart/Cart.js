@@ -69,17 +69,6 @@ export default class Cart extends Component {
         </thead>
         <tbody>
           {
-            cart.video ? <tr className={`checkedout`}>
-              <RewardCard 
-                title={`SHIPPED ${cart.shippedDate}`}
-                sub={`Tracking Number: ${cart.trackingNum}`}
-                classes='one noLine'
-                imageSrc='//storage.googleapis.com/kip-random/social/new_cart.png'
-                navigateSrc={cart.trackingURL}
-                cart={cart}/>
-            </tr> : null
-          }
-          {
             cart.video ? <tr className={`noLine`}>
               <th colSpan='100%' className={`noLine`}>
                 <div className={`card reward video noLine`}>
@@ -94,6 +83,17 @@ export default class Cart extends Component {
                   </div>
                 </div>
               </th>
+            </tr> : null
+          }
+          {
+            cart.video ? <tr className={`checkedout`}>
+              <RewardCard 
+                title={`SHIPPED ${cart.shippedDate}`}
+                sub={`Tracking Number: ${cart.trackingNum}`}
+                classes='one noLine'
+                imageSrc='//storage.googleapis.com/kip-random/social/new_cart.png'
+                navigateSrc={cart.trackingURL}
+                cart={cart}/>
             </tr> : null
           }
           {

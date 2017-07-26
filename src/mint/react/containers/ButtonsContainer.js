@@ -12,7 +12,8 @@ import {
   toggleYpoCheckout,
   fetchInvoiceByCart,
   toggleReward,
-  fetchMetrics
+  fetchMetrics,
+  dummyCheckout
 } from '../actions';
 
 const mapStateToProps = (state, props) => {
@@ -41,7 +42,8 @@ const mapDispatchToProps = dispatch => ({
       dispatch(toggleReward())
       dispatch(fetchMetrics(cart_id))
     }, 2000);
-  }
+  },
+  dummyCheckout: (cart_id) => dispatch(dummyCheckout(cart_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);

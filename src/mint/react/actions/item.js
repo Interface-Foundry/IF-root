@@ -7,9 +7,9 @@ export const editItem = item_id => ({
   }
 });
 
-export const updateItem = (item_id, updatedValues) => post(
+export const updateItem = (item_id, updatedValues, option_ids) => post(
   `/api/item/${item_id}`,
-  'UPDATE_ITEM', { ...updatedValues },
+  'UPDATE_ITEM', { updateItem: {...updatedValues}, option_ids },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: {

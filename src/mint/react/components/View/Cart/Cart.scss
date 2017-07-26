@@ -67,6 +67,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         padding: 0 0 0 $padding;
       }
     }
+
     th,td {
       &:after {
         content: '';
@@ -171,6 +172,60 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
   td, th {
     padding: 0 ($padding / 2);
+
+    .cart__options {
+      padding: $padding 0;
+
+      .selectBox {
+        display: block;
+        position: relative;
+        margin-top: $padding;
+
+        .type {
+          position: absolute;
+          right: 10px;
+          top: -5px;
+          font-size: 12px;
+          z-index: 10;
+          background: white;
+          width: 50px;
+          text-align: center;
+        }
+      }
+
+      select {
+        position: relative;
+        margin-right: $padding * 2;
+        -webkit-appearance: none;
+        padding: $padding ($padding * 2);
+        font-size: 12px;
+        cursor: pointer;
+        background: white;
+        border: 1px solid $border-color-light;
+        background-size: $nav-height/2;
+        background-repeat: no-repeat;
+        background-position: $padding 50%;
+
+
+        &.miniImage {
+          padding: $padding ($padding * 5);
+        }
+
+        @media only screen and (max-width: 600px) {
+          width: 100%;
+          margin-right: 0;
+          margin-bottom: $padding;
+
+          &:last-of-type {
+            margin-bottom: 0;
+          }
+        }
+
+        &:focus {
+          font-size: 12px;
+        }
+      }
+    }
 
     &.noLine {
       &:after {

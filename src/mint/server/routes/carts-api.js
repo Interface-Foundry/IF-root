@@ -794,7 +794,7 @@ module.exports = function (router) {
 
     // get the item
     var item = yield db.Items.findOne({ id: req.params.item_id })
-      .populate('cart')
+      .populate('cart').populate('options')
 
     // get the cart, too
     var cart = item.cart
@@ -808,7 +808,19 @@ module.exports = function (router) {
     delete req.body.id
     delete req.body.added_by
 
-    _.merge(item, req.body)
+    // if item_json is supplied in the body, update the options
+    if (req.body.option_ids) {
+      yield item.options.map(function * (option) {
+        if (req.body.option_ids.indexOf(option.id) > -1) {
+          yield db.ItemOptions.update({id: option.id}, {selected: true})
+        }
+        else if (option.selected) {
+          yield db.ItemOptions.update({id: option.id}, {selected: false})
+        }
+      })
+    }
+
+    _.merge(item, req.body.updateItem)
     yield item.save()
 
     // mark the cart as dirty if there is one

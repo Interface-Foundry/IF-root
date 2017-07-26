@@ -4,6 +4,7 @@ var _ = require('lodash')
 var fs = require('fs')
 var path = require('path');
 var router = express.Router();
+var moment = require('moment');
 
 var db;
 const dbReady = require('../../db');
@@ -38,33 +39,55 @@ require('./carts-api')(router)
 require('./users-api')(router)
 
 // Koh Dummy test email
-// curl -i -X GET http://127.0.0.1:3000/api/cart/4ba2030df526/test/komangwluce@gmail.com
-const dealsDb = require('../deals/deals')
-router.get('/cart/:cart_id/test/:email_id', (req, res) => co(function * () {
-  const email_id = req.params.email_id;
-  const cart_id = req.params.cart_id;
+// curl -i -X GET http://127.0.0.1:3000/api/cart/bf5eee04c998/test
+// const dealsDb = require('../deals/deals')
+router.get('/cart/:cart_id/test', (req, res) => co(function * () {
+  var baseUrl;
+  var cart_id = req.params.cart_id;
+  var cart = yield db.Carts.findOne({id: cart_id}).populate('items').populate('members').populate('leader');
 
-  var email = yield db.Emails.create({
-    recipients: email_id,
-    subject: 'Share Kip Cart Test',
-    cart: cart_id
+  var totalItems = cart.items.reduce(function (sum, item) {
+    return sum + item.quantity
+  }, 0)
+
+  yield cart.members.map(function * (user) {
+    // var user = await dbReady.UserAccounts.findOne({id: user_id})
+    var email = yield db.Emails.create({
+      recipients: user.email_address,
+      subject: 'Your Kip Order has been Placed!',
+      template_name: 'success'
+    })
+
+    var items = cart.items.filter(item => {
+      return item.added_by === user.id
+    })
+
+    var totalCost = items.reduce(function (sum, item) {
+      return sum + item.price
+    }, 0)
+
+    items.map(item => {
+      item.price = (item.price / 100)
+    })
+
+    email.template('success_demo', {
+      username: user.name,
+      baseUrl: 'beta.kipthis.com',
+      items: items,
+      users: cart.members,
+      date: moment().format('dddd, MMMM Do, h:mm a'),
+      total: '$' + (totalCost / 100).toFixed(2),
+      totalItems: totalItems,
+      cart: cart,
+      invoice_id: cart.id
+    })
+    console.log('about to send email')
+    yield email.send();
   })
 
-  var allDeals = yield dealsDb.getDeals(4, 0)
-      deals = [allDeals.slice(0, 2), allDeals.slice(2, 4)];
-
-  email.template('share_cart_demo', {
-    cart: {
-      id: cart_id,
-      name: email_id + "\'s Kip Cart"
-    },
-    deals: deals
-  })
-
-  yield email.send();
-
-  res.send(email.message_html)
+  res.send('emails sent')
 }))
+
 
 // Testing route for getting medium posts
 // curl -i -X GET http://127.0.0.1:3000/api/blog/posts
