@@ -1,11 +1,12 @@
-var cheerio = require('cheerio')
-var _ = require('lodash')
-var url = require('url')
-var lotte = require('./stores/lotte')
-var punyus = require('./stores/punyus')
-var muji = require('./stores/muji')
-var waitrose = require('./stores/waitrose')
-var hands = require('./stores/hands')
+const cheerio = require('cheerio')
+const _ = require('lodash')
+const url = require('url')
+const lotte = require('./stores/lotte')
+const punyus = require('./stores/punyus')
+const muji = require('./stores/muji')
+const waitrose = require('./stores/waitrose')
+const hands = require('./stores/hands')
+const taobao = require('./stores/taobao')
 
 //scraper stuff
 var fx_currency = require('./foreign_exchange')
@@ -41,6 +42,11 @@ module.exports.tryHtml = async function (s,html) {
 
 		case 'hands.net':
 			return await hands(s, $)
+			break
+
+		case 'item.taobao.com':
+		case 'taobao.com':
+			return await taobao(s, $)
 			break
 
 		default:

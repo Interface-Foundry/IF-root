@@ -31,5 +31,11 @@ module.exports = {
     domain: 'hands.net',
     image: 'https://storage.googleapis.com/kip-random/kip_stores/punyus_jp.png',
     default_image: 'https://storage.googleapis.com/kip-random/kip_stores/cart_images/muji_jp.png'
+  },
+  Taobao: {
+    domain: 'taobao.com',
+    locale: 'CN',
+    image: 'https://storage.googleapis.com/kip-random/kip_stores/punyus_jp.png',
+    default_image: 'https://storage.googleapis.com/kip-random/kip_stores/cart_images/muji_jp.png'
   }
 }

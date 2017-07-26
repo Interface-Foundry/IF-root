@@ -37,6 +37,8 @@ module.exports.scrapeURL = async function (url, proxy) {
 	var convert
 	await request(options, function (error, res, html) {
     // if (!proxy) error = true
+    logging.info('statusCode:', res.statusCode)
+    if(error) logging.error(error)
 	  if (!error && res.statusCode == 200) {
       logging.info('scrape success')
 

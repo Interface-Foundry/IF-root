@@ -100,7 +100,8 @@ var cartsCollection = Waterline.Collection.extend({
         'GB',
         'CA',
         'JP',
-        'KR'
+        'KR',
+        'CN'
       ],
       required: true
     },
