@@ -29,7 +29,7 @@ export default class App extends Component {
   }
 
   render() {
-    const { tab } = this.props,
+    const { tab, user, cart } = this.props,
       props = this.props,
       containers = {
         'search': ResultsContainer,
@@ -39,7 +39,7 @@ export default class App extends Component {
       Component = containers[tab];
 
     return (
-      <div className={`view view_${tab}`}>
+      <div className={`view view_${tab} ${user.id !== cart.leader.id || cart.locked ? 'short' : ''}`}>
         { tab === 'cart' ? <Details {...props} /> : null }
         { Component ? <Component /> : null }
       </div>
