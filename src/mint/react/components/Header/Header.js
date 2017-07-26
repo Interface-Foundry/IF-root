@@ -66,7 +66,6 @@ export default class Header extends Component {
           </Switch>
         </div>
         <div className='buttons'>
-          <Route path={'/cart/:cart_id'} exact component={RefreshContainer} />
           <TransitionGroup>
             {
               showCheckout
@@ -76,6 +75,7 @@ export default class Header extends Component {
               : null
             }
           </TransitionGroup>
+          <Route path={'/cart/:cart_id'} exact component={RefreshContainer} />
         </div>
         <div className='header__right'>
             {!userName ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}
