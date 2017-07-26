@@ -96,9 +96,9 @@ export const splitCartById = (state, props) => {
       } : member);
     } else {
       return [...acc, {
+        ...linkedMember,
         id: item.added_by,
-        email_address: linkedMember.email_address,
-        name: linkedMember.name,
+        price_locale: state.cart.price_locale,
         items: [item]
       }];
     }

@@ -14,7 +14,7 @@ export default class MemberHead extends Component {
     _toggleCart: PropTypes.func
   }
   render = () => {
-    const { user, openCarts, memberItems, isLeader, isCurrentMember, _toggleCart } = this.props;
+    const { user, openCarts, isLeader, isCurrentMember, _toggleCart } = this.props;
     return (
       <div className='card-head'>
         {
@@ -35,13 +35,13 @@ export default class MemberHead extends Component {
         </h1>
         <h4>
           <span className='grey'>
-            {numberOfItems(memberItems)} item{numberOfItems(memberItems) !== 1 ? 's' : ''} • Updated {timeFromDate(memberItems[0].updatedAt)}
+            {numberOfItems(user.items)} item{numberOfItems(user.items) !== 1 ? 's' : ''} • Updated {timeFromDate(user.items[0].updatedAt)}
           </span>
         </h4>
         { isCurrentMember
           ? <h4>
             <span className='my-price'>
-              Total: <span className='price'>{displayCost(calculateItemTotal(memberItems), memberItems.price_locale)}</span> &nbsp;
+              Total: <span className='price'>{displayCost(calculateItemTotal(user.items), user.price_locale)}</span> &nbsp;
             </span>
           </h4>
           : null

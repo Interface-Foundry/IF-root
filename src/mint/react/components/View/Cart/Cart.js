@@ -49,8 +49,8 @@ export default class Cart extends Component {
                   <div className='card' onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
                     <MemberHead
                       {...this.props}
+                      user={userCart}
                       openCarts={openCarts}
-                      memberItems={userCart.items}
                       isLeader={isLeader}
                       isCurrentMember={userCart.id === user.id}
                       _toggleCart={_toggleCart} />

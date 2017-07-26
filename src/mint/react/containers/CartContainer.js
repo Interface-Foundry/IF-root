@@ -12,7 +12,7 @@ import {
   togglePopup,
   fetchItem,
   selectCartItem,
-  fetchPaymentStatus
+  fetchPaymentStatus,
 } from '../actions';
 
 import { isUrl, addSearchHistory } from '../utils';
