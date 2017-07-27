@@ -44,7 +44,7 @@ export default class Payment extends Component {
                   ? <div>
                       <nav><h4>Payment Type</h4></nav>
                       <ul>
-                        {
+                        { !userPaymentStatus.paid ?
                           this.paymentTypes.map(paymentType => (
                             <li key={paymentType.type} className={`clickable ${invoice.split_type === paymentType.type? 'selected' : ''}`} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
                               <div className='circle'/>
@@ -53,7 +53,7 @@ export default class Payment extends Component {
                               </div>
                             </li>
                           ))
-                        }
+                        : null }
                       </ul>
                     </div>
                   : <div>

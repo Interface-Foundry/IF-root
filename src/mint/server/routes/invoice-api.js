@@ -331,8 +331,8 @@ module.exports = function (router) {
         logging.info('sendCollectionEmail called')
         await invoice.sendCollectionEmail()
       }
+
       return res.send({'amount': payment.amount, 'paid': true})
-      // return res.send(payment)
     })
     /**
      * @api {delete} /payment/:paymentsource_id
@@ -454,8 +454,10 @@ module.exports = function (router) {
       cart: req.params.cart_id,
       paid: false,
       total: cart.subtotal,
-      affiliate_checkout_url: cart.affiliate_checkout_url
+      affiliate_checkout_url: cart.affiliate_checkout_url,
+      split_type: _.get(cart, 'split_type') ? cart.split_type : 'split_single'
     })
+
     logging.info('sending invoice now!')
     return res.send(invoice)
   })

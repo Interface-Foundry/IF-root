@@ -55,7 +55,7 @@ export default function payments(state = initialState, action) {
   case 'CREATE_PAYMENT_SUCCESS':
     return {
       ...state,
-      payment: action.response
+      userPaymentStatus: action.response
     };
   case 'CREATE_PAYMENT_WITHOUT_SOURCE':
     return {
