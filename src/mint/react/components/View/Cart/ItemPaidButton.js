@@ -1,5 +1,4 @@
 // mint/react/components/View/Cart/Cart.js
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -10,11 +9,15 @@ export default class ItemPaidButton extends Component {
     goToInvoice: PropTypes.func,
     selectAccordion: PropTypes.func,
     cart: PropTypes.object,
-    paid: PropTypes.bool
+    paid: PropTypes.bool,
+    displayInvoice: PropTypes.bool,
+    isLeader: PropTypes.bool,
+    splitType: PropTypes.string
   }
   render() {
-    const { goToInvoice, cart, selectAccordion, paid } = this.props;
-    return (
+    const { goToInvoice, cart, selectAccordion, paid, displayInvoice, splitType, isLeader } = this.props;
+    if (!displayInvoice || (splitType === 'split_single' && !isLeader)) return null;
+    else return (
       paid
       ? (
         <div className='pay-button paid'>

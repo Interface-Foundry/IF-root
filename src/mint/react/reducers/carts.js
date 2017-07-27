@@ -15,9 +15,8 @@ export default function otherCarts(state = initialState, action) {
   case 'DELETE_CART_SUCCESS':
     return {
       ...state,
-      carts: state.carts
-        .filter(c => c.id !== action.response),
-      archivedCarts: [...state.carts.filter(c => c.id === action.response), ...state.archivedCarts]
+      carts: state.carts.filter(c => c.id !== action.response),
+      archivedCarts: state.archivedCarts.filter(c => c.id !== action.response)
     };
   default:
     return state;
