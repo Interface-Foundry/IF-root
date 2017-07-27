@@ -142,6 +142,18 @@ var cartsCollection = Waterline.Collection.extend({
       default: false
     },
 
+
+    /**
+     * ability to split if we are using invoice:
+     *  - single: one person pays
+     *  - split_equal: each person pays total/users.length
+     *  - split_per_item: each person pays for item they added
+     */
+    split_type: {
+      type: 'string',
+      enum: ['split_single', 'split_equal', 'split_by_item']
+    },
+
     invoice: Waterline.isA('invoices'),
 
     // the YPO cart xml or the amazon raw object
