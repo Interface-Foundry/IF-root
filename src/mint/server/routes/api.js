@@ -85,7 +85,7 @@ router.get('/cart/:cart_id/test', (req, res) => co(function * () {
     yield email.send();
   })
 
-  res.send('emails sent')
+  res.send(cart)
 }))
 
 

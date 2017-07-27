@@ -50,15 +50,12 @@ export default class Default extends Component {
   }
 
   _orderCart = (e) => {
-    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, selectTab, toggleReward, dummyCheckout } = this.props;
+    const { cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, selectTab, dummyCheckout } = this.props;
     // if (store === 'YPO') toggleYpoCheckout(true);
     // else if (locked) reorderCart(id);
 
     if (leader.id === user.id) updateCart({ id, locked: true });
     // if (store !== 'YPO') window.open(`/api/cart/${id}/checkout`);
-
-    selectTab('cart')
-    toggleReward(id)
     dummyCheckout(id)
   }
 

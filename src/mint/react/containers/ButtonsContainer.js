@@ -35,15 +35,17 @@ const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   createInvoice: (cart_id, invoice_type, split_type) => dispatch(createInvoice(cart_id, invoice_type, split_type)),
   toggleYpoCheckout: (show) => dispatch(toggleYpoCheckout(show)),
-  toggleReward: (cart_id) => {
-    dispatch(toggleReward())
-    dispatch(replace(`${location.pathname}?toast=Purchase Successful&status=success`))
-    setTimeout(() => {
+  dummyCheckout: (cart_id) => {
+    dispatch(dummyCheckout(cart_id)).then(() => {
+      dispatch(selectTab('cart'))
       dispatch(toggleReward())
-      dispatch(fetchMetrics(cart_id))
-    }, 2000);
-  },
-  dummyCheckout: (cart_id) => dispatch(dummyCheckout(cart_id))
+      dispatch(replace(`${location.pathname}?toast=Purchase Successful&status=success`))
+      setTimeout(() => {
+        dispatch(toggleReward())
+        dispatch(fetchMetrics(cart_id))
+      }, 2000);
+    })
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Buttons);
