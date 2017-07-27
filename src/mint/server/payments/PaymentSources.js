@@ -92,7 +92,7 @@ class PaymentSource {
     }
 
     // check if user has already paid
-    if (_.get(paymentsOnThisInvoice, 'status') === 'success') {
+    if (_.get(paymentsOnThisInvoice, 'data')) {
       logging.info('user has already paid')
       paymentStatus.paid = true
       paymentStatus.amount = paymentsOnThisInvoice.amount
