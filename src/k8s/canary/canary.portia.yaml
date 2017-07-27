@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: portia
+  namespace: canary
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: portia
+    spec:
+      containers:
+      - image: scrapinghub/portia
+        imagePullPolicy: Always
+        name: portia
+        ports:
+        - containerPort: 9001
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portia
+  namespace: canary
+  labels:
+    app: portia
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 9001
+  selector:
+    app: portia
