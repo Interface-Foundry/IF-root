@@ -132,7 +132,7 @@
     "babel-preset-modern-browsers": "^9.0.2",
     "babel-preset-react": "^6.23.0",
     "babel-preset-stage-0": "^6.22.0",
-    "babel-runtime": "^6.23.0",
+    "babel-runtime": "^6.25.0",
     "babili-webpack-plugin": "^0.1.1",
     "case-sensitive-paths-webpack-plugin": "^2.1.1",
     "compression-webpack-plugin": "^1.0.0",
