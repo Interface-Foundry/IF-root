@@ -29,8 +29,13 @@ export default class Payment extends Component {
     isLeader: PropTypes.bool
   }
 
+  _handleUpdateInvoice(paymentType) {
+    const { updateInvoice, invoice } = this.props;
+    updateInvoice(invoice.id, 'split_type', paymentType);
+  }
+
   render = () => {
-    const { userPaymentStatus, selectAccordion, selectedAccordion, updateInvoice, invoice, isLeader } = this.props;
+    const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader } = this.props;
     return (
       <div className='payment accordion'>
         <nav className='clickable' onClick={() => selectAccordion('payment')}>
@@ -46,7 +51,10 @@ export default class Payment extends Component {
                       <ul>
                         { !userPaymentStatus.paid ?
                           this.paymentTypes.map(paymentType => (
-                            <li key={paymentType.type} className={`clickable ${invoice.split_type === paymentType.type? 'selected' : ''}`} onClick={() => updateInvoice(invoice.id, 'split_type',paymentType.type)}>
+                            <li
+                            key={paymentType.type}
+                            className={`clickable ${invoice.split_type === paymentType.type? 'selected' : ''}`}
+                            onClick={() => this._handleUpdateInvoice(paymentType.type)}>
                               <div className='circle'/>
                               <div className='text'>
                                 <h4>{paymentType.text}</h4>

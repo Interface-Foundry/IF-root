@@ -50,7 +50,8 @@ export default function payments(state = initialState, action) {
   case 'UPDATE_INVOICE_OPTIONS_SUCCESS':
     return {
       ...state,
-      invoice: action.response
+      invoice: action.response.invoice,
+      userPaymentStatus: action.response.userPaymentStatus
     };
   case 'CREATE_PAYMENT_SUCCESS':
     return {

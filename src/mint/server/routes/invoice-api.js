@@ -111,12 +111,14 @@ module.exports = function (router) {
     .put(async (req, res) => {
       logging.info('got req to update or action', req.body)
       let invoice
+      const userId = req.UserSession.user_account.id
       if (_.get(req, 'body.option_change')) {
         logging.info(`updating option for invoice ${req.params.invoice_id}: ${req.body.option_change} with ${req.body.option_data}`)
         invoice = await Invoice.optionUpdate(req.params.invoice_id, req.body.option_change, req.body.option_data)
       }
 
-      return res.send(invoice)
+      const paymentObject = await PaymentSource.GetPaymentStatus(userId, invoice.id)
+      return res.send({'invoice': invoice, 'userPaymentStatus': paymentObject})
     })
 
   /**
