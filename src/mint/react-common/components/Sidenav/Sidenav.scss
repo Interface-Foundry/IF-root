@@ -44,8 +44,6 @@
     li {
       padding: 0 $padding 0 0;
 
-
-
       h4 {
         text-align: right;
         padding: ($padding / 2) $padding;
@@ -134,7 +132,11 @@
 
           p {
             height: $nav-height;
-            line-height: $nav-height / 1.6;
+            padding: 2px;
+            max-width: 170px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            text-overflow: fade;
 
             span {
               line-height: $nav-height / 4;

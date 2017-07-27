@@ -56,7 +56,7 @@ export default class Cart extends Component {
                       _toggleCart={_toggleCart} />
                     {
                       !openCarts.includes(userCart.id)
-                      ?  <FlipMove typeName="ul" duration={350} staggerDurationBy={30} easing="cubic-bezier(0.4, 0, 0.2, 1)"  enterAnimation="elevator" leaveAnimation="elevator">
+                      ?  <FlipMove typeName="ul" duration={350} staggerDurationBy={30} easing="cubic-bezier(0.4, 0, 0.2, 1)"  enterAnimation="accordionVertical" leaveAnimation="accordionVertical">
                           {
                             userCart.items.map(item =>
                               <MemberItem
