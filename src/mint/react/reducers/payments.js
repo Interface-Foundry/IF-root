@@ -40,6 +40,7 @@ export default function payments(state = initialState, action) {
   case 'CREATE_PAYMENT_WITHOUT_SOURCE':
   case 'FETCH_PAYMENT_STATUS_SUCCESS':
   case 'CREATE_PAYMENTSOURCE_SUCCESS':
+  case 'REFUND_PAYMENT_SUCCESS':
     return {
       ...state,
       userPaymentStatus: action.response
