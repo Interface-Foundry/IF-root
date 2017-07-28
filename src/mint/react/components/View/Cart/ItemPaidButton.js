@@ -31,7 +31,7 @@ export default class ItemPaidButton extends Component {
           <button disabled> ✔︎ Paid! </button>
         </div>
       ) : (
-        <div className='pay-button'>
+        <div className='pay-button unpaid'>
           <button onClick={()=> {goToInvoice(cart.id); selectAccordion('payments');}}> Pay Now </button>
         </div>
       )

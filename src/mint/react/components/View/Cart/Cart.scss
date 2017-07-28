@@ -68,6 +68,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         display: flex;
         flex-wrap: wrap;
         .pay-button {
+
           button {
             border: 1px solid $orange-caution;
             background: $orange-caution;
@@ -76,6 +77,26 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             border-radius: 5px;
             padding: $padding / 3;
           }
+
+          &.unpaid {
+            background: rgba(0, 0, 05, .7);
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: 5px;
+            button {
+              padding: $padding;
+              font-size: 22px;
+            }
+          }
+
+
           &.paid {
             button {
               background-color: $green-accent;
