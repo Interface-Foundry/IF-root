@@ -14,7 +14,6 @@ export default function payments(state = initialState, action) {
       paymentSources: state.paymentSources.filter((paymentSource, i) => paymentSource.id !== action.response)
     };
   case 'PAYMENTSOURCES_SUCCESS':
-  case 'CREATE_PAYMENTSOURCE_SUCCESS':
     return {
       ...state,
       userPaymentSources: action.response
@@ -35,11 +34,12 @@ export default function payments(state = initialState, action) {
   case 'UPDATE_INVOICE_OPTIONS_SUCCESS':
     return {
       ...state,
-      ...action
+      ...action.response
     };
   case 'CREATE_PAYMENT_SUCCESS':
   case 'CREATE_PAYMENT_WITHOUT_SOURCE':
   case 'FETCH_PAYMENT_STATUS_SUCCESS':
+  case 'CREATE_PAYMENTSOURCE_SUCCESS':
     return {
       ...state,
       userPaymentStatus: action.response
