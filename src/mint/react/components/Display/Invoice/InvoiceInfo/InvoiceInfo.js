@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { displayCost, numberOfItems } from '../../../../utils';
 
 export default class InvoiceInfo extends Component {
   static propTypes = {
@@ -13,7 +14,7 @@ export default class InvoiceInfo extends Component {
 
   render() {
 
-    const { selectAccordion, cart } = this.props;
+    const { selectAccordion, cart, invoice } = this.props;
 
     return (
       <div className='payment accordion items'>
@@ -24,8 +25,8 @@ export default class InvoiceInfo extends Component {
           <table className="invoice-info">
             <tbody>
               <tr>
-                <td>Items ({cart.items.length}):</td>
-                <td>${(cart.subtotal / 100).toFixed(2)}</td>
+                <td>Items ({numberOfItems(cart.items)}):</td>
+                <td>{displayCost(invoice.total)}</td>
               </tr>
               <tr>
                 <td>Shipping & handling:</td>
@@ -40,7 +41,7 @@ export default class InvoiceInfo extends Component {
               </tr>
               <tr>
                 <td><b>Total:</b></td>
-                <td><b>${(cart.subtotal / 100).toFixed(2)}</b></td>
+                <td><b>{displayCost(invoice.total)}</b></td>
               </tr>
             </tbody>
           </table>
