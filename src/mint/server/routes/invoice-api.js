@@ -83,6 +83,12 @@ module.exports = function (router) {
         logging.info('error getting invoice, possibly not available', err)
         return res.send(500)
       }
+      const userId = req.UserSession.user_account.id
+      logging.info('using userId', userId)
+      logging.info('using invoice leader?', invoice.leader)
+      if (userId === invoice.leader.id) {
+        logging.info('we should get all payments for this invoice since admin')
+      }
       return res.send(invoice)
     })
 
@@ -132,7 +138,7 @@ module.exports = function (router) {
 
   router.route('/invoice/payment/:invoice_id')
   /**
-  * @api {post} /invoice/payment/:invoice_id
+  * @api {get} /invoice/payment/:invoice_id
   * @apiDescription create the payment objects to be used with paymentsources for an invoice
   * @apiGroup Payments
   *
@@ -362,8 +368,12 @@ module.exports = function (router) {
    */
   router.get('/invoice/cart/:cart_id', async (req, res) => {
     var invoice = await Invoice.GetByCartId(req.params.cart_id)
+
     if (invoice) {
-      logging.info('this is the invoice', invoice)
+      if (_.get(req, 'UserSession.user_account.id') === invoice.leader.id) {
+        logging.info('we should get all payments for this invoice since admin')
+        invoice.usersPayments = await invoice.usersPayments()
+      }
       await invoice.updateInvoice()
       return res.send(invoice)
     }
@@ -412,12 +422,6 @@ module.exports = function (router) {
     res.sendStatus(200)
   })
 
-  //TESTING ROUTE to be deleted
-  router.get('/remainingpayments/:invoice_id', async (req, res) => {
-    var invoice = await Invoice.GetById(req.params.invoice_id)
-    var paymentsLeft = await invoice.userPaymentAmounts()
-    res.send(paymentsLeft)
-  })
 
   /**
   * @api {post} /invoice/:invoice_type/:cart_id create invoice

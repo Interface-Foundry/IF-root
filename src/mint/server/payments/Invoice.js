@@ -1,6 +1,7 @@
 var moment = require('moment')
 const _ = require('lodash')
 const Cart = require('../cart/Cart')
+const PaymentSource = require('./PaymentSources.js')
 const userPaymentAmountHandler = require('../utilities/invoice_utils').userPaymentAmountHandler
 
 var db
@@ -380,6 +381,25 @@ class Invoice {
       if (amounts[p.user] <= 0) delete amounts[p.user]
     })
     return amounts
+  }
+
+  /**
+   * function to get status of all the users payments to display to cart leader
+   *
+   * @return     {Promise}  { description_of_the_return_value }
+   */
+  async usersPayments() {
+
+    const cart = await db.Carts.findOne({id: _.get(this, 'cart.id')}).populate('members')
+
+    const userPayments = await cart.members.map(async (user) => {
+      const paymentObject = await PaymentSource.GetPaymentStatus(user.id, this.id)
+      paymentObject.name = user.name
+      logging.info('got this paymentObject', paymentObject)
+      return paymentObject
+    })
+
+    return Promise.all(userPayments)
   }
 }
 

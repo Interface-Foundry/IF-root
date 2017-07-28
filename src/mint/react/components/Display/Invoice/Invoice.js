@@ -30,7 +30,10 @@ export default class Invoice extends Component {
 
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;
-    fetchPaymentStatus(invoice.id);
+
+    if (invoice.id) {
+      fetchPaymentStatus(invoice.id);
+    }
   }
 
   componentWillReceiveProps = ({ cart, fetchInvoiceByCart, invoice, closeTab }) => {
@@ -44,11 +47,38 @@ export default class Invoice extends Component {
     return (
       <div className='invoice'>
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
+
         <InvoiceInfo {...this.props} />
+        { isLeader ? <InvoicePaymentStatus {...this.props}/> : null }
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
         <Payment {...this.props} isLeader={isLeader}/>
         <Shipping {...this.props} isLeader={isLeader}/>
       </div>
+    );
+  }
+}
+
+class InvoicePaymentStatus extends Component {
+  static propTypes = {
+    cart: PropTypes.object,
+    user: PropTypes.object,
+    invoice: PropTypes.object
+  }
+
+  render() {
+    const { invoice } = this.props;
+    return(
+      <div>
+      {
+        invoice.usersPayments ? invoice.usersPayments.map((payment, i) => (
+                <div key={i} className='text'>
+                    <h4>user: {payment.name}</h4>
+                    <p>how much: ${payment.amount / 100} </p>
+                    <p>status: {payment.paid ? <p> user has paid </p> : <p> remind user via clickable button that emails them </p> } </p>
+                </div>
+           )) : null
+      }
+    </div>
     );
   }
 }
