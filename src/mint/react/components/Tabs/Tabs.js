@@ -15,6 +15,7 @@ class Tabs extends Component {
     history: PropTypes.object,
     clearTimeouts: PropTypes.func,
     createTimeout: PropTypes.func,
+    invoice: PropTypes.object
   }
 
   state = {
@@ -23,7 +24,7 @@ class Tabs extends Component {
 
   clearHightlight = null
 
-  _getTabs = ({ invoice, numItems, id, query, highlight = false }) => {
+  _getTabs = ({ user, invoice, numItems, id, query, highlight = false }) => {
     const tabs = [{
       id: 1,
       tab: 'cart',
@@ -44,7 +45,7 @@ class Tabs extends Component {
       url: `/cart/${id}/m/share`,
       display: 'Share'
     }];
-    if (invoice && invoice.display) {
+    if (invoice && invoice.display && user.id) {
       tabs.push({
         id: 4,
         tab: 'invoice',
@@ -57,14 +58,14 @@ class Tabs extends Component {
   }
 
   componentWillMount() {
-    const { invoice, cart: { items, id }, search: { query } } = this.props;
-    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query });
+    const { user, invoice, cart: { items, id }, search: { query } } = this.props;
+    const tabs = this._getTabs({ user, invoice, numItems: numberOfItems(items), id, query });
 
     this.setState({ tabs });
   }
 
-  componentWillReceiveProps({ invoice, cart: { items, id }, search: { query } }) {
-    const tabs = this._getTabs({ invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
+  componentWillReceiveProps({ user, invoice, cart: { items, id }, search: { query } }) {
+    const tabs = this._getTabs({ user, invoice, numItems: numberOfItems(items), id, query, highlight: items.length > this.props.cart.items.length });
     this.setState({ tabs });
     if (numberOfItems(items) > numberOfItems(this.props.cart.items)) {
       this.props.clearTimeouts();
