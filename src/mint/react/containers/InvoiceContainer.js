@@ -9,6 +9,7 @@ import {
   fetchInvoiceByCart,
   updateInvoice,
   createPayment,
+  refundPayment,
   fetchPaymentStatus,
   fetchPaymentSources,
   createPaymentSource,
@@ -35,6 +36,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
   createPayment: (paymentsource_id, invoice_id) => dispatch(createPayment(paymentsource_id, invoice_id)),
+  refundPayment: (payment_id) => dispatch(refundPayment(payment_id)),
   fetchInvoice: (invoice_id) => dispatch(fetchInvoice(invoice_id)),
   fetchInvoiceByCart: (cart_id) => dispatch(fetchInvoiceByCart(cart_id)),
   createPaymentSource: (payment_amount, payment_data, payment_source, invoice_id) => dispatch(createPaymentSource(payment_amount, payment_data, payment_source, invoice_id)),

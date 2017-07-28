@@ -96,6 +96,7 @@ class PaymentSource {
       logging.info('user has already paid')
       paymentStatus.paid = true
       paymentStatus.amount = paymentsOnThisInvoice.amount
+      paymentStatus.payment_id = paymentsOnThisInvoice.id
       return paymentStatus
     }
     logging.info('total would be', invoice.total)
@@ -136,7 +137,7 @@ class PaymentSource {
   static async RefundPaymentId (paymentId) {
     const payment = await db.Payments.findOne({id: paymentId}).populate('payment_source').populate('invoice')
 
-    const paymentVendor = _.get(payment, 'payment_vendor') ? payment.payment_vendor : payment.payment_source.payment_vendor
+    const paymentVendor = _.get(payment, 'payment_source.payment_vendor') ? payment.payment_source.payment_vendor : payment.payment_vendor
     logging.info('using payment.payment_vendor', paymentVendor)
 
     logging.info('checking if invoice can be refunded:', payment.invoice.refund_ability)
@@ -145,7 +146,10 @@ class PaymentSource {
     }
 
     const PaymentSourceClass = paymentSourceHandlers[paymentVendor]
-    const refund = await PaymentSourceClass.refundPayment(payment)
+    const refund = {
+      refund: await PaymentSourceClass.refundPayment(payment),
+      invoice: payment.invoice
+    }
 
     return refund
   }

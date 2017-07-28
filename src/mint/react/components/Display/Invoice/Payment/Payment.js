@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import PaymentSources from './PaymentSources';
 import Stripe from './Stripe';
 import Paypal from './Paypal';
+import RefundPayment from './RefundPayment';
 
 export default class Payment extends Component {
 
@@ -82,7 +83,7 @@ export default class Payment extends Component {
 
                 <ul>
                   {
-                    userPaymentStatus.paid ? <p> Thanks for Paying! </p> :
+                    userPaymentStatus.paid ? <RefundPayment {...this.props}/> :
                       <div>
                         <PaymentSources {...this.props}/>
                         <span className='payment-methods'>

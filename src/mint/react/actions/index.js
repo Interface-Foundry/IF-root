@@ -42,6 +42,7 @@ export {
   fetchPaymentStatus,
   fetchPayments,
   createPayment,
+  refundPayment,
   sendPaymentCollectionEmails,
   // payment sources
   fetchPaymentSources,

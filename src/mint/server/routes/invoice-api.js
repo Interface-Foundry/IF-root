@@ -33,7 +33,7 @@ module.exports = function (router) {
     .post(async (req, res) => {
       // refund all for invoice
       if (_.get(req, 'body.invoice_id')) {
-        logging.info('using invoice_id')
+        logging.info('using invoice_id to refund entire invoice')
         const invoiceId = req.body.invoice_id
         const invoice = await Invoice.GetById(invoiceId)
         if (_.get(req, 'UserSession.user_account.id') !== invoice.leader) {
@@ -49,9 +49,12 @@ module.exports = function (router) {
 
       // individual refund
       if (_.get(req, 'body.payment_id')) {
-        logging.info('using payment_id')
+        logging.info('using payment_id to refund specific payment')
         const refund = await PaymentSource.RefundPaymentId(req.body.payment_id)
-        return res.send(refund)
+        const userId = req.UserSession.user_account.id
+
+        const paymentObject = await PaymentSource.GetPaymentStatus(userId, refund.invoice)
+        return res.send(paymentObject)
       }
     })
 
