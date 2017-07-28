@@ -105,16 +105,17 @@ export default class App extends Component {
     }
   }
 
-  componentWillReceiveProps = ({ user: { id: nextId }, location: { pathname: nextPathname } }) => {
+  componentWillReceiveProps = ({ fetchCart, fetchMetrics, fetchInvoiceByCart, user: { id: nextId }, location: { pathname: nextPathname } }) => {
     const {
       _logPageView,
-      props: { fetchCart, fetchMetrics, location: { pathname }, user: { id } }
+      props: { location: { pathname }, user: { id } }
     } = this;
     const cartId = pathname.match(/cart\/(\w*)\/?/),
       nextCartId = nextPathname.match(/cart\/(\w*)\/?/);
     if ((cartId && nextCartId && cartId[1] !== nextCartId[1]) || (!cartId && nextCartId)) {
       fetchCart(nextCartId[1]);
       fetchMetrics(nextCartId[1]);
+      fetchInvoiceByCart(nextCartId[1]);
     }
 
     if (!id && nextId && GA_ENABLED) {

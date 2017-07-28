@@ -6,8 +6,10 @@ const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
 
-// add $10.00 fee to illustrate how it would work for user payments
-const KIP_PAY_FEE = 1000
+// If we want to add a fee, this is the basic idea of how we would do it.
+// we will probably need to calculate it differently based on some attributes
+// from invoice tho like store and shipping to/from
+const KIP_PAY_FEE = 0
 
 /**
  * split amount owned by split_type

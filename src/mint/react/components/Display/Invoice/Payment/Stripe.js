@@ -11,9 +11,9 @@ export default class Stripe extends Component {
     user: PropTypes.object,
     cart: PropTypes.object,
     userPaymentStatus: PropTypes.object,
-    createPaymentSource: PropTypes.func
+    createPaymentSource: PropTypes.func,
+    fetchPaymentStatus: PropTypes.func
   }
-
 
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;

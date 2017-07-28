@@ -13,7 +13,7 @@ export default class InvoiceInfo extends Component {
 
   render() {
 
-    const { selectAccordion, invoice, cart } = this.props;
+    const { selectAccordion, cart } = this.props;
 
     return (
       <div className='payment accordion items'>
@@ -22,25 +22,27 @@ export default class InvoiceInfo extends Component {
             <h3>Cart Summary</h3>
           </div>
           <table className="invoice-info">
-            <tr>
-              <td>Items ({cart.items.length}):</td>
-              <td>${(cart.subtotal / 100).toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Shipping & handling:</td>
-              <td>$0.00</td>
-            </tr>
-            <tr>
-              <td>Estimated Tax:</td>
-              <td>$0.00</td>
-            </tr>
-            <tr>
-              <td></td><td><hr className="separator"/></td>
-            </tr>
-            <tr>
-              <td><b>Total:</b></td>
-              <td><b>${(cart.subtotal / 100).toFixed(2)}</b></td>
-            </tr>
+            <tbody>
+              <tr>
+                <td>Items ({cart.items.length}):</td>
+                <td>${(cart.subtotal / 100).toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Shipping & handling:</td>
+                <td>$0.00</td>
+              </tr>
+              <tr>
+                <td>Estimated Tax:</td>
+                <td>$0.00</td>
+              </tr>
+              <tr>
+                <td></td><td><hr className="separator"/></td>
+              </tr>
+              <tr>
+                <td><b>Total:</b></td>
+                <td><b>${(cart.subtotal / 100).toFixed(2)}</b></td>
+              </tr>
+            </tbody>
           </table>
         </nav>
       </div>
