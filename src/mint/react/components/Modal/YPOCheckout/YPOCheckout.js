@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 import { ButtonsContainer } from '../../../containers';
+import { Icon } from '../../../../react-common/components'
 
 export default class YPOCheckout extends Component {
   static propTypes = {
