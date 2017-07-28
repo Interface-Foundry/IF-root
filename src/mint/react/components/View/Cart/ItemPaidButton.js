@@ -9,16 +9,23 @@ export default class ItemPaidButton extends Component {
     goToInvoice: PropTypes.func,
     selectAccordion: PropTypes.func,
     cart: PropTypes.object,
-    paid: PropTypes.bool,
+    userPaid: PropTypes.bool,
     displayInvoice: PropTypes.bool,
     isLeader: PropTypes.bool,
-    splitType: PropTypes.string
+    splitType: PropTypes.string,
+    invoiceId: PropTypes.string,
+    fetchPaymentStatus: PropTypes.func,
+    userCost: PropTypes.number
   }
-  render() {
-    const { goToInvoice, cart, selectAccordion, paid, displayInvoice, splitType, isLeader } = this.props;
+
+  componentWillReceiveProps = ({ fetchPaymentStatus, invoiceId, userCost, displayInvoice }) =>
+    (invoiceId && displayInvoice === this.props.displayInvoice && !userCost) ? fetchPaymentStatus(invoiceId) : null;
+
+  render = () => {
+    const { goToInvoice, cart, selectAccordion, userPaid, displayInvoice, splitType, isLeader } = this.props;
     if (!displayInvoice || (splitType === 'split_single' && !isLeader)) return null;
     else return (
-      paid
+      userPaid
       ? (
         <div className='pay-button paid'>
           <button disabled> ✔︎ Paid! </button>

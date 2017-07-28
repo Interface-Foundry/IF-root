@@ -43,7 +43,8 @@ const mapDispatchToProps = dispatch => ({
   deletePaymentSource: (paymentsource_id) => dispatch(deletePaymentSource(paymentsource_id)),
   updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data)),
   fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id)),
-  setTab: () => dispatch(selectTab('invoice'))
+  setTab: () => dispatch(selectTab('invoice')),
+  closeTab: () => dispatch(selectTab('cart'))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Invoice);
