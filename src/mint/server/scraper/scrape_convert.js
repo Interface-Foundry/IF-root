@@ -64,11 +64,14 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		console.log("domain:", domain)
 		if (domain === 'taobao.com') {
 			//this is a taobao url; let's use nightmare
+			console.log('this is a taobao url; let\'s use nightmare')
 			var html_id = await nightmare(url)
 			//read in the new html file or smth
 		}
-		else var html = await utils.scrapeURL(url)
-		if (!html) html = await utils.scrapeURL(url, true)
+		else {
+			var html = await utils.scrapeURL(url)
+			if (!html) html = await utils.scrapeURL(url, true)
+		}
 		s = await handle_html.tryHtml(s,html)
 		console.log('scraped')
 

@@ -18,7 +18,18 @@ module.exports = async function (s, $) {
   s.main_image_url = 'http:' + $('.magnify').attr('href')
 
   //get price
-  s.original_price.value = $('.price').find('input').attr('value')
-
+  var price = $('.l-content').find('.price').find('strong').text().trim()
+  // s.original_price.value
+  console.log("price, price.length", price, price.length)
+  if (price[price.length-1] === 'p') {
+    console.log('price in pence')
+    console.log('new price', price)
+    price = price.slice(0, price.length-1) / 100
+  }
+  else {
+    price = price.slice(1)
+    console.log('new price', price)
+  }
+  s.original_price.value = price
   return s
 }
