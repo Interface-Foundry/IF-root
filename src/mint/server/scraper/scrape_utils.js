@@ -87,7 +87,7 @@ var fakeUserAgent = function () {
   return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_'+ osxVer +
   ') AppleWebKit/' + webkitMajVer + '.' + webkitMinVer +
   ' (KHTML, like Gecko) Chrome/' + chromeMajVer + '.0.' + chromeMinVer +
-  '2623.110 Safari/' + safariMajVer +'.36';
+  '2623.110 Mobile Safari/' + safariMajVer +'.36';
 }
 
 /**

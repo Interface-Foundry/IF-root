@@ -1,6 +1,8 @@
 var co = require('co')
-var fs = require('fs')
+var fs = require('fs-extra')
 var currency = require('currency-code-map')
+
+var nightmare = require('./nightmare')
 
 var db
 const dbReady = require('../../db')
@@ -53,14 +55,19 @@ var getLocale = function (url,user_country,user_locale,store_country,domain){
 	return s
 }
 
-
-
 //do a thing
 var scrape = async function (url, user_country, user_locale, store_country, domain) {
 		//incoming country / locale
 		console.log('USER_COUNTRY, USER_LOCALE', user_country, user_locale)
 		var s = getLocale(url,user_country,user_locale,store_country,domain)
-		var html = await utils.scrapeURL(url)
+
+		console.log("domain:", domain)
+		if (domain === 'taobao.com') {
+			//this is a taobao url; let's use nightmare
+			var html_id = await nightmare(url)
+			//read in the new html file or smth
+		}
+		else var html = await utils.scrapeURL(url)
 		if (!html) html = await utils.scrapeURL(url, true)
 		s = await handle_html.tryHtml(s,html)
 		console.log('scraped')
