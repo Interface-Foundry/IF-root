@@ -1,5 +1,4 @@
 // mint/react/components/View/Cart/Cart.scss
-
 @import '../../../../react-common/styles/Constants';
 @import '../../../../react-common/styles/Animations';
 
@@ -43,11 +42,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       &:last-of-type {
         border-right: 1px solid transparent;
         margin-right: 0;
-
       }
 
       &.info {
-        background: $secondaryColor;
+        background: $blue-header;
         color: white;
         font-weight: bold;
         opacity: 1;
@@ -62,42 +60,63 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       position: relative;
       padding: $padding ($padding * 3);
       text-align: left;
-      background: white;
+      background: $color-white;
       border-radius: 5px;
       box-shadow: $card-box-shadow;
 
-      @media only screen and (max-width: 600px) {
-        padding: $padding $padding;
-      }
-
-      & > h1 {
-        position: relative;
-        display: inline-block;
-        width: 50%;
-        overflow: hidden;
-        font-size: 16px;
-        line-height: 20px;
-        font-weight: 500;
-
-        span {
-          opacity: 0.3;
-          font-size: 12px;
+      .card-head {
+        display: flex;
+        flex-wrap: wrap;
+        .pay-button {
+          button {
+            border: 1px solid $orange-caution;
+            background: $orange-caution;
+            color: $color-white;
+            font-size: 18px;
+            border-radius: 5px;
+            padding: $padding / 3;
+          }
+          &.paid {
+            button {
+              background-color: $green-accent;
+              border-color: $green-accent;
+              cursor: default;
+            }
+          }
         }
 
-        &:last-of-type {
-          float: right;
+        @media only screen and (max-width: 600px) {
+          padding: $padding $padding;
+        }
+
+        .item-owner {
+          position: relative;
+          display: inline-block;
+          overflow: hidden;
+          font-size: 16px;
+          font-weight: 500;
+          flex: 1 1 auto;
+
+          span {
+            opacity: 0.3;
+            font-size: 12px;
+          }
+        }
+        .toggle-items {
           font-size: 12px;
-          width: 25px;
-          text-align: center;
           cursor: pointer;
+          padding: 0 0 0 2 * $padding;
+          display: flex;
+          align-items: center;
         }
-      }
 
-      & > h4 {
-        font-weight: 500;
+        &>h4 {
+          font-weight: 500;
+          width: 100%;
 
-        z {
-          font-size: 15px;
+          .my-price {
+            font-size: 15px;
+          }
         }
       }
 
@@ -167,7 +186,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             z-index: 9;
 
             span {
-              color: $secondaryColor;
+              color: $blue-header;
               padding: $padding 0;
               font-size: 12px;
               @media only screen and (max-width: 600px) {
@@ -185,10 +204,10 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             width: 50%;
           }
 
-          & > span {
+          &>span {
             display: none;
             @media only screen and (max-width: 600px) {
-              color: $secondaryColor;
+              color: $blue-header;
               padding: 0;
               height: 10px;
               line-height: 10px;

@@ -31,7 +31,6 @@ module.exports = function (router) {
       * @apiParam {object} { refund_type: refund_id }, refund type either invoice_id or payment_id, and then respective payment/invoice id
       */
     .post(async (req, res) => {
-      logging.info('in invoice/refund~~~~~')
       // refund all for invoice
       if (_.get(req, 'body.invoice_id')) {
         logging.info('using invoice_id')
@@ -54,11 +53,6 @@ module.exports = function (router) {
         const refund = await PaymentSource.RefundPaymentId(req.body.payment_id)
         return res.send(refund)
       }
-    })
-
-    router.get('/invoice/asdf/', async (req, res) => {
-      const refund = await PaymentSource.RefundPaymentId('dbe62ce9-f40f-4c96-a126-ed042be748f5')
-      return res.send(refund)
     })
 
     router.route('/invoice/refund/:refund_key/:refund_status')
@@ -117,12 +111,14 @@ module.exports = function (router) {
     .put(async (req, res) => {
       logging.info('got req to update or action', req.body)
       let invoice
+      const userId = req.UserSession.user_account.id
       if (_.get(req, 'body.option_change')) {
         logging.info(`updating option for invoice ${req.params.invoice_id}: ${req.body.option_change} with ${req.body.option_data}`)
         invoice = await Invoice.optionUpdate(req.params.invoice_id, req.body.option_change, req.body.option_data)
       }
 
-      return res.send(invoice)
+      const paymentObject = await PaymentSource.GetPaymentStatus(userId, invoice.id)
+      return res.send({'invoice': invoice, 'userPaymentStatus': paymentObject})
     })
 
   /**
@@ -337,8 +333,8 @@ module.exports = function (router) {
         logging.info('sendCollectionEmail called')
         await invoice.sendCollectionEmail()
       }
+
       return res.send({'amount': payment.amount, 'paid': true})
-      // return res.send(payment)
     })
     /**
      * @api {delete} /payment/:paymentsource_id
@@ -364,16 +360,10 @@ module.exports = function (router) {
   router.get('/invoice/cart/:cart_id', async (req, res) => {
     var invoice = await Invoice.GetByCartId(req.params.cart_id)
     if (invoice) {
-      logging.info('this is the inoice', invoice)
+      logging.info('this is the invoice', invoice)
       await invoice.updateInvoice()
       return res.send(invoice)
     }
-    else {
-      logging.info('error getting invoice getbycartId -- creating new invoice')
-      invoice = await Invoice.CreateByCartId(req.params.cart_id)
-      if (invoice) return res.send(invoice)
-    }
-
     return res.send({display: false})
   })
 
@@ -398,7 +388,7 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id id of the invoice we are attaching a shipping address to
    * @apiParam {string} address id of address we are shipping to
    */
-  router.post('/invoice/:invoice_id/shipto', async(req, res) => {
+  router.post('/invoice/:invoice_id/shipto', async (req, res) => {
     if (!req.body.address) res.sendStatus(400)
     var invoice = await db.Invoices.findOne({ id: req.params.invoice_id })
     invoice.address = req.body.address.id
@@ -466,8 +456,10 @@ module.exports = function (router) {
       cart: req.params.cart_id,
       paid: false,
       total: cart.subtotal,
-      affiliate_checkout_url: cart.affiliate_checkout_url
+      affiliate_checkout_url: cart.affiliate_checkout_url,
+      split_type: _.get(cart, 'split_type') ? cart.split_type : 'split_single'
     })
+
     logging.info('sending invoice now!')
     return res.send(invoice)
   })

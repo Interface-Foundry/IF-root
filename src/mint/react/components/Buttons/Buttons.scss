@@ -42,10 +42,10 @@
 
     &.blue {
       background: transparent;
-      color: $color-blue;
+      color: $blue-header;
 
       svg {
-        fill: $color-blue;
+        fill: $blue-header;
         padding: $padding / 2;
       }
     }
@@ -65,7 +65,7 @@
     }
 
     &.yellow {
-      background: $mainColor;
+      background: $yellow-checkout;
       padding: 0 $padding;
 
       .inner-button {
@@ -103,7 +103,7 @@
           }
 
           &:last-of-type {
-            border-left: 2px solid darken($mainColor, 20%);
+            border-left: 2px solid darken($yellow-checkout, 20%);
             order: 2;
           }
 

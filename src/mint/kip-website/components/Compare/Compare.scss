@@ -106,7 +106,7 @@
           width: 70%;
           margin: 0 auto;
         }
-        
+
       }
     }
     .action {
@@ -150,7 +150,7 @@
       a {
         &:first-of-type {
           button {
-            background: $warningColor;
+            background: $red-warning-bright;
             color: white;
             @media only screen and (max-width: 600px) {
               margin: 0 0 $padding*2;
@@ -170,11 +170,11 @@
     &:nth-of-type(2) {
       background-repeat: no-repeat;
       background-position: center;
-      background: mix(white, $secondaryColor, 85%);
+      background: mix(white, $blue-header, 85%);
     }
   }
   td {
-    fill: $warningColor;
+    fill: $red-warning-bright;
     font-size: 15px;
     svg {
       height: 50px;
@@ -184,7 +184,7 @@
     }
   }
   .check {
-    fill: $thirdColor;
+    fill: $green-accent;
     font-size: 30px;
   }
   .price {

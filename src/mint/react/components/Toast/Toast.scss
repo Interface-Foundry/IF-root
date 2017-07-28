@@ -23,10 +23,10 @@
     background: rgba($price-color, 0.98);
   }
   &.warn {
-    background: rgba($mainColor, 0.98);
+    background: rgba($yellow-checkout, 0.98);
   }
   &.success {
-    background: rgba($thirdColor, 0.98);
+    background: rgba($green-accent, 0.98);
   }
 }
 

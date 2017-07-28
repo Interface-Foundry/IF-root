@@ -65,24 +65,27 @@ export default class Header extends Component {
             <Route path={'/cart/:cart_id*'} exact component={() =><CartHeader {...props}/> } />
           </Switch>
         </div>
-        <div className='header__buttons'>
-        <Route path={'/cart/:cart_id'} exact component={RefreshContainer} />
-        <TransitionGroup>
-          {
-            showCheckout
-            ? (<CSSTransition classNames='checkoutButton' timeout={{enter: 450, exit: 450}} >
-                <ButtonsContainer checkoutOnly={true}/>
-              </CSSTransition>)
-             : null
-           }
-        </TransitionGroup>
-        </div>
+
         <div className='header__right'>
+          <div className='buttons'>
+            <Route path={'/cart/:cart_id'} exact component={RefreshContainer} />
+            <TransitionGroup>
+            {
+              showCheckout
+              ? (<CSSTransition classNames='checkoutButton' timeout={{enter: 450, exit: 450}} >
+                  <ButtonsContainer checkoutOnly={true}/>
+                </CSSTransition>)
+              : null
+            }
+            </TransitionGroup>
+          </div>
+          <span className='hamburger-area'>
             {!userName ? <p onClick={() => _toggleLoginScreen()}><span>Login</span></p> : null}
             <div className='navbar__icon' onClick={_toggleSidenav}>
               <Icon icon='Hamburger'/>
-               {/* showAlert ? <AlertBubble top={13} right={25} /> : null */}
+                {/* showAlert ? <AlertBubble top={13} right={25} /> : null */}
             </div>
+          </span>
         </div>
       </nav>
     );

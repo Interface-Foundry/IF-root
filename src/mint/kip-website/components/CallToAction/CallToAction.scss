@@ -78,7 +78,7 @@
     a {
       &:first-of-type {
         button {
-          background: $warningColor;
+          background: $red-warning-bright;
           color: $color-white;
 
           @media only screen and (max-width: 600px) {
@@ -95,7 +95,7 @@
         button {
           background: transparent;
           box-shadow: none;
-          color: $thirdColor;
+          color: $green-accent;
           font-size: 20px;
           line-height: $ribbonHeight;
 
@@ -109,7 +109,7 @@
             &::after {
               @include transition(all 0.33s $material-bezier);
 
-              border-color: $thirdColor;
+              border-color: $green-accent;
               border-radius: 150px;
               bottom: -3px;
               content: '';
@@ -123,7 +123,7 @@
           &:hover {
             span {
               &::after {
-                background: $thirdColor;
+                background: $green-accent;
               }
             }
           }
@@ -132,7 +132,7 @@
             @include transition(all 0.33s $material-bezier);
 
             background: transparent;
-            fill: $thirdColor !important;
+            fill: $green-accent !important;
             height: $ribbonHeight;
             padding: 15px 0;
             width: auto;

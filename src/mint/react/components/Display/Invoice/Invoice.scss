@@ -22,17 +22,17 @@
     padding: $padding 0;
 
     button {
-      font-family: $main-font;
+      font-family: $arial-font;
       background: transparent;
-      border: 1px solid $secondaryColor;
+      border: 1px solid $blue-header;
       border-radius: 5px;
       margin: $padding / 2;
       padding: $padding / 1.5;
-      color: $secondaryColor;
+      color: $blue-header;
       font-size: 16px;
       &.delete__button {
-        color: $fourthColor;
-        border-color: $fourthColor;
+        color: $red-warning;
+        border-color: $red-warning;
         margin: 0 5px;
         font-size: 10px;
         padding: 2px;
@@ -40,9 +40,9 @@
         float: right;
       }
       &.pay__button {
-        float: left;
-        color: $thirdColor;
-        border-color: $thirdColor;
+        width: 100%;
+        color: $green-accent;
+        border-color: $green-accent;
       }
     }
 
@@ -79,7 +79,7 @@
         span {
           float: right;
           padding: 0 $padding;
-          color: $secondaryColor;
+          color: $blue-header;
           font-weight: 500;
           font-size: 12px;
         }

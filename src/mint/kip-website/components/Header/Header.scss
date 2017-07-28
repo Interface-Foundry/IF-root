@@ -38,13 +38,13 @@
   }
 
   &.secondary {
-    border-bottom: 3px solid mix(white, $secondaryColor, 85%);
+    border-bottom: 3px solid mix(white, $blue-header, 85%);
 
     .text {
       h1 {
         span {
           &:after {
-            background: $secondaryColor;
+            background: $blue-header;
           }
         }
       }
@@ -52,23 +52,23 @@
 
     .more {
       h2 {
-        color: $secondaryColor;
+        color: $blue-header;
       }
 
       svg {
-        fill: $secondaryColor;
+        fill: $blue-header;
       }
     }
   }
 
   &.third {
-    border-bottom: 3px solid mix(white, $thirdColor, 85%);
+    border-bottom: 3px solid mix(white, $green-accent, 85%);
 
     .text {
       h1 {
         span {
           &:after {
-            background: $thirdColor;
+            background: $green-accent;
           }
         }
       }
@@ -76,11 +76,11 @@
 
     .more {
       h2 {
-        color: $thirdColor;
+        color: $green-accent;
       }
 
       svg {
-        fill: $thirdColor;
+        fill: $green-accent;
       }
     }
   }

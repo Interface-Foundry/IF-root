@@ -62,6 +62,28 @@ export const createPayment = (paymentsource_id, invoice_id) => post(
   })
 );
 
+export const refundPayment = (payment_id) => post(
+  '/api/invoice/refund',
+  'REFUND_PAYMENT',
+  { 'payment_id': payment_id },
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
+export const refundInvoice = (invoice_id) => post(
+  '/api/invoice/refund',
+  'REFUND_INVOICE',
+  { 'invoice_id': invoice_id },
+  (type, json) => ({
+    type: `${type}_SUCCESS`,
+    response: json,
+    receivedAt: Date.now()
+  })
+);
+
 export const createPaymentWithoutSource = (amount, payment_data, payment_source, invoice) => post(
   `/api/payment/${payment_source}`,
   'CREATE_PAYMENT_WITHOUT_SOURCE',

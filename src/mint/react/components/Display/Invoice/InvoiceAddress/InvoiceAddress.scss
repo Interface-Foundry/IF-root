@@ -17,7 +17,7 @@
     }
     span {
       padding: 0 $padding;
-      color: $secondaryColor;
+      color: $blue-header;
     }
   }
 
@@ -32,12 +32,12 @@
       align-items: center;
 
       &.selected {
-        border: 1px solid $secondaryColor;
-        background: rgba($secondaryColor, 0.2);
+        border: 1px solid $blue-header;
+        background: rgba($blue-header, 0.2);
         border-radius: $padding/2;
 
         .circle {
-          border: 5px solid $secondaryColor;
+          border: 5px solid $blue-header;
           background: white;
         }
       }
@@ -73,7 +73,7 @@
         }
         span {
           padding: 0 $padding;
-          color: $secondaryColor;
+          color: $blue-header;
           span {
             cursor: pointer;
           }

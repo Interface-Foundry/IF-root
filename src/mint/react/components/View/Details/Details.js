@@ -18,6 +18,7 @@ export default class Details extends Component {
     locked: PropTypes.bool,
     cloneCart: PropTypes.func,
     undoRemove: PropTypes.func,
+    togglePopup: PropTypes.func,
     oldCart: PropTypes.array,
     showUndo: PropTypes.bool
   }
@@ -32,7 +33,8 @@ export default class Details extends Component {
       undoRemove,
       showUndo,
       cart,
-      oldCart
+      oldCart,
+      togglePopup
     } = this.props,
       metrics = [{
         name: 'Members',
@@ -96,7 +98,12 @@ export default class Details extends Component {
                           ${likedList.includes(user.id) && m.name === 'Likes' ? 'red' : ''}
                           ${ m.name !== 'Members' ? 'cursor' : '' }`
                         } onClick={() => {
-                          m.name === 'Likes' ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) ) : m.name === 'Re-Kips' ? cloneCart(id): null;
+                          !user.id ? togglePopup()
+                          : m.name === 'Likes'
+                            ? ( likedList.includes(user.id) ? unlikeCart(id) : likeCart(id) )
+                            : m.name === 'Re-Kips'
+                              ? cloneCart(id)
+                              : null;
                         }}>
                         <div className='top'>
                           <Icon icon={m.icon}/>

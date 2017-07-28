@@ -3,7 +3,7 @@
 @import '../../../react-common/styles/Animations';
 
 .navbar {
-  background: $secondaryColor;
+  background: $blue-header;
   color: $color-white;
   display: flex;
   font-family: 'Raleway';
@@ -35,216 +35,208 @@
 
 
   .header__left {
-    flex: 1 1 auto;
-    overflow: visible;
-  }
-
-  .buttons {
-    height: 40px;
-    padding: 0;
-
-    &.checkoutButton-enter {
-      @include animation(fadeInHeaderButtons 0.5s);
-    }
-
-    &.checkoutButton-exit {
-      @include animation(fadeOutHeaderButtons .5s);
-      flex-grow: 0.00001;
-    }
-
-    .default {
-      span {
-        button {
-          &.yellow {
-            padding: 0;
-
-            &.lock {
-              padding: 0 $padding;
-            }
-          }
-
-          a:first-of-type {
-            padding: 0;
-          }
-
-          p {
-            padding: 5px;
-          }
-        }
-      }
-    }
-  }
-
-  .cartHead, .settingsHead {
-    display: flex;
-    height: 100%;
-    position: relative;
-    white-space: nowrap;
+    flex-grow: 5;
+    max-width: 900px;
     overflow: visible;
 
-    @media only screen and (max-width: 600px) {
-      padding: 0 0 0 $padding;
-    }
-
-    a {
-      display: inline-block;
-
-      &:first-of-type {
-        padding-left: 20px;
-      }
+    .cartHead, .settingsHead {
+      display: flex;
+      height: 100%;
+      position: relative;
+      white-space: nowrap;
+      overflow: visible;
 
       @media only screen and (max-width: 600px) {
+        padding: 0 0 0 $padding;
+      }
+
+      a {
+        display: inline-block;
+
         &:first-of-type {
-          padding-left: 0;
+          padding-left: 20px;
         }
-      }
 
-      .desktop {
         @media only screen and (max-width: 600px) {
-          display: none;
+          &:first-of-type {
+            padding-left: 0;
+          }
         }
-      }
 
-      .mobile {
-        width: 30px;
-        margin: 0;
-        height: 30px;
-        margin: $padding $padding 0 0;
-
-        @media only screen and (min-width: 600px) {
-          display: none;
+        .desktop {
+          @media only screen and (max-width: 600px) {
+            display: none;
+          }
         }
-      }
-    }
 
-    .navbar__icon {
-      display: inline-block;
-      width: auto;
-      min-width: 50px;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
+        .mobile {
+          width: 30px;
+          margin: 0;
+          height: 30px;
+          margin: $padding $padding 0 0;
 
-      svg {
-        height: 100%;
-        vertical-align: top !important;
-      }
-    }
-
-    .image {
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover; // background-size: cover !important;
-      display: inline-block;
-      height: 35px;
-      margin: 10px 0;
-      position: relative;
-      width: 90px;
-
-      .beta {
-        background: $color-white;
-        border: 1px solid $secondaryColor;
-        border-radius: 3px;
-        color: $secondaryColor;
-        display: block;
-        font-size: 8px;
-        font-weight: 900;
-        left: 5px;
-        padding: 0 3px;
-        position: absolute;
-        text-align: center;
-        text-transform: uppercase;
-        top: 27px;
-
-        @media (max-width: 600px) {
-          left: 2px; // transform: rotate(-25deg);
-        }
-      }
-    }
-
-    .members {
-      position: absolute;
-      height: 25px;
-      line-height: 25px;
-      bottom: 0;
-      left: 50px;
-      font-size: 10px;
-    }
-
-    h3 {
-      display: inline-block;
-      white-space: nowrap;
-      height: 50px;
-      line-height: 50px;
-      font-size: 27px;
-
-      @media (min-width: 900px) {
-        width: calc(100% - 50px);
-      }
-    }
-
-    .bounce {
-      @include animation(bounceDownSmall 1.5s);
-
-      animation-iteration-count: 2; // too much twitching
-    }
-
-    .navbar__modal__head {
-      flex: 1 1 auto;
-
-      &.settings {
-        padding: 0 ($padding * 2) 0 0;
-
-        .header__left {
-          a {
-            @media only screen and (max-width: 600px) {
-              display: inline-block;
-            }
+          @media only screen and (min-width: 600px) {
+            display: none;
           }
         }
       }
 
-      svg {
-        font-size: 20px;
-        height: $nav-height;
-        line-height: $nav-height;
-        margin-right: $padding / 2;
-        vertical-align: top !important;
+      .navbar__icon {
+        display: inline-block;
+        width: auto;
+        min-width: 50px;
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+
+        svg {
+          height: 100%;
+          vertical-align: top !important;
+        }
       }
 
-      span {
+      .image {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover; // background-size: cover !important;
         display: inline-block;
-        font-size: 14px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        height: 35px;
+        margin: 10px 0;
+        position: relative;
+        width: 90px;
+
+        .beta {
+          background: $color-white;
+          border: 1px solid $blue-header;
+          border-radius: 3px;
+          color: $blue-header;
+          display: block;
+          font-size: 8px;
+          font-weight: 900;
+          left: 5px;
+          padding: 0 3px;
+          position: absolute;
+          text-align: center;
+          text-transform: uppercase;
+          top: 27px;
+
+          @media (max-width: 600px) {
+            left: 2px; // transform: rotate(-25deg);
+          }
+        }
+      }
+
+      .members {
+        position: absolute;
+        height: 25px;
+        bottom: 0;
+        left: 50px;
+        font-size: 10px;
+      }
+
+      h3 {
+        display: inline-block;
         white-space: nowrap;
+        height: 50px;
+        font-size: 27px;
+
+        @media (min-width: 900px) {
+          width: calc(100% - 50px);
+        }
+      }
+
+      .bounce {
+        @include animation(bounceDownSmall 1.5s);
+
+        animation-iteration-count: 2; // too much twitching
+      }
+
+      .navbar__modal__head {
+        flex: 1 1 auto;
+
+        &.settings {
+          padding: 0 ($padding * 2) 0 0;
+
+          .header__left {
+            a {
+              @media only screen and (max-width: 600px) {
+                display: inline-block;
+              }
+            }
+          }
+        }
+
+        svg {
+          font-size: 20px;
+          height: $nav-height;
+          margin-right: $padding / 2;
+          vertical-align: top !important;
+        }
+
+        span {
+          display: inline-block;
+          font-size: 14px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
     }
-  }
 
-  .settings {
-    .image {
-      flex: 1 1 auto;
-      background-size: contain;
+    .settings {
+      .image {
+        flex: 1 1 auto;
+        background-size: contain;
 
-      .beta {
-        position: relative;
-        width: 30px;
-        margin: 0 auto;
-        left: -22px;
+        .beta {
+          position: relative;
+          width: 30px;
+          margin: 0 auto;
+          left: -22px;
+        }
       }
     }
   }
 
   .header__right {
-    height: $nav-height;
-    text-align: right;
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    flex-basis: 10px;
 
-    .navbar__icon {
-      padding: 0 ($padding * 3);
+    .buttons {
+      padding: 0;
+      display: flex;
 
-      @media only screen and (max-width: 600px) {
-        padding: 0;
+      &.checkoutButton-enter {
+        @include animation(fadeInHeaderButtons 0.5s);
+      }
+
+      &.checkoutButton-exit {
+        @include animation(fadeOutHeaderButtons .5s);
+        flex-grow: 0.00001;
+      }
+
+      .default {
+        span {
+          button {
+            &.yellow {
+              padding: 0;
+
+              &.lock {
+                padding: 0 $padding;
+              }
+            }
+
+            a:first-of-type {
+              padding: 0;
+            }
+
+            p {
+              padding: 5px;
+            }
+          }
+        }
       }
     }
 
@@ -254,39 +246,47 @@
       padding: 0;
     }
 
-    p {
-      display: inline-block;
-      padding: 0;
-      line-height: 47px;
-      font-weight: bold;
-      margin-right: $padding;
-      cursor: pointer;
+    .hamburger-area {
+      display: flex;
+      align-items: center;
 
-      span {
-        border-bottom: 3px solid $mainColor;
+      .navbar__icon {
+        padding: 18px;
       }
 
-      &.name {
-        @media only screen and (max-width: 600px) {
-          display: none;
+      p {
+        display: inline-block;
+        padding: 0;
+        font-weight: bold;
+        margin-right: $padding;
+        cursor: pointer;
+
+        span {
+          border-bottom: 3px solid $yellow-checkout;
+        }
+
+        &.name {
+          @media only screen and (max-width: 600px) {
+            display: none;
+          }
         }
       }
-    }
 
-    a {
-      border-bottom: 3px solid $mainColor;
-    }
+      a {
+        border-bottom: 3px solid $yellow-checkout;
+      }
 
-    .navbar__icon {
-      display: inline-block;
-      height: $nav-height;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
+      .navbar__icon {
+        display: inline-block;
+        height: $nav-height;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
 
-      svg {
-        vertical-align: top !important;
-        height: 100%;
+        svg {
+          vertical-align: top !important;
+          height: 100%;
+        }
       }
     }
   }

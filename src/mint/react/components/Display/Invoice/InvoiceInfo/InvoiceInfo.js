@@ -13,19 +13,35 @@ export default class InvoiceInfo extends Component {
 
   render() {
 
-    const { selectAccordion, invoice } = this.props;
+    const { selectAccordion, invoice, cart } = this.props;
 
     return (
-      <div className='payment accordion'>
+      <div className='payment accordion items'>
         <nav onClick={() => selectAccordion('invoiceinfo')}>
           <div>
-            <h3> Invoice Info - Note: Adding Flat $10.00 Kip Fee to All orders for time being</h3>
+            <h3>Cart Summary</h3>
           </div>
-            <div>
-             {
-              (invoice.leader) ? <div>
-              <text> leader: {invoice.leader.name ||invoice.leader}, paid: {invoice.paid ? 'paid' : 'not paid'}, status: {invoice.status}, split_type: {invoice.split_type} </text> </div>: <p> not available create one above </p>}
-            </div>
+          <table className="invoice-info">
+            <tr>
+              <td>Items ({cart.items.length}):</td>
+              <td>${(cart.subtotal / 100).toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td>Shipping & handling:</td>
+              <td>$0.00</td>
+            </tr>
+            <tr>
+              <td>Estimated Tax:</td>
+              <td>$0.00</td>
+            </tr>
+            <tr>
+              <td></td><td><hr className="separator"/></td>
+            </tr>
+            <tr>
+              <td><b>Total:</b></td>
+              <td><b>${(cart.subtotal / 100).toFixed(2)}</b></td>
+            </tr>
+          </table>
         </nav>
       </div>
     );

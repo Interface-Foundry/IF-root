@@ -14,16 +14,16 @@
       font-size: 15px;
       line-height: $nav-height/1.5;
       height: $nav-height/1.5;
-      color: $fifthColor;
+      color: $orange-caution;
       cursor: pointer;
       svg {
         font-size: 50px;
       }
       &:first-of-type {
-        color: $thirdColor;
+        color: $green-accent;
       }
       &:last-of-type {
-        color: $fourthColor;
+        color: $red-warning;
       }
     }
   }
@@ -52,7 +52,7 @@
     font-size: 20px;
     font-weight: bold;
     color: white;
-    background: $thirdColor;
+    background: $green-accent;
     margin-top: $padding*3;
     border-radius: 5px;
     svg {

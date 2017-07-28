@@ -7,18 +7,19 @@ import moment from 'moment';
 import { displayCost, numberOfItems } from '../../../../utils';
 
 const shippingOptions = [{
-    name: 'Fast',
-    shippingDate: moment().add(1, 'days').format('DD/MM/YYYY'),
-    price: 100
+    name: 'Expedited',
+    shippingDate: moment().add(1, 'days').format('YYYY-MM-DD'),
+    price: 499,
+    disabled: !SHIPPING_OPTIONS_ENABLED
   },
   {
-    name: 'slow',
-    shippingDate: moment().add(10, 'days').format('DD/MM/YYYY'),
-    price: 10
+    name: 'Standard',
+    shippingDate: moment().add(10, 'days').format('YYYY-MM-DD'),
+    price: 0
   }
 ];
 
-export default class CartReview extends Component {
+export default class Shipping extends Component {
 
   static propTypes = {
     selectedAccordion: PropTypes.string,
@@ -48,7 +49,7 @@ export default class CartReview extends Component {
           selectedAccordion.includes('review') ? <div>
             <ul className='items'>
               <nav>
-                <h4>Cart Review</h4>
+                <h4>Items</h4>
               </nav>
               {
                 cart.items.map((item) => (
@@ -67,27 +68,26 @@ export default class CartReview extends Component {
             </ul>
             <ul className='delivery'>
               <nav>
-                <h4>Delivery option</h4>
+                <h4>Choose your delivery option</h4>
               </nav>
               {
-               isLeader
-               ? shippingOptions.map((option, i) => (
-                  <li key={i} className={`clickable ${selectedIndex === i ? 'selected' : ''}`} onClick={() => this.setState({selectedIndex: i})}>
-                      <div className='circle'/>
-                      <div className='text'>
-                        <h4>{option.name}</h4>
-                        <p>Delivery on {option.shippingDate}</p>
-                        <p>{displayCost(option.price, cart.store_locale)}</p>
-                      </div>
-                  </li>
-                ))
-                :
-                <li>
-                  <div className='text'>
-                    <h4>Fast </h4>
-                    <p>Delivered on 1/1/79</p>
-                  </div>
-                </li>
+                shippingOptions.map((option, i) => {
+                  const classes = [
+                    option.disabled ? 'disabled' : 'clickable',
+                    selectedIndex === i ? 'selected': null
+                  ].filter(Boolean).join(' ')
+
+                  return (
+                    <li key={i} className={classes} onClick={() => option.disabled || this.setState({selectedIndex: i})}>
+                        <div className='circle'/>
+                        <div className='text'>
+                          <h4>{option.name}</h4>
+                          <p>Delivery on {option.shippingDate}</p>
+                          <p>{displayCost(option.price, cart.store_locale)}</p>
+                        </div>
+                    </li>
+                  )
+                })
               }
             </ul>
           </div> : null

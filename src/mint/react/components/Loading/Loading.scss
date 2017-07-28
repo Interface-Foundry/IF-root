@@ -6,11 +6,11 @@ $color-red: rgba(255, 0, 0, 1);
 $color-orange: rgba(255, 165, 0, 1);
 $color-yellow: rgba(255, 255, 0, 1);
 $color-green: rgba(0, 128, 0, 1);
-$color-blue: rgba(0, 0, 255, 1);
+$blue-header: rgba(0, 0, 255, 1);
 $color-purple: rgba(128, 0, 128, 1);
 
-$rainbow-gradient: -45deg, $color-red 0%, $color-red 14%, $color-orange 14%, $color-orange 31%, $color-yellow 31%, $color-yellow 48%, $color-green 48%, $color-green 65%, $color-blue 65%, $color-blue 82%, $color-purple 82%, $color-purple 97%, $color-red 97%;
-$default-gradient: to right, adjust-hue($thirdColor, 45deg) 8%, $thirdColor 18%, adjust-hue($thirdColor, 45deg) 33%;
+$rainbow-gradient: -45deg, $color-red 0%, $color-red 14%, $color-orange 14%, $color-orange 31%, $color-yellow 31%, $color-yellow 48%, $color-green 48%, $color-green 65%, $blue-header 65%, $blue-header 82%, $color-purple 82%, $color-purple 97%, $color-red 97%;
+$default-gradient: to right, adjust-hue($green-accent, 45deg) 8%, $green-accent 18%, adjust-hue($green-accent, 45deg) 33%;
 
 $default-size: 200% 4px;
 $rainbow-size: 100px 4px;

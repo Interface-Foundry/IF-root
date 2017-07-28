@@ -14,8 +14,8 @@
     width: 40px;
 
     &:hover {
-      background: darken($secondaryColor, 10%);
-      box-shadow: inset 0 0 3px darken($secondaryColor, 20%);
+      background: darken($blue-header, 10%);
+      box-shadow: inset 0 0 3px darken($blue-header, 20%);
     }
 
     svg {

@@ -1571,6 +1571,13 @@ babel-runtime@^6.18.0, babel-runtime@^6.2.0, babel-runtime@^6.22.0, babel-runtim
     core-js "^2.4.0"
     regenerator-runtime "^0.10.0"
 
+babel-runtime@^6.25.0:
+  version "6.25.0"
+  resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.25.0.tgz#33b98eaa5d482bb01a8d1aa6b437ad2b01aec41c"
+  dependencies:
+    core-js "^2.4.0"
+    regenerator-runtime "^0.10.0"
+
 babel-template@^6.16.0, babel-template@^6.24.1, babel-template@^6.25.0, babel-template@^6.3.0, babel-template@^6.7.0, babel-template@^6.9.0:
   version "6.25.0"
   resolved "https://registry.yarnpkg.com/babel-template/-/babel-template-6.25.0.tgz#665241166b7c2aa4c619d71e192969552b10c071"
@@ -4471,7 +4478,7 @@ hoist-non-react-statics@^1.0.3, hoist-non-react-statics@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
 
-hoist-non-react-statics@^2.2.0:
+hoist-non-react-statics@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.2.1.tgz#a7e41c760121d0abfc7a2339b331d29a26389e52"
 
@@ -7092,9 +7099,9 @@ pause-stream@0.0.11:
   dependencies:
     through "~2.3"
 
-paypal-checkout@^4.0.96:
-  version "4.0.96"
-  resolved "https://registry.yarnpkg.com/paypal-checkout/-/paypal-checkout-4.0.96.tgz#8a6b5524b52ab43a7adbe77217af9b045784f8e5"
+paypal-checkout@^4.0.97:
+  version "4.0.97"
+  resolved "https://registry.yarnpkg.com/paypal-checkout/-/paypal-checkout-4.0.97.tgz#55b2d3b1f15be53d1e0b6dfa15acc4c60821ab0a"
   dependencies:
     Base64 "^1.0.0"
     beaver-logger "^3.0.6"
@@ -7984,9 +7991,9 @@ react-hot-loader@next:
     redbox-react "^1.3.6"
     source-map "^0.4.4"
 
-react-html5video@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/react-html5video/-/react-html5video-2.2.0.tgz#a75b3040a760a3fc9ae35b84e9537c55d601609a"
+react-html5video@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-html5video/-/react-html5video-2.3.0.tgz#e7de4d40aa1b1b0300b9f79c63b14566796da736"
 
 react-icon-base@2.0.7:
   version "2.0.7"
@@ -8120,9 +8127,9 @@ react-stripe-checkout@2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/react-stripe-checkout/-/react-stripe-checkout-2.5.0.tgz#6a6f612f99e3e2bf787b88aed98b5f86a87b81dd"
 
-react-stripe-elements@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-0.0.5.tgz#dae84792777b25bbfafab5c0c8b31f2a132b6469"
+react-stripe-elements@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-0.0.6.tgz#cb4d2fb3f30eeca0c8f7c1e2a27962867387d001"
   dependencies:
     prop-types "^15.5.8"
 
@@ -8335,13 +8342,13 @@ reduce-function-call@^1.0.1:
   dependencies:
     balanced-match "^0.4.2"
 
-redux-form@^7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/redux-form/-/redux-form-7.0.2.tgz#6fcc3e847ee95e1eca6af46da34c949458c6e950"
+redux-form@^7.0.3:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/redux-form/-/redux-form-7.0.3.tgz#80157d01df7de6c8eb2297ad1fbbb092bafa34f5"
   dependencies:
     deep-equal "^1.0.1"
     es6-error "^4.0.0"
-    hoist-non-react-statics "^2.2.0"
+    hoist-non-react-statics "^2.2.1"
     invariant "^2.2.2"
     is-promise "^2.1.0"
     lodash "^4.17.3"
@@ -10027,9 +10034,9 @@ webpack-sources@^1.0.1:
     source-list-map "^2.0.0"
     source-map "~0.5.3"
 
-webpack@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.4.0.tgz#e9465b660ad79dd2d33874d968b31746ea9a8e63"
+webpack@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.4.1.tgz#4c3f4f3fb318155a4db0cb6a36ff05c5697418f4"
   dependencies:
     acorn "^5.0.0"
     acorn-dynamic-import "^2.0.0"

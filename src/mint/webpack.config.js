@@ -1,5 +1,6 @@
 const path = require('path'),
   webpack = require('webpack'),
+  // PrepackWebpackPlugin = require('prepack-webpack-plugin').default,
   BUILD_DIR = path.resolve(__dirname, 'public/build'),
   CART_DIR = path.resolve(__dirname, 'react'),
   HOME_DIR = path.resolve(__dirname, 'kip-website');

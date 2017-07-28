@@ -35,6 +35,7 @@ export default class PaymentSources extends Component {
 
     return (
         <div>
+          { paymentSources.length ? 'Select a card to pay with' : null}
           {
             paymentSources.map((payment, i) => (
               (payment !== null) ?
@@ -48,7 +49,7 @@ export default class PaymentSources extends Component {
               </li>
             : null ))
           }
-          { paymentSources.length ? 'Select a card to pay with' : null}
+
           {
             (paymentSources.length > 0 && selectedCardIndex !== null)
               ? <button className='pay__button' onClick={()=> createPayment(paymentSources[selectedCardIndex].id, invoice.id)}>Pay With Selected Card</button>

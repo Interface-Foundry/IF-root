@@ -2,7 +2,7 @@
 @import '../../../../react-common/styles/Constants';
 @import '../../../../react-common/styles/Animations';
 .checkout-modal {
-  font-family: $main-font;
+  font-family: $arial-font;
   p {
     padding: $padding;
   }
@@ -30,11 +30,11 @@
         padding: 0;
       }
       &:first-of-type {
-        background: $thirdColor;
+        background: $green-accent;
         border-bottom-left-radius: 5px;
       }
       &:last-of-type {
-        background: $secondaryColor;
+        background: $blue-header;
         border-bottom-right-radius: 5px;
       }
     }

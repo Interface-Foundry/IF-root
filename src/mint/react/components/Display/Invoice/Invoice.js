@@ -6,23 +6,30 @@ import React, { Component } from 'react';
 import Payment from './Payment';
 import InvoiceAddress from './InvoiceAddress';
 import InvoiceInfo from './InvoiceInfo';
-import CartReview from './CartReview';
+import Shipping from './Shipping';
 import Forms from './Forms';
 
 export default class Invoice extends Component {
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,
+    invoice: PropTypes.object,
     selectedAccordion: PropTypes.string,
     fetchInvoiceByCart: PropTypes.func,
     tab: PropTypes.string,
-    setTab: PropTypes.func
+    setTab: PropTypes.func,
+    fetchPaymentStatus: PropTypes.func
   }
 
   componentDidMount() {
     const { cart, fetchInvoiceByCart, tab, setTab } = this.props;
     if (tab !== 'invoice') setTab();
     fetchInvoiceByCart(cart.id);
+  }
+
+  componentWillMount() {
+    const { fetchPaymentStatus, invoice } = this.props;
+    fetchPaymentStatus(invoice.id);
   }
 
   componentWillReceiveProps = ({ cart, fetchInvoiceByCart }) =>
@@ -37,7 +44,7 @@ export default class Invoice extends Component {
         <InvoiceInfo {...this.props} />
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
         <Payment {...this.props} isLeader={isLeader}/>
-        <CartReview {...this.props} isLeader={isLeader}/>
+        <Shipping {...this.props} isLeader={isLeader}/>
       </div>
     );
   }

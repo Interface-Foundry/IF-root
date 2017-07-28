@@ -46,17 +46,19 @@ export default class Sidenav extends Component {
     const {
       props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, large },
       state: { show }
-    } = this;
-
-    const SideNavLink = (window.location.pathname.includes('/cart') || window.location.pathname.includes('/m/') || window.location.pathname.includes('/newcart') || window.location.pathname.includes('/404')) ? Link : LinkClass;
-
-    let leaderCarts = moveToFront(
-        carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
+    } = this,
+    SideNavLink = (window.location.pathname.includes('/cart') || window.location.pathname.includes('/m/') || window.location.pathname.includes('/newcart') || window.location.pathname.includes('/404'))
+      ? Link
+      : LinkClass,
+      sortedCarts = carts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
+      leaderCarts = moveToFront(
+        sortedCarts
+        .filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
         cart_id),
       memberCarts = moveToFront(
-        carts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
+        sortedCarts
+        .filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
         cart_id);
-
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={() => _toggleSidenav()}>
