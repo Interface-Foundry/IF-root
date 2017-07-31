@@ -6,5 +6,6 @@ module.exports = {
   // available stores we are supporting atm
   STORES: ['YPO', 'Amazon', 'Muji'],
   LOCALES: ['US', 'CA', 'GB', 'JP'],
-  PAYMENT_SOURCE: ['stripe']
+  PAYMENT_SOURCE: ['stripe'],
+  UUID_REGEX: '[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}'
 };

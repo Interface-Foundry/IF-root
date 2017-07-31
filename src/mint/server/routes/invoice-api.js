@@ -4,6 +4,7 @@ const Invoice = require('../payments/Invoice.js')
 const Cart = require('../cart/Cart.js')
 const PaymentSource = require('../payments/PaymentSources.js')
 const utils = require('../utilities/invoice_utils.js')
+const UUID_REGEX = require('../constants.js').UUID_REGEX
 const assert = require('assert')
 
 var db
@@ -67,7 +68,7 @@ module.exports = function (router) {
   /**
    * main invoice route
    */
-  router.route('/invoice/:invoice_id')
+  router.route(`/invoice/:invoice_id(${UUID_REGEX})`)
   /**
    * @api {get} /invoice/:invoice_id get
    * @apiDescription present a page relevant to invoice_id, allow entering payment details for stripe/etc.
@@ -136,7 +137,7 @@ module.exports = function (router) {
 
 
 
-  router.route('/invoice/payment/:invoice_id')
+  router.route(`/invoice/payment/:invoice_id(${UUID_REGEX})`)
   /**
   * @api {get} /invoice/payment/:invoice_id
   * @apiDescription create the payment objects to be used with paymentsources for an invoice
@@ -145,7 +146,7 @@ module.exports = function (router) {
   * @apiParam {string} :invoice_id - invoice id
   */
     .get(async (req, res) => {
-      logging.info('getting user payment status')
+      logging.info('getting user payment status AND using regex?')
       logging.info('req.user', req.UserSession.user_account.id)
       const userId = req.UserSession.user_account.id
       const invoiceId = req.params.invoice_id
@@ -297,7 +298,7 @@ module.exports = function (router) {
       return res.send({'amount': paymentAmount, 'paid': true})
     })
 
-  router.route('/payment/:paymentsource_id')
+  router.route(`/payment/:paymentsource_id(${UUID_REGEX})`)
     /**
      * @api {post} /payment/:paymentsource_id
      * @apiDescription create a payment for an invoice
@@ -387,7 +388,7 @@ module.exports = function (router) {
    *
    * @apiParam {string} :invoice_id id of the invoice whose users we are pinging
    */
-  router.post('/invoice/:invoice_id/collect', async (req, res) => {
+  router.post(`/invoice/:invoice_id(${UUID_REGEX})/collect`, async (req, res) => {
     var invoice = await Invoice.GetById(req.params.invoice_id)
     await invoice.sendCollectionEmail()
     res.sendStatus(200)
@@ -401,7 +402,7 @@ module.exports = function (router) {
    * @apiParam {string} :invoice_id id of the invoice we are attaching a shipping address to
    * @apiParam {string} address id of address we are shipping to
    */
-  router.post('/invoice/:invoice_id/shipto', async (req, res) => {
+  router.post(`/invoice/:invoice_id(${UUID_REGEX})/shipto`, async (req, res) => {
     if (!req.body.address) res.sendStatus(400)
     var invoice = await db.Invoices.findOne({ id: req.params.invoice_id })
     invoice.address = req.body.address.id
@@ -416,7 +417,7 @@ module.exports = function (router) {
    *
    * @apiParam {string} :invoice_id id of the invoice whose users we are pinging
    */
-  router.post('/invoice/:invoice_id/success', async (req, res) => {
+  router.post(`/invoice/:invoice_id(${UUID_REGEX})/success`, async (req, res) => {
     var invoice = await Invoice.GetById(req.params.invoice_id)
     await invoice.sendSuccessEmail(invoice)
     res.sendStatus(200)
