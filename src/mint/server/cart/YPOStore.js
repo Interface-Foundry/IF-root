@@ -119,7 +119,7 @@ class YPOStore extends Store {
     if (cart.locked) {
       return {
         ok: false,
-        redirect: `/cart/${cart.id}?toast="Order submitted successfully"&status=success`,
+        redirect: `/cart/${cart.id}?toast=Order submitted successfully&status=success`,
         message: 'Order already submitted'
       }
     }

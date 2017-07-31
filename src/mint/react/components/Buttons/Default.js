@@ -16,7 +16,8 @@ export default class Default extends Component {
     user: PropTypes.object,
     toggleYpoCheckout: PropTypes.func,
     checkoutOnly: PropTypes.bool,
-    toggleCheckoutModal: PropTypes.func
+    toggleCheckoutModal: PropTypes.func,
+    checkoutFunc: PropTypes.func
   }
 
   _handleShare = () => {
@@ -49,6 +50,7 @@ export default class Default extends Component {
   }
 
   _orderCart = (e) => {
+    if (this.props.checkoutFunc) return this.props.checkoutFunc(e);
     const { cart, cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
     if (leader.id === user.id) updateCart({ ...cart, locked: true });
 
@@ -71,7 +73,7 @@ export default class Default extends Component {
 
           cart.locked
           ? <span>
-              <button className='yellow sub' onClick={this._orderCart} >
+              <button className='yellow sub' onClick={this._orderCart} type='submit'>
                 <span className='inner-button'>
                   <Icon icon='Cart'/>
                   <p className='checkout-button-text'>Checkout</p>
@@ -95,7 +97,7 @@ export default class Default extends Component {
                     Checkout <span>{displayCost(total, cart.price_locale)}</span>
                   </button>
                 :
-                  <button className='yellow sub' onClick={this._orderCart}>
+                  <button className='yellow sub' onClick={this._orderCart} type='submit'>
                     <span className='inner-button'>
                       <Icon icon='Cart'/>
                       <p className='checkout-button-text'>Checkout</p>

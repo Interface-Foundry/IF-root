@@ -10,7 +10,7 @@ export default class YPOCheckout extends Component {
     accountNumber: PropTypes.string,
     deliveryMessage: PropTypes.string,
     voucherCode: PropTypes.string,
-    cart: PropTypes.string,
+    cart: PropTypes.object,
     submitYpoData: PropTypes.func,
     toggleYpoCheckout: PropTypes.func,
     leader: PropTypes.object,
@@ -31,6 +31,7 @@ export default class YPOCheckout extends Component {
 
   _handleSubmit = e => {
     const { props: { submitYpoData, cart, leader, userId }, state: { orderNumber, accountNumber, deliveryMessage, voucherCode } } = this;
+    console.log('submitting ypo!')
     e.preventDefault();
     submitYpoData({ cart, orderNumber, accountNumber, deliveryMessage, voucherCode, lock: leader.id === userId })
       .then(() => window.location = `/api/cart/${cart.id}/checkout`); // ¯\_(ツ)_/¯
@@ -105,7 +106,7 @@ export default class YPOCheckout extends Component {
             </span>
           </label>
 
-          <ButtonsContainer checkoutOnly={true}/>
+          <ButtonsContainer checkoutOnly={true} checkoutFunc={this._handleSubmit}/>
         </form>
       </div>
     );
