@@ -30,10 +30,8 @@ export default class Payment extends Component {
     isLeader: PropTypes.bool
   }
 
-  componentDidMount() {
-    const { fetchPaymentStatus, invoice, userPaymentStatus } = this.props;
-    console.log({ line: 'Payment.js:35', userPaymentStatus });
-    if (!userPaymentStatus.amount) fetchPaymentStatus(invoice.id);
+  componentWillReceiveProps({ fetchPaymentStatus, invoice, userPaymentStatus }) {
+    if (invoice !== this.props.invoice && !userPaymentStatus.amount) fetchPaymentStatus(invoice.id);
   }
 
   _handleUpdateInvoice(paymentType) {

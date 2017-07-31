@@ -15,12 +15,6 @@ export default class Stripe extends Component {
     fetchPaymentStatus: PropTypes.func
   }
 
-  // componentWilMount() {
-  //   const { fetchPaymentStatus, invoice, userPaymentStatus } = this.props;
-  //   console.log({ line: 'stripe.js:20', userPaymentStatus });
-  //   if (!userPaymentStatus.amount) fetchPaymentStatus(invoice.id);
-  // }
-
   render() {
     const { user, invoice, userPaymentStatus, createPaymentSource } = this.props;
     const invoiceId = invoice.id;

@@ -22,7 +22,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(selectTab('invoice'));
   },
   selectAccordion: (accordion) => dispatch(selectAccordion(accordion)),
-  fetchPaymentStatus: (invoiceId) => dispatch(fetchPaymentStatus(invoiceId))
+  fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ItemPaidButton);

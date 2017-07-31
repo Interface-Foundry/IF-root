@@ -31,7 +31,6 @@ export default class Invoice extends Component {
     const { fetchPaymentStatus, invoice } = this.props;
 
     if (invoice.id && !invoice.pay) {
-      console.log({line: 'Invoice.js:34'})
       fetchPaymentStatus(invoice.id);
     }
   }

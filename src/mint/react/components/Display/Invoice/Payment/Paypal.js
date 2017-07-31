@@ -17,12 +17,6 @@ export default class Paypal extends Component {
     createPaymentWithoutSource: PropTypes.func
   }
 
-  // componentWillReceiveProps({ fetchPaymentStatus, invoice, userPaymentStatus }) {
-  //   const { amount } = userPaymentStatus;
-  //   console.log({ line: 'paypal.js:23', amount })
-  //   if (amount !== this.props.userPaymentStatus.amount && !amount) fetchPaymentStatus(invoice.id);
-  // }
-
   render() {
     const { invoice, userPaymentStatus, createPaymentWithoutSource } = this.props;
     const invoiceId = invoice.id;
