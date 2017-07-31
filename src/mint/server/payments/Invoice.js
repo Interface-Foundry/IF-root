@@ -8,6 +8,10 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
+let baseUrl
+if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
+else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
+else baseUrl = 'http://mint-dev.kipthis.com'
 
 class Invoice {
   constructor(invoiceType) {
@@ -111,11 +115,6 @@ class Invoice {
     */
 
     if (newStatus === 'complete') {
-      let baseUrl
-      if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
-      else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
-      else baseUrl = 'http://mint-dev.kipthis.com'
-
       invoice.refund_ability = false
 
       // send email
@@ -165,14 +164,6 @@ class Invoice {
     return updatedInvoice
   }
 
-
-  actionHandler(action, actionData) {
-    const handlers = {
-      email: this.emailUsers
-    }
-
-    return handlers[action](actionData)
-  }
 
   async updateInvoice () {
     let cart = await Cart.GetById(this.cart.id)
@@ -230,9 +221,6 @@ class Invoice {
    */
   async sendSuccessEmail (invoice) {
     var invoice = this
-    if (process.env.NODE_ENV.includes('production')) var baseUrl = 'kipthis.com'
-    else if (process.env.NODE_ENV.includes('development_')) var baseUrl = 'localhost:3000'
-    else var baseUrl = 'mint-dev.kipthis.com'
 
     logging.info('shipping address?????', invoice.address)
 
@@ -293,11 +281,6 @@ class Invoice {
   async sendCollectionEmail (reminder) {
     var invoice = this
     var debts = await this.userPaymentAmounts(invoice)
-
-    var baseUrl
-    if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
-    else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
-    else baseUrl = 'http://mint-dev.kipthis.com'
 
     var cart = await db.Carts.findOne({id: this.id}).populate('items').populate('members')
     var users = cart.members
@@ -395,11 +378,62 @@ class Invoice {
     const userPayments = await cart.members.map(async (user) => {
       const paymentObject = await PaymentSource.GetPaymentStatus(user.id, this.id)
       paymentObject.name = user.name
+      paymentObject.user_id = user.id
       logging.info('got this paymentObject', paymentObject)
       return paymentObject
     })
 
     return Promise.all(userPayments)
+  }
+
+
+  /**
+   * abstracted action handler to email users/do things
+   *
+   * @param      {string}   action  The action
+   * @param      {object}   data    The data
+   * @return     {Promise}  the promise of the action
+   */
+  async doAction(action, data) {
+    logging.info('attempting to do action, with data:', action, data)
+    const handlers = {
+      email: this.emailUser
+    }
+    const response = await handlers[action](data)
+    return response
+  }
+
+
+  async emailUser(data) {
+    if (data.user_id) {
+      logging.info('emailing specific user_id', data.user_id)
+      const user = await db.UserAccounts.findOne({id: data.user_id})
+      const email = await db.Emails.create({
+        recipients: user.email_address,
+        subject: 'Admin wants you to pay!',
+        template_name: 'collection'
+      })
+
+      const text = `Thanks for using Kip! The admin of cart clicked a button to send this email, you still owe $${data.amount / 100} at your earliest possible convenience.`
+
+      await email.template('collection', {
+        username: user.name,
+        baseUrl: baseUrl,
+        items: [],
+        users: [data],
+        date: moment().format('dddd, MMMM Do, h:mm a'),
+        total: '$' + (data.amount / 100).toFixed(2),
+        totalItems: 1,
+        cart: this.cart,
+        invoice_id: this.id,
+        text: text,
+        user_amount: data.amount / 100
+      })
+
+      await email.send();
+      logging.info('just sent collection email')
+
+    }
   }
 }
 

@@ -103,10 +103,11 @@ module.exports = function (router) {
      */
     .post(async (req, res) => {
       const invoice = await Invoice.GetById(req.params.invoice_id)
+      let response
       if (_.get(req, 'body.action')) {
-        await invoice.doAction(req.body.action)
+        response = await invoice.doAction(req.body.action, req.body.data)
       }
-      return res.send(invoice)
+      return res.send(response)
     })
 
     /**

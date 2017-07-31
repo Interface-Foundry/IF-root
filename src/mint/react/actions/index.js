@@ -38,6 +38,7 @@ export {
   fetchInvoiceByCart,
   createInvoice,
   updateInvoice,
+  actionInvoice,
   // payments
   fetchPaymentStatus,
   fetchPayments,

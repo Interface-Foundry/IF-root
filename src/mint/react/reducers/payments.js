@@ -53,6 +53,11 @@ export default function payments(state = initialState, action) {
         address: action.address
       }
     };
+  case 'ACTION_INVOICE_SUCCESS':
+    return {
+      ...state,
+      action: action.response
+    };
   default:
     return state;
   }

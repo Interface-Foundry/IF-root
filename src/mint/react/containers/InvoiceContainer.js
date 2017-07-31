@@ -8,6 +8,7 @@ import {
   fetchInvoice,
   fetchInvoiceByCart,
   updateInvoice,
+  actionInvoice,
   createPayment,
   refundPayment,
   fetchPaymentStatus,
@@ -44,6 +45,7 @@ const mapDispatchToProps = dispatch => ({
   fetchPaymentSources: (user_id) => dispatch(fetchPaymentSources(user_id)),
   deletePaymentSource: (paymentsource_id) => dispatch(deletePaymentSource(paymentsource_id)),
   updateInvoice: (invoice_id, option, data) => dispatch(updateInvoice(invoice_id, option, data)),
+  actionInvoice: (invoice_id, action, data) => dispatch(actionInvoice(invoice_id, action, data)),
   fetchPaymentStatus: (invoice_id) => dispatch(fetchPaymentStatus(invoice_id)),
   setTab: () => dispatch(selectTab('invoice')),
   closeTab: () => dispatch(selectTab('cart'))

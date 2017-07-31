@@ -19,7 +19,8 @@ export default class Invoice extends Component {
     tab: PropTypes.string,
     setTab: PropTypes.func,
     closeTab: PropTypes.func,
-    fetchPaymentStatus: PropTypes.func
+    fetchPaymentStatus: PropTypes.func,
+    actionInvoice: PropTypes.func
   }
 
   componentDidMount() {
@@ -64,7 +65,7 @@ class InvoicePaymentStatus extends Component {
   }
 
   render() {
-    const { invoice } = this.props;
+    const { invoice, actionInvoice } = this.props;
     return (
       <div>
       {
@@ -72,7 +73,7 @@ class InvoicePaymentStatus extends Component {
                 <div key={i} className='text'>
                     <h4>user: {payment.name}</h4>
                     <p>how much: ${payment.amount / 100} </p>
-                    <p>status: { payment.paid ? 'user has paid' : 'remind user via clickable button that emails them' } </p>
+                    <p>status: { payment.paid ? 'user has paid' : <button className='email__user' onClick={()=> actionInvoice(invoice.id, 'email', payment)}>email user to pay</button>  } </p>
                 </div>
            )) : null
       }

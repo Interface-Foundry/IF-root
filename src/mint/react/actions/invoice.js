@@ -116,9 +116,10 @@ export const deletePaymentSource = (paymentsource_id) => del(
   })
 );
 
-export const sendPaymentCollectionEmails = invoice_id => post(
+export const updateInvoice = (invoice_id, option, data) => put(
   `/api/invoice/${invoice_id}`,
-  'SEND_COLLECTION_EMAIL', { action: 'email' },
+  'UPDATE_INVOICE_OPTIONS',
+  { 'option_change': option, 'option_data': data },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -126,10 +127,10 @@ export const sendPaymentCollectionEmails = invoice_id => post(
   })
 );
 
-export const updateInvoice = (invoice_id, option, data) => put(
+export const actionInvoice = (invoice_id, action, data) => post(
   `/api/invoice/${invoice_id}`,
-  'UPDATE_INVOICE_OPTIONS',
-  { 'option_change': option, 'option_data': data },
+  'ACTION_INVOICE',
+  { 'action': action, 'data': data },
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
