@@ -203,10 +203,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
           h1 {
             font-size: 18px;
-            height: 20px;
-            line-height: 20px;
             cursor: pointer;
-            /* white-space: nowrap; //not sure what this is supposed to do but it doesn't work with long titles */
             .locked {
               svg {
                 margin: 0 $padding 0 0;

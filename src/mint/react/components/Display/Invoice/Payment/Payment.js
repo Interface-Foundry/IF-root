@@ -30,6 +30,12 @@ export default class Payment extends Component {
     isLeader: PropTypes.bool
   }
 
+  componentDidMount() {
+    const { fetchPaymentStatus, invoice, userPaymentStatus } = this.props;
+    console.log({ line: 'Payment.js:35', userPaymentStatus });
+    if (!userPaymentStatus.amount) fetchPaymentStatus(invoice.id);
+  }
+
   _handleUpdateInvoice(paymentType) {
     const { updateInvoice, invoice } = this.props;
     updateInvoice(invoice.id, 'split_type', paymentType);
@@ -65,7 +71,7 @@ export default class Payment extends Component {
                         : null }
                       </ul>
                     </div>
-                  : <div>
+                  : <div className='payment-option'>
                       <nav><h4>Payment Type</h4></nav>
                       <ul>
                         <li>

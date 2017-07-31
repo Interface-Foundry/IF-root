@@ -16,7 +16,7 @@ export default function payments(state = initialState, action) {
   case 'PAYMENTSOURCES_SUCCESS':
     return {
       ...state,
-      userPaymentSources: action.response
+      paymentSources: action.response
     };
   case 'INVOICE_SUCCESS':
   case 'CREATE_INVOICE_SUCCESS':
@@ -43,7 +43,7 @@ export default function payments(state = initialState, action) {
   case 'REFUND_PAYMENT_SUCCESS':
     return {
       ...state,
-      userPaymentStatus: action.response
+      paymentStatus: action.response
     };
   case 'SELECT_ADDRESS_SUCCESS':
     return {

@@ -14,6 +14,7 @@ export default class RefundPayment extends Component {
 
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;
+    console.log({line: 'Refund.js:17'})
     fetchPaymentStatus(invoice.id);
   }
 

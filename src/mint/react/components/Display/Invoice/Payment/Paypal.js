@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import PaypalExpressBtn from 'react-paypal-express-checkout';
 
-
 //
 // @class      Paypal (name) - paypal react component
 //
@@ -18,10 +17,11 @@ export default class Paypal extends Component {
     createPaymentWithoutSource: PropTypes.func
   }
 
-  componentWillMount() {
-    const { fetchPaymentStatus, invoice } = this.props;
-    fetchPaymentStatus(invoice.id);
-  }
+  // componentWillReceiveProps({ fetchPaymentStatus, invoice, userPaymentStatus }) {
+  //   const { amount } = userPaymentStatus;
+  //   console.log({ line: 'paypal.js:23', amount })
+  //   if (amount !== this.props.userPaymentStatus.amount && !amount) fetchPaymentStatus(invoice.id);
+  // }
 
   render() {
     const { invoice, userPaymentStatus, createPaymentWithoutSource } = this.props;

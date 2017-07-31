@@ -23,21 +23,20 @@ export default class Invoice extends Component {
   }
 
   componentDidMount() {
-    const {  tab, setTab } = this.props;
+    const { tab, setTab } = this.props;
     if (tab !== 'invoice') setTab();
-    // if (!invoice.cart) fetchInvoiceByCart(cart.id);
   }
 
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;
 
-    if (invoice.id) {
+    if (invoice.id && !invoice.pay) {
+      console.log({line: 'Invoice.js:34'})
       fetchPaymentStatus(invoice.id);
     }
   }
 
   componentWillReceiveProps = ({ cart, fetchInvoiceByCart, invoice, closeTab }) => {
-    if (cart.id !== this.props.cart.id) fetchInvoiceByCart(cart.id);
     if (!invoice.display) closeTab();
   }
 
@@ -67,7 +66,7 @@ class InvoicePaymentStatus extends Component {
 
   render() {
     const { invoice } = this.props;
-    return(
+    return (
       <div>
       {
         invoice.usersPayments ? invoice.usersPayments.map((payment, i) => (
