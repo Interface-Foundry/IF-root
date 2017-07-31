@@ -72,7 +72,7 @@ class InvoicePaymentStatus extends Component {
                 <div key={i} className='text'>
                     <h4>user: {payment.name}</h4>
                     <p>how much: ${payment.amount / 100} </p>
-                    <p>status: {payment.paid ? <p> user has paid </p> : <p> remind user via clickable button that emails them </p> } </p>
+                    <p>status: { payment.paid ? 'user has paid' : 'remind user via clickable button that emails them' } </p>
                 </div>
            )) : null
       }
