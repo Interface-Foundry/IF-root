@@ -70,11 +70,13 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         .pay-button {
 
           button {
-            border: 1px solid $orange-caution;
+            align-self: start;
             background: $orange-caution;
+            border-radius: 5px;
+            border: 1px solid $orange-caution;
             color: $color-white;
             font-size: 18px;
-            border-radius: 5px;
+
             padding: $padding / 3;
           }
 
@@ -92,6 +94,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             border-radius: 5px;
 
             button {
+              margin-top: 50px;
               padding: $padding;
               font-size: 22px;
             }

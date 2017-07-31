@@ -43,7 +43,7 @@ export default function payments(state = initialState, action) {
   case 'REFUND_PAYMENT_SUCCESS':
     return {
       ...state,
-      paymentStatus: action.response
+      userPaymentStatus: action.response
     };
   case 'SELECT_ADDRESS_SUCCESS':
     return {
