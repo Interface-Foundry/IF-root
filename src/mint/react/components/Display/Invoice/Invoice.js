@@ -19,8 +19,7 @@ export default class Invoice extends Component {
     tab: PropTypes.string,
     setTab: PropTypes.func,
     closeTab: PropTypes.func,
-    fetchPaymentStatus: PropTypes.func,
-    actionInvoice: PropTypes.func
+    fetchPaymentStatus: PropTypes.func
   }
 
   componentDidMount() {
@@ -61,7 +60,8 @@ class InvoicePaymentStatus extends Component {
   static propTypes = {
     cart: PropTypes.object,
     user: PropTypes.object,
-    invoice: PropTypes.object
+    invoice: PropTypes.object,
+    actionInvoice: PropTypes.func
   }
 
   render() {
