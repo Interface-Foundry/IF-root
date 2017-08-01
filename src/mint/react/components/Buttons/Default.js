@@ -37,11 +37,6 @@ export default class Default extends Component {
     }
   }
 
-  _handleUnlockCart = () => {
-    const { updateCart, cart } = this.props;
-    updateCart({ ...cart, locked: false });
-  }
-
   _orderCart = (e) => {
     if (this.props.checkoutFunc) return;
     const { cart, cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
