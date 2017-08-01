@@ -43,7 +43,7 @@ export default class Default extends Component {
   }
 
   _orderCart = (e) => {
-    if (this.props.checkoutFunc) return this.props.checkoutFunc(e);
+    if (this.props.checkoutFunc) return;
     const { cart, cart: { locked, store, id, leader }, user, reorderCart, toggleYpoCheckout, updateCart, toggleCheckoutModal } = this.props;
     if (leader.id === user.id) updateCart({ ...cart, locked: true });
 
@@ -57,7 +57,7 @@ export default class Default extends Component {
 
   render() {
     const {
-      props: { cart, user, updateCart, checkoutOnly = false }
+      props: { cart, user, updateCart, checkoutFunc, checkoutOnly = false }
     } = this,
     total = calculateItemTotal(cart.items);
     return (
@@ -99,7 +99,7 @@ export default class Default extends Component {
                     </span>
                   </button>
                 }
-              {!checkoutOnly ? <button className='blue' onClick={this._handleShare}> <Icon icon='Person'/> Share Cart </button> :null}
+              {!checkoutOnly ? <button className='blue' onClick={this._handleShare} onSubmit={e=>checkoutFunc(e)}> <Icon icon='Person'/> Share Cart </button> :null}
             </span>
           }
 
