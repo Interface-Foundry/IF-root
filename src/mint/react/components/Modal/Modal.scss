@@ -21,6 +21,10 @@
     border-radius: $padding / 2;
     box-shadow: $card-box-shadow;
     width: 350px;
+    display: flex;
+    flex-direction: column;
+    max-height: 600px;
+    overflow: hidden;
 
     .modal-box__head {
       border-radius: ($padding / 2) ($padding / 2) 0 0;
@@ -34,6 +38,7 @@
     }
 
     .modal-box__content {
+      overflow: scroll;
       .form-container {
         .close {
           float: left;

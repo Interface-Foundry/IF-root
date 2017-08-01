@@ -48,7 +48,7 @@ export default class Modal extends Component {
               <div className='modal-box__content'>
                 { this.props.showYpoCheckout ? <YpoCheckoutContainer /> : null }
                 { this.props.showAddressForm ? <AddressFormContainer /> : null }
-                {this.props.showCheckoutModal ? <CheckoutModalContainer /> : null}
+                { this.props.showCheckoutModal ? <CheckoutModalContainer /> : null }
               </div>
           </div>
         </div>
