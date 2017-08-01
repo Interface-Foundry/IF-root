@@ -28,7 +28,7 @@ export default class Shipping extends Component {
   }
 
   state = {
-    selectedIndex: null
+    selectedIndex: 1
   }
 
   render() {
@@ -74,7 +74,7 @@ export default class Shipping extends Component {
                 shippingOptions.map((option, i) => {
                   const classes = [
                     option.disabled ? 'disabled' : 'clickable',
-                    selectedIndex === i ? 'selected': null
+                    selectedIndex === i ? 'selected' : null
                   ].filter(Boolean).join(' ')
 
                   return (

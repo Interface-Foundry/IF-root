@@ -18,21 +18,25 @@ export default class History extends Component {
   render() {
     const { props: { query, categories, selectedQuery, submitQuery, updateQuery, cart: { store = '', store_locale = '' } } } = this,
     history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
-      suggestedCategories =  categories.slice(0, 5);
+      suggestedCategories = categories.slice(0, 5);
     return (
       <span className='history'>
         <ul className='previous'>
           {
             history.map((previousSearch, i) => {
               return (
-                <li key={i} className={`history__term ${i === selectedQuery ? 'selected' : ''}`}>
+                <li
+                  key={i}
+                  className={`history__term ${i === selectedQuery ? 'selected' : ''}`}
+                  onMouseDown={(e) => {
+                    updateQuery(previousSearch);
+                    submitQuery(previousSearch, store, store_locale);
+                  }}
+                >
                   <div className='history__term-icon'>
                     <Icon icon='Search'/>
                   </div>
-                  <div className='history__term-query' onMouseDown={(e) => {
-                    updateQuery(previousSearch);
-                    submitQuery(previousSearch, store, store_locale);
-                  }}>
+                  <div className='history__term-query' >
                     <p>{previousSearch}</p>
                   </div>
                 </li>
@@ -45,14 +49,18 @@ export default class History extends Component {
           {
             suggestedCategories.map((category, i) => {
               return (
-                <li key={i} className={`history__term ${i === ( selectedQuery - history.length ) ? 'selected' : ''}`}>
+                <li
+                  key={i}
+                  className={`history__term ${i === ( selectedQuery - history.length ) ? 'selected' : ''}`}
+                  onMouseDown={(e) => {
+                    updateQuery(category.humanName);
+                    submitQuery(category.machineName, store, store_locale);
+                  }}
+                >
                   <div className='history__term-icon'>
                     <Icon icon='Eye'/>
                   </div>
-                  <div className='history__term-query' onMouseDown={(e) => {
-                    updateQuery(category.humanName);
-                    submitQuery(category.machineName, store, store_locale);
-                  }}>
+                  <div className='history__term-query'>
                     <p>{category.humanName}</p>
                   </div>
                 </li>

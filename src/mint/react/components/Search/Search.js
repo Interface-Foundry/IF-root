@@ -51,7 +51,7 @@ export default class Search extends Component {
     }
   }
 
-  _handeKeyPress(e) {
+  _handeKeyPress = (e) => {
     const { query, categories } = this.props, { selectedQuery } = this.state,
       history = query.length > 0 ? getSearchHistory(query).slice(0, 5) : [],
       suggestedCategories = history.length > 0 ? categories.slice(0, 5) : [];
@@ -67,28 +67,28 @@ export default class Search extends Component {
         this.setState({ selectedQuery: selectedQuery - 1 });
         break;
       case 13:
-        ::this._processSearch(e);
+        this._processSearch(e);
         break;
       }
     }
   }
 
-  render() {
+  render = () => {
     const { showHistory, toggleHistory, cart: { store = '' }, query, updateQuery } = this.props, { selectedQuery } = this.state;
     return (
-      <form onSubmit={::this._processSearch} className='search'>
+      <form onSubmit={this._processSearch} className='search'>
         <button type='submit' className='submit'>
             <Icon icon='Search'/>
         </button>
-        <input 
-          onFocus={()=>toggleHistory(true)} 
-          onBlur={()=>toggleHistory(false)} 
-          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : 'Search or Paste URL'} 
-          value={query} 
-          onChange={(e) => updateQuery(e.currentTarget.value)} 
-          autoComplete="off" 
-          spellCheck='true' 
-          onKeyDown={::this._handeKeyPress}
+        <input
+          onFocus={()=>toggleHistory(true)}
+          onBlur={()=>toggleHistory(false)}
+          placeholder={store.length > 0 ? `Search ${store.split(' ').map((w = ' ') => w.replace(w[0], w[0].toUpperCase())).join(' ')} or Paste URL` : 'Search or Paste URL'}
+          value={query}
+          onChange={(e) => updateQuery(e.currentTarget.value)}
+          autoComplete="off"
+          spellCheck='true'
+          onKeyDown={this._handeKeyPress}
           ref={(searchInput) => this.searchInput = searchInput}
           />
         <button className='cancel' type='button' disabled={!query.length} onClick={(e) => {updateQuery(''); this.searchInput.focus();}}>

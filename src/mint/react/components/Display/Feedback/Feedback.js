@@ -7,9 +7,6 @@ import { Icon } from '../../../../react-common/components';
 export default class Feedback extends Component {
   constructor(props) {
     super(props);
-    this._handleSubmit = ::this._handleSubmit;
-    this._setRating = ::this._setRating;
-    this._setReview = ::this._setReview;
   }
 
   static propTypes = {
@@ -38,7 +35,7 @@ export default class Feedback extends Component {
     this.setState({ text: value });
   }
 
-  render() {
+  render = () => {
     const { rating } = this.state;
     const { _setRating, _setReview, _handleSubmit } = this;
 
@@ -46,11 +43,11 @@ export default class Feedback extends Component {
       <form onSubmit={_handleSubmit} className="display__form">
           <div>
             {
-              !rating ? <RatingField 
+              !rating ? <RatingField
                 type="custom"
                 label="How do you enjoy Kip?"
                 _setRating={_setRating}
-              /> : <TextField 
+              /> : <TextField
                 type="string"
                 label="Thank you for using kip!"
                 placeholder="Additional Comments"
@@ -72,19 +69,19 @@ class RatingField extends Component {
     _setRating: PropTypes.func
   }
 
-  render() {
+  render = () => {
     const { label, _setRating } = this.props;
     return (
       <div className='feedback'>
         <h1>{label}</h1>
         <ul>
-          <li className='col-4' onClick={() => { 
+          <li className='col-4' onClick={() => {
             _setRating('good');
           }}>
             <Icon icon='Happy'/>
             <h3>Good</h3>
           </li>
-          <li className='col-4' onClick={() => { 
+          <li className='col-4' onClick={() => {
               _setRating('okay');
           }}>
             <Icon icon='Neutral'/>
@@ -120,8 +117,8 @@ class TextField extends Component {
       <div className='feedback'>
         <h1>{label}</h1>
         <textarea value={review} placeholder={placeholder} type={type} onChange={(e) => _setReview(e.currentTarget.value)}/>
-        <button 
-          className='form__input__submit' 
+        <button
+          className='form__input__submit'
           type="submit"
           onClick={_handleSubmit}><Icon icon='Email'/>SEND</button>
       </div>

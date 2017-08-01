@@ -17,7 +17,7 @@ export default class Settings extends Component {
     editMail: false
   }
 
-  componentDidMount() {
+  componentDidMount = () => {
     const { user: { name, email_address } } = this.props;
     this.setState({
       name,
@@ -25,19 +25,19 @@ export default class Settings extends Component {
     });
   }
 
-  _editName() {
+  _editName = () => {
     this.setState({
       editName: true
     });
   }
 
-  _editMail() {
+  _editMail = () => {
     this.setState({
       editMail: true
     });
   }
 
-  _saveName() {
+  _saveName = () => {
     const { props: { updateUser, user: { id } }, state: { name } } = this;
     this.setState({
       editName: false
@@ -45,7 +45,7 @@ export default class Settings extends Component {
     updateUser(id, { name });
   }
 
-  _saveMail() {
+  _saveMail = () => {
     const { props: { updateUser, user: { id } }, state: { mail } } = this;
     this.setState({
       editMail: false
@@ -53,43 +53,43 @@ export default class Settings extends Component {
     updateUser(id, { email_address: mail });
   }
 
-  render() {
+  render = () => {
     const { props: { cart, user: { name, email_address } }, state: { editName, editMail } } = this;
     return (
       <div className='settings-page'>
         <ul>
-          { 
+          {
             editName
               ? <li>
-                  Name: 
-                  <input 
-                    autoFocus 
-                    type='text' 
-                    required 
-                    placeholder='Name' 
-                    defaultValue={name} 
+                  Name:
+                  <input
+                    autoFocus
+                    type='text'
+                    required
+                    placeholder='Name'
+                    defaultValue={name}
                     onChange={(e) => this.setState({name:e.target.value})}
                   />
-                  <button onClick={::this._saveName}> Save </button>
+                  <button onClick={this._saveName}> Save </button>
                 </li>
-              : <li onClick={::this._editName}><p>{name}  &nbsp;<Icon icon='Edit'/></p></li>
+              : <li onClick={this._editName}><p>{name}  &nbsp;<Icon icon='Edit'/></p></li>
           }
-          { 
+          {
             editMail
               ? <li>
-                  Email: <input 
-                    autoFocus 
-                    type='text' 
-                    required 
-                    placeholder='Email' 
-                    defaultValue={email_address} 
+                  Email: <input
+                    autoFocus
+                    type='text'
+                    required
+                    placeholder='Email'
+                    defaultValue={email_address}
                     onChange={(e) => this.setState({mail:e.target.value})}
                   />
-                  <button onClick={::this._saveMail}> Save </button>
+                  <button onClick={this._saveMail}> Save </button>
                 </li>
-              : <li onClick={::this._editMail}><p>{email_address}  &nbsp;<Icon icon='Edit'/></p></li>
+              : <li onClick={this._editMail}><p>{email_address}  &nbsp;<Icon icon='Edit'/></p></li>
           }
-          
+
           <li><Link to={`/cart/${cart.id}/m/feedback`}><Icon icon='Email'/> &nbsp; Send Feedback</Link></li>
         </ul>
         <div className='reachKip'/>
