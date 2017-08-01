@@ -2,14 +2,12 @@
 @import '../../../../react-common/styles/Constants';
 @import '../../../../react-common/styles/Animations';
 
-$colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
-
 .cart {
-  position: relative;
-  width: 100%;
+  border-collapse: collapse;
   height: auto;
   margin: 0 auto;
-  border-collapse: collapse;
+  position: relative;
+  width: 100%;
 
   @media only screen and (max-width: 600px) {
     border-spacing: 0;
@@ -29,15 +27,15 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
     button {
       background: #e3e3e3;
-      border-radius: 5px;
       border: 0;
-      padding: 0 ($padding * 1.5);
-      height: 25px;
-      line-height: 25px;
+      border-radius: 5px;
       color: #333;
       font-size: 14px;
-      opacity: 0.6;
+      height: 25px;
+      line-height: 25px;
       margin-right: 10px;
+      opacity: 0.6;
+      padding: 0 ($padding * 1.5);
 
       &:last-of-type {
         border-right: 1px solid transparent;
@@ -57,12 +55,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     padding: ($padding / 3) ($padding / 2);
 
     .card {
-      position: relative;
-      padding: $padding ($padding * 3);
-      text-align: left;
       background: $color-white;
       border-radius: 5px;
       box-shadow: $card-box-shadow;
+      padding: $padding ($padding * 3);
+      position: relative;
+      text-align: left;
 
       .card-head {
         display: flex;
@@ -72,31 +70,30 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
           button {
             align-self: start;
             background: $orange-caution;
-            border-radius: 5px;
             border: 1px solid $orange-caution;
+            border-radius: 5px;
             color: $color-white;
             font-size: 18px;
-
-            padding: $padding / 3;
+            padding: $padding / 3 $padding;
           }
 
           &.unpaid {
-            background: rgba(0, 0, 05, .7);
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 1;
+            background: rgba(0, 0, 05, .7);
             border-radius: 5px;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 1;
 
             button {
+              font-size: 22px;
               margin-top: 50px;
               padding: $padding;
-              font-size: 22px;
             }
           }
 
@@ -115,24 +112,24 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
 
         .item-owner {
-          position: relative;
           display: inline-block;
-          overflow: hidden;
+          flex: 1 1 auto;
           font-size: 16px;
           font-weight: 500;
-          flex: 1 1 auto;
+          overflow: hidden;
+          position: relative;
 
           span {
-            opacity: 0.3;
             font-size: 12px;
+            opacity: 0.3;
           }
         }
         .toggle-items {
-          font-size: 12px;
-          cursor: pointer;
-          padding: 0 0 0 2 * $padding;
-          display: flex;
           align-items: center;
+          cursor: pointer;
+          display: flex;
+          font-size: 12px;
+          padding: 0 0 0 2 * $padding;
         }
 
         &>h4 {
@@ -147,14 +144,14 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
       ul {
         border-radius: 5px;
-        padding: $padding 0;
         margin: $padding auto 0;
+        padding: $padding 0;
       }
 
       li {
-        position: relative;
-        padding: $padding ($padding * 2);
         background: white;
+        padding: $padding ($padding * 2);
+        position: relative;
         &:first-of-type {
           @media only screen and (max-width: 600px) {
             padding: 0;
@@ -166,8 +163,8 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
 
         @media only screen and (max-width: 600px) {
-          padding: $padding*2 0 0;
           border-bottom: 2px solid #E4F1FD;
+          padding: $padding*2 0 0;
         }
 
         &.edit {
@@ -175,26 +172,26 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
         }
 
         .image {
-          width: $nav-height * 2;
-          height: $nav-height * 2;
           display: inline-block;
+          height: $nav-height * 2;
+          width: $nav-height * 2;
           @media only screen and (max-width: 600px) {
-            width: 50%;
             min-height: 150px;
+            width: 50%;
           }
         }
 
         .extra {
           .iframe {
-            position: relative;
             overflow: hidden;
-            width: 90%;
             padding: ($padding * 2) 0 0;
+            position: relative;
+            width: 90%;
 
             iframe {
-              width: 100%;
               border: 0;
               overflow: hidden;
+              width: 100%;
 
               @media only screen and (max-width: 600px) {
                 height: 230px;
@@ -204,16 +201,16 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
           .text__expanded {
             display: inline-block;
-            padding: $padding 0 0;
             font-size: 14px;
             font-weight: 400;
             line-height: 18px;
+            padding: $padding 0 0;
             z-index: 9;
 
             span {
               color: $blue-header;
-              padding: $padding 0;
               font-size: 12px;
+              padding: $padding 0;
               @media only screen and (max-width: 600px) {
                 display: none;
               }
@@ -233,20 +230,20 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             display: none;
             @media only screen and (max-width: 600px) {
               color: $blue-header;
-              padding: 0;
-              height: 10px;
-              line-height: 10px;
               display: block;
               font-size: 10px;
+              height: 10px;
+              line-height: 10px;
+              padding: 0;
             }
           }
 
           .update {
+            align-items: stretch;
             display: flex;
             height: $nav-height / 1.5;
-            line-height: $nav-height / 1.5;
             justify-content: flex-start;
-            align-items: stretch;
+            line-height: $nav-height / 1.5;
             margin: $padding/2 0 0 0;
 
             @media only screen and (max-width: 600px) {
@@ -259,53 +256,52 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             }
 
             button {
-              display: flex;
               align-items: center;
-              justify-items: center;
-              margin: 0;
+              background: white;
               border-radius: 5px;
               border: 0;
-              padding: 0 $padding;
-              background: white;
               border: 1px solid $border-color-light;
-              font-size: 20px;
+              display: flex;
+              font-size: 20px; // justify-items: center;
+              margin: 0;
+              padding: 0 $padding;
 
               &:disabled {
                 background: mix(grey, white, 20%);
-                opacity: 0.4;
                 cursor: not-allowed;
+                opacity: 0.4;
               }
             }
 
             p {
+              align-items: center;
+              display: flex;
+              font-size: 16px;
               margin: 0;
               padding: 0 $padding;
-              font-size: 16px;
-              display: flex;
-              align-items: center;
             }
           }
 
           h1 {
-            position: relative;
-            overflow: hidden;
             font-size: 14px;
-            line-height: 20px;
             height: 45px;
+            line-height: 20px;
+            overflow: hidden;
+            position: relative;
 
             @media only screen and (max-width: 600px) {
               height: 80px;
             }
 
             &:after {
-              content: '';
-              text-align: right;
-              position: absolute;
-              bottom: 5px;
-              right: 0;
-              width: 70%;
-              height: 20px;
               background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 80%);
+              bottom: 5px;
+              content: '';
+              height: 20px;
+              position: absolute;
+              right: 0;
+              text-align: right;
+              width: 70%;
             }
           }
 
@@ -318,9 +314,9 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
 
           h4 {
             font-size: 14px;
+            font-weight: 500;
             line-height: 20px;
             opacity: 0.8;
-            font-weight: 500;
           }
         }
       }
@@ -331,12 +327,12 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
     overflow-x: auto;
 
     td, th {
-      width: 100% !important;
-      padding: 0 3px;
       margin: 5px 0 10px;
+      padding: 0 3px;
+      width: 100% !important;
 
       &:last-of-type {
-        margin: 5px 0 5px;
+        margin: 5px 0;
       }
     }
   }

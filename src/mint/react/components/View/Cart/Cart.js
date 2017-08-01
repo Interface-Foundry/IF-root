@@ -46,7 +46,10 @@ export default class Cart extends Component {
             userCarts.map((userCart, i) => (
               <tr key={userCart.id}>
                 <td colSpan='100%'>
-                  <div className='card' onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}>
+                  <div
+                    className='card'
+                    onClick={() => openCarts.includes(userCart.id) ? _toggleCart(userCart.id) : null}
+                  >
                     <MemberHead
                       {...this.props}
                       user={userCart}
@@ -56,7 +59,13 @@ export default class Cart extends Component {
                       _toggleCart={_toggleCart} />
                     {
                       !openCarts.includes(userCart.id)
-                      ?  <FlipMove typeName="ul" duration={350} staggerDurationBy={30} easing="cubic-bezier(0.4, 0, 0.2, 1)"  enterAnimation="accordionVertical" leaveAnimation="accordionVertical">
+                      ?  <FlipMove
+                            typeName='ul'
+                            duration={350}
+                            staggerDurationBy={30}
+                            easing='cubic-bezier(0.4, 0, 0.2, 1)'
+                            enterAnimation='accordionVertical'
+                            leaveAnimation='accordionVertical'>
                           {
                             userCart.items.map(item =>
                               <MemberItem
