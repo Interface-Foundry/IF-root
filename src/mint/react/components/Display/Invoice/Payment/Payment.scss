@@ -19,6 +19,9 @@
         cursor: pointer;
       }
 
+      &.disabled {
+        color: rgba(0,0,0,0.4)
+      }
 
       &.selected {
         border: 1px solid $blue-header;
@@ -68,6 +71,13 @@
           &:last-of-type {
             text-align: right;
           }
+        }
+
+        .description {
+          font-size: 12px;
+          color: rgba(0,0,0,0.7);
+          font-style: italic;
+          width: 100%;
         }
       }
     }
