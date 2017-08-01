@@ -68,6 +68,7 @@
     "prop-types": "^15.5.8",
     "randomstring": "^1.1.5",
     "react": "^15.6.0",
+    "react-async-script-loader": "^0.3.0",
     "react-dom": "^15.6.0",
     "react-flip-move": "^2.9.14",
     "react-ga": "^2.2.0",
