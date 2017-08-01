@@ -1001,12 +1001,17 @@ module.exports = function (router) {
    * @apiGroup Carts
    * @apiParam {String} :cart_id the cart id
    */
-  router.get('/cart/:cart_id/checkout', (req, res) => co(function* () {
+  router.get('/cart/:cart_id/checkout', (req, res) => co(function * () {
     var cart = yield db.Carts.findOneById(req.params.cart_id)
       .populate('items')
       .populate('leader')
 
-    var checkoutResponse = yield cart.checkout()
+    try {
+      var checkoutResponse = yield cart.checkout()
+    } catch (e) {
+      logging.error(e)
+      return res.redirect(`/cart/${req.params.cart_id}?toast=Couldn\'t check out cart, ${e.message}&status=warn`)
+    }
 
     if (checkoutResponse.redirect) {
       res.redirect(checkoutResponse.redirect)

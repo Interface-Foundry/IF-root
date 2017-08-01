@@ -116,13 +116,7 @@ class YPOStore extends Store {
   }
 
   async checkout(cart) {
-    if (cart.locked) {
-      return {
-        ok: false,
-        redirect: `/cart/${cart.id}?toast=Order submitted successfully&status=success`,
-        message: 'Order already submitted'
-      }
-    }
+    console.log('cheking out ypo cart')
 
     assert(cart.account_number, 'Account number is required')
 
@@ -134,7 +128,7 @@ class YPOStore extends Store {
     const address = await db.Addresses.findOne({user_account: leader.id})
 
     const itemsXML = cart.items.map(item => {
-      assert(item.code)
+      assert(item.asin, 'item did not have a YPO code')
         return `<item>
             <store>YPO</store>
             <code>${item.asin}</code>
@@ -171,11 +165,10 @@ class YPOStore extends Store {
     // delivery_message = optional text field
     // voucher_code = optional field
 
+    // log the cart xml to the db.
     console.log(cartXML)
     cart.raw_order = cartXML;
     await cart.save();
-
-    // log the cart xml to the db.
 
     await new Promise((resolve, reject) => {
       soap.createClient(svcUrl11 + '?WSDL', {
