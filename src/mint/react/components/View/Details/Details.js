@@ -156,6 +156,7 @@ export default class Details extends Component {
 
         if (distance < 0) {
           clearInterval(self.timeout);
+          self.setState({time: "Cart Complete"})
         } else {
           self._countdownTimer();
         }
