@@ -19,7 +19,6 @@ export default class MyCart extends Component {
     const { myCart, achievements, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
           { open } = this.state;
 
-    console.log(cart.lockMembers)
     return (
       <tr>
         <th colSpan='100%'>
