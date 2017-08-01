@@ -8,10 +8,9 @@ var db
 const dbReady = require('../../db')
 dbReady.then((models) => { db = models; })
 
-let baseUrl
-if (process.env.NODE_ENV.includes('production')) baseUrl = 'http://kipthis.com'
-else if (process.env.NODE_ENV.includes('development_')) baseUrl = 'http://localhost:3000'
-else baseUrl = 'http://mint-dev.kipthis.com'
+// process.env.BASEURL is set in the ecosystem.json files for mint-dev and production
+// so if it's not set, use localhost
+let baseUrl = process.env.BASEURL || 'http://localhost:3000'
 
 class Invoice {
   constructor(invoiceType) {
