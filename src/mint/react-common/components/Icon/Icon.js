@@ -44,7 +44,8 @@ import {
   IoPaperAirplane,
   IoIosUploadOutline,
   IoAndroidOpen,
-  IoIosWorldOutline
+  IoIosWorldOutline,
+  IoAndroidStopwatch
 } from 'react-icons/lib/io';
 import {
   FaExternalLink,
@@ -166,6 +167,8 @@ export default class Icon extends Component {
       return <IoAndroidOpen/>;
     case 'World':
       return <IoIosWorldOutline/>;
+    case 'Timer':
+      return <IoAndroidStopwatch/>;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

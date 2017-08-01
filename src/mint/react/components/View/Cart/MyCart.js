@@ -19,6 +19,7 @@ export default class MyCart extends Component {
     const { myCart, achievements, color, isLeader, openCarts, index, cart, editId, user, updateItem } = this.props,
           { open } = this.state;
 
+    console.log(cart.lockMembers)
     return (
       <tr>
         <th colSpan='100%'>
@@ -53,11 +54,11 @@ export default class MyCart extends Component {
                         <h1>{item.name}</h1>
                         <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                         {
-                          user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
+                          user.id && (user.id !== item.added_by || !isLeader) && ( cart.lockMembers && user.id !== cart.leader.id ) ? null : <div className='update'>
                             <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                             <p>{ item.quantity }</p>
                             <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                          </div> : null
+                          </div>
                         }
                       </div>
                       {
@@ -73,7 +74,7 @@ export default class MyCart extends Component {
                           </div>
                         ) : null
                       }
-                      <CartButtons {...this.props} item={item}/>
+                      { cart.lockMembers && user.id !== cart.leader.id ? <br/> : <CartButtons {...this.props} item={item}/> }
                     </li>;
                   })
                 }

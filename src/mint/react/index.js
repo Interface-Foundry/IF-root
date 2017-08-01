@@ -13,7 +13,7 @@ import getClientId from './socket/client_id';
 import remoteActionMiddleware from './socket/remote_action_middleware';
 
 import Reducers from './reducers';
-import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery, toggleReward } from './actions';
+import { checkSession, fetchCart, fetchCarts, fetchInvoiceByCart, fetchStores, fetchMetrics, fetchCategories, submitQuery, updateQuery, toggleReward, lockMembers } from './actions';
 import { AppContainer } from './containers';
 
 if (module.hot && (!process.env.BUILD_MODE || !process.env.BUILD_MODE.includes('prebuilt')) && (!process.env.NODE_ENV || !process.env.NODE_ENV.includes('production'))) {
@@ -62,6 +62,14 @@ store.dispatch(checkSession()).then(() => {
     store.dispatch(fetchCart(cart_id[1]))
       .then((res) => {
         // store.dispatch(fetchCategories(cart_id[1]));
+        let createDate = new Date(res.response.createdAt);
+        const numberOfDaysToAdd = 3;
+        createDate.setDate(createDate.getDate() + numberOfDaysToAdd); 
+
+        if(new Date() > createDate) {
+          store.dispatch(lockMembers());
+        }
+
         if (search && search[1]) {
           store.dispatch(updateQuery(decodeURIComponent(search[1])));
           store.dispatch(submitQuery(decodeURIComponent(search[1]), res.response.store, res.response.store_locale));

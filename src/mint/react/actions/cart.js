@@ -1,5 +1,12 @@
 import { get, post, del, put } from './async';
 
+export const lockMembers = () => ({
+  type: 'LOCK_MEMBERS',
+  response: {
+    lockMembers: true
+  }
+})
+
 export const selectCartItem = item_id => ({
   type: 'SELECT_CART_ITEM',
   response: {

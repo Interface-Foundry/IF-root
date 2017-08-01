@@ -64,7 +64,8 @@ export {
   reorderCart,
   updatePrivacy,
   cloneCart,
-  selectCartItem
+  selectCartItem,
+  lockMembers
 }
 from './cart';
 

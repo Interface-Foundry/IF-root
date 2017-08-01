@@ -156,7 +156,6 @@ export default class App extends Component {
           <Route path={'/cart/:cart_id'} exact component={ViewContainer} />
           <Route path={'/m/*'} exact component={Display} />
           <Route path={'/404'} exact component={ErrorPage} />
-
         </div>
         { sidenav ? <SidenavContainer large={match.url.includes('/m/') || match.url.includes('/newcart')}/> : null }  
 

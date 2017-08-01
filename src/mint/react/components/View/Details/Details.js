@@ -9,6 +9,11 @@ import { ButtonsContainer } from '../../../containers';
 import CartDescription from './CartDescription';
 
 export default class Details extends Component {
+  constructor(props) {
+    super(props)
+
+    this._countdownTimer = ::this._countdownTimer;
+  }
 
   static propTypes = {
     cart: PropTypes.object,
@@ -22,10 +27,22 @@ export default class Details extends Component {
     showUndo: PropTypes.bool
   }
 
+  state = {
+    time: ''
+  }
+
+  componentWillMount() {
+    this._countdownTimer()
+  }
+
+  componentWillUnmount() {
+    this._countdownTimer(true)
+  }
+
   render() {
-    const {
-      cart: { name, locked, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
+    const { cart: { name, locked, leader, store, store_locale, members, items, thumbnail_url, updatedAt, createdAt, likes, clones, id },
               likeCart, unlikeCart, user, cloneCart, undoRemove, showUndo, cart, oldCart } = this.props,
+      { time } = this.state,
       metrics = [{
         name: 'Members',
         icon: 'Member',
@@ -67,6 +84,10 @@ export default class Details extends Component {
                         }
                       </h1>
                       <CartDescription {...this.props} />
+                      <div className='timer'>
+                        <Icon icon='Timer'/>
+                        <h4>{time}</h4>
+                      </div>
                     </div>
                   </div>
                   <div className='right'>
@@ -101,5 +122,44 @@ export default class Details extends Component {
         </tbody>
       </table>
     );
+  }
+
+  _countdownTimer(stop) {
+    const { cart: { createdAt } } = this.props;
+
+    if(stop) {
+      if(self)
+        clearTimeout(self.timeout)
+
+      clearTimeout(this.timeout)
+    } else {
+      let self = this
+      self.timeout = setTimeout(() => {
+        const numberOfDaysToAdd = 3;
+        let createDate = new Date(createdAt);
+        createDate.setDate(createDate.getDate() + numberOfDaysToAdd); 
+        const countDownDate = createDate.getTime();
+
+        // Get todays date and time
+        const now = new Date().getTime();
+
+        // Find the distance between now an the count down date
+        const distance = countDownDate - now;
+
+        // Time calculations for days, hours, minutes and seconds
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        self.setState({time: days + "d " + hours + "h " + minutes + "m " + seconds + "s "})
+
+        if (distance < 0) {
+          clearInterval(self.timeout);
+        } else {
+          self._countdownTimer();
+        }
+      }, 100);
+    }
   }
 }

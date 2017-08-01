@@ -52,11 +52,15 @@ export default class UserCart extends Component {
                       <h1>{item.name}</h1>
                       <h4> Price: <span className='price'>{displayCost(item.price, cart.store_locale)}</span> </h4>
                       {
-                        user.id && (user.id === item.added_by || isLeader) ? <div className='update'>
+                        isLeader ?<div className='update'>
                           <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
                           <p>{ item.quantity }</p>
                           <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
-                        </div> : null
+                        </div> : !user.id || ( user.id !== item.added_by ) || ( cart.lockMembers && user.id !== cart.leader.id ) ? null : <div className='update'>
+                          <button disabled={item.quantity <= 1} onClick={() => updateItem(item.id, { quantity: item.quantity - 1 })}> - </button>
+                          <p>{ item.quantity }</p>
+                          <button onClick={() => updateItem(item.id, { quantity: item.quantity + 1 })}> + </button>
+                        </div>
                       }
                     </div>
                     {
@@ -68,11 +72,11 @@ export default class UserCart extends Component {
                               {item.description}
                             </div>
                           </div>
-                          { userCart.id === user.id || cart.leader.id === user.id ? <CartOptions {...this.props} item={item} itemOptions={itemOptions}/> : null }
+                          { userCart.id === user.id || isLeader ? <CartOptions {...this.props} item={item} itemOptions={itemOptions}/> : null }
                         </div>
                       ) : null
                     }
-                    <CartButtons {...this.props} item={item}/>
+                    { cart.lockMembers && !isLeader ? <br/> : <CartButtons {...this.props} item={item}/> }
                   </li>
                 })
               }

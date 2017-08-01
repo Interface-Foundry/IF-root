@@ -45,6 +45,7 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
       }
 
       .left {
+        position: relative;
         flex: 1 1 auto;
         min-width: 270px;
 
@@ -73,9 +74,22 @@ $colorList: #fddcdc #eaf9ff #d9f8f0 #f4e99e;
             width: calc(100% - #{$nav-height * 2});
           }
 
+          .timer {
+            position: relative;
+            text-align: right;
+
+            * {
+              display: inline-block;
+            }
+
+            svg {
+              margin-right: $padding/2;
+            }
+          }
+
           .cart-description {
             display: block;
-            min-height: 50px;
+            min-height: 60px;
             padding: 5px 0;
             max-width: 400px;
 

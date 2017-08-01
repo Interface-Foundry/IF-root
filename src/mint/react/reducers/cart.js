@@ -25,6 +25,7 @@ const initialState = {
   likes: [],
   kip_pay_allowed: false,
   privacy: 'public',
+  lockMembers: false,
   locked: false,
   ok: true,
   editId: null
@@ -40,13 +41,15 @@ export default function cart(state = initialState, action) {
       checkouts: state.checkouts,
       clones: state.clones,
       views: state.views,
-      likes: state.likes
+      likes: state.likes,
+      lockMembers: state.lockMembers
     };
   case 'CART_FAIL':
     return {
       ...state,
       ok: false
     };
+  case 'LOCK_MEMBERS':
   case 'SELECT_CART_ITEM':
   case 'LIKE_CART_SUCCESS':
   case 'METRICS_SUCCESS':
