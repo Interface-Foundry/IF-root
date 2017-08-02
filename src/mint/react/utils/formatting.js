@@ -11,13 +11,13 @@ export const commaSeparateNumber = (val, loc = undefined, opts = { maximumFracti
   return val.toLocaleString(loc, opts);
 };
 
-export const displayCost = (val, currency) => {
+export const displayCost = (val = 0, currency) => {
   const opts = {
     maximumFractionDigits: 2,
     style: 'currency',
-    currency: currency === 'GB' ? 'GBP' :  'USD'
+    currency: currency === 'GB' ? 'GBP' : 'USD'
   };
-  return (val/100).toLocaleString({}, opts);
+  return (val / 100).toLocaleString({}, opts);
 };
 
 export const getNameFromEmail = email => {
@@ -57,17 +57,17 @@ export const addLinkToDesktop = (links, url) => {
   });
 };
 const formatLinkForDesktop = (socialPlatforms, url) => {
-  switch(socialPlatforms.icon) {
-    case 'Facebook':
-      return socialPlatforms.link.replace('display=',`display=page&href=${url}&redirect_uri=${url}`);
-    case 'Twitter':
-      return socialPlatforms.link.replace('url=',`url=${url}`);
-    case 'Gmail':
-      return socialPlatforms.link.replace('body=',`url=${url}`);
-    case 'Pinterest':
-      return socialPlatforms.link.replace('url=',`url=${url}&description=KipCart`);
-    default:
-      return socialPlatforms.link;
+  switch (socialPlatforms.icon) {
+  case 'Facebook':
+    return socialPlatforms.link.replace('display=', `display=page&href=${url}&redirect_uri=${url}`);
+  case 'Twitter':
+    return socialPlatforms.link.replace('url=', `url=${url}`);
+  case 'Gmail':
+    return socialPlatforms.link.replace('body=', `url=${url}`);
+  case 'Pinterest':
+    return socialPlatforms.link.replace('url=', `url=${url}&description=KipCart`);
+  default:
+    return socialPlatforms.link;
   }
 }
 
@@ -98,9 +98,9 @@ export const splitAndMergeSearchWithCart = (items, results, user) => results.red
 
 export const splitOptionsByType = (options = []) => {
   return options.reduce((acc, option) => {
-    if(!acc[option.type]) acc[option.type] = [{id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name}];
-    else acc[option.type].push({id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name});
-    if(option.selected) acc[option.type].selected = option.asin;
+    if (!acc[option.type]) acc[option.type] = [{ id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name }];
+    else acc[option.type].push({ id: option.id, asin: option.asin, main_image_url: option.main_image_url, name: option.name });
+    if (option.selected) acc[option.type].selected = option.asin;
     return acc;
   }, {});
 };
