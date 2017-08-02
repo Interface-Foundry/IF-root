@@ -20,41 +20,53 @@ const paymentTypes = [{
     )
   }
 }, {
-  type: 'split_equal',
-  text: 'Everyone Pays Equally',
-  enabled: function (invoice) {
-    return invoice.usersPayments && invoice.usersPayments.length > 0
-  },
-  details: function (invoice) {
-    var num = invoice.usersPayments ? invoice.usersPayments.length : 1;
-    if (num === 1) {
-      return (
-        <div>1 person pays {displayCost(invoice.total/num)}</div>
-      )
-    } else {
-      return (
-        <div>{num} people pay {displayCost(invoice.total/num)}</div>
-      )
+    type: 'split_equal',
+    text: 'Everyone Pays Equally',
+    enabled: function(invoice) {
+      return invoice.usersPayments && invoice.usersPayments.length > 0
+    },
+    details: function(invoice) {
+      var num = invoice.usersPayments ? invoice.usersPayments.length : 1;
+      if (num === 1) {
+        return (
+          <div>1 person pays {displayCost(invoice.total/num)}</div>
+        )
+      } else {
+        return (
+          <div>{num} people pay {displayCost(invoice.total/num)}</div>
+        )
+      }
+    }
+  }, {
+    type: 'split_by_item',
+    text: 'Everyone Pays for Their Own Items',
+    enabled: function(invoice) {
+      return invoice.usersPayments && invoice.usersPayments.length > 0
+    },
+    details: function(invoice, cart) {
+      if (!cart.members) return null
+
+      // aggregate each member's total
+      var memberHash = cart.members.reduce((hash, member) => {
+        hash[member.id] = {
+          name: member.name,
+          total: 0
+        }
+        return hash
+      }, {})
+
+      cart.items.map(i => {
+        memberHash[i.added_by].total += i.price
+      })
+
+      var payments = Object.keys(memberHash).map(id => {
+        var member = memberHash[id]
+        return `${member.name} pays ${displayCost(member.total)}`
+      }).join(', ')
+
     }
   }
-}, {
-  type: 'split_by_item',
-  text: 'Everyone Pays for Their Own Items',
-  enabled: function (invoice) {
-    return invoice.usersPayments && invoice.usersPayments.length > 0
-  },
-  details: function (invoice) {
-    if (!invoice.usersPayments) return null
-
-    var payments = invoice.usersPayments.map(p => {
-      return `${p.name} pays ${displayCost(p.amount)}`
-    }).join(', ')
-
-    return (
-      <div>{payments}</div>
-    )
-  }
-}];
+];
 
 export default class Payment extends Component {
   static propTypes = {
@@ -73,7 +85,7 @@ export default class Payment extends Component {
   }
 
   render = () => {
-    const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader } = this.props;
+    const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader, cart } = this.props;
     return (
       <div className={`payment accordion ${userPaymentStatus.paid ? '' : 'clickable'}`}  onClick={() => userPaymentStatus.paid ? null : selectAccordion('payment')}>
         <nav className={userPaymentStatus.paid ? '' : 'clickable'}>
@@ -144,7 +156,7 @@ class PaymentTypeSelection extends Component {
 
   render() {
 
-    const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader } = this.props;
+    const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader, cart } = this.props;
 
     // if already paid then don't show the selection boxes
     if (userPaymentStatus.paid) {
@@ -166,7 +178,7 @@ class PaymentTypeSelection extends Component {
           <div className='circle'/>
           <div className='text'>
             <h4>{paymentType.text}</h4>
-            <div className="description">{paymentType.details(invoice)}</div>
+            <div className="description">{paymentType.details(invoice, cart)}</div>
           </div>
         </li>
       )
