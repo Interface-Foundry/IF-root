@@ -41,17 +41,10 @@ export default class Modal extends Component {
     this.state.showModal
     ? (
       <div className='modal-overlay' onClick={this._closeModal}>
-            <div className='modal-box' onClick={(e) => e.stopPropagation()}>
-              <div className='modal-box__head'>
-                <a className='close' href='#' onClick={this._closeModal}><Icon icon='Clear'/></a>
-              </div>
-              <div className='modal-box__content'>
-                { this.props.showYpoCheckout ? <YpoCheckoutContainer /> : null }
-                { this.props.showAddressForm ? <AddressFormContainer /> : null }
-                { this.props.showCheckoutModal ? <CheckoutModalContainer /> : null }
-              </div>
-          </div>
-        </div>
+        { this.props.showYpoCheckout ? <YpoCheckoutContainer close={this._closeModal} /> : null }
+        { this.props.showAddressForm ? <AddressFormContainer close={this._closeModal} /> : null }
+        { this.props.showCheckoutModal ? <CheckoutModalContainer close={this._closeModal} /> : null }
+      </div>
     )
     : null
 }

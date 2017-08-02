@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 import { ButtonsContainer } from '../../../containers';
-import { Icon } from '../../../../react-common/components'
+import { Icon } from '../../../../react-common/components';
 
 export default class YPOCheckout extends Component {
   static propTypes = {
@@ -14,7 +14,8 @@ export default class YPOCheckout extends Component {
     submitYpoData: PropTypes.func,
     toggleYpoCheckout: PropTypes.func,
     leader: PropTypes.object,
-    userId: PropTypes.string
+    userId: PropTypes.string,
+    close: PropTypes.func
   }
 
   state = {
@@ -60,53 +61,62 @@ export default class YPOCheckout extends Component {
     } = this;
 
     return (
-      <div className='ypo-checkout form-container'>
-        <h1>Last Step!</h1>
-        <p>Before you check out, we need a couple details from your YPO Account 😊</p>
-        <form onSubmit={this._handleSubmit}>
-          <label>
-            <div>
-              YPO Account Number <i>Required</i>
-            </div>
-            <span>
-              <Icon icon='Member'/>
-              <input type='number' placeholder='YPO Account Number' required value={accountNumber} onChange={_updateAccountNumber} />
-              <span className='required'>﹡</span>
-            </span>
-          </label>
+      <div className='modal-box' >
+        <div className='modal-box__head'>
+          <a className='close' href='#' onClick={this.props.close}><Icon icon='Clear'/></a>
+          <p>Checkout</p>
+        </div>
 
-          <label>
-            <div>
-              Order Number <i>Optional</i>
-            </div>
-            <span>
-              <Icon icon='Hash'/>
-              <input type='number' placeholder='Order Number' value={orderNumber} onChange={_updateOrderNumber} />
-            </span>
-          </label>
+        <div className='modal-box__content ypo-checkout form-container' onClick={e => e.stopPropagation()}>
+          <h1>Last Step!</h1>
+          <p>Before you check out, we need a couple details from your YPO Account 😊</p>
+          <form onSubmit={this._handleSubmit} id='ypo-checkout'>
+            <label>
+              <div>
+                YPO Account Number <i>Required</i>
+              </div>
+              <span>
+                <Icon icon='Member'/>
+                <input type='number' placeholder='YPO Account Number' required value={accountNumber} onChange={_updateAccountNumber} />
+                <span className='required'>﹡</span>
+              </span>
+            </label>
 
-          <label>
-            <div>
-              Delivery Message <i>Optional</i>
-            </div>
-            <span className='textarea'>
-              <Icon icon='Chatbubble'/>
-              <textarea rows='3'  placeholder='Delivery Message' value={deliveryMessage} onChange={_updateDeliveryMessage} />
-            </span>
-          </label>
+            <label>
+              <div>
+                Order Number <i>Optional</i>
+              </div>
+              <span>
+                <Icon icon='Hash'/>
+                <input type='number' placeholder='Order Number' value={orderNumber} onChange={_updateOrderNumber} />
+              </span>
+            </label>
 
-          <label>
-            <div>
-              Voucher Code <i>Optional</i>
-            </div>
-            <span>
-              <Icon icon='QR'/>
-              <input type='number' placeholder='Voucher Code' value={voucherCode} onChange={_updateVoucherCode} />
-            </span>
-          </label>
+            <label>
+              <div>
+                Delivery Message <i>Optional</i>
+              </div>
+              <span className='textarea'>
+                <Icon icon='Chatbubble'/>
+                <textarea rows='3'  placeholder='Delivery Message' value={deliveryMessage} onChange={_updateDeliveryMessage} />
+              </span>
+            </label>
 
-          <ButtonsContainer checkoutOnly={true} checkoutFunc={this._handleSubmit}/>
-        </form>
+            <label>
+              <div>
+                Voucher Code <i>Optional</i>
+              </div>
+              <span>
+                <Icon icon='QR'/>
+                <input type='number' placeholder='Voucher Code' value={voucherCode} onChange={_updateVoucherCode} />
+              </span>
+            </label>
+          </form>
+        </div>
+
+        <div className='modal-box__footer ypo-buttons' onClick={e => e.stopPropagation()}>
+          <ButtonsContainer checkoutOnly={true} checkoutFunc={this._handleSubmit} formId='ypo-checkout'/>
+        </div>
       </div>
     );
   }

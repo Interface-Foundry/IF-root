@@ -6,7 +6,7 @@ import { deleteAddress, selectAddress, toggleAddressForm, fetchAddresses, clearS
 
 const mapStateToProps = (state, ownProps) => ({
   addresses: state.user.addresses,
-  selectedAddress: state.user.selectedAddress.id,
+  selectedAddress: state.user.selectedAddress ? state.user.selectedAddress.id : null,
   invoiceId: state.payments.invoice.id,
   invoiceAddress: state.payments.invoice.address ? state.payments.invoice.address.id : '',
   userId: state.user.id

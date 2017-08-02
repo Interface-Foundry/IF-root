@@ -17,10 +17,13 @@ export default class Default extends Component {
     toggleYpoCheckout: PropTypes.func,
     checkoutOnly: PropTypes.bool,
     toggleCheckoutModal: PropTypes.func,
-    checkoutFunc: PropTypes.func
+    checkoutFunc: PropTypes.func,
+    formId: PropTypes.string
   }
 
-  _handleShare = () => {
+  _handleShar
+
+  e = () => {
     const { push, cart } = this.props;
 
     // TRY THIS FIRST FOR ANY BROWSER
@@ -61,7 +64,7 @@ export default class Default extends Component {
 
           cart.locked
           ? <span>
-              <button className='yellow sub' onClick={this._orderCart} type='submit'>
+              <button className='yellow sub' onClick={this._orderCart} type='submit' form={this.props.formId}>
                 <span className='inner-button'>
                   <Icon icon='Cart'/>
                   <p className='checkout-button-text'>Checkout</p>
@@ -85,7 +88,7 @@ export default class Default extends Component {
                     Checkout <span>{displayCost(total, cart.price_locale)}</span>
                   </button>
                 :
-                  <button className='yellow sub' onClick={this._orderCart} type='submit'>
+                  <button className='yellow sub' onClick={this._orderCart} type='submit' form={this.props.formId}>
                     <span className='inner-button'>
                       <Icon icon='Cart'/>
                       <p className='checkout-button-text'>Checkout</p>

@@ -22,7 +22,8 @@ export default class AddressForm extends Component {
     userId: PropTypes.string,
     toggleAddressForm: PropTypes.func,
     addAddress: PropTypes.func,
-    updateAddress: PropTypes.func
+    updateAddress: PropTypes.func,
+    close: PropTypes.func
   }
 
   state = {
@@ -69,92 +70,100 @@ export default class AddressForm extends Component {
   }
 
   render = () =>
-    <div className='address-form form-container'>
-      <h1>{this.props.addressId ? 'Update' : 'Add'} an Address</h1>
-      <p>Enter your information Below</p>
-      <form onSubmit={this._handleSubmit}>
-        <label>
-          <div>
-            Name <i>Required</i>
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='text' placeholder='Your Name' required value={this.state.name} onChange={this._updateName} />
-            <span className='required'>﹡</span>
-          </span>
-        </label>
-        <label>
-          <div>
-            Address line 1 <i>Required</i>
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='text' placeholder='Street Address' required value={this.state.addressLine1} onChange={this._updateLine1} />
-            <span className='required'>﹡</span>
-          </span>
-        </label>
-        <label>
-          <div>
-            Address Line 2
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='text' placeholder='Apartment Number, PO Box, etc' value={this.state.addressLine2} onChange={this._updateLine2} />
-          </span>
-        </label>
-        <label>
-          <div>
-            City <i>Required</i>
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='text' placeholder='City' required value={this.state.city} onChange={this._updateCity} />
-            <span className='required'>﹡</span>
-          </span>
-        </label>
-        <label>
-          <div>
-            State/Province/Region
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='text' placeholder='State/Province/Region' value={this.state.region} onChange={this._updateRegion} />
-          </span>
-        </label>
-        <label>
-          <div>
-            ZIP Code
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='number' placeholder='ZIP Code' value={this.state.code} onChange={this._updateCode} />
-          </span>
-        </label>
-        <label>
-          <div>
-            Country <i>Required</i>
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='text' placeholder='Country' required value={this.state.country} onChange={this._updateCountry} />
-            <span className='required'>﹡</span>
-          </span>
-        </label>
-        <label>
-          <div>
-            Phone Number <i>Required</i>
-          </div>
-          <span>
-            <Icon icon='Member'/>
-            <input type='tel' placeholder='Phone Number' required value={this.state.phone} onChange={this._updatePhone} />
-            <span className='required'>﹡</span>
-          </span>
-        </label>
+    <div className='modal-box' >
+      <div className='modal-box__head'>
+        <a className='close' href='#' onClick={this.props.close}><Icon icon='Clear'/></a>
+        <p>{this.props.addressId ? 'Update' : 'Add'} an Address</p>
+      </div>
+
+      <div className='modal-box__content address-form form-container' onClick={e => e.stopPropagation()}>
+        <p>Enter your information Below</p>
+        <form onSubmit={this._handleSubmit} id='address-form'>
+          <label>
+            <div>
+              Name <i>Required</i>
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='text' placeholder='Your Name' required value={this.state.name} onChange={this._updateName} />
+              <span className='required'>﹡</span>
+            </span>
+          </label>
+          <label>
+            <div>
+              Address line 1 <i>Required</i>
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='text' placeholder='Street Address' required value={this.state.addressLine1} onChange={this._updateLine1} />
+              <span className='required'>﹡</span>
+            </span>
+          </label>
+          <label>
+            <div>
+              Address Line 2
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='text' placeholder='Apartment Number, PO Box, etc' value={this.state.addressLine2} onChange={this._updateLine2} />
+            </span>
+          </label>
+          <label>
+            <div>
+              City <i>Required</i>
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='text' placeholder='City' required value={this.state.city} onChange={this._updateCity} />
+              <span className='required'>﹡</span>
+            </span>
+          </label>
+          <label>
+            <div>
+              State/Province/Region
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='text' placeholder='State/Province/Region' value={this.state.region} onChange={this._updateRegion} />
+            </span>
+          </label>
+          <label>
+            <div>
+              ZIP Code
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='number' placeholder='ZIP Code' value={this.state.code} onChange={this._updateCode} />
+            </span>
+          </label>
+          <label>
+            <div>
+              Country <i>Required</i>
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='text' placeholder='Country' required value={this.state.country} onChange={this._updateCountry} />
+              <span className='required'>﹡</span>
+            </span>
+          </label>
+          <label>
+            <div>
+              Phone Number <i>Required</i>
+            </div>
+            <span>
+              <Icon icon='Member'/>
+              <input type='tel' placeholder='Phone Number' required value={this.state.phone} onChange={this._updatePhone} />
+              <span className='required'>﹡</span>
+            </span>
+          </label>
+        </form>
+      </div>
+      <div className='modal-box__footer address-buttons' onClick={e => e.stopPropagation()}>
         {
           this.props.addressId
-          ? <button className='update-button' type='submit'>Update Address</button>
-          : <button className='save-button' type='submit'>Save Address</button>
+          ? <button className='update-button' type='submit' form='address-form'>Update Address</button>
+          : <button className='save-button' type='submit' form='address-form'>Save Address</button>
         }
-      </form>
+      </div>
     </div>
 }

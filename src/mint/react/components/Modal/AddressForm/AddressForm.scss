@@ -2,15 +2,18 @@
 @import '../../../../react-common/styles/Constants';
 @import '../../../../react-common/styles/Animations';
 
-.address-form {
+.address-buttons {
+
+
   button {
+    width: 100%;
     border: 0;
     border-radius: 0 0 5px 5px;
     color: $color-white;
     font-size: 16px;
     font-weight: bold;
     height: 40px;
-    margin-top: 10px;
+
 
     &.save-button {
       background: $green-accent;

@@ -24,7 +24,6 @@ export default (state = initialState, action) => {
   case 'GET_ADDRESSES_SUCCESS':
     return {
       ...state,
-      selectedAddress: {},
       addresses: action.response
     };
   case 'SELECT_ADDRESS_SUCCESS':
@@ -46,6 +45,12 @@ export default (state = initialState, action) => {
     return {
       ...state,
       addresses: [action.newAddress, ...state.addresses]
+    };
+  case 'INVOICE_SUCCESS':
+  case 'INVOICE_BY_CART_SUCCESS':
+    return {
+      ...state,
+      selectedAddress: action.response.address
     };
   default:
     return state;
