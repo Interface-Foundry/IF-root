@@ -21,9 +21,7 @@ export default class Default extends Component {
     formId: PropTypes.string
   }
 
-  _handleShar
-
-  e = () => {
+  _handleShare = () => {
     const { push, cart } = this.props;
 
     // TRY THIS FIRST FOR ANY BROWSER
