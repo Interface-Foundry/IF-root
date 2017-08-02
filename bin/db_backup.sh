@@ -1,6 +1,11 @@
 #! /bin/sh
+# add w crontab -e every day at 1AM:
+# 0 1 * * * /bin/bash /home/kip/cronjobs/db_backup.sh
 
 _now=$(date +"%m_%d_%Y")
+
+touch ~/logs/$_now
+echo "starting to run" >> ~/logs/$_now
 
 _file_fb="fb_foundry_$_now"
 _file_zip_fb="$_file_fb.tar.gz"
@@ -27,6 +32,8 @@ mongo_mint="10.142.0.14"
 
 # mongodump -h 10.142.0.8 --db=foundry --out=$_file
 
+echo "copying all" >> ~/logs/$_now
+
 # copy prod fb mongodb
 mongodump --host=$mongo_fb --db=foundry --out=$_file_fb
 tar -zcf $_file_zip_fb $_file_fb
@@ -39,11 +46,14 @@ tar -zcf $_file_zip_slack $_file_slack
 mongodump --host=$mongo_mint --db=mint --out=$_file_mint
 tar -zcf $_file_zip_mint $_file_mint
 
+
+echo "moving files" >> ~/logs/$_now
 # moves old and puts latest in latest
 gsutil mv gs://kip-db-dump/latest/*.tar.gz gs://kip-db-dump/old/
 
 gsutil cp $_file_zip_fb gs://kip-db-dump/latest/
 gsutil cp $_file_zip_slack gs://kip-db-dump/latest/
 gsutil cp $_file_zip_mint gs://kip-db-dump/latest/
+echo "done" >> ~/logs/$_now
 
 cd ~ && rm -r ~/tmp_backups
