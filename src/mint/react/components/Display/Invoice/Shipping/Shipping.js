@@ -87,7 +87,7 @@ export default class Shipping extends Component {
           </div>
           : <div className='review-preview'>
               <p>{numberOfItems(cart.items)} Items shipping {shippingOptions[selectedIndex].name} on {shippingOptions[selectedIndex].shippingDate}</p>
-              <span>Change</span>
+              <span>Change Shipping Method</span>
             </div>
         }
       </div>

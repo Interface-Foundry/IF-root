@@ -75,8 +75,8 @@ export default class Payment extends Component {
   render = () => {
     const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader } = this.props;
     return (
-      <div className='payment accordion clickable'  onClick={() => selectAccordion('payment')}>
-        <nav className='clickable'>
+      <div className={`payment accordion ${userPaymentStatus.paid ? '' : 'clickable'}`}  onClick={() => userPaymentStatus.paid ? null : selectAccordion('payment')}>
+        <nav className={userPaymentStatus.paid ? '' : 'clickable'}>
           <h3>2. Payment method</h3>
         </nav>
         {
@@ -113,8 +113,16 @@ export default class Payment extends Component {
               </ul>
             </div>
             : <div className='payment-preview'>
-                <p>You Owe { displayCost(userPaymentStatus.amount) }</p>
-                <span>Change Payment Method</span>
+                <p>{
+                  userPaymentStatus.paid
+                  ? 'Thanks for Paying! 🎉'
+                  : `You Owe ${displayCost(userPaymentStatus.amount)}`
+                }</p>
+                <span>{
+                  userPaymentStatus.paid
+                  ? ''
+                  : 'Pay Now'
+                }</span>
               </div>
           }
 

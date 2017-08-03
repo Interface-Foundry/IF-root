@@ -35,7 +35,7 @@ export default class InvoiceAddress extends Component {
               { !full_name && isLeader ?  <span>Choose an Address</span>
                 : <p>{`${full_name ? full_name + ',' : ''} ${line_1 ? line_1 + ',' : ''} ${city ? city : ''}`}</p>
               }
-              {isLeader && full_name ? <span>Change</span> : null}
+              {isLeader && full_name ? <span>Change Address</span> : null}
 
               </div>
           }
