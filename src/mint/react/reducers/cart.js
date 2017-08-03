@@ -33,11 +33,6 @@ export default function cart(state = initialState, action) {
       ok: false
     };
   case 'LIKE_CART_SUCCESS':
-    console.log({ state, action });
-    return {
-      ...state,
-      ...action.response
-    }
   case 'METRICS_SUCCESS':
   case 'UPDATE_CART_SUCCESS':
   case 'SELECT_CART_ITEM':

@@ -56,10 +56,10 @@ export default class Default extends Component {
       props: { cart, user, updateCart, checkoutFunc, checkoutOnly = false }
     } = this,
     total = calculateItemTotal(cart.items);
+
     return (
       <div className='default'>
         {
-
           cart.locked
           ? <span>
               <button className='yellow sub' onClick={this._orderCart} type='submit' form={this.props.formId}>
@@ -95,10 +95,13 @@ export default class Default extends Component {
                     </span>
                   </button>
                 }
-              {!checkoutOnly ? <button className='blue' onClick={this._handleShare} onSubmit={e=>checkoutFunc(e)}> <Icon icon='Person'/> Share Cart </button> :null}
+              {
+                !checkoutOnly
+                ? <button className='blue' onClick={this._handleShare} onSubmit={e=>checkoutFunc(e)}> <Icon icon='Person'/> Share Cart </button>
+                : null
+              }
             </span>
           }
-
       </div>
     );
   }

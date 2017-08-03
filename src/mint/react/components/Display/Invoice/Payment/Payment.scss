@@ -5,6 +5,23 @@
   position: relative;
   width: 100%;
 
+  &.clickable {
+    .payment-preview {
+      cursor: pointer;
+    }
+  }
+
+  &-preview {
+    display: flex;
+    p {
+      flex: 1 1 auto;
+    }
+    span {
+      padding: 0 $padding;
+      color: $blue-header;
+    }
+  }
+
   ul {
     padding: $padding;
     .payment-methods {
@@ -20,7 +37,7 @@
       }
 
       &.disabled {
-        color: rgba(0,0,0,0.4)
+        color: rgba(0, 0, 0, 0.4)
       }
 
       &.selected {
@@ -75,7 +92,7 @@
 
         .description {
           font-size: 12px;
-          color: rgba(0,0,0,0.7);
+          color: rgba(0, 0, 0, 0.7);
           font-style: italic;
           width: 100%;
         }

@@ -50,7 +50,6 @@ export default class Details extends Component {
         value: likes.length
       }],
       isAdmin = user.id === leader.id;
-    console.log({ likes })
     return (
       <table className='details'>
         <tbody>

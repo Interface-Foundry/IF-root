@@ -35,15 +35,9 @@ export default class Shipping extends Component {
     const { selectedAccordion, selectAccordion, cart, isLeader } = this.props, { selectedIndex } = this.state;
 
     return (
-      <div className='review accordion'>
-        <nav className='clickable' onClick={() => selectAccordion('review')}>
+      <div className='review accordion clickable' onClick={() => selectAccordion('review')}>
+        <nav className='clickable'>
           <h3>3. Items and shipping</h3>
-          {
-              selectedIndex !== null && !selectedAccordion.includes('review') ? <div className='text'>
-                  <p>{numberOfItems(cart.items)} Items shipping {shippingOptions[selectedIndex].name} on {shippingOptions[selectedIndex].shippingDate}</p>
-                  <span>change</span>
-              </div> : null
-          }
         </nav>
         {
           selectedAccordion.includes('review') ? <div>
@@ -86,11 +80,15 @@ export default class Shipping extends Component {
                           <p>{displayCost(option.price, cart.store_locale)}</p>
                         </div>
                     </li>
-                  )
+                  );
                 })
               }
             </ul>
-          </div> : null
+          </div>
+          : <div className='review-preview'>
+              <p>{numberOfItems(cart.items)} Items shipping {shippingOptions[selectedIndex].name} on {shippingOptions[selectedIndex].shippingDate}</p>
+              <span>Change</span>
+            </div>
         }
       </div>
     );

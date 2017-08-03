@@ -9,52 +9,52 @@ import RefundPayment from './RefundPayment';
 import { displayCost } from '../../../../utils';
 
 const paymentTypes = [{
-    type: 'split_single',
-    text: 'Cart Creator Pays',
-    enabled: function(invoice) {
-      return true
-    },
-    details: function(invoice) {
+  type: 'split_single',
+  text: 'Cart Creator Pays',
+  enabled: function (invoice) {
+    return true
+  },
+  details: function (invoice) {
+    return (
+      <div>You pay {displayCost(invoice.total)}</div>
+    )
+  }
+}, {
+  type: 'split_equal',
+  text: 'Everyone Pays Equally',
+  enabled: function (invoice) {
+    return invoice.usersPayments && invoice.usersPayments.length > 0
+  },
+  details: function (invoice) {
+    var num = invoice.usersPayments ? invoice.usersPayments.length : 1;
+    if (num === 1) {
       return (
-        <div>You pay {displayCost(invoice.total)}</div>
+        <div>1 person pays {displayCost(invoice.total/num)}</div>
+      )
+    } else {
+      return (
+        <div>{num} people pay {displayCost(invoice.total/num)}</div>
       )
     }
-  }, {
-    type: 'split_equal',
-    text: 'Everyone Pays Equally',
-    enabled: function(invoice) {
-      return invoice.usersPayments && invoice.usersPayments.length > 0
-    },
-    details: function(invoice) {
-      var num = invoice.usersPayments ? invoice.usersPayments.length : 1;
-      if (num === 1) {
-        return (
-          <div>1 person pays {displayCost(invoice.total/num)}</div>
-        )
-      } else {
-        return (
-          <div>{num} people pay {displayCost(invoice.total/num)}</div>
-        )
-      }
-    }
-  }, {
-    type: 'split_by_item',
-    text: 'Everyone Pays for Their Own Items',
-    enabled: function(invoice) {
-      return invoice.usersPayments && invoice.usersPayments.length > 0
-    },
-    details: function(invoice) {
-      if (!invoice.usersPayments) return null
+  }
+}, {
+  type: 'split_by_item',
+  text: 'Everyone Pays for Their Own Items',
+  enabled: function (invoice) {
+    return invoice.usersPayments && invoice.usersPayments.length > 0
+  },
+  details: function (invoice) {
+    if (!invoice.usersPayments) return null
 
-      var payments = invoice.usersPayments.map(p => {
-        return `${p.name} pays ${displayCost(p.amount)}`
-      }).join(', ')
+    var payments = invoice.usersPayments.map(p => {
+      return `${p.name} pays ${displayCost(p.amount)}`
+    }).join(', ')
 
-      return (
-        <div>{payments}</div>
-      )
-    }
-  }];
+    return (
+      <div>{payments}</div>
+    )
+  }
+}];
 
 export default class Payment extends Component {
   static propTypes = {
@@ -72,12 +72,11 @@ export default class Payment extends Component {
     if (invoice !== this.props.invoice && !userPaymentStatus.amount) fetchPaymentStatus(invoice.id);
   }
 
-
   render = () => {
     const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader } = this.props;
     return (
-      <div className='payment accordion'>
-        <nav className='clickable' onClick={() => selectAccordion('payment')}>
+      <div className='payment accordion clickable'  onClick={() => selectAccordion('payment')}>
+        <nav className='clickable'>
           <h3>2. Payment method</h3>
         </nav>
         {
@@ -91,7 +90,7 @@ export default class Payment extends Component {
                     <li>
                       <div className='text'>
                         <h4>{paymentTypes.find(p=>p.type===invoice.split_type).text}</h4>
-                        <h4> Your payment will be: ${ userPaymentStatus.amount/100 }</h4>
+                        <h4> Your payment will be: { displayCost(userPaymentStatus.amount) }</h4>
                       </div>
                     </li>
                   </ul>
@@ -99,32 +98,30 @@ export default class Payment extends Component {
               }
               <nav>
                 <h4>Your credit and debit cards</h4>
-
-                </nav>
-
-                <ul>
-                  {
-                    userPaymentStatus.paid ? <RefundPayment {...this.props}/> :
-                      <div>
-                        <PaymentSources {...this.props}/>
-                        <span className='payment-methods'>
-                          <Stripe {...this.props} />
-                          <Paypal {...this.props} />
-                        </span>
-                      </div>
-                  }
-                </ul>
+              </nav>
+              <ul>
+                {
+                  userPaymentStatus.paid ? <RefundPayment {...this.props}/> :
+                    <div>
+                      <PaymentSources {...this.props}/>
+                      <span className='payment-methods'>
+                        <Stripe {...this.props} />
+                        <Paypal {...this.props} />
+                      </span>
+                    </div>
+                }
+              </ul>
             </div>
-            : null
+            : <div className='payment-preview'>
+                <p>You Owe { displayCost(userPaymentStatus.amount) }</p>
+                <span>Change Payment Method</span>
+              </div>
           }
 
       </div>
     );
   }
 }
-
-
-
 
 class PaymentTypeSelection extends Component {
 
@@ -137,7 +134,7 @@ class PaymentTypeSelection extends Component {
     if (invoice !== this.props.invoice && !userPaymentStatus.amount) fetchPaymentStatus(invoice.id);
   }
 
-  render () {
+  render() {
 
     const { userPaymentStatus, selectAccordion, selectedAccordion, invoice, isLeader } = this.props;
 
@@ -149,7 +146,7 @@ class PaymentTypeSelection extends Component {
     // otherwise show them
     var paymentRadios = paymentTypes.map(paymentType => {
       var classes = [
-        paymentType.enabled(invoice) ? 'clickable': null,
+        paymentType.enabled(invoice) ? 'clickable' : null,
         invoice.split_type === paymentType.type ? 'selected' : null
       ].filter(Boolean).join(' ')
 
@@ -174,6 +171,6 @@ class PaymentTypeSelection extends Component {
           {paymentRadios}
         </ul>
       </div>
-   )
+    )
   }
 }

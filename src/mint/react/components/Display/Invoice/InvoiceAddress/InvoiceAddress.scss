@@ -4,13 +4,14 @@
 .address {
   position: relative;
   width: 100%;
+
   &.clickable {
     .address-preview {
       cursor: pointer;
     }
   }
 
-  .address-preview {
+  &-preview {
     display: flex;
     p {
       flex: 1 1 auto;

@@ -5,6 +5,23 @@
   position: relative;
   width: 100%;
 
+  &.clickable {
+    .review-preview {
+      cursor: pointer;
+    }
+  }
+
+  &-preview {
+    display: flex;
+    p {
+      flex: 1 1 auto;
+    }
+    span {
+      padding: 0 $padding;
+      color: $blue-header;
+    }
+  }
+
   ul {
     padding: $padding;
     display: inline-block;
@@ -40,7 +57,7 @@
           cursor: pointer;
         }
         &.disabled {
-          color: rgba(0,0,0,0.4)
+          color: rgba(0, 0, 0, 0.4)
         }
 
         &.selected {
