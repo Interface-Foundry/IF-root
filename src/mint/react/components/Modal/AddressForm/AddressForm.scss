@@ -4,16 +4,14 @@
 
 .address-buttons {
 
-
   button {
-    width: 100%;
     border: 0;
     border-radius: 0 0 5px 5px;
     color: $color-white;
     font-size: 16px;
     font-weight: bold;
     height: 40px;
-
+    width: 100%;
 
     &.save-button {
       background: $green-accent;

@@ -44,13 +44,22 @@ module.exports = {
             'es2015',
             'stage-0'
           ],
-          plugins: [
-            'transform-react-remove-prop-types', ['transform-runtime', {
-              helpers: false,
-              polyfill: false,
-              regenerator: true,
-              moduleName: 'babel-runtime'
-            }]
+          'plugins': [
+            [
+              'transform-react-remove-prop-types',
+              {
+                mode: 'remove',
+                removeImport: true
+              }
+            ],
+            [
+              'transform-runtime', {
+                helpers: false,
+                polyfill: false,
+                regenerator: true,
+                moduleName: 'babel-runtime'
+              }
+            ]
           ]
         }
       }

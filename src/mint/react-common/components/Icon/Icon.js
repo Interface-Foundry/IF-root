@@ -39,7 +39,9 @@ import {
   IoPound,
   IoQrScanner,
   IoSocialTwitter,
-  IoSocialPinterest
+  IoSocialPinterest,
+  IoLocation,
+  IoEarth
 } from 'react-icons/lib/io';
 import {
   FaExternalLink
@@ -62,6 +64,8 @@ export default class Icon extends Component {
   }
   render() {
     switch (this.props.icon) {
+    case 'Address':
+      return <IoLocation/>;
     case 'Like':
       return <IoAndroidFavorite/>;
     case 'Loop':
@@ -152,6 +156,8 @@ export default class Icon extends Component {
       return <IoSocialTwitter/>;
     case 'Pinterest':
       return <IoSocialPinterest/>;
+    case 'Globe':
+      return <IoEarth />;
     default:
       return <div>¯\_(ツ)_/¯</div>;
     }

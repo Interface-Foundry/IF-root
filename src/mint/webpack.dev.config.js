@@ -35,7 +35,16 @@ module.exports = {
         loader: 'babel-loader',
         options: {
           cacheDirectory: true,
-          'presets': ['react', 'es2015', 'stage-0']
+          'presets': ['react', 'es2015', 'stage-0'],
+          'plugins': [
+            [
+              'transform-react-remove-prop-types',
+              {
+                mode: 'remove',
+                removeImport: true
+              }
+            ]
+          ]
         }
       }
     }, {

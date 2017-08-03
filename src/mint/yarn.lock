@@ -1301,11 +1301,11 @@ babel-plugin-transform-react-jsx@^6.24.1, babel-plugin-transform-react-jsx@^6.3.
     babel-plugin-syntax-jsx "^6.8.0"
     babel-runtime "^6.22.0"
 
-babel-plugin-transform-react-remove-prop-types@^0.4.6:
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.6.tgz#c3d20ff4e97fb08fa63e86a97b2daab6ad365a19"
+babel-plugin-transform-react-remove-prop-types@^0.4.7:
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.7.tgz#cea12f3cfda61ed3233625f53d4c9347510b0886"
   dependencies:
-    babel-traverse "^6.24.1"
+    babel-traverse "^6.25.0"
 
 babel-plugin-transform-regenerator@^6.24.1, babel-plugin-transform-regenerator@^6.9.0:
   version "6.24.1"
@@ -2578,8 +2578,8 @@ cross-domain-safe-weakmap@^1.0.1, cross-domain-safe-weakmap@^1.0.10, cross-domai
   resolved "https://registry.yarnpkg.com/cross-domain-safe-weakmap/-/cross-domain-safe-weakmap-1.0.10.tgz#f4ff3ce7a37eb3463b16d2df12b0831bac6c6a37"
 
 cross-domain-utils@^1.0.1, cross-domain-utils@^1.0.5:
-  version "1.0.18"
-  resolved "https://registry.yarnpkg.com/cross-domain-utils/-/cross-domain-utils-1.0.18.tgz#33a78874d87d047377f70511c9e5fc35dcf427c5"
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/cross-domain-utils/-/cross-domain-utils-1.0.19.tgz#d0dc9c2ac5f9b163dd50d4ad21760e643ce4fa79"
   dependencies:
     cross-domain-safe-weakmap "^1.0.10"
     zalgo-promise "^1.0.11"
@@ -7210,9 +7210,9 @@ pause-stream@0.0.11:
   dependencies:
     through "~2.3"
 
-paypal-checkout@^4.0.98:
-  version "4.0.98"
-  resolved "https://registry.yarnpkg.com/paypal-checkout/-/paypal-checkout-4.0.98.tgz#4caadefc35c058cfacd339d3fbe8cbd393f4b187"
+paypal-checkout@^4.0.103:
+  version "4.0.103"
+  resolved "https://registry.yarnpkg.com/paypal-checkout/-/paypal-checkout-4.0.103.tgz#c0ecacdb3a5c532d84e3d45fac5de7c9b5236f82"
   dependencies:
     Base64 "^1.0.0"
     beaver-logger "^3.0.6"
@@ -9315,8 +9315,8 @@ split@0.3:
     through "2"
 
 split@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/split/-/split-1.0.0.tgz#c4395ce683abcd254bc28fe1dabb6e5c27dcffae"
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/split/-/split-1.0.1.tgz#605bd9be303aa59fb35f9229fbea0ddec9ea07d9"
   dependencies:
     through "2"
 
@@ -10384,8 +10384,8 @@ wtf-8@1.0.0:
   resolved "https://registry.yarnpkg.com/wtf-8/-/wtf-8-1.0.0.tgz#392d8ba2d0f1c34d1ee2d630f15d0efb68e1048a"
 
 xcomponent@^3.0.0:
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/xcomponent/-/xcomponent-3.0.10.tgz#1de8097a82afd43652fa681f7b93ae11a3f69dd2"
+  version "3.0.13"
+  resolved "https://registry.yarnpkg.com/xcomponent/-/xcomponent-3.0.13.tgz#bcb1e0b7c09fe0f92b2b48a1eadaaf1463b4333a"
   dependencies:
     beaver-logger "^3"
     cross-domain-safe-weakmap "^1.0.8"

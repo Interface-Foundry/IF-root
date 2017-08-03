@@ -94,7 +94,7 @@ export default class AddressForm extends Component {
               Address line 1 <i>Required</i>
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Home'/>
               <input type='text' placeholder='Street Address' required value={this.state.addressLine1} onChange={this._updateLine1} />
               <span className='required'>﹡</span>
             </span>
@@ -104,7 +104,7 @@ export default class AddressForm extends Component {
               Address Line 2
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Home'/>
               <input type='text' placeholder='Apartment Number, PO Box, etc' value={this.state.addressLine2} onChange={this._updateLine2} />
             </span>
           </label>
@@ -113,7 +113,7 @@ export default class AddressForm extends Component {
               City <i>Required</i>
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Address'/>
               <input type='text' placeholder='City' required value={this.state.city} onChange={this._updateCity} />
               <span className='required'>﹡</span>
             </span>
@@ -123,7 +123,7 @@ export default class AddressForm extends Component {
               State/Province/Region
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Globe'/>
               <input type='text' placeholder='State/Province/Region' value={this.state.region} onChange={this._updateRegion} />
             </span>
           </label>
@@ -132,7 +132,7 @@ export default class AddressForm extends Component {
               ZIP Code
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Hash'/>
               <input type='number' placeholder='ZIP Code' value={this.state.code} onChange={this._updateCode} />
             </span>
           </label>
@@ -141,7 +141,7 @@ export default class AddressForm extends Component {
               Country <i>Required</i>
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Globe'/>
               <input type='text' placeholder='Country' required value={this.state.country} onChange={this._updateCountry} />
               <span className='required'>﹡</span>
             </span>
@@ -151,7 +151,7 @@ export default class AddressForm extends Component {
               Phone Number <i>Required</i>
             </div>
             <span>
-              <Icon icon='Member'/>
+              <Icon icon='Hash'/>
               <input type='tel' placeholder='Phone Number' required value={this.state.phone} onChange={this._updatePhone} />
               <span className='required'>﹡</span>
             </span>
