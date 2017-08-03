@@ -65,7 +65,9 @@ var scrape = async function (url, user_country, user_locale, store_country, doma
 		if (domain === 'taobao.com') {
 			//this is a taobao url; let's use nightmare
 			console.log('this is a taobao url; let\'s use nightmare')
-			var html_id = await nightmare(url)
+			var html = await nightmare(url)
+			console.log('got result from nightmare')
+			// console.log('html:', html)
 			//read in the new html file or smth
 		}
 		else {

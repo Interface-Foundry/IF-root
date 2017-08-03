@@ -888,7 +888,7 @@ module.exports = function (router) {
     cart.likes.add(user_id)
     yield cart.save()
     var modifiedCart = yield db.Carts.findOne({id: req.params.cart_id}).populate('likes')
-    res.send(modifiedCart.likes)
+    res.send(modifiedCart.likes.map(x => x.id))
   }))
 
   /**
