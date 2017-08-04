@@ -8,7 +8,10 @@ import LinkClass from './LinkClass';
 import CartListItem from './CartListItem';
 import { Icon } from '..';
 import { moveToFront } from '../../utils';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
+@DragDropContext(HTML5Backend)
 export default class Sidenav extends Component {
   static propTypes = {
     cart_id: PropTypes.string,
@@ -23,7 +26,31 @@ export default class Sidenav extends Component {
   }
 
   state = {
-    show: null
+    show: null,
+    leaderCarts: [],
+    memberCarts: []
+  }
+
+  componentWillMount = () =>
+    this._updateCarts(this.props)
+
+  componentWillReceiveProps = (nextProps) =>
+    this._updateCarts(nextProps)
+
+  _updateCarts = ({ carts, user_account, cart_id }) => {
+    const leaderOrder = localStorage && localStorage.leaderOrder
+      ? localStorage.leaderOrder.split(',')
+      : null;
+    const memberOrder = localStorage && localStorage.memberOrder
+      ? localStorage.memberOrder.split(',')
+      : null;
+
+    const sortedCarts = carts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
+      leaderCarts = sortedCarts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
+      memberCarts = sortedCarts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id));
+    leaderCarts.sort((a, b) => leaderOrder.includes(a.id) ? leaderOrder.indexOf(a.id) - leaderOrder.indexOf(b.id) : 1);
+    memberCarts.sort((a, b) => memberOrder.includes(a.id) ? memberOrder.indexOf(a.id) - memberOrder.indexOf(b.id) : 1);
+    this.setState({ leaderCarts: moveToFront(leaderCarts, cart_id), memberCarts: moveToFront(memberCarts, cart_id) });
   }
 
   _handleShare = () => {
@@ -42,23 +69,30 @@ export default class Sidenav extends Component {
     }
   }
 
+  rearrangeMyCarts = (dragIndex, hoverIndex) => {
+    const { state: { leaderCarts }, props: { cart_id } } = this;
+    leaderCarts.splice(hoverIndex, 0, leaderCarts.splice(dragIndex, 1)[0]);
+    const carts = moveToFront(leaderCarts, cart_id);
+    if (localStorage) localStorage.leaderOrder = carts.map(c => c.id);
+    this.setState({ leaderCarts: carts });
+  }
+
+  rearrangeOtherCarts = (dragIndex, hoverIndex) => {
+    const { state: { memberCarts }, props: { cart_id } } = this;
+    memberCarts.splice(hoverIndex, 0, memberCarts.splice(dragIndex, 1)[0]);
+    const carts = moveToFront(memberCarts, cart_id);
+    if (localStorage) localStorage.memberOrder = carts.map(c => c.id);
+    this.setState({ memberCarts: carts });
+  }
+
   render = () => {
     const {
-      props: { carts, archivedCarts, _toggleSidenav, user_account, cart_id, large },
-      state: { show }
+      props: { archivedCarts, _toggleSidenav, user_account, cart_id, large },
+      state: { show, memberCarts, leaderCarts }
     } = this,
     SideNavLink = (window.location.pathname.includes('/cart') || window.location.pathname.includes('/m/') || window.location.pathname.includes('/newcart') || window.location.pathname.includes('/404'))
       ? Link
-      : LinkClass,
-      sortedCarts = carts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
-      leaderCarts = moveToFront(
-        sortedCarts
-        .filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
-        cart_id),
-      memberCarts = moveToFront(
-        sortedCarts
-        .filter((c, i) => (c && c.leader && user_account) && (c.leader.id !== user_account.id)),
-        cart_id);
+      : LinkClass;
     return (
       <div className={`sidenav ${(!window.location.pathname.includes('/cart') && !window.location.pathname.includes('/newcart') && !window.location.pathname.includes('/404')) ? 'homesidenav' : 'cartsidenav'}`}>
         <div className='sidenav__overlay' onClick={() => _toggleSidenav()}>
@@ -80,10 +114,10 @@ export default class Sidenav extends Component {
                 leaderCarts.map((c, i) =>
                   (i > 3 && show !== 'me')
                   ? null
-                  : <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink} isLeader={true}/>)
+                  : <CartListItem rearrangeCart={this.rearrangeMyCarts} index={i} key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink} isLeader={true}/>)
               }
               {
-                leaderCarts.length >= 4
+                leaderCarts.length > 4
                  ? (<h4 className='show__more' key='show_more_leader'
                       onClick={() => show !== 'me' ? this.setState({show: 'me'}) : this.setState({show: null})}>
                       <Icon icon={show === 'me' ? 'Up' : 'Down'}/>
@@ -99,10 +133,10 @@ export default class Sidenav extends Component {
                 memberCarts.map((c, i) =>
                 (i > 3 && show !== 'other')
                  ? null
-                 : <CartListItem key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink} isLeader={false}/>)
+                 : <CartListItem rearrangeCart={this.rearrangeOtherCarts} index={i} key={c.id} cart={c} currentCartId={cart_id} SideNavLink={SideNavLink} isLeader={false}/>)
               }
               {
-                memberCarts.length >= 4 ? <h4 className='show__more' key='show_more_member' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
+                memberCarts.length > 4 ? <h4 className='show__more' key='show_more_member' onClick={() => show !== 'other' ? this.setState({show: 'other'}) : this.setState({show: null})}>
                 <Icon icon={show === 'other' ? 'Up' : 'Down'}/>
                   &nbsp; {show === 'other' ? 'Less' : 'More'}
                 </h4> : null
