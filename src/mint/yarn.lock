@@ -8254,9 +8254,9 @@ react-stripe-checkout@^2.6.3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/react-stripe-checkout/-/react-stripe-checkout-2.6.3.tgz#3173a870b04e5a3c321a06d24cd53c6030111c45"
 
-react-stripe-elements@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-0.0.6.tgz#cb4d2fb3f30eeca0c8f7c1e2a27962867387d001"
+react-stripe-elements@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/react-stripe-elements/-/react-stripe-elements-0.0.7.tgz#57b10f7efef9c41e6c36a5a9faf337b5215f79ca"
   dependencies:
     prop-types "^15.5.8"
 
