@@ -15,7 +15,7 @@ export const addSearchHistory = term => {
 	if(localStorage.searchHistory) {
 		if(!localStorage.searchHistory.includes(term)) {
 			localStorage.searchHistory = localStorage.searchHistory + `-${term}`;
-		} else if (localStorage.searchHistory.includes(`-${term}`)) { 
+		} else if (localStorage.searchHistory.includes(`-${term}`)) {
 			localStorage.searchHistory = localStorage.searchHistory.replace(`-${term}`, '');
 			localStorage.searchHistory = localStorage.searchHistory + `-${term}`;
 		}
