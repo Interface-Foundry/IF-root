@@ -45,6 +45,7 @@ module.exports = {
             'stage-0'
           ],
           'plugins': [
+            'transform-decorators-legacy',
             [
               'transform-react-remove-prop-types',
               {

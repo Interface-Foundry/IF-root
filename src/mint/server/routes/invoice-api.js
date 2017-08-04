@@ -106,6 +106,7 @@ module.exports = function (router) {
       let response
       if (_.get(req, 'body.action')) {
         response = await invoice.doAction(req.body.action, req.body.data)
+        response.usersPayments = await invoice.usersPayments()
       }
       return res.send(response)
     })
@@ -126,6 +127,7 @@ module.exports = function (router) {
       if (_.get(req, 'body.option_change')) {
         logging.info(`updating option for invoice ${req.params.invoice_id}: ${req.body.option_change} with ${req.body.option_data}`)
         invoice = await Invoice.optionUpdate(req.params.invoice_id, req.body.option_change, req.body.option_data)
+        invoice.usersPayments = await invoice.usersPayments()
       }
 
       const paymentObject = await PaymentSource.GetPaymentStatus(userId, invoice.id)

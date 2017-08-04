@@ -22,11 +22,6 @@ export default class Invoice extends Component {
     fetchPaymentStatus: PropTypes.func
   }
 
-  componentDidMount() {
-    const { tab, setTab } = this.props;
-    if (tab !== 'invoice') setTab();
-  }
-
   componentWillMount() {
     const { fetchPaymentStatus, invoice } = this.props;
 
@@ -35,8 +30,9 @@ export default class Invoice extends Component {
     }
   }
 
-  componentWillReceiveProps = ({ cart, fetchInvoiceByCart, invoice, closeTab }) => {
-    if (!invoice.display) closeTab();
+  componentWillReceiveProps = ({ cart, fetchInvoiceByCart, invoice, closeTab, tab, setTab }) => {
+    if (invoice && tab !== 'invoice') setTab();
+    else if (invoice.display === false) closeTab();
   }
 
   render() {
