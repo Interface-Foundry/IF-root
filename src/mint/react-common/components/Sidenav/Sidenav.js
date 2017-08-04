@@ -40,10 +40,10 @@ export default class Sidenav extends Component {
   _updateCarts = ({ carts, user_account, cart_id }) => {
     const leaderOrder = localStorage && localStorage.leaderOrder
       ? localStorage.leaderOrder.split(',')
-      : null;
+      : [];
     const memberOrder = localStorage && localStorage.memberOrder
       ? localStorage.memberOrder.split(',')
-      : null;
+      : [];
 
     const sortedCarts = carts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
       leaderCarts = sortedCarts.filter((c, i) => (c && c.leader && user_account) && (c.leader.id === user_account.id)),
