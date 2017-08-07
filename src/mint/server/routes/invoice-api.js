@@ -474,7 +474,7 @@ module.exports = function (router) {
     }
 
     // create the invoice document here, don't need an es6 class to create it i think
-    const invoice = await db.Invoices.create({
+    var invoice = await db.Invoices.create({
       leader: cart.leader,
       cart: req.params.cart_id,
       address: lastAddress,
@@ -485,6 +485,6 @@ module.exports = function (router) {
     })
 
     logging.info('sending invoice now!')
-    return res.send(invoice)
+    return res.redirect('/api/invoice/' + invoice.id)
   })
 }
