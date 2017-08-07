@@ -36,14 +36,14 @@ export default class Invoice extends Component {
   }
 
   render() {
-    const { selectedAccordion, user, cart } = this.props;
+    const { selectedAccordion, user, cart, invoice } = this.props;
     const isLeader = user.id === cart.leader.id || user.id === cart.leader;
     return (
       <div className='invoice'>
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
 
         <InvoiceInfo {...this.props} />
-        { isLeader ? <InvoicePaymentStatus {...this.props}/> : null }
+        { isLeader && invoice.split_type !== 'split_single' ? <InvoicePaymentStatus {...this.props}/> : null }
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
         <Shipping {...this.props} isLeader={isLeader}/>
         <Payment {...this.props} isLeader={isLeader}/>
