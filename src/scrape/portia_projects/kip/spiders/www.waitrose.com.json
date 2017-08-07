@@ -1,0 +1,17 @@
+{
+    "allowed_domains": [], 
+    "exclude_patterns": [], 
+    "follow_patterns": [], 
+    "id": "www.waitrose.com", 
+    "js_disable_patterns": [], 
+    "js_enable_patterns": [], 
+    "js_enabled": false, 
+    "links_to_follow": "all", 
+    "respect_nofollow": false, 
+    "start_urls": [
+        {
+            "url": "http://www.waitrose.com/shop/Browse/Groceries", 
+            "type": "url"
+        }
+    ]
+}

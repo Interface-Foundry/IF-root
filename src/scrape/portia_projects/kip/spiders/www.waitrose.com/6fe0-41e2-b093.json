@@ -1,0 +1,132 @@
+{
+    "extractors": {}, 
+    "id": "6fe0-41e2-b093", 
+    "name": "essential Waitrose mixed peppers - Waitrose", 
+    "page_id": "", 
+    "page_type": "item", 
+    "plugins": {
+        "annotations-plugin": {
+            "extracts": [
+                {
+                    "annotations": {
+                        "#portia-content": "#dummy"
+                    }, 
+                    "container_id": null, 
+                    "id": "912b-4363-80bc", 
+                    "item_container": true, 
+                    "repeated": false, 
+                    "required": [], 
+                    "schema_id": "fbfe-42b0-b540", 
+                    "selector": "#\\34 4117", 
+                    "siblings": 0, 
+                    "tagid": null, 
+                    "text-content": "#portia-content"
+                }, 
+                {
+                    "accept_selectors": [
+                        "em"
+                    ], 
+                    "container_id": "912b-4363-80bc", 
+                    "data": {
+                        "abd7-40a1-8835": {
+                            "attribute": "content", 
+                            "extractors": {}, 
+                            "field": "b132-466e-a8bb", 
+                            "required": false
+                        }
+                    }, 
+                    "id": "c6cb-4b32-ad6a", 
+                    "text-content": "content", 
+                    "post_text": null, 
+                    "pre_text": null, 
+                    "reject_selectors": [], 
+                    "required": [], 
+                    "repeated": false, 
+                    "selection_mode": "auto", 
+                    "selector": "#\\34 4117 > .hero > .l-content > h1 > em", 
+                    "tagid": null, 
+                    "xpath": "//*[@id=\"\\34 4117\"]/*[contains(concat(\" \", @class, \" \"), \" hero \")]/*[contains(concat(\" \", @class, \" \"), \" l-content \")]/h1/em"
+                }, 
+                {
+                    "accept_selectors": [
+                        ".main-image"
+                    ], 
+                    "container_id": "912b-4363-80bc", 
+                    "data": {
+                        "db17-49a6-9203": {
+                            "attribute": "src", 
+                            "extractors": {}, 
+                            "field": "b35f-4409-8d9a", 
+                            "required": false
+                        }
+                    }, 
+                    "id": "2533-458f-9f8e", 
+                    "text-content": "content", 
+                    "post_text": null, 
+                    "pre_text": null, 
+                    "reject_selectors": [], 
+                    "required": [], 
+                    "repeated": false, 
+                    "selection_mode": "auto", 
+                    "selector": "#\\34 4117 > .hero > .l-content > .product-image > .magnify > .main-image", 
+                    "tagid": null, 
+                    "xpath": "//*[@id=\"\\34 4117\"]/*[contains(concat(\" \", @class, \" \"), \" hero \")]/*[contains(concat(\" \", @class, \" \"), \" l-content \")]/*[contains(concat(\" \", @class, \" \"), \" product-image \")]/*[contains(concat(\" \", @class, \" \"), \" magnify \")]/*[contains(concat(\" \", @class, \" \"), \" main-image \")]"
+                }, 
+                {
+                    "accept_selectors": [
+                        ".product-info"
+                    ], 
+                    "container_id": "912b-4363-80bc", 
+                    "data": {
+                        "d044-4c9d-befb": {
+                            "attribute": "content", 
+                            "extractors": {}, 
+                            "field": "88c2-4de1-9fbf", 
+                            "required": false
+                        }
+                    }, 
+                    "id": "b960-47fb-ab64", 
+                    "text-content": "content", 
+                    "post_text": null, 
+                    "pre_text": null, 
+                    "reject_selectors": [], 
+                    "required": [], 
+                    "repeated": false, 
+                    "selection_mode": "auto", 
+                    "selector": "#\\34 4117 > .summary > .l-content", 
+                    "tagid": null, 
+                    "xpath": "//*[@id=\"\\34 4117\"]/*[contains(concat(\" \", @class, \" \"), \" summary \")]/*[contains(concat(\" \", @class, \" \"), \" l-content \")]"
+                }, 
+                {
+                    "accept_selectors": [
+                        "strong"
+                    ], 
+                    "container_id": "912b-4363-80bc", 
+                    "data": {
+                        "5bb3-4412-bbce": {
+                            "attribute": "content", 
+                            "extractors": {}, 
+                            "field": "4474-4788-8b60", 
+                            "required": false
+                        }
+                    }, 
+                    "id": "2eca-434e-8bfa", 
+                    "text-content": "content", 
+                    "post_text": null, 
+                    "pre_text": null, 
+                    "reject_selectors": [], 
+                    "required": [], 
+                    "repeated": false, 
+                    "selection_mode": "auto", 
+                    "selector": "#\\34 4117 > .hero > .l-content > .price > strong", 
+                    "tagid": null, 
+                    "xpath": "//*[@id=\"\\34 4117\"]/*[contains(concat(\" \", @class, \" \"), \" hero \")]/*[contains(concat(\" \", @class, \" \"), \" l-content \")]/*[contains(concat(\" \", @class, \" \"), \" price \")]/strong"
+                }
+            ]
+        }
+    }, 
+    "scrapes": "fbfe-42b0-b540", 
+    "spider": "www.waitrose.com", 
+    "url": "http://www.waitrose.com/shop/DisplayProductFlyout?productId=44116", 
+    "version": "0.13.1"
+}

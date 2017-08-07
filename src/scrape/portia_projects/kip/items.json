@@ -1,0 +1,35 @@
+{
+    "fbfe-42b0-b540": {
+        "fields": {
+            "b35f-4409-8d9a": {
+                "id": "b35f-4409-8d9a", 
+                "name": "main_image", 
+                "required": false, 
+                "type": "image", 
+                "vary": false
+            }, 
+            "b132-466e-a8bb": {
+                "id": "b132-466e-a8bb", 
+                "name": "name", 
+                "required": false, 
+                "type": "text", 
+                "vary": false
+            }, 
+            "4474-4788-8b60": {
+                "id": "4474-4788-8b60", 
+                "name": "price", 
+                "required": false, 
+                "type": "price", 
+                "vary": false
+            }, 
+            "88c2-4de1-9fbf": {
+                "id": "88c2-4de1-9fbf", 
+                "name": "product_description", 
+                "required": false, 
+                "type": "text", 
+                "vary": false
+            }
+        }, 
+        "name": "basic item"
+    }
+}
