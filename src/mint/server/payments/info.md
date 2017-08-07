@@ -2,36 +2,47 @@ keeping info here
 
 
 
-what an invoice, payment, etc is
+what an invoice, payment, paymentsource, etc is
 
-- invoice is the conglomerate charge for mint/cafe/any other type thing, it is the main resource we should act on i.e. /:invoice_type/, 
-invoice should have id to look it up similar to cart
-
-- payment is a payment to an invoice i.e. a recurring stripe charge would pay towards an invoice total
-    + only handling one payment per invoice atm since im already confused
+- invoice is the conglomerate object for mint cart that users can checkout through kip (i.e. not checking out themselves through the site used), it is the main resource for the invoice page.  invoice has a uuid to look it up similar to cart
+- payment is a payment to an invoice i.e. a recurring stripe charge would pay towards an invoice total.  a payment is from an individual user and relates to a specific invoice.  a payment typically will come from or be related to a paymentsource
+- paymentsource is the saved info relating to a payment that we can typically action on, i.e. create charges on.  related to a specific user and is only functionally useful for stripe cards since paypal system does not work this way.  
 
 
-## plan for cafe:
+## payment sources
 
-ideally user would select something like new card on slack, 
-would get url that goes to kipthis.com/pay/:invoice_id where enter stripe details and pay (and we save etc.)
+### stripe
+for stripe we are having user enter their card into the stripe react components.  the stripe react component uses the stripe.js file to integrate with the stripe system and hits our backend via invoice-api.js to save the source so we can later display this info back to the user if they want to reuse a card.  all the info we save is received from stripe but we create the charge amount
 
-
-### for saved card:
-1. from old handlers -> post to /cafe/stripe with body containing which card AND order info 
-2. create payment document in mint db 
-    - possibly also post back to old server and create document there
-3. create stripe charge from previous card  
-4. pay for delivery.com order 
-5. send back delivery.com response to slack url (new route in webserver.js most likely)
+### paypal
+paypal system works differently from stripe b/c the user is checking out from the paypal system (i.e. they are forwarded to the paypal site and login, then can checkout with amount that we specify).  the system should theoretically be able to refund either manually or from the sdk/paypal api but can't get either to actually work (the sandbox page seems to error out for most actions).  we do not have a payment source when a user charges via paypal express checkout button.
 
 
-### for new card: 
-1. from old handlers -> post to /cafe/stripe/new with order info 
-2. create invoice from post that user can enter card info on
-3. goto page to enter card/stripe details with total amount 
-4. 
+## frontend
 
+### process
+1. admin clicks checkout, checkout via kip
+2. goes to invoice page
+3. admin selects options and pays
+4. users pay
+5. once all users have paid then email kip admin to checkout items
+6. items shipped to kip and then forwarded
+
+### invoice page
+
+#### admin options
+- payment type selection
+    + each individual pays for their own items
+    + admin pays for all items
+    + split cart equally 
+- shipping and kip fee
+    + kip fee undecided still 
+    + shipping fee's probably will depend on sites along with destinations
+- address
+
+#### users invoice page
+- what items they have added, what they are paying for  
+- ability to pay for whatever 
 
 
 ---
