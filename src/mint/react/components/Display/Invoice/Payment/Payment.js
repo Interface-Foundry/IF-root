@@ -44,6 +44,7 @@ const paymentTypes = [{
       return invoice.usersPayments && invoice.usersPayments.length > 0
     },
     details: function(invoice, cart) {
+      console.log('such split', cart)
       if (!cart.members) return null
 
       // aggregate each member's total
@@ -63,6 +64,8 @@ const paymentTypes = [{
         var member = memberHash[id]
         return `${member.name} pays ${displayCost(member.total)}`
       }).join(', ')
+
+      return payments
 
     }
   }
