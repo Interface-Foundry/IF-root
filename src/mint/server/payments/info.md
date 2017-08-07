@@ -1,8 +1,6 @@
-keeping info here
+# _invoice related info_
 
-
-
-what an invoice, payment, paymentsource, etc is
+## what an invoice, payment, paymentsource, etc is
 
 - invoice is the conglomerate object for mint cart that users can checkout through kip (i.e. not checking out themselves through the site used), it is the main resource for the invoice page.  invoice has a uuid to look it up similar to cart
 - payment is a payment to an invoice i.e. a recurring stripe charge would pay towards an invoice total.  a payment is from an individual user and relates to a specific invoice.  a payment typically will come from or be related to a paymentsource
