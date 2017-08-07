@@ -37,7 +37,7 @@ export default class Shipping extends Component {
     return (
       <div className='review accordion clickable' onClick={() => selectAccordion('review')}>
         <nav className='clickable'>
-          <h3>3. Items and shipping</h3>
+          <h3>2. Items and shipping</h3>
         </nav>
         {
           selectedAccordion.includes('review') ? <div>

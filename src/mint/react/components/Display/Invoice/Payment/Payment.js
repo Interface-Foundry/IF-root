@@ -89,7 +89,7 @@ export default class Payment extends Component {
     return (
       <div className={`payment accordion ${userPaymentStatus.paid ? '' : 'clickable'}`}  onClick={() => userPaymentStatus.paid ? null : selectAccordion('payment')}>
         <nav className={userPaymentStatus.paid ? '' : 'clickable'}>
-          <h3>2. Payment method</h3>
+          <h3>3. Payment method</h3>
         </nav>
         {
           selectedAccordion.includes('payment')

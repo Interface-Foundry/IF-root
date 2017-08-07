@@ -45,8 +45,8 @@ export default class Invoice extends Component {
         <InvoiceInfo {...this.props} />
         { isLeader ? <InvoicePaymentStatus {...this.props}/> : null }
         <InvoiceAddress {...this.props} isLeader={isLeader}/>
-        <Payment {...this.props} isLeader={isLeader}/>
         <Shipping {...this.props} isLeader={isLeader}/>
+        <Payment {...this.props} isLeader={isLeader}/>
       </div>
     );
   }

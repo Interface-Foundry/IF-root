@@ -461,10 +461,23 @@ module.exports = function (router) {
       await cart.save()
     }
 
+    // check for the last used address
+    const lastInvoice = await db.Invoices.findOne({
+      where: {
+        leader: cart.leader
+      },
+      sort: 'createdAt DESC'
+    })
+
+    if (lastInvoice) {
+      var lastAddress = lastInvoice.address
+    }
+
     // create the invoice document here, don't need an es6 class to create it i think
     const invoice = await db.Invoices.create({
       leader: cart.leader,
       cart: req.params.cart_id,
+      address: lastAddress,
       paid: false,
       total: cart.subtotal,
       affiliate_checkout_url: cart.affiliate_checkout_url,
