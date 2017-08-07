@@ -17,6 +17,12 @@
     left: 100%;
   }
 
+  .action {
+    color: $blue-header;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
   .accordion {
     border-bottom: 1px solid $border-color-light;
     padding: $padding 0;
@@ -100,5 +106,6 @@
     &:last-of-type {
       border-bottom: 1px solid transparent;
     }
+
   }
 }

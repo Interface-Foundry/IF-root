@@ -127,13 +127,16 @@ export const updateInvoice = (invoice_id, option, data) => put(
   })
 );
 
-export const actionInvoice = (invoice_id, action, data) => post(
-  `/api/invoice/${invoice_id}`,
-  'ACTION_INVOICE',
-  { 'action': action, 'data': data },
-  (type, json) => ({
-    type: `${type}_SUCCESS`,
-    response: json,
-    receivedAt: Date.now()
-  })
-);
+export const actionInvoice = (invoice_id, action, data) => {
+  alert('sending email')
+  post(
+    `/api/invoice/${invoice_id}`,
+    'ACTION_INVOICE',
+    { 'action': action, 'data': data },
+    (type, json) => ({
+      type: `${type}_SUCCESS`,
+      response: json,
+      receivedAt: Date.now()
+    })
+  );
+}

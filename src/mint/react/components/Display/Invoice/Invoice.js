@@ -8,6 +8,7 @@ import InvoiceAddress from './InvoiceAddress';
 import InvoiceInfo from './InvoiceInfo';
 import Shipping from './Shipping';
 import Forms from './Forms';
+import { displayCost } from '../../../utils';
 
 export default class Invoice extends Component {
   static propTypes = {
@@ -38,15 +39,23 @@ export default class Invoice extends Component {
   render() {
     const { selectedAccordion, user, cart, invoice } = this.props;
     const isLeader = user.id === cart.leader.id || user.id === cart.leader;
+    const leaderHasPaid = (invoice.usersPayments || []).reduce((paid, payment) => {
+      return paid || payment.user_id === user.id && payment.paid;
+    }, false)
+
+    const showReminderButtons = isLeader && leaderHasPaid && invoice.split_type !== 'split_single';
+
     return (
       <div className='invoice'>
         { selectedAccordion.includes('form') ? <Forms {...this.props}/> : null}
 
         <InvoiceInfo {...this.props} />
-        { isLeader && invoice.split_type !== 'split_single' ? <InvoicePaymentStatus {...this.props}/> : null }
-        <InvoiceAddress {...this.props} isLeader={isLeader}/>
-        <Shipping {...this.props} isLeader={isLeader}/>
-        <Payment {...this.props} isLeader={isLeader}/>
+
+        { showReminderButtons ? <InvoicePaymentStatus {...this.props}/> : null }
+
+        <InvoiceAddress {...this.props} isLeader={isLeader} editable={leaderHasPaid} />
+        <Shipping {...this.props} isLeader={isLeader} editable={leaderHasPaid} />
+        <Payment {...this.props} isLeader={isLeader} editable={leaderHasPaid} />
       </div>
     );
   }
@@ -61,19 +70,35 @@ class InvoicePaymentStatus extends Component {
   }
 
   render() {
-    const { invoice, actionInvoice } = this.props;
-    return (
-      <div>
-      {
-        invoice.usersPayments ? invoice.usersPayments.map((payment, i) => (
-                <div key={i} className='text'>
-                    <h4>user: {payment.name}</h4>
-                    <p>how much: ${payment.amount / 100} </p>
-                    <p>status: { payment.paid ? 'user has paid' : <button className='email__user' onClick={()=> actionInvoice(invoice.id, 'email', payment)}>email user to pay</button>  } </p>
-                </div>
-           )) : null
+    const { invoice, actionInvoice, user } = this.props;
+
+    // list of user payments that need to be processed
+    const payments = invoice.usersPayments && invoice.usersPayments.map((payment, i) => {
+      const isThisUser = user.id === payment.user_id
+
+      const name = isThisUser ? 'You' : payment.name
+      if (payment.paid) {
+        var text = 'paid'
+      } else if (isThisUser) {
+        text = 'owe'
+      } else {
+        text = 'owes'
       }
-    </div>
+
+      const action = payment.paid || user.id === payment.user_id ? null : (
+        <a className='email__user action' onClick={()=> actionInvoice(invoice.id, 'email', payment)}>Send Reminder Email</a>
+      )
+      return (
+        <div key={i} className='text'>
+          <b>{name}</b> {text} <b>{displayCost(payment.amount)} {action}</b>
+        </div>
+      )
+    }).filter(Boolean)
+
+    return (
+      <div className="payment accordion">
+        {payments}
+      </div>
     );
   }
 }
