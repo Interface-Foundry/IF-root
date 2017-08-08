@@ -6,6 +6,7 @@ const PaymentSource = require('../payments/PaymentSources.js')
 const utils = require('../utilities/invoice_utils.js')
 const UUID_REGEX = require('../constants.js').UUID_REGEX
 const assert = require('assert')
+const request = require('request')
 
 var db
 const dbReady = require('../../db')
@@ -435,13 +436,13 @@ module.exports = function (router) {
   * @apiParam {string} :invoice_type - description of param
   * @apiParam {string} :cart_id - cart id to lookup since we may have multiple systems
   */
-  router.post('/invoice/:invoice_type/:cart_id', async (req, res) => {
+  router.get('/invoice/:invoice_type/:cart_id', async (req, res) => {
     const oldInvoice = await db.Invoices.findOne({
       cart: req.params.cart_id
     })
 
     if (oldInvoice) {
-      throw new Error('Cannot create a new invoice when you already have one')
+      res.redirect('/api/invoice/' + oldInvoice.id)
     }
 
     // get the cart

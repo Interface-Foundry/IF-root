@@ -1,9 +1,8 @@
 import { get, post, put, del } from './async';
 
-export const createInvoice = (cart_id, invoice_type, split_type) => post(
+export const createInvoice = (cart_id, invoice_type, split_type) => get(
   `/api/invoice/${invoice_type}/${cart_id}`,
   'CREATE_INVOICE',
-  {'split_type': split_type},
   (type, json) => ({
     type: `${type}_SUCCESS`,
     response: json,
@@ -128,8 +127,7 @@ export const updateInvoice = (invoice_id, option, data) => put(
 );
 
 export const actionInvoice = (invoice_id, action, data) => {
-  alert('sending email')
-  post(
+  return post(
     `/api/invoice/${invoice_id}`,
     'ACTION_INVOICE',
     { 'action': action, 'data': data },

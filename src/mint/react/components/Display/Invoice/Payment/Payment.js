@@ -44,8 +44,7 @@ const paymentTypes = [{
       return invoice.usersPayments && invoice.usersPayments.length > 0
     },
     details: function(invoice, cart) {
-      console.log('such split', cart)
-      if (!cart.members) return null
+      if (!cart.members) return null;
 
       // aggregate each member's total
       var memberHash = cart.members.reduce((hash, member) => {
